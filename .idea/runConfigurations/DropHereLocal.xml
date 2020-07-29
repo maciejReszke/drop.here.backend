@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DropHereApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="DropHereLocal" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="drop-here" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.drop.here.backend.drophere.DropHereApplication" />
     <option name="ACTIVE_PROFILES" value="local" />
