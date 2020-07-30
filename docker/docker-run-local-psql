@@ -1,0 +1,1 @@
+docker run --name drop-here-psql -e POSTGRES_USER=drop_here_user -e POSTGRES_PASSWORD=drop_here_password -e POSTGRES_DB=drop-here --restart=always -p 5999:5432 -d postgres:12.3
