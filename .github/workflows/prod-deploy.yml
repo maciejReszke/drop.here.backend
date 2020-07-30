@@ -17,5 +17,5 @@ jobs:
     - name: Release on openshift
       uses: joelwmale/webhook-action@master
       env:
-        WEBHOOK_URL: https://api.us-east-1.starter.openshift-online.com:6443/apis/build.openshift.io/v1/namespaces/drop-here-backend/buildconfigs/drop-here-backend/webhooks/a0f9bce0c3eaa884/github
+        WEBHOOK_URL: https://api.us-east-1.starter.openshift-online.com:6443/apis/build.openshift.io/v1/namespaces/drop-here-backend/buildconfigs/drop-here-backend/webhooks/22ab874b344aac2e/generic
         data: "Please build"
