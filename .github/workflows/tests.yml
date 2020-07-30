@@ -1,11 +1,11 @@
 # This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: Prod tests and build
+name: Integration tests
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 
 jobs:
   build:
@@ -19,9 +19,3 @@ jobs:
         java-version: 11
     - name: Build with Maven
       run: mvn -Dmaven.test.failure.ignore=false clean install
-
-    - name: Release on openshift
-      uses: joelwmale/webhook-action@master
-      env:
-        WEBHOOK_URL: https://api.us-east-1.starter.openshift-online.com:6443/apis/build.openshift.io/v1/namespaces/drop-here-backend/buildconfigs/drop-here-backend/webhooks/a0f9bce0c3eaa884/github
-        data: "Please build"
