@@ -4,7 +4,7 @@
 name: Prod tests and build
 
 on:
-  pull_request:
+  push:
     branches: [ master ]
 
 jobs:
@@ -13,15 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 1.11
-      uses: actions/setup-java@v1
-      with:
-        java-version: 11
-    - name: Build with Maven
-      run: mvn -Dmaven.test.failure.ignore=false clean install
-  
+
     - name: Release on openshift
       uses: joelwmale/webhook-action@master
       env:
-        WEBHOOK_URL: https://api.us-east-1.starter.openshift-online.com:6443/apis/build.openshift.io/v1/namespaces/drop-here-backend/buildconfigs/drop-here-backend/webhooks/drop-here-backend-github-webhook-secret/github
+        WEBHOOK_URL: https://api.us-east-1.starter.openshift-online.com:6443/apis/build.openshift.io/v1/namespaces/drop-here-backend/buildconfigs/drop-here-backend/webhooks/a0f9bce0c3eaa884/github
         data: "Please build"
