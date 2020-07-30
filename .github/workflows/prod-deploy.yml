@@ -13,12 +13,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 1.11
-      uses: actions/setup-java@v1
-      with:
-        java-version: 11
-    - name: Build with Maven
-      run: mvn -Dmaven.test.failure.ignore=false clean install
 
     - name: Release on openshift
       uses: joelwmale/webhook-action@master
