@@ -16,6 +16,11 @@
 
     <properties>
         <java.version>11</java.version>
+        <asciidoctor-version>1.5.8</asciidoctor-version>
+        <io-vavr.version>0.10.2</io-vavr.version>
+        <commons-lang3.version>3.11</commons-lang3.version>
+        <testcontainers-psql.version>1.14.3</testcontainers-psql.version>
+        <com.auth0-java-jwt.version>3.10.2</com.auth0-java-jwt.version>
     </properties>
 
     <dependencies>
@@ -39,7 +44,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -62,6 +66,24 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+            <version>${io-vavr.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${com.auth0-java-jwt.version}</version>
+        </dependency>
+
+        <!-- Test -->
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -73,13 +95,14 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-test</artifactId>
+            <groupId>org.springframework.restdocs</groupId>
+            <artifactId>spring-restdocs-mockmvc</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.restdocs</groupId>
-            <artifactId>spring-restdocs-mockmvc</artifactId>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers-psql.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -89,7 +112,7 @@
             <plugin>
                 <groupId>org.asciidoctor</groupId>
                 <artifactId>asciidoctor-maven-plugin</artifactId>
-                <version>1.5.8</version>
+                <version>${asciidoctor-version}</version>
                 <executions>
                     <execution>
                         <id>generate-docs</id>
