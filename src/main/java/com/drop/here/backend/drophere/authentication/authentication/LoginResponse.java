@@ -1,6 +1,6 @@
 package com.drop.here.backend.drophere.authentication.authentication;
 
-import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,11 +12,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class LoginResponse {
 
+    @ApiModelProperty(value = "Authentication token", example = "acxzhu9sndao")
     private String token;
 
+    @ApiModelProperty(value = "Date which indicates how long token is valid", example = "2020-04-06T11:03:32")
     private String tokenValidUntil;
-
-    private AccountType accountType;
-
-    // TODO: 03/08/2020 role
 }

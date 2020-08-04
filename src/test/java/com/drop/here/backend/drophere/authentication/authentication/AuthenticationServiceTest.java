@@ -1,11 +1,13 @@
 package com.drop.here.backend.drophere.authentication.authentication;
 
+import com.drop.here.backend.drophere.authentication.account.dto.AuthenticationResponse;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
-import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.authentication.account.service.AccountService;
 import com.drop.here.backend.drophere.authentication.account.service.BaseLoginRequest;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
+import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,7 +41,7 @@ class AuthenticationServiceTest {
                 .build();
 
         final Account account = AccountDataGenerator.companyAccount(1);
-        final LoginResponse response = new LoginResponse("token", "validUntil", AccountType.COMPANY);
+        final LoginResponse response = new LoginResponse("token", "validUntil");
 
         when(accountService.findActiveAccountByMail(baseLoginRequest.getMail())).thenReturn(Optional.of(account));
         when(accountService.isPasswordValid(account, baseLoginRequest.getPassword())).thenReturn(true);
@@ -90,5 +92,19 @@ class AuthenticationServiceTest {
         assertThat(((UnauthorizedRestException) (throwable)).getCode()).isEqualTo(RestExceptionStatusCode.LOGIN_INVALID_PASSWORD.ordinal());
     }
 
+    @Test
+    void givenAccountAuthenticationWhenGetAuthenticationInfoThenGet() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final AuthenticationResponse info = AuthenticationResponse.builder().build();
+        when(authenticationExecutiveService.getAuthenticationInfo(accountAuthentication)).thenReturn(info);
+
+        //when
+        final AuthenticationResponse authenticationInfo = authenticationService.getAuthenticationInfo(accountAuthentication);
+
+        //then
+        assertThat(authenticationInfo).isEqualTo(info);
+    }
 
 }

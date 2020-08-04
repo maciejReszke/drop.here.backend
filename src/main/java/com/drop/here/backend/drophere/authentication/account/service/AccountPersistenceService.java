@@ -23,4 +23,8 @@ public class AccountPersistenceService {
     public Optional<Account> findByMail(String mail) {
         return accountRepository.findByMail(mail);
     }
+
+    public Optional<Account> findByMailWithRoles(String mail) {
+        return accountRepository.findByMailWithRoles(mail);
+    }
 }

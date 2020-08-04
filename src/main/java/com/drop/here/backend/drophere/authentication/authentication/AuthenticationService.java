@@ -1,9 +1,11 @@
 package com.drop.here.backend.drophere.authentication.authentication;
 
+import com.drop.here.backend.drophere.authentication.account.dto.AuthenticationResponse;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.service.AccountService;
 import com.drop.here.backend.drophere.authentication.account.service.BaseLoginRequest;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,5 +24,9 @@ public class AuthenticationService {
         }
 
         return authenticationExecutiveService.successLogin(account);
+    }
+
+    public AuthenticationResponse getAuthenticationInfo(AccountAuthentication accountAuthentication) {
+        return authenticationExecutiveService.getAuthenticationInfo(accountAuthentication);
     }
 }

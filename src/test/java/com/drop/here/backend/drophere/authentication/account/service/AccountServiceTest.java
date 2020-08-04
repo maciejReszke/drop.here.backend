@@ -1,7 +1,6 @@
 package com.drop.here.backend.drophere.authentication.account.service;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AccountCreationRequest;
-import com.drop.here.backend.drophere.authentication.account.dto.AccountInformationResponse;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.authentication.AuthenticationExecutiveService;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -37,6 +37,12 @@ class AccountServiceTest {
     @Mock
     private AuthenticationExecutiveService authenticationExecutiveService;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private PrivilegeService privilegeService;
+
     @Test
     void givenValidCreationRequestWhenCreateAccountThenCreate() {
         //given
@@ -44,31 +50,19 @@ class AccountServiceTest {
         final Account account = AccountDataGenerator.companyAccount(1);
         final LoginResponse creationResponse = LoginResponse.builder().build();
 
+        when(passwordEncoder.encode(creationRequest.getPassword())).thenReturn("password");
+
         doNothing().when(accountValidationService).validateRequest(creationRequest);
-        when(accountMappingService.newAccount(creationRequest)).thenReturn(account);
+        when(accountMappingService.newAccount(creationRequest, "password")).thenReturn(account);
         doNothing().when(accountPersistenceService).createAccount(account);
         when(authenticationExecutiveService.successLogin(account)).thenReturn(creationResponse);
+        doNothing().when(privilegeService).addNewAccountPrivileges(account);
 
         //when
         final LoginResponse response = accountService.createAccount(creationRequest);
 
         //then
         assertThat(response).isEqualTo(creationResponse);
-    }
-
-    @Test
-    void givenAccountWhenGetAccountInformationThenGet() {
-        //given
-        final Account account = AccountDataGenerator.companyAccount(1);
-
-        final AccountInformationResponse accountInformationResponse = AccountInformationResponse.builder().build();
-        when(accountMappingService.toAccountInformationResponse(account)).thenReturn(accountInformationResponse);
-
-        //when
-        final AccountInformationResponse response = accountService.getAccountInformation(account);
-
-        //then
-        assertThat(response).isEqualTo(accountInformationResponse);
     }
 
     @Test
@@ -102,6 +96,67 @@ class AccountServiceTest {
 
         //then
         assertThat(foundAccount).isEmpty();
+    }
+
+    @Test
+    void givenExistingActiveAccountWhenFindActiveByMailWithRolesThenGet() {
+        //given
+        final String mail = "mail";
+        final Account account = AccountDataGenerator.companyAccount(1);
+        account.setAccountStatus(AccountStatus.ACTIVE);
+
+        when(accountPersistenceService.findByMailWithRoles(mail)).thenReturn(Optional.of(account));
+
+        //when
+        final Optional<Account> foundAccount = accountService.findActiveAccountByMailWithRoles(mail);
+
+        //then
+        assertThat(foundAccount).isPresent();
+        assertThat(foundAccount.orElseThrow()).isEqualTo(account);
+    }
+
+    @Test
+    void givenExistingNotActiveAccountWhenFindActiveByMailWithRolesThenEmpty() {
+        //given
+        final String mail = "mail";
+        final Account account = AccountDataGenerator.companyAccount(1);
+        account.setAccountStatus(AccountStatus.INACTIVE);
+
+        when(accountPersistenceService.findByMailWithRoles(mail)).thenReturn(Optional.of(account));
+
+        //when
+        final Optional<Account> foundAccount = accountService.findActiveAccountByMailWithRoles(mail);
+
+        //then
+        assertThat(foundAccount).isEmpty();
+    }
+
+    @Test
+    void givenMatchingPasswordWhenIsPasswordValidThenTrue() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final String password = "password";
+        when(passwordEncoder.matches(password, account.getPassword())).thenReturn(true);
+
+        //when
+        final boolean result = accountService.isPasswordValid(account, password);
+
+        //then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void givenNotMatchingPasswordWhenIsPasswordValidThenFalse() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final String password = "password";
+        when(passwordEncoder.matches(password, account.getPassword())).thenReturn(false);
+
+        //when
+        final boolean result = accountService.isPasswordValid(account, password);
+
+        //then
+        assertThat(result).isFalse();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.authentication.account.service;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,8 +15,10 @@ import javax.validation.constraints.NotBlank;
 public class BaseLoginRequest {
 
     @NotBlank
+    @ApiModelProperty(value = "User mail", example = "maszkamszota@gmail.com", required = true)
     private String mail;
 
     @NotBlank
+    @ApiModelProperty(value = "User password", example = "asdasiubd213", required = true)
     private String password;
 }
