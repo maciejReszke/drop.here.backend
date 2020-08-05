@@ -26,6 +26,7 @@ public class AccountDataGenerator {
                 .accountStatus(AccountStatus.ACTIVE)
                 .accountType(AccountType.COMPANY)
                 .createdAt(LocalDateTime.now())
+                .isAnyProfileRegistered(false)
                 .mail("mailAtCompany" + i + "@pl.pl")
                 .mailActivatedAt(LocalDateTime.now())
                 .password("password1234#" + i)

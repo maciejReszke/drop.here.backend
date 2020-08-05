@@ -9,7 +9,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class AuthenticationResponse {
 
     @ApiModelProperty(value = "Account type", example = "COMPANY")
@@ -26,5 +26,17 @@ public class AuthenticationResponse {
 
     @ApiModelProperty(value = "Account status", example = "ACTIVE")
     private AccountStatus accountStatus;
+
+    @ApiModelProperty(value = "Indicates if user has any profile", example = "true")
+    private boolean hasProfile;
+
+    @ApiModelProperty(value = "Indicates if user is currently logged on any profile", example = "true")
+    private boolean loggedOnProfile;
+
+    @ApiModelProperty(value = "Profile uid", example = "uid1234")
+    private String profileUid;
+
+    @ApiModelProperty(value = "First name + last name from profile", example = "Miotr Paszota")
+    private String profileName;
 
 }

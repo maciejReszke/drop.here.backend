@@ -1,10 +1,13 @@
 package com.drop.here.backend.drophere.authentication.token;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.security.configuration.PreAuthentication;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,9 @@ public class JwtService {
     @Value("${authentication.jwt.issuer}")
     private String issuer;
 
+    @Value("${authentication.jwt.profileClaimName}")
+    private String profileClaimName;
+
     @Value("${authentication.jwt.secret}")
     private String secret;
 
@@ -33,18 +39,29 @@ public class JwtService {
         this.algorithm = Algorithm.HMAC512(secret.getBytes());
     }
 
-    public TokenResponse createToken(Account account) {
+    public TokenResponse createToken(Account account, AccountProfile profile) {
         final LocalDateTime validUntil = LocalDateTime.now().plusMinutes(validInMinutes);
-        final String jwt = JWT.create()
-                .withAudience(issuer)
-                .withExpiresAt(Date.from(validUntil.atZone(ZoneId.systemDefault()).toInstant()))
-                .withSubject(account.getMail())
-                .withIssuer(issuer)
+        final String jwt = baseJwt(account, validUntil)
+                .withClaim(profileClaimName, profile.getProfileUid())
                 .sign(algorithm);
         return new TokenResponse(jwt, validUntil);
     }
 
-    // TODO: 03/08/2020 Dodac jeszcze jaki profil uzywa!
+    private JWTCreator.Builder baseJwt(Account account, LocalDateTime validUntil) {
+        return JWT.create()
+                .withAudience(issuer)
+                .withExpiresAt(Date.from(validUntil.atZone(ZoneId.systemDefault()).toInstant()))
+                .withSubject(account.getMail())
+                .withIssuer(issuer);
+    }
+
+    public TokenResponse createToken(Account account) {
+        final LocalDateTime validUntil = LocalDateTime.now().plusMinutes(validInMinutes);
+        final String jwt = baseJwt(account, validUntil)
+                .sign(algorithm);
+        return new TokenResponse(jwt, validUntil);
+    }
+
     public PreAuthentication decodeToken(String token) {
         final JWTVerifier verifier = JWT.require(algorithm)
                 .withIssuer(issuer)
@@ -53,7 +70,11 @@ public class JwtService {
 
         final DecodedJWT decodedJwt = verifier.verify(token);
 
-        return new PreAuthentication(decodedJwt.getSubject(), dateToLocalDateTime(decodedJwt));
+        final Claim profileClaim = decodedJwt.getClaim(profileClaimName);
+
+        return profileClaim.isNull()
+                ? PreAuthentication.withoutProfile(decodedJwt.getSubject(), dateToLocalDateTime(decodedJwt))
+                : PreAuthentication.withProfile(decodedJwt.getSubject(), profileClaim.asString(), dateToLocalDateTime(decodedJwt));
     }
 
     private LocalDateTime dateToLocalDateTime(DecodedJWT decodedJwt) {

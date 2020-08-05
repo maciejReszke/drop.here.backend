@@ -1,7 +1,6 @@
 package com.drop.here.backend.drophere.authentication.authentication;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AuthenticationResponse;
-import com.drop.here.backend.drophere.authentication.account.service.BaseLoginRequest;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
@@ -38,6 +37,19 @@ public class AuthenticationController {
     })
     public LoginResponse login(@Valid @RequestBody BaseLoginRequest loginRequest) {
         return authenticationService.login(loginRequest);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation("Logging in on profile")
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Logged in on profile", response = LoginResponse.class),
+            @ApiResponse(code = HttpServletResponse.SC_UNAUTHORIZED, message = "Unauthorized", response = ExceptionMessage.class)
+    })
+    @ApiAuthorizationToken
+    @PostMapping("/profile")
+    public LoginResponse loginOnProfile(@Valid @RequestBody ProfileLoginRequest loginRequest,
+                                        @ApiIgnore AccountAuthentication accountAuthentication) {
+        return authenticationService.loginOnProfile(loginRequest, accountAuthentication);
     }
 
     @GetMapping

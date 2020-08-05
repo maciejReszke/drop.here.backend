@@ -2,11 +2,13 @@ package com.drop.here.backend.drophere.authentication.authentication;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AuthenticationResponse;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.account.service.AccountProfileService;
 import com.drop.here.backend.drophere.authentication.account.service.AccountService;
-import com.drop.here.backend.drophere.authentication.account.service.BaseLoginRequest;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
+import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +33,9 @@ class AuthenticationServiceTest {
 
     @Mock
     private AuthenticationExecutiveService authenticationExecutiveService;
+
+    @Mock
+    private AccountProfileService accountProfileService;
 
     @Test
     void givenValidBaseRequestWhenLoginThenLogin() {
@@ -93,7 +98,7 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void givenAccountAuthenticationWhenGetAuthenticationInfoThenGet() {
+    void givenAccountAuthenticationWithoutProfileWhenGetAuthenticationInfoThenGet() {
         //given
         final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
@@ -105,6 +110,73 @@ class AuthenticationServiceTest {
 
         //then
         assertThat(authenticationInfo).isEqualTo(info);
+    }
+
+    @Test
+    void givenValidProfileLoginRequestWhenLoginOnProfileThenLogin() {
+        //given
+        final ProfileLoginRequest loginRequest = ProfileLoginRequest.builder()
+                .profileUid("profileUid")
+                .password("password")
+                .build();
+
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final LoginResponse response = new LoginResponse("token", "validUntil");
+        final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+
+        when(accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, "profileUid")).thenReturn(Optional.of(accountProfile));
+        when(accountProfileService.isPasswordValid(accountProfile, "password")).thenReturn(true);
+        when(authenticationExecutiveService.successLogin(account, accountProfile)).thenReturn(response);
+
+        //when
+        final LoginResponse result = authenticationService.loginOnProfile(loginRequest, accountAuthentication);
+
+        //then
+        assertThat(result).isEqualTo(response);
+    }
+
+    @Test
+    void givenNotExistingAccountProfileWhenLoginOnProfileThenError() {
+        //given
+        final ProfileLoginRequest loginRequest = ProfileLoginRequest.builder()
+                .profileUid("profileUid")
+                .password("password")
+                .build();
+
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+
+        when(accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, "profileUid")).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> authenticationService.loginOnProfile(loginRequest, accountAuthentication));
+
+        //then
+        assertThat(throwable).isInstanceOf(UnauthorizedRestException.class);
+        assertThat(((UnauthorizedRestException) (throwable)).getCode()).isEqualTo(RestExceptionStatusCode.LOGIN_ACTIVE_PROFILE_NOT_FOUND.ordinal());
+    }
+
+    @Test
+    void givenInvalidPasswordWhenLoginOnProfileThenError() {
+        //given
+        final ProfileLoginRequest loginRequest = ProfileLoginRequest.builder()
+                .profileUid("profileUid")
+                .password("password")
+                .build();
+
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
+
+        when(accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, "profileUid")).thenReturn(Optional.of(accountProfile));
+        when(accountProfileService.isPasswordValid(accountProfile, "password")).thenReturn(false);
+        //when
+        final Throwable throwable = catchThrowable(() -> authenticationService.loginOnProfile(loginRequest, accountAuthentication));
+
+        //then
+        assertThat(throwable).isInstanceOf(UnauthorizedRestException.class);
+        assertThat(((UnauthorizedRestException) (throwable)).getCode()).isEqualTo(RestExceptionStatusCode.LOGIN_INVALID_PROFILE_PASSWORD.ordinal());
     }
 
 }

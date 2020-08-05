@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByMail(String mail);
 
-    @Query("select a from Account a join fetch a.privileges")
+    @Query("select a from Account a join fetch a.privileges " +
+            "where a.mail = :mail")
     Optional<Account> findByMailWithRoles(String mail);
 }

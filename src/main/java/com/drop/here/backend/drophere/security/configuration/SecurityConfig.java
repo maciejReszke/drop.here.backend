@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.security.configuration;
 
+import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtService))
                 .authorizeRequests(registry -> registry
                         .mvcMatchers(HttpMethod.POST, "/authentication").anonymous()
+                        .mvcMatchers(HttpMethod.POST, "/authentication/profile").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.POST, "/accounts").anonymous()
                         .mvcMatchers(HttpMethod.GET, "/authentication").authenticated()
                         .mvcMatchers("/actuator/**").permitAll()

@@ -37,6 +37,7 @@ class AccountMappingServiceTest {
         assertThat(response.getMailActivatedAt()).isNull();
         assertThat(response.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
         assertThat(response.getAccountMailStatus()).isEqualTo(AccountMailStatus.UNCONFIRMED);
+        assertThat(response.isAnyProfileRegistered()).isFalse();
     }
 
 }

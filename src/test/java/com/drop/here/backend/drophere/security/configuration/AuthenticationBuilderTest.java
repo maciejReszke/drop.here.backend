@@ -1,8 +1,10 @@
 package com.drop.here.backend.drophere.security.configuration;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.entity.Privilege;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
+import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +27,7 @@ class AuthenticationBuilderTest {
         final Account account = AccountDataGenerator.companyAccount(1);
         account.setPrivileges(List.of(Privilege.builder().name("priv1").build()));
         final LocalDateTime time = LocalDateTime.now().minusMinutes(100);
-        final PreAuthentication preAuthentication = new PreAuthentication("mail", time);
+        final PreAuthentication preAuthentication = PreAuthentication.withoutProfile("mail", time);
 
         //when
         final AccountAuthentication result = authenticationBuilder.buildAuthentication(account, preAuthentication);
@@ -33,6 +35,29 @@ class AuthenticationBuilderTest {
         //then
         assertThat(result.getAuthorities()).hasSize(1);
         assertThat(((SimpleGrantedAuthority) (result.getAuthorities().toArray()[0])).getAuthority()).isEqualTo("priv1");
+        assertThat(result.getCredentials()).isNull();
+        assertThat(result.getName()).isEqualTo(account.getMail());
+        assertThat(result.getDetails()).isEqualTo(account);
+        assertThat(result.getPrincipal()).isEqualTo(account);
+        assertThat(result.getTokenValidUntil()).isEqualTo(time);
+    }
+
+    @Test
+    void givenAccountAndProfileWhenBuildAuthenticationThenBuild() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1);
+        account.setPrivileges(List.of(Privilege.builder().name("priv1").build()));
+        final LocalDateTime time = LocalDateTime.now().minusMinutes(100);
+        final PreAuthentication preAuthentication = PreAuthentication.withoutProfile("mail", time);
+        final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
+        accountProfile.setPrivileges(List.of(Privilege.builder().name("priv2").build()));
+        //when
+        final AccountAuthentication result = authenticationBuilder.buildAuthentication(account, accountProfile, preAuthentication);
+
+        //then
+        assertThat(result.getAuthorities()).hasSize(2);
+        assertThat(((SimpleGrantedAuthority) (result.getAuthorities().toArray()[0])).getAuthority()).isEqualTo("priv1");
+        assertThat(((SimpleGrantedAuthority) (result.getAuthorities().toArray()[1])).getAuthority()).isEqualTo("priv2");
         assertThat(result.getCredentials()).isNull();
         assertThat(result.getName()).isEqualTo(account.getMail());
         assertThat(result.getDetails()).isEqualTo(account);

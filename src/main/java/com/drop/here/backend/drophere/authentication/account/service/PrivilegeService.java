@@ -16,6 +16,7 @@ public class PrivilegeService {
 
     public static final String NEW_ACCOUNT_CREATE_COMPANY_PRIVILEGE = "CREATE_COMPANY";
     public static final String NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE = "CREATE_CUSTOMER";
+    public static final String OWN_PROFILE_MANAGEMENT_PRIVILEGE = "OWN_PROFILE_MANAGEMENT";
 
     public void addNewAccountPrivileges(Account account) {
         final Privilege privilege = privilegeRepository.save(Privilege.builder()

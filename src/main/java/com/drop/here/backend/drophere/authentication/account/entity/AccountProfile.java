@@ -1,14 +1,10 @@
 package com.drop.here.backend.drophere.authentication.account.entity;
 
-import com.drop.here.backend.drophere.authentication.account.enums.AccountMailStatus;
-import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
-import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
@@ -19,46 +15,51 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// TODO: 05/08/2020 crud
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @Builder(toBuilder = true)
-@Table(indexes = @Index(columnList = "mail"),
-        uniqueConstraints = @UniqueConstraint(columnNames = "mail"))
-@ToString(exclude = "privileges")
-@EqualsAndHashCode(exclude = "privileges")
-public class Account {
+@Entity
+@Table(indexes = {
+        @Index(unique = true, columnList = "profileUid"),
+        @Index(columnList = "account_id")
+})
+public class AccountProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    private String mail;
+    private String profileUid;
+
+    @NotBlank
+    private String firstName;
+
+    @NotBlank
+    private String lastName;
 
     @NotBlank
     private String password;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
-    private AccountType accountType;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private Account account;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private AccountStatus accountStatus;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private AccountMailStatus accountMailStatus;
+    private AccountProfileStatus status;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -67,12 +68,6 @@ public class Account {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime deactivatedAt;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private LocalDateTime mailActivatedAt;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "account")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "accountProfile")
     private List<Privilege> privileges;
-
-    @NotNull
-    private boolean isAnyProfileRegistered;
 }

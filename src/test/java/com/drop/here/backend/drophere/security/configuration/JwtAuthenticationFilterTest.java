@@ -43,7 +43,7 @@ class JwtAuthenticationFilterTest {
     void givenValidTokenInAuthorizationWhenDoFilterInternalThenSetAuthentication() throws IOException, ServletException {
         //given
         when(httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer TOKEN");
-        when(jwtService.decodeToken("TOKEN")).thenReturn(new PreAuthentication("to", LocalDateTime.now()));
+        when(jwtService.decodeToken("TOKEN")).thenReturn(PreAuthentication.withoutProfile("to", LocalDateTime.now()));
         doNothing().when(filterChain).doFilter(httpServletRequest, httpServletResponse);
 
         //when

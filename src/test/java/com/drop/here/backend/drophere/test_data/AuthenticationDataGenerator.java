@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.test_data;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.experimental.UtilityClass;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,6 +18,13 @@ public class AuthenticationDataGenerator {
                 .authorities(List.of(new SimpleGrantedAuthority("authority")))
                 .account(account)
                 .tokenValidUntil(LocalDateTime.now())
+                .build();
+    }
+
+    public AccountAuthentication accountAuthenticationWithProfile(Account account, AccountProfile accountProfile) {
+        return accountAuthentication(account)
+                .toBuilder()
+                .profile(accountProfile)
                 .build();
     }
 }

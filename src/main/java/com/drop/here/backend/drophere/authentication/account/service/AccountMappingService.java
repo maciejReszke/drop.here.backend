@@ -9,13 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
 public class AccountMappingService {
-
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
     public Account newAccount(AccountCreationRequest accountCreationRequest, String encodedPassword) {
         return Account.builder()
@@ -25,6 +22,7 @@ public class AccountMappingService {
                 .accountStatus(AccountStatus.ACTIVE)
                 .accountMailStatus(AccountMailStatus.UNCONFIRMED)
                 .createdAt(LocalDateTime.now())
+                .isAnyProfileRegistered(false)
                 .build();
     }
 }
