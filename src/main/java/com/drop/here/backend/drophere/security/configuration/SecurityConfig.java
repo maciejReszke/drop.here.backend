@@ -33,6 +33,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests(registry -> registry
                         .mvcMatchers(HttpMethod.POST, "/authentication").anonymous()
                         .mvcMatchers(HttpMethod.POST, "/authentication/profile").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.POST, "/accounts/{accountId}/profiles").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.PATCH, "/accounts/{accountId}/profiles/{accountProfileUid}").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.POST, "/accounts").anonymous()
                         .mvcMatchers(HttpMethod.GET, "/authentication").authenticated()
                         .mvcMatchers("/actuator/**").permitAll()

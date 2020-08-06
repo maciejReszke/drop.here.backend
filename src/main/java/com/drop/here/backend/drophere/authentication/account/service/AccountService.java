@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.authentication.account.service;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AccountCreationRequest;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.authentication.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.authentication.authentication.LoginResponse;
@@ -48,5 +49,14 @@ public class AccountService {
 
     public boolean isPasswordValid(Account account, String rawPassword) {
         return passwordEncoder.matches(rawPassword, account.getPassword());
+    }
+
+    public AccountProfileType accountProfileCreated(Account account) {
+        if (account.isAnyProfileRegistered()) {
+            return AccountProfileType.SUBPROFILE;
+        }
+        account.setAnyProfileRegistered(true);
+        accountPersistenceService.updateAccount(account);
+        return AccountProfileType.MAIN;
     }
 }

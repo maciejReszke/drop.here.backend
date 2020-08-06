@@ -20,6 +20,12 @@ public class AccountPersistenceService {
         log.info("Successfully saved account with mail {} and type {}", account.getMail(), account.getAccountType());
     }
 
+    public void updateAccount(Account account) {
+        log.info("Updating account with mail {} and type {}", account.getMail(), account.getAccountType());
+        accountRepository.save(account);
+        log.info("Successfully updated account with mail {} and type {}", account.getMail(), account.getAccountType());
+    }
+
     public Optional<Account> findByMail(String mail) {
         return accountRepository.findByMail(mail);
     }

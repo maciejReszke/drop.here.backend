@@ -3,7 +3,9 @@ package com.drop.here.backend.drophere.authentication.account.entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -19,6 +21,8 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @Builder
 @Entity
+@ToString(exclude = {"account", "accountProfile"})
+@EqualsAndHashCode(exclude = {"account", "accountProfile"})
 public class Privilege {
 
     @Id

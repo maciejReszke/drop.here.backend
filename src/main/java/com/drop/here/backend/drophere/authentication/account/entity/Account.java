@@ -22,6 +22,7 @@ import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -75,4 +76,7 @@ public class Account {
 
     @NotNull
     private boolean isAnyProfileRegistered;
+
+    @Version
+    private Long version;
 }

@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.authentication.account.service;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AccountCreationRequest;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.authentication.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.authentication.authentication.LoginResponse;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -157,6 +159,37 @@ class AccountServiceTest {
 
         //then
         assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenAccountAndFirstProfileCreatedWhenAccountProfileCreatedThenSetProfileRegisteredAndSave() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1);
+        account.setAnyProfileRegistered(false);
+
+        doNothing().when(accountPersistenceService).updateAccount(account);
+
+        //when
+        final AccountProfileType result = accountService.accountProfileCreated(account);
+
+        //then
+        assertThat(result).isEqualTo(AccountProfileType.MAIN);
+        assertThat(account.isAnyProfileRegistered()).isTrue();
+    }
+
+    @Test
+    void givenAccountAndNextProfileCreatedWhenAccountProfileCreatedThenReturnSubprofile() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1);
+        account.setAnyProfileRegistered(true);
+
+        //when
+        final AccountProfileType result = accountService.accountProfileCreated(account);
+
+        //then
+        assertThat(result).isEqualTo(AccountProfileType.SUBPROFILE);
+        assertThat(account.isAnyProfileRegistered()).isTrue();
+        verifyNoInteractions(accountPersistenceService);
     }
 
 }

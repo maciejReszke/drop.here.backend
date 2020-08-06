@@ -34,4 +34,17 @@ class AccountPersistenceServiceTest {
         verifyNoMoreInteractions(accountRepository);
     }
 
+    @Test
+    void givenAccountWhenUpdateThenSave() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1);
+        when(accountRepository.save(account)).thenReturn(account);
+
+        //when
+        accountPersistenceService.updateAccount(account);
+
+        //then
+        verifyNoMoreInteractions(accountRepository);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.authentication.account.dto;
 
+import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import io.swagger.annotations.ApiModelProperty;
@@ -39,4 +40,6 @@ public class AuthenticationResponse {
     @ApiModelProperty(value = "First name + last name from profile", example = "Miotr Paszota")
     private String profileName;
 
+    @ApiModelProperty(value = "Profile type - MAIN or SUBPROFILE", example = "MAIN")
+    private AccountProfileType profileType;
 }

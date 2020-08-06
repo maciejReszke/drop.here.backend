@@ -1,10 +1,13 @@
 package com.drop.here.backend.drophere.authentication.account.entity;
 
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileStatus;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
@@ -19,12 +22,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// TODO: 05/08/2020 crud
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,6 +37,8 @@ import java.util.List;
         @Index(unique = true, columnList = "profileUid"),
         @Index(columnList = "account_id")
 })
+@ToString(exclude = {"account", "privileges"})
+@EqualsAndHashCode(exclude = {"account", "privileges"})
 public class AccountProfile {
 
     @Id
@@ -70,4 +75,11 @@ public class AccountProfile {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "accountProfile")
     private List<Privilege> privileges;
+
+    @Version
+    private Long version;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private AccountProfileType profileType;
 }

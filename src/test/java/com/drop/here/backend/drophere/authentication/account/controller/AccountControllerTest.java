@@ -54,7 +54,7 @@ class AccountControllerTest extends IntegrationBaseClass {
 
         assertThat(accountRepository.findAll()).hasSize(1);
         assertThat(privilegeRepository.findAll()).hasSize(1);
-        assertThat(privilegeRepository.findAll().get(0).getName()).isEqualTo("CREATE_COMPANY");
+        assertThat(privilegeRepository.findAll().get(0).getName()).isEqualTo("OWN_PROFILE_MANAGEMENT");
     }
 
     @Test
