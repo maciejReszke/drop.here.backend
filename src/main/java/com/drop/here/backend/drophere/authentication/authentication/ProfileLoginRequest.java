@@ -14,8 +14,6 @@ import javax.validation.constraints.NotBlank;
 @Builder
 public class ProfileLoginRequest {
 
-    // TODO: 05/08/2020 skad ma znac profileid? trzeba gdzies zwracac
-
     @NotBlank
     @ApiModelProperty(value = "User profile id", example = "profileId123", required = true)
     private String profileUid;

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,5 +30,9 @@ public class AccountProfilePersistenceService {
         log.info("Updating account profile for profile {} with uid {}", profile.getAccount().getId(), profile.getProfileUid());
         accountProfileRepository.save(profile);
         log.info("Successfully updated account profile for profile {} with uid {}", profile.getAccount().getId(), profile.getProfileUid());
+    }
+
+    public List<AccountProfile> findByAccount(Account account) {
+        return accountProfileRepository.findByAccount(account);
     }
 }

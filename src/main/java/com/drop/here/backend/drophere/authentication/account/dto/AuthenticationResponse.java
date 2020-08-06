@@ -13,6 +13,9 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class AuthenticationResponse {
 
+    @ApiModelProperty(value = "Account id", example = "1")
+    private Long accountId;
+
     @ApiModelProperty(value = "Account type", example = "COMPANY")
     private AccountType accountType;
 
@@ -37,8 +40,11 @@ public class AuthenticationResponse {
     @ApiModelProperty(value = "Profile uid", example = "uid1234")
     private String profileUid;
 
-    @ApiModelProperty(value = "First name + last name from profile", example = "Miotr Paszota")
-    private String profileName;
+    @ApiModelProperty(value = "First name from profile", example = "Miotr")
+    private String profileFirstName;
+
+    @ApiModelProperty(value = "Last name from profile", example = "Paszota")
+    private String profileLastName;
 
     @ApiModelProperty(value = "Profile type - MAIN or SUBPROFILE", example = "MAIN")
     private AccountProfileType profileType;

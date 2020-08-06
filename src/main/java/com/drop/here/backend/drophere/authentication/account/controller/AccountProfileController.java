@@ -33,7 +33,6 @@ import javax.validation.Valid;
 public class AccountProfileController {
     private final AccountProfileService accountProfileService;
 
-    // TODO: 06/08/2020 docs
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation("Creating new account profile")
@@ -48,7 +47,6 @@ public class AccountProfileController {
         return accountProfileService.createAccountProfile(accountCreationRequest, accountAuthentication);
     }
 
-    // TODO: 06/08/2020 test + docs
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation("Updating account profile")
     @ApiResponses(value = {

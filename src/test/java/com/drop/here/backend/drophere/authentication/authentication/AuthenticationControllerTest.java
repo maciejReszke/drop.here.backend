@@ -209,6 +209,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
 
         //then
         result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.accountId", equalTo(account.getId().intValue())))
                 .andExpect(jsonPath("$.accountType", equalTo("COMPANY")))
                 .andExpect(jsonPath("$.roles", contains("privilege")))
                 .andExpect(jsonPath("$.tokenValidUntil", Matchers.not(Matchers.emptyString())))
@@ -216,7 +217,9 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
                 .andExpect(jsonPath("$.hasProfile", equalTo(false)))
                 .andExpect(jsonPath("$.loggedOnProfile", equalTo(false)))
                 .andExpect(jsonPath("$.profileUid", emptyOrNullString()))
-                .andExpect(jsonPath("$.profileName", emptyOrNullString()))
+                .andExpect(jsonPath("$.profileFirstName", emptyOrNullString()))
+                .andExpect(jsonPath("$.profileLastName", emptyOrNullString()))
+                .andExpect(jsonPath("$.profileType", emptyOrNullString()))
                 .andExpect(jsonPath("$.accountStatus", equalTo("ACTIVE")));
     }
 
@@ -240,6 +243,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
 
         //then
         result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.accountId", equalTo(account.getId().intValue())))
                 .andExpect(jsonPath("$.accountType", equalTo("COMPANY")))
                 .andExpect(jsonPath("$.roles", contains("privilege", "privilege2")))
                 .andExpect(jsonPath("$.tokenValidUntil", Matchers.not(Matchers.emptyString())))
@@ -247,7 +251,9 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
                 .andExpect(jsonPath("$.hasProfile", equalTo(true)))
                 .andExpect(jsonPath("$.loggedOnProfile", equalTo(true)))
                 .andExpect(jsonPath("$.profileUid", equalTo(accountProfile.getProfileUid())))
-                .andExpect(jsonPath("$.profileName", equalTo(accountProfile.getFirstName() + " " + accountProfile.getLastName())))
+                .andExpect(jsonPath("$.profileFirstName", equalTo(accountProfile.getFirstName())))
+                .andExpect(jsonPath("$.profileLastName", equalTo(accountProfile.getLastName())))
+                .andExpect(jsonPath("$.profileType", equalTo(accountProfile.getProfileType().name())))
                 .andExpect(jsonPath("$.accountStatus", equalTo("ACTIVE")));
     }
 

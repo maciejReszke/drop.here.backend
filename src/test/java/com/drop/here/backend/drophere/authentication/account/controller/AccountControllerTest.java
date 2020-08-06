@@ -2,19 +2,26 @@ package com.drop.here.backend.drophere.authentication.account.controller;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AccountCreationRequest;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.account.entity.Privilege;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
+import com.drop.here.backend.drophere.authentication.account.repository.AccountProfileRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
+import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
+import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,9 +34,16 @@ class AccountControllerTest extends IntegrationBaseClass {
     @Autowired
     private PrivilegeRepository privilegeRepository;
 
+    @Autowired
+    private AccountProfileRepository accountProfileRepository;
+
+    @Autowired
+    private JwtService jwtService;
+
     @AfterEach
     void cleanUp() {
         privilegeRepository.deleteAll();
+        accountProfileRepository.deleteAll();
         accountRepository.deleteAll();
     }
 
@@ -100,6 +114,43 @@ class AccountControllerTest extends IntegrationBaseClass {
         result.andExpect(status().isUnprocessableEntity());
 
         assertThat(accountRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void givenOwnAccountValidPrivilegeWhenGetAccountInfoThen200() throws Exception {
+        //given
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        privilegeRepository.save(Privilege.builder().name("priv").account(account).build());
+        final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
+        privilegeRepository.save(Privilege.builder().name("priv2").accountProfile(accountProfile).build());
+
+        final String url = String.format("/accounts/%s", account.getId());
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.accountType", Matchers.equalTo("COMPANY")));
+    }
+
+    @Test
+    void givenNotOwnAccountValidPrivilegeWhenGetAccountInfoThen403() throws Exception {
+        //given
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        privilegeRepository.save(Privilege.builder().name("priv").account(account).build());
+        final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
+        privilegeRepository.save(Privilege.builder().name("priv2").accountProfile(accountProfile).build());
+
+        final String url = String.format("/accounts/%s", account.getId() + 1);
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isForbidden());
     }
 
 }

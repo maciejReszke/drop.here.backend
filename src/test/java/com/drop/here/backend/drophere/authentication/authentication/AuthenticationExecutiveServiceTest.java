@@ -50,11 +50,13 @@ class AuthenticationExecutiveServiceTest {
         //given
         final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication authentication = AuthenticationDataGenerator.accountAuthentication(account);
+        account.setId(1L);
 
         //when
         final AuthenticationResponse response = authenticationExecutiveService.getAuthenticationInfo(authentication);
 
         //then
+        assertThat(response.getAccountId()).isEqualTo(account.getId());
         assertThat(response.getAccountStatus()).isEqualTo(account.getAccountStatus());
         assertThat(response.getMail()).isEqualTo(account.getMail());
         assertThat(response.getTokenValidUntil()).isEqualTo(authentication.getTokenValidUntil().format(DateTimeFormatter.ISO_DATE_TIME));
@@ -69,6 +71,7 @@ class AuthenticationExecutiveServiceTest {
     void givenAccountAuthenticationWithProfileWhenGetAuthenticationInfoThenGet() {
         //given
         final Account account = AccountDataGenerator.companyAccount(1);
+        account.setId(1L);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final AccountAuthentication authentication = AuthenticationDataGenerator.accountAuthenticationWithProfile(account, accountProfile);
 
@@ -76,6 +79,7 @@ class AuthenticationExecutiveServiceTest {
         final AuthenticationResponse response = authenticationExecutiveService.getAuthenticationInfo(authentication);
 
         //then
+        assertThat(response.getAccountId()).isEqualTo(account.getId());
         assertThat(response.getAccountStatus()).isEqualTo(account.getAccountStatus());
         assertThat(response.getMail()).isEqualTo(account.getMail());
         assertThat(response.getTokenValidUntil()).isEqualTo(authentication.getTokenValidUntil().format(DateTimeFormatter.ISO_DATE_TIME));
@@ -85,7 +89,9 @@ class AuthenticationExecutiveServiceTest {
         assertThat(response.isHasProfile()).isTrue();
         assertThat(response.isLoggedOnProfile()).isTrue();
         assertThat(response.getProfileUid()).isEqualTo(accountProfile.getProfileUid());
-        assertThat(response.getProfileName()).isEqualTo(accountProfile.getFirstName() + " " + accountProfile.getLastName());
+        assertThat(response.getProfileFirstName()).isEqualTo(accountProfile.getFirstName());
+        assertThat(response.getProfileLastName()).isEqualTo(accountProfile.getLastName());
+        assertThat(response.getProfileType()).isEqualTo(accountProfile.getProfileType());
     }
 
 }

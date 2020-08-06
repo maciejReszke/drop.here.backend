@@ -1,12 +1,15 @@
 package com.drop.here.backend.drophere.authentication.account.service;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AccountCreationRequest;
+import com.drop.here.backend.drophere.authentication.account.dto.AccountInfoResponse;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.authentication.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.authentication.authentication.LoginResponse;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
+import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -190,6 +193,22 @@ class AccountServiceTest {
         assertThat(result).isEqualTo(AccountProfileType.SUBPROFILE);
         assertThat(account.isAnyProfileRegistered()).isTrue();
         verifyNoInteractions(accountPersistenceService);
+    }
+
+    @Test
+    void givenAccountAuthenticationWhenGetAccountInfoThenGet() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+
+        final AccountInfoResponse accountInfoResponse = AccountInfoResponse.builder().build();
+        when(accountMappingService.toAccountInfoResponse(account)).thenReturn(accountInfoResponse);
+
+        //when
+        final AccountInfoResponse response = accountService.getAccountInfo(accountAuthentication);
+
+        //then
+        assertThat(response).isEqualTo(accountInfoResponse);
     }
 
 }

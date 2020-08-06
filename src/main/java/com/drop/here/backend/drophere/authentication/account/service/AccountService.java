@@ -1,11 +1,13 @@
 package com.drop.here.backend.drophere.authentication.account.service;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AccountCreationRequest;
+import com.drop.here.backend.drophere.authentication.account.dto.AccountInfoResponse;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.authentication.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.authentication.authentication.LoginResponse;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -58,5 +60,9 @@ public class AccountService {
         account.setAnyProfileRegistered(true);
         accountPersistenceService.updateAccount(account);
         return AccountProfileType.MAIN;
+    }
+
+    public AccountInfoResponse getAccountInfo(AccountAuthentication accountAuthentication) {
+        return accountMappingService.toAccountInfoResponse(accountAuthentication.getPrincipal());
     }
 }

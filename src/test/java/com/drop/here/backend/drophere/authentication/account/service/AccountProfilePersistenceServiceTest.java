@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,6 +43,22 @@ class AccountProfilePersistenceServiceTest {
         //then
         assertThat(profile).isPresent();
         assertThat(profile.orElseThrow()).isEqualTo(accountProfile);
+    }
+
+    @Test
+    void whenFindByAccountThenFind() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
+
+        when(accountProfileRepository.findByAccount(account)).thenReturn(List.of(accountProfile));
+
+        //when
+        final List<AccountProfile> profiles = accountProfilePersistenceService.findByAccount(account);
+
+        //then
+        assertThat(profiles).hasSize(1);
+        assertThat(profiles.get(0)).isEqualTo(accountProfile);
     }
 
     @Test

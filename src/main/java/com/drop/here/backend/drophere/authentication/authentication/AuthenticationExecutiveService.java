@@ -58,17 +58,16 @@ public class AuthenticationExecutiveService {
                 .hasProfile(true)
                 .loggedOnProfile(true)
                 .profileUid(profile.getProfileUid())
-                .profileName(buildProfileName(profile))
+                .profileFirstName(profile.getFirstName())
+                .profileLastName(profile.getLastName())
+                .profileType(profile.getProfileType())
                 .build();
-    }
-
-    private String buildProfileName(AccountProfile profile) {
-        return profile.getFirstName() + " " + profile.getLastName();
     }
 
     private AuthenticationResponse getBaseAuthenticationInfo(AccountAuthentication accountAuthentication) {
         final Account account = accountAuthentication.getPrincipal();
         return AuthenticationResponse.builder()
+                .accountId(account.getId())
                 .accountStatus(account.getAccountStatus())
                 .accountType(account.getAccountType())
                 .mail(account.getMail())
