@@ -1,6 +1,6 @@
-package com.drop.here.backend.drophere.company;
+package com.drop.here.backend.drophere.product.entity;
 
-import com.drop.here.backend.drophere.country.Country;
+import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,8 +16,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -25,7 +28,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
-public class Company {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,18 +37,36 @@ public class Company {
     @NotBlank
     private String name;
 
-    // TODO: 24/08/2020 na podstawie nazwy
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private ProductCategory category;
+
     @NotBlank
-    private String uid;
+    private String categoryName;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_id")
-    private Country country;
+    @JoinColumn(name = "unit_id")
+    private ProductUnit unit;
+
+    @NotBlank
+    private String unitName;
+
+    private String unitValue;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private CompanyRegistrationStatus registrationStatus;
+    private ProductAvailabilityStatus availabilityStatus;
+
+    @NotNull
+    @Positive
+    private BigDecimal averagePrice;
+
+    private String description;
+
+    @Version
+    private Long version;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -55,6 +76,6 @@ public class Company {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime lastUpdatedAt;
 
-    // TODO: 02/08/2020 audyt?
+    @NotNull
+    boolean deletable;
 }
-
