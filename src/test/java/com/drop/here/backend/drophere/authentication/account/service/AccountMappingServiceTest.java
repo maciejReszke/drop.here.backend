@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.authentication.account.enums.AccountMailStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
+import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,8 @@ class AccountMappingServiceTest {
     @Test
     void givenAccountWhenToAccountInfoResponseThenMap() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountProfile profile = AccountProfileDataGenerator.accountProfile(1, account);
 
         when(accountProfilePersistenceService.findByAccount(account)).thenReturn(List.of(profile));

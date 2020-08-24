@@ -13,7 +13,6 @@ import java.util.UUID;
 @Service
 public class AccountProfileMappingService {
 
-
     public AccountProfile newAccountProfile(AccountProfileCreationRequest accountProfileRequest, String encodedPassword, AccountProfileType profileType, Account account) {
         return AccountProfile.builder()
                 .status(AccountProfileStatus.ACTIVE)

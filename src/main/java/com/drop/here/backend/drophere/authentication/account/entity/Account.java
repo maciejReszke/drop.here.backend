@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.authentication.account.entity;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountMailStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
+import com.drop.here.backend.drophere.company.Company;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -35,8 +38,8 @@ import java.util.List;
 @Builder(toBuilder = true)
 @Table(indexes = @Index(columnList = "mail"),
         uniqueConstraints = @UniqueConstraint(columnNames = "mail"))
-@ToString(exclude = "privileges")
-@EqualsAndHashCode(exclude = "privileges")
+@ToString(exclude = {"privileges", "company"})
+@EqualsAndHashCode(exclude = {"privileges", "company"})
 public class Account {
 
     @Id
@@ -79,4 +82,8 @@ public class Account {
 
     @Version
     private Long version;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "company_id")
+    private Company company;
 }

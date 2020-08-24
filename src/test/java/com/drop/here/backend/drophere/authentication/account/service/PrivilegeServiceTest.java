@@ -5,6 +5,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
+import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,8 @@ class PrivilegeServiceTest {
     @Test
     void givenCompanyAccountWhenAddNewAccountPrivilegesThenCreateSaveAndAdd() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         account.setAccountType(AccountType.COMPANY);
 
         when(privilegeRepository.save(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
@@ -45,7 +47,8 @@ class PrivilegeServiceTest {
     @Test
     void givenCustomerAccountWhenAddNewAccountPrivilegesThenCreateSaveAndAdd() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         account.setAccountType(AccountType.CUSTOMER);
 
         when(privilegeRepository.save(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
@@ -61,7 +64,8 @@ class PrivilegeServiceTest {
     @Test
     void givenMainProfileWhenAddNewAccountProfilePrivilegesThenCreateSaveAndAdd() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         accountProfile.setProfileType(AccountProfileType.MAIN);
 
@@ -78,7 +82,8 @@ class PrivilegeServiceTest {
     @Test
     void givenSubProfileWhenAddNewProfileAccountPrivilegesThenCreateSaveAndAdd() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         accountProfile.setProfileType(AccountProfileType.SUBPROFILE);
 

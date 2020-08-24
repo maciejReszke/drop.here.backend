@@ -55,8 +55,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestAndCorrectAccountWithPrivilegesWhenCreateAccountProfileThenCreate() throws Exception {
         //given
-
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
         account.setAccountType(AccountType.COMPANY);
         account.setAnyProfileRegistered(false);
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE).build());
@@ -85,7 +84,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
     void givenValidRequestAndIncorrectAccountWithPrivilegesWhenCreateAccountProfileThenForbidden() throws Exception {
         //given
 
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
         account.setAccountType(AccountType.COMPANY);
         account.setAnyProfileRegistered(false);
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE).build());
@@ -109,7 +108,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
     void givenValidRequestAndCorrectAccountWithoutPrivilegesWhenCreateAccountProfileThenForbidden() throws Exception {
         //given
 
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
         account.setAccountType(AccountType.COMPANY);
         account.setAnyProfileRegistered(false);
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE + "Aaa").build());
@@ -133,7 +132,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
     void givenValidRequestAndCorrectAccountAndProfileWithPrivilegesWhenUpdateAccountProfileThenNoContent() throws Exception {
         //given
 
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
         account.setAccountType(AccountType.COMPANY);
         account.setAnyProfileRegistered(false);
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE).build());
@@ -160,7 +159,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestAndIncorrectAccountAndProfileWithPrivilegesWhenUpdateAccountProfileThenForbidden() throws Exception {
         //given
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
         account.setAccountType(AccountType.COMPANY);
         account.setAnyProfileRegistered(false);
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE).build());
@@ -187,7 +186,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestAndCorrectAccountAndIncorrectProfileWithPrivilegesWhenUpdateAccountProfileThenForbidden() throws Exception {
         //given
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
         account.setAccountType(AccountType.COMPANY);
         account.setAnyProfileRegistered(false);
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE).build());
@@ -214,7 +213,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestAndCorrectAccountAndProfileWithInvalidPrivilegesWhenUpdateAccountProfileThenForbidden() throws Exception {
         //given
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
         account.setAccountType(AccountType.COMPANY);
         account.setAnyProfileRegistered(false);
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE + "aaa").build());

@@ -14,6 +14,8 @@ public class ProductSearchingService {
     private final ProductRepository productRepository;
 
     // TODO: 24/08/2020
+    // TODO: 24/08/2020 company musi byc juz dostepne!
+    // TODO: 24/08/2020 filtering! (archived, unavailable)
     public Page<ProductResponse> findAll(Pageable pageable, String companyUid, AccountAuthentication accountAuthentication) {
         return null;
     }

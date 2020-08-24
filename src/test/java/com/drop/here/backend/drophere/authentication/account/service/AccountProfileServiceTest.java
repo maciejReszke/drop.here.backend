@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountProfil
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.authentication.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.authentication.authentication.LoginResponse;
+import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
@@ -55,7 +56,8 @@ class AccountProfileServiceTest {
     @Test
     void givenExistingActiveProfileWhenFindActiveByAccountAndProfileUidThenGet() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final String profileUid = "profileUid";
         final AccountProfile profile = AccountProfileDataGenerator.accountProfile(1, account);
         profile.setStatus(AccountProfileStatus.ACTIVE);
@@ -70,7 +72,8 @@ class AccountProfileServiceTest {
     @Test
     void givenExistingNotActiveProfileWhenFindActiveByAccountAndProfileUidThenEmpty() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final String profileUid = "profileUid";
         final AccountProfile profile = AccountProfileDataGenerator.accountProfile(1, account);
         profile.setStatus(AccountProfileStatus.INACTIVE);
@@ -85,7 +88,8 @@ class AccountProfileServiceTest {
     @Test
     void givenMatchingPasswordWhenIsPasswordValidThenTrue() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final String password = "password";
         when(passwordEncoder.matches(password, accountProfile.getPassword())).thenReturn(true);
@@ -100,7 +104,8 @@ class AccountProfileServiceTest {
     @Test
     void givenNotMatchingPasswordWhenIsPasswordValidThenFalse() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final String password = "password";
         when(passwordEncoder.matches(password, accountProfile.getPassword())).thenReturn(false);
@@ -116,7 +121,8 @@ class AccountProfileServiceTest {
     void givenAccountProfileRequestWhenCreateAccountProfileThenSave() {
         //given
         final AccountProfileCreationRequest request = AccountProfileDataGenerator.accountProfileRequest(1);
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final LoginResponse loginResponse = new LoginResponse();
@@ -140,7 +146,8 @@ class AccountProfileServiceTest {
     void givenAccountProfileUpdateRequestWhenUpdateAccountProfileThenUpdate() {
         //given
         final AccountProfileUpdateRequest accountProfileRequest = AccountProfileDataGenerator.accountProfileUpdateRequest(1);
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthenticationWithProfile(account, accountProfile);
 

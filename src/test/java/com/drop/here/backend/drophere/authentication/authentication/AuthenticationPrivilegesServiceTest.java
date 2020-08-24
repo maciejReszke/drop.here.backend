@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.authentication.authentication;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
@@ -22,7 +23,8 @@ class AuthenticationPrivilegesServiceTest {
     @Test
     void givenOwnAccountOperationWhenIsOwnAccountOperationThenTrue() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         account.setId(1L);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
@@ -36,7 +38,8 @@ class AuthenticationPrivilegesServiceTest {
     @Test
     void givenNotOwnAccountOperationWhenIsOwnAccountOperationThenFalse() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         account.setId(1L);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
@@ -51,7 +54,8 @@ class AuthenticationPrivilegesServiceTest {
     @Test
     void givenOwnAccountProfileOperationWhenIsOwnProfileOperationThenTrue() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthenticationWithProfile(account, accountProfile);
 
@@ -65,7 +69,8 @@ class AuthenticationPrivilegesServiceTest {
     @Test
     void givenNullProfileOperationWhenIsOwnProfileOperationThenFalse() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
         //when
@@ -78,7 +83,8 @@ class AuthenticationPrivilegesServiceTest {
     @Test
     void givenNotOwnAccountProfileOperationWhenIsOwnProfileOperationThenFalse() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthenticationWithProfile(account, accountProfile);
 

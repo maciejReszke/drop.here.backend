@@ -1,0 +1,168 @@
+package com.drop.here.backend.drophere.product.service;
+
+import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
+import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
+import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.company.Company;
+import com.drop.here.backend.drophere.product.dto.ProductResponse;
+import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
+import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.entity.ProductCategory;
+import com.drop.here.backend.drophere.product.entity.ProductUnit;
+import com.drop.here.backend.drophere.product.repository.ProductRepository;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
+import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
+import com.drop.here.backend.drophere.test_data.ProductDataGenerator;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class ProductServiceTest {
+
+    @InjectMocks
+    private ProductService productService;
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @Mock
+    private ProductSearchingService productSearchingService;
+
+    @Mock
+    private ProductValidationService productValidationService;
+
+    @Mock
+    private ProductMappingService productMappingService;
+
+    @Test
+    void givenRequestWhenFindAllThenFindAll() {
+        //given
+        final Pageable pageable = Pageable.unpaged();
+        final String companyUid = "companyUid";
+                final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final Page<ProductResponse> paged = Page.empty();
+
+        when(productSearchingService.findAll(pageable, companyUid, accountAuthentication)).thenReturn(paged);
+
+        //when
+        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, accountAuthentication);
+
+        //then
+        assertThat(result).isEqualTo(paged);
+    }
+
+    @Test
+    void givenProductManagementRequestWhenCreateProductThenCreate() {
+        //given
+        final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder().build();
+        final String companyUid = "companyUid";
+
+        doNothing().when(productValidationService).validate(productManagementRequest);
+        final ProductUnit unit = ProductDataGenerator.unit(1);
+        final ProductCategory category = ProductDataGenerator.category(1);
+        final Company company = Company.builder().build();
+        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        when(productMappingService.toEntity(productManagementRequest)).thenReturn(product);
+        when(productRepository.save(product)).thenReturn(product);
+
+        //when
+        final ResourceOperationResponse response = productService.createProduct(productManagementRequest, companyUid);
+
+        //then
+        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
+    }
+
+    @Test
+    void givenExistingProductAndProductManagementRequestWhenUpdateProductThenUpdate() {
+        //given
+        final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder().build();
+        final String companyUid = "companyUid";
+
+        doNothing().when(productValidationService).validate(productManagementRequest);
+        final ProductUnit unit = ProductDataGenerator.unit(1);
+        final ProductCategory category = ProductDataGenerator.category(1);
+        final Company company = Company.builder().build();
+        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Long productId = 1L;
+        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
+        doNothing().when(productMappingService).update(product, productManagementRequest);
+        when(productRepository.save(product)).thenReturn(product);
+
+        //when
+        final ResourceOperationResponse response = productService.updateProduct(productManagementRequest, productId, companyUid);
+
+        //then
+        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+    }
+
+
+    @Test
+    void givenNotExistingProductAndProductManagementRequestWhenUpdateProductThenError() {
+        //given
+        final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder().build();
+        final String companyUid = "companyUid";
+
+        final Long productId = 1L;
+        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> productService.updateProduct(productManagementRequest, productId, companyUid));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenExistingProductWhenDeleteProductThenDelete() {
+        //given
+        final String companyUid = "companyUid";
+
+        final ProductUnit unit = ProductDataGenerator.unit(1);
+        final ProductCategory category = ProductDataGenerator.category(1);
+        final Company company = Company.builder().build();
+        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Long productId = 1L;
+        doNothing().when(productValidationService).validateDelete(product);
+        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
+        doNothing().when(productRepository).delete(product);
+
+        //when
+        final ResourceOperationResponse response = productService.deleteProduct(productId, companyUid);
+
+        //then
+        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.DELETED);
+    }
+
+
+    @Test
+    void givenNotExistingProductWhenDeleteProductThenError() {
+        //given
+        final String companyUid = "companyUid";
+
+        final Long productId = 1L;
+        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> productService.deleteProduct(productId, companyUid));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+}

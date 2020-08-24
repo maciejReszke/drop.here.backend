@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.authentication.account.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountRepository;
+import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +25,8 @@ class AccountPersistenceServiceTest {
     @Test
     void givenAccountWhenSaveThenSave() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         when(accountRepository.save(account)).thenReturn(account);
 
         //when
@@ -37,7 +39,8 @@ class AccountPersistenceServiceTest {
     @Test
     void givenAccountWhenUpdateThenSave() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         when(accountRepository.save(account)).thenReturn(account);
 
         //when

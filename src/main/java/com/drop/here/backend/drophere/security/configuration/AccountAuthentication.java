@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.security.configuration;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.company.Company;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import org.springframework.security.core.Authentication;
@@ -10,13 +11,13 @@ import org.springframework.security.core.GrantedAuthority;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-// TODO: 04/08/2020 pytanie czy tutaj tez trzymac customera/company?
 @Builder(toBuilder = true)
 public class AccountAuthentication implements Authentication {
     private final Account account;
     private final Collection<? extends GrantedAuthority> authorities;
     private final LocalDateTime tokenValidUntil;
     private final AccountProfile profile;
+    private final Company company;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -66,5 +67,9 @@ public class AccountAuthentication implements Authentication {
 
     public boolean hasProfile() {
         return profile != null;
+    }
+
+    public Company getCompany() {
+        return company;
     }
 }

@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.authentication.account.service.AccountProfileService;
 import com.drop.here.backend.drophere.authentication.account.service.AccountService;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
+import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
@@ -44,8 +45,8 @@ class AuthenticationServiceTest {
                 .mail("mail")
                 .password("password")
                 .build();
-
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final LoginResponse response = new LoginResponse("token", "validUntil");
 
         when(accountService.findActiveAccountByMail(baseLoginRequest.getMail())).thenReturn(Optional.of(account));
@@ -84,7 +85,8 @@ class AuthenticationServiceTest {
                 .mail("mail")
                 .password("password")
                 .build();
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
 
         when(accountService.findActiveAccountByMail(baseLoginRequest.getMail())).thenReturn(Optional.of(account));
         when(accountService.isPasswordValid(account, baseLoginRequest.getPassword())).thenReturn(false);
@@ -100,7 +102,8 @@ class AuthenticationServiceTest {
     @Test
     void givenAccountAuthenticationWithoutProfileWhenGetAuthenticationInfoThenGet() {
         //given
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final AuthenticationResponse info = AuthenticationResponse.builder().build();
         when(authenticationExecutiveService.getAuthenticationInfo(accountAuthentication)).thenReturn(info);
@@ -119,8 +122,8 @@ class AuthenticationServiceTest {
                 .profileUid("profileUid")
                 .password("password")
                 .build();
-
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final LoginResponse response = new LoginResponse("token", "validUntil");
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
@@ -143,8 +146,8 @@ class AuthenticationServiceTest {
                 .profileUid("profileUid")
                 .password("password")
                 .build();
-
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
         when(accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, "profileUid")).thenReturn(Optional.empty());
@@ -164,8 +167,8 @@ class AuthenticationServiceTest {
                 .profileUid("profileUid")
                 .password("password")
                 .build();
-
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
 

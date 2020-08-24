@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.product.entity;
 
+import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -78,4 +79,10 @@ public class Product {
 
     @NotNull
     boolean deletable;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
+    // TODO: 24/08/2020 zdjecie?
 }

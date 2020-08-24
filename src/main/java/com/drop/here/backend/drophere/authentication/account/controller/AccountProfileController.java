@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.authentication.account.service.AccountProf
 import com.drop.here.backend.drophere.authentication.authentication.LoginResponse;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -41,6 +42,7 @@ public class AccountProfileController {
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnAccountOperation(authentication, #accountId)")
+    @ApiAuthorizationToken
     public LoginResponse createAccountProfile(@Valid @RequestBody AccountProfileCreationRequest accountCreationRequest,
                                               @ApiIgnore @PathVariable Long accountId,
                                               @ApiIgnore AccountAuthentication accountAuthentication) {
@@ -56,6 +58,7 @@ public class AccountProfileController {
     @PreAuthorize("@authenticationPrivilegesService.isOwnAccountOperation(authentication, #accountId) && " +
             "@authenticationPrivilegesService.isOwnProfileOperation(authentication, #accountProfileUid)")
     @PatchMapping("/{accountProfileUid}")
+    @ApiAuthorizationToken
     public void updateAccountProfile(@Valid @RequestBody AccountProfileUpdateRequest accountCreationRequest,
                                      @ApiIgnore @PathVariable Long accountId,
                                      @ApiIgnore @PathVariable String accountProfileUid,

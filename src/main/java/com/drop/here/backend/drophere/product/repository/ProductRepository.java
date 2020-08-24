@@ -1,4 +1,13 @@
 package com.drop.here.backend.drophere.product.repository;
 
-public interface ProductRepository {
+import com.drop.here.backend.drophere.product.entity.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface ProductRepository extends JpaRepository<Product, Long> {
+
+    Optional<Product> findByIdAndCompanyUid(Long productId, String companyUid);
 }

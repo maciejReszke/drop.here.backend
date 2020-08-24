@@ -5,6 +5,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
+import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,8 @@ class AccountProfileMappingServiceTest {
     void givenProfileCreationRequestWhenNewAccountProfileThenMap() {
         //given
         final AccountProfileCreationRequest accountProfileCreationRequest = AccountProfileDataGenerator.accountProfileRequest(1);
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         final String encodedPassword = "encoded";
         final AccountProfileType accountProfileType = AccountProfileType.MAIN;
 

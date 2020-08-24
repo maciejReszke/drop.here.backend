@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.authentication.authentication;
 
+import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,14 @@ public class AuthenticationPrivilegesService {
     }
 
     public boolean isOwnProfileOperation(AccountAuthentication accountAuthentication, String profileUid) {
-        return accountAuthentication.getProfile() != null &&
+        return accountAuthentication.hasProfile() &&
                 accountAuthentication.getProfile().getProfileUid().equalsIgnoreCase(profileUid);
+    }
+
+    // TODO: 24/08/2020 test
+    public boolean isOwnCompanyOperation(AccountAuthentication accountAuthentication, String companyUid) {
+        return accountAuthentication.getPrincipal().getAccountType() == AccountType.COMPANY &&
+                accountAuthentication.getCompany() != null &&
+                accountAuthentication.getCompany().getUid().equalsIgnoreCase(companyUid);
     }
 }

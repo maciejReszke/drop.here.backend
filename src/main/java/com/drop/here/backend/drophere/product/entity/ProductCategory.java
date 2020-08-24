@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 // TODO: 24/08/2020 controller
+// TODO: 24/08/2020 category + sub category (food, pizza)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

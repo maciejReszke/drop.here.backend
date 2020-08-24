@@ -5,6 +5,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
+import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -32,7 +33,8 @@ class AccountProfileValidationServiceTest {
     void givenValidRequestWhenValidateRequestThenDoNothing() {
         //given
         final AccountProfileCreationRequest request = AccountProfileDataGenerator.accountProfileRequest(1);
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
 
         //when
         accountProfileValidationService.validateRequest(request, account);
@@ -45,7 +47,8 @@ class AccountProfileValidationServiceTest {
     void givenInvalidTypeValidRequestWhenValidateRequestThenError() {
         //given
         final AccountProfileCreationRequest request = AccountProfileDataGenerator.accountProfileRequest(1);
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         account.setAccountType(AccountType.CUSTOMER);
 
 //when
@@ -60,7 +63,8 @@ class AccountProfileValidationServiceTest {
     void givenTooShortPasswordWhenValidateRequestThenError() {
         //given
         final AccountProfileCreationRequest request = AccountProfileDataGenerator.accountProfileRequest(1);
-        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = Company.builder().build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
         request.setPassword("abc");
 
         //when
