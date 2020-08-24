@@ -2,12 +2,13 @@ package com.drop.here.backend.drophere.product.controller;
 
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
-import com.drop.here.backend.drophere.product.dto.ProductResponse;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
+import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
@@ -50,8 +52,9 @@ public class ProductController {
     @ApiAuthorizationToken
     public Page<ProductResponse> findAll(@ApiIgnore @PathVariable String companyUid,
                                          @ApiIgnore AccountAuthentication accountAuthentication,
+                                         @ApiParam(value = "Desired property (1... n)") @RequestParam(value = "category", required = false) String[] desiredCategories,
                                          @NotNull Pageable pageable) {
-        return productService.findAll(pageable, companyUid, accountAuthentication);
+        return productService.findAll(pageable, companyUid, desiredCategories, accountAuthentication);
     }
 
     // TODO: 24/08/2020 test
@@ -68,7 +71,7 @@ public class ProductController {
     public ResourceOperationResponse create(@ApiIgnore @PathVariable String companyUid,
                                             @ApiIgnore AccountAuthentication authentication,
                                             @RequestBody @Valid ProductManagementRequest productManagementRequest) {
-        return productService.createProduct(productManagementRequest, companyUid);
+        return productService.createProduct(productManagementRequest, companyUid, authentication);
     }
 
     // TODO: 24/08/2020 test

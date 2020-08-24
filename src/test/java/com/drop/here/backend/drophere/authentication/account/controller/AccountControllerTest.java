@@ -9,7 +9,6 @@ import com.drop.here.backend.drophere.authentication.account.repository.AccountP
 import com.drop.here.backend.drophere.authentication.account.repository.AccountRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
-import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
@@ -99,8 +98,7 @@ class AccountControllerTest extends IntegrationBaseClass {
     @Test
     void givenExistingAccountRequestWhenCreateAccountThenError() throws Exception {
         //given
-        final Company company = Company.builder().build();
-        final Account savedAccount = accountRepository.save(AccountDataGenerator.companyAccount(1, company));
+        final Account savedAccount = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
         final AccountCreationRequest request = AccountDataGenerator.accountCreationRequest(1);
         request.setMail(savedAccount.getMail());
         final String json = objectMapper.writeValueAsString(request);
@@ -121,8 +119,7 @@ class AccountControllerTest extends IntegrationBaseClass {
     @Test
     void givenOwnAccountValidPrivilegeWhenGetAccountInfoThen200() throws Exception {
         //given
-        final Company company = Company.builder().build();
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, company));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
         privilegeRepository.save(Privilege.builder().name("priv").account(account).build());
         final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
         privilegeRepository.save(Privilege.builder().name("priv2").accountProfile(accountProfile).build());
@@ -141,8 +138,7 @@ class AccountControllerTest extends IntegrationBaseClass {
     @Test
     void givenNotOwnAccountValidPrivilegeWhenGetAccountInfoThen403() throws Exception {
         //given
-        final Company company = Company.builder().build();
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, company));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
         privilegeRepository.save(Privilege.builder().name("priv").account(account).build());
         final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
         privilegeRepository.save(Privilege.builder().name("priv2").accountProfile(accountProfile).build());

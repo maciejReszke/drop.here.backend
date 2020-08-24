@@ -4,8 +4,8 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
-import com.drop.here.backend.drophere.product.dto.ProductResponse;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
+import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
@@ -24,13 +24,13 @@ public class ProductService {
     private final ProductValidationService productValidationService;
     private final ProductMappingService productMappingService;
 
-    public Page<ProductResponse> findAll(Pageable pageable, String companyUid, AccountAuthentication accountAuthentication) {
-        return productSearchingService.findAll(pageable, companyUid, accountAuthentication);
+    public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, AccountAuthentication accountAuthentication) {
+        return productSearchingService.findAll(pageable, companyUid, desiredCategories, accountAuthentication);
     }
 
-    public ResourceOperationResponse createProduct(ProductManagementRequest productManagementRequest, String companyUid) {
+    public ResourceOperationResponse createProduct(ProductManagementRequest productManagementRequest, String companyUid, AccountAuthentication accountAuthentication) {
         productValidationService.validate(productManagementRequest);
-        final Product product = productMappingService.toEntity(productManagementRequest);
+        final Product product = productMappingService.toEntity(productManagementRequest, accountAuthentication);
         log.info("Creating product for company {} with name {}", companyUid, product.getName());
         productRepository.save(product);
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, product.getId());

@@ -55,6 +55,6 @@ public class Company {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime lastUpdatedAt;
 
-    // TODO: 02/08/2020 audyt?
+    // TODO: 02/08/2020 audyt? + zdjecie i moze galeria?
 }
 

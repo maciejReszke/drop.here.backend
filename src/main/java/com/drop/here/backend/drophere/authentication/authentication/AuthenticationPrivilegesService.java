@@ -16,7 +16,6 @@ public class AuthenticationPrivilegesService {
                 accountAuthentication.getProfile().getProfileUid().equalsIgnoreCase(profileUid);
     }
 
-    // TODO: 24/08/2020 test
     public boolean isOwnCompanyOperation(AccountAuthentication accountAuthentication, String companyUid) {
         return accountAuthentication.getPrincipal().getAccountType() == AccountType.COMPANY &&
                 accountAuthentication.getCompany() != null &&

@@ -34,4 +34,17 @@ public class AccountDataGenerator {
                 .password("password1234#" + i)
                 .build();
     }
+
+    public Account customerAccount(int i) {
+        return Account.builder()
+                .accountMailStatus(AccountMailStatus.CONFIRMED)
+                .accountStatus(AccountStatus.ACTIVE)
+                .accountType(AccountType.CUSTOMER)
+                .createdAt(LocalDateTime.now())
+                .isAnyProfileRegistered(false)
+                .mail("mailAtCompany" + i + "@pl.pl")
+                .mailActivatedAt(LocalDateTime.now())
+                .password("password1234#" + i)
+                .build();
+    }
 }

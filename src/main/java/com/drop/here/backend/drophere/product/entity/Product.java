@@ -21,13 +21,14 @@ import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 public class Product {
 
@@ -54,7 +55,9 @@ public class Product {
     @NotBlank
     private String unitName;
 
-    private String unitValue;
+    @NotNull
+    @PositiveOrZero
+    private BigDecimal unitValue;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -84,5 +87,4 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private Company company;
-    // TODO: 24/08/2020 zdjecie?
 }

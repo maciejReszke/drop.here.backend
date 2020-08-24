@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.authentication.authentication;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
@@ -94,5 +95,66 @@ class AuthenticationPrivilegesServiceTest {
 
         //then
         assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenNotCompanyAccountWhenIsOwnCompanyOperationThenFalse() {
+        //given
+        final Company company = Company.builder().uid("uid").build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
+        account.setAccountType(AccountType.CUSTOMER);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+
+        //when
+        final boolean result = authenticationPrivilegesService.isOwnCompanyOperation(accountAuthentication, "uid");
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenLackOfCompanyAccountWhenIsOwnCompanyOperationThenFalse() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1, null);
+        account.setAccountType(AccountType.COMPANY);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+
+        //when
+        final boolean result = authenticationPrivilegesService.isOwnCompanyOperation(accountAuthentication, "uid");
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenDifferentCompanyUidAccountWhenIsOwnCompanyOperationThenFalse() {
+        //given
+        final Company company = Company.builder().uid("uid1").build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
+        account.setAccountType(AccountType.COMPANY);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+
+        //when
+        final boolean result = authenticationPrivilegesService
+                .isOwnCompanyOperation(accountAuthentication, "uid");
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenValidSameCompanyAccountWhenIsOwnCompanyOperationThenTrue() {
+        //given
+        final Company company = Company.builder().uid("uid").build();
+        final Account account = AccountDataGenerator.companyAccount(1, company);
+        account.setAccountType(AccountType.COMPANY);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+
+        //when
+        final boolean result = authenticationPrivilegesService
+                .isOwnCompanyOperation(accountAuthentication, "uid");
+
+        //then
+        assertThat(result).isTrue();
     }
 }

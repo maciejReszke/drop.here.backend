@@ -5,8 +5,8 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.Company;
-import com.drop.here.backend.drophere.product.dto.ProductResponse;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
+import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
@@ -53,15 +53,16 @@ class ProductServiceTest {
         //given
         final Pageable pageable = Pageable.unpaged();
         final String companyUid = "companyUid";
-                final Company company = Company.builder().build();
+        final Company company = Company.builder().build();
         final Account account = AccountDataGenerator.companyAccount(1, company);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Page<ProductResponse> paged = Page.empty();
 
-        when(productSearchingService.findAll(pageable, companyUid, accountAuthentication)).thenReturn(paged);
+        final String[] desiredCategories = new String[0];
+        when(productSearchingService.findAll(pageable, companyUid, desiredCategories, accountAuthentication)).thenReturn(paged);
 
         //when
-        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, accountAuthentication);
+        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, desiredCategories, accountAuthentication);
 
         //then
         assertThat(result).isEqualTo(paged);
@@ -78,11 +79,13 @@ class ProductServiceTest {
         final ProductCategory category = ProductDataGenerator.category(1);
         final Company company = Company.builder().build();
         final Product product = ProductDataGenerator.product(1, category, unit, company);
-        when(productMappingService.toEntity(productManagementRequest)).thenReturn(product);
+        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        when(productMappingService.toEntity(productManagementRequest, accountAuthentication)).thenReturn(product);
         when(productRepository.save(product)).thenReturn(product);
 
         //when
-        final ResourceOperationResponse response = productService.createProduct(productManagementRequest, companyUid);
+        final ResourceOperationResponse response = productService.createProduct(productManagementRequest, companyUid, accountAuthentication);
 
         //then
         assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
@@ -101,7 +104,7 @@ class ProductServiceTest {
         final Product product = ProductDataGenerator.product(1, category, unit, company);
         final Long productId = 1L;
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
-        doNothing().when(productMappingService).update(product, productManagementRequest);
+        when(productMappingService.update(product, productManagementRequest)).thenReturn(product);
         when(productRepository.save(product)).thenReturn(product);
 
         //when

@@ -18,6 +18,7 @@ public class AuthenticationDataGenerator {
                 .authorities(List.of(new SimpleGrantedAuthority("authority")))
                 .account(account)
                 .tokenValidUntil(LocalDateTime.now())
+                .company(account.getCompany())
                 .build();
     }
 
