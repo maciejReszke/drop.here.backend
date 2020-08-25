@@ -23,8 +23,8 @@ public class ProductCustomizationRequest {
     @PositiveOrZero
     private BigDecimal price;
 
-    @ApiModelProperty(value = "Customization name", example = "Ciabatta", required = true)
+    @ApiModelProperty(value = "Customization value", example = "Ciabatta", required = true)
     @NotBlank
     @Length(max = 255)
-    private String customizationName;
+    private String value;
 }

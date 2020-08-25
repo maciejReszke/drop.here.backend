@@ -12,7 +12,7 @@ import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -47,8 +47,8 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
     @Autowired
     private JwtService jwtService;
 
-    @BeforeEach
-    void prepare() {
+    @AfterEach
+    void cleanUp() {
         privilegeRepository.deleteAll();
         accountProfileRepository.deleteAll();
         accountRepository.deleteAll();

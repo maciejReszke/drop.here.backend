@@ -70,7 +70,7 @@ public class ProductDataGenerator {
     private ProductCustomizationRequest productCustomizationRequest(int i) {
         return ProductCustomizationRequest.builder()
                 .price(BigDecimal.valueOf(55.44 + i))
-                .customizationName("customizationName" + i)
+                .value("customizationName" + i)
                 .build();
     }
 }

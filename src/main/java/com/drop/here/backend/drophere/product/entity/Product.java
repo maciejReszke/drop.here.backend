@@ -5,7 +5,9 @@ import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
@@ -30,6 +32,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @Entity
+@ToString(exclude = {"category", "unit", "company"})
+@EqualsAndHashCode(exclude = {"category", "unit", "company"})
 public class Product {
 
     @Id

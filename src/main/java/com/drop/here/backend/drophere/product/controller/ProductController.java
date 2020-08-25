@@ -40,7 +40,7 @@ public class ProductController {
     private final ProductService productService;
 
     // TODO: 24/08/2020 get na 1 razem z ingredientami
-    // TODO: 24/08/2020 docs dla boyss
+    // TODO: 24/08/2020 docs dla boyss + test swaggera
     // TODO: 24/08/2020 test
     @GetMapping
     @ApiOperation("Fetching products")

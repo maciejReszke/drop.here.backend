@@ -1,0 +1,46 @@
+package com.drop.here.backend.drophere.product.service;
+
+import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationRequest;
+import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
+import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.entity.ProductCustomization;
+import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
+import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperType;
+import org.springframework.stereotype.Service;
+
+import java.math.RoundingMode;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class ProductCustomizationMappingService {
+
+    public ProductCustomizationWrapper toCustomizationWrapper(Product product, ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
+        final ProductCustomizationWrapper productCustomizationWrapper = mapToCustomizationWrapper(product, productCustomizationWrapperRequest);
+
+        final List<ProductCustomization> customizations = productCustomizationWrapperRequest.getCustomizations()
+                .stream()
+                .map(customization -> toCustomization(customization, productCustomizationWrapper))
+                .collect(Collectors.toList());
+
+        productCustomizationWrapper.setCustomizations(customizations);
+
+        return productCustomizationWrapper;
+    }
+
+    private ProductCustomizationWrapper mapToCustomizationWrapper(Product product, ProductCustomizationWrapperRequest request) {
+        return ProductCustomizationWrapper.builder()
+                .heading(request.getHeading())
+                .product(product)
+                .type(ProductCustomizationWrapperType.valueOf(request.getType()))
+                .build();
+    }
+
+    private ProductCustomization toCustomization(ProductCustomizationRequest customization, ProductCustomizationWrapper wrapper) {
+        return ProductCustomization.builder()
+                .price(customization.getPrice().setScale(2, RoundingMode.DOWN))
+                .value(customization.getValue())
+                .wrapper(wrapper)
+                .build();
+    }
+}
