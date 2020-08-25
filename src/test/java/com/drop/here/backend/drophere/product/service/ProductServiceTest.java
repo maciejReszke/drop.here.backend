@@ -5,10 +5,12 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.Company;
+import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCategory;
+import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
@@ -48,6 +50,9 @@ class ProductServiceTest {
     @Mock
     private ProductMappingService productMappingService;
 
+    @Mock
+    private ProductCustomizationService productCustomizationService;
+
     @Test
     void givenRequestWhenFindAllThenFindAll() {
         //given
@@ -74,7 +79,7 @@ class ProductServiceTest {
         final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder().build();
         final String companyUid = "companyUid";
 
-        doNothing().when(productValidationService).validate(productManagementRequest);
+        doNothing().when(productValidationService).validateProductRequest(productManagementRequest);
         final ProductUnit unit = ProductDataGenerator.unit(1);
         final ProductCategory category = ProductDataGenerator.category(1);
         final Company company = Company.builder().build();
@@ -97,7 +102,7 @@ class ProductServiceTest {
         final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder().build();
         final String companyUid = "companyUid";
 
-        doNothing().when(productValidationService).validate(productManagementRequest);
+        doNothing().when(productValidationService).validateProductRequest(productManagementRequest);
         final ProductUnit unit = ProductDataGenerator.unit(1);
         final ProductCategory category = ProductDataGenerator.category(1);
         final Company company = Company.builder().build();
@@ -141,7 +146,7 @@ class ProductServiceTest {
         final Company company = Company.builder().build();
         final Product product = ProductDataGenerator.product(1, category, unit, company);
         final Long productId = 1L;
-        doNothing().when(productValidationService).validateDelete(product);
+        doNothing().when(productValidationService).validateProductDelete(product);
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(product);
 
@@ -163,6 +168,123 @@ class ProductServiceTest {
 
         //when
         final Throwable throwable = catchThrowable(() -> productService.deleteProduct(productId, companyUid));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenExistingProductWhenCreateCustomizationThenCreate() {
+        //given
+        final Long productId = 1L;
+        final String companyUid = "companyUid";
+        final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
+
+        final ProductUnit unit = ProductDataGenerator.unit(1);
+        final ProductCategory category = ProductDataGenerator.category(1);
+        final Company company = Company.builder().build();
+        final Product product = ProductDataGenerator.product(1, category, unit, company);
+
+        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
+        when(productCustomizationService.createCustomizations(product, request)).thenReturn(ProductCustomizationWrapper.builder().build());
+
+        //when
+        final ResourceOperationResponse response = productService.createCustomization(productId, companyUid, request);
+
+        //then
+        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
+    }
+
+    @Test
+    void givenNotExistingProductWhenCreateCustomizationThenError() {
+        //given
+        final Long productId = 1L;
+        final String companyUid = "companyUid";
+        final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
+
+        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> productService.createCustomization(productId, companyUid, request));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+
+    @Test
+    void givenExistingProductWhenUpdateCustomizationThenUpdate() {
+        //given
+        final Long productId = 1L;
+        final Long customizationId = 1L;
+        final String companyUid = "companyUid";
+        final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
+
+        final ProductUnit unit = ProductDataGenerator.unit(1);
+        final ProductCategory category = ProductDataGenerator.category(1);
+        final Company company = Company.builder().build();
+        final Product product = ProductDataGenerator.product(1, category, unit, company);
+
+        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
+        when(productCustomizationService.updateCustomization(product, customizationId, request)).thenReturn(ProductCustomizationWrapper.builder().build());
+
+        //when
+        final ResourceOperationResponse response = productService.updateCustomization(productId, companyUid, customizationId, request);
+
+        //then
+        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+    }
+
+    @Test
+    void givenNotExistingProductWhenUpdateCustomizationThenError() {
+        //given
+        final Long productId = 1L;
+        final String companyUid = "companyUid";
+        final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
+        final Long customizationId = 1L;
+
+        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> productService.updateCustomization(productId, companyUid, customizationId, request));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenExistingProductWhenDeleteCustomizationThenDelete() {
+        //given
+        final Long productId = 1L;
+        final Long customizationId = 1L;
+        final String companyUid = "companyUid";
+
+        final ProductUnit unit = ProductDataGenerator.unit(1);
+        final ProductCategory category = ProductDataGenerator.category(1);
+        final Company company = Company.builder().build();
+        final Product product = ProductDataGenerator.product(1, category, unit, company);
+
+        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
+        doNothing().when(productCustomizationService).deleteCustomization(product, customizationId);
+
+        //when
+        final ResourceOperationResponse response = productService.deleteCustomization(productId, companyUid, customizationId);
+
+        //then
+        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.DELETED);
+    }
+
+    @Test
+    void givenNotExistingProductWhenDeleteCustomizationThenError() {
+        //given
+        final Long productId = 1L;
+        final String companyUid = "companyUid";
+        final Long customizationId = 1L;
+
+        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> productService.deleteCustomization(productId, companyUid, customizationId));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);

@@ -40,7 +40,7 @@ class ProductValidationServiceTest {
         when(productCategoryService.getByName(productManagementRequest.getCategory())).thenReturn(ProductCategory.builder().build());
 
         //when
-        final Throwable throwable = catchThrowable(() -> productValidationService.validate(productManagementRequest));
+        final Throwable throwable = catchThrowable(() -> productValidationService.validateProductRequest(productManagementRequest));
 
         //then
         assertThat(throwable).isNull();
@@ -59,7 +59,7 @@ class ProductValidationServiceTest {
         when(productCategoryService.getByName(productManagementRequest.getCategory())).thenReturn(ProductCategory.builder().build());
 
         //when
-        final Throwable throwable = catchThrowable(() -> productValidationService.validate(productManagementRequest));
+        final Throwable throwable = catchThrowable(() -> productValidationService.validateProductRequest(productManagementRequest));
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
@@ -71,7 +71,7 @@ class ProductValidationServiceTest {
         final Product product = Product.builder().deletable(true).build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> productValidationService.validateDelete(product));
+        final Throwable throwable = catchThrowable(() -> productValidationService.validateProductDelete(product));
 
         //then
         assertThat(throwable).isNull();
@@ -83,7 +83,7 @@ class ProductValidationServiceTest {
         final Product product = Product.builder().deletable(false).build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> productValidationService.validateDelete(product));
+        final Throwable throwable = catchThrowable(() -> productValidationService.validateProductDelete(product));
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);

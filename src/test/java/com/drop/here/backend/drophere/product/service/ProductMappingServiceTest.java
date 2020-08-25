@@ -53,7 +53,7 @@ class ProductMappingServiceTest {
         //then
         assertThat(result.getCategory()).isEqualTo(productCategory);
         assertThat(result.getName()).isEqualTo(productManagementRequest.getName());
-        assertThat(result.getAveragePrice()).isEqualTo(productManagementRequest.getAveragePrice().setScale(2));
+        assertThat(result.getPrice()).isEqualTo(productManagementRequest.getPrice().setScale(2));
         assertThat(result.getAvailabilityStatus()).isEqualTo(ProductAvailabilityStatus.UNAVAILABLE);
         assertThat(result.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(result.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
@@ -82,7 +82,7 @@ class ProductMappingServiceTest {
         //then
         assertThat(result.getCategory()).isEqualTo(productCategory);
         assertThat(result.getName()).isEqualTo(productManagementRequest.getName());
-        assertThat(result.getAveragePrice()).isEqualTo(productManagementRequest.getAveragePrice().setScale(2));
+        assertThat(result.getPrice()).isEqualTo(productManagementRequest.getPrice().setScale(2));
         assertThat(result.getAvailabilityStatus()).isEqualTo(ProductAvailabilityStatus.UNAVAILABLE);
         assertThat(result.getCreatedAt()).isNull();
         assertThat(result.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));

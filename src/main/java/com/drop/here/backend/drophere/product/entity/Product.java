@@ -65,7 +65,7 @@ public class Product {
 
     @NotNull
     @Positive
-    private BigDecimal averagePrice;
+    private BigDecimal price;
 
     private String description;
 

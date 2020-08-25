@@ -36,7 +36,7 @@ public class ProductSearchingService {
                 .category(product.getCategoryName())
                 .unit(product.getUnitName())
                 .availabilityStatus(product.getAvailabilityStatus())
-                .averagePrice(product.getAveragePrice())
+                .price(product.getPrice())
                 .description(product.getDescription())
                 .deletable(isOwnCompanyOperation ? product.isDeletable() : null)
                 .build();

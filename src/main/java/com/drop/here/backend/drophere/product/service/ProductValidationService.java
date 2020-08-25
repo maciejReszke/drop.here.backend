@@ -15,7 +15,7 @@ public class ProductValidationService {
     private final ProductCategoryService productCategoryService;
     private final ProductUnitService productUnitService;
 
-    public void validate(ProductManagementRequest productManagementRequest) {
+    public void validateProductRequest(ProductManagementRequest productManagementRequest) {
         validateCategory(productManagementRequest);
         validateUnit(productManagementRequest);
         validateStatus(productManagementRequest);
@@ -37,7 +37,7 @@ public class ProductValidationService {
         productCategoryService.getByName(productManagementRequest.getCategory());
     }
 
-    public void validateDelete(Product product) {
+    public void validateProductDelete(Product product) {
         if (!product.isDeletable()) {
             throw new RestIllegalRequestValueException(String.format(
                     "Product to be removed with id %s is not deletable", product.getId()),

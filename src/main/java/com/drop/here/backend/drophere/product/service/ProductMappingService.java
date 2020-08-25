@@ -41,7 +41,7 @@ public class ProductMappingService {
                 .unitName(unit.getName())
                 .unitValue(request.getUnitValue() == null ? BigDecimal.ONE : request.getUnitValue().setScale(2, RoundingMode.DOWN))
                 .availabilityStatus(ProductAvailabilityStatus.valueOf(request.getAvailabilityStatus()))
-                .averagePrice(request.getAveragePrice().setScale(2, RoundingMode.DOWN))
+                .price(request.getPrice().setScale(2, RoundingMode.DOWN))
                 .description(request.getDescription())
                 .lastUpdatedAt(now)
                 .build();
