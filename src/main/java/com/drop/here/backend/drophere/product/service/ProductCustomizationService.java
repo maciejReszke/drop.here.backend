@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -51,5 +53,9 @@ public class ProductCustomizationService {
                         "Customization with id %s for product %s was not found", customizationId, product.getId()),
                         RestExceptionStatusCode.PRODUCT_CUSTOMIZATION_NOT_FOUND
                 ));
+    }
+
+    public List<ProductCustomizationWrapper> findCustomizations(List<Long> productsIds) {
+        return customizationWrapperRepository.findByIdsWithCustomizations(productsIds);
     }
 }

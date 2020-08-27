@@ -21,7 +21,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -49,5 +49,5 @@ public class ProductCustomizationWrapper {
     private Product product;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "wrapper")
-    private List<ProductCustomization> customizations;
+    private Set<ProductCustomization> customizations;
 }

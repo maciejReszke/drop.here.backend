@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -36,11 +37,10 @@ import javax.validation.constraints.NotNull;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/companies/{companyUid}/products")
+@Api(tags = "Products management API")
 public class ProductController {
     private final ProductService productService;
 
-    // TODO: 24/08/2020 get na 1 razem z ingredientami
-    // TODO: 24/08/2020 docs dla boyss + test swaggera
     // TODO: 24/08/2020 test
     @GetMapping
     @ApiOperation("Fetching products")

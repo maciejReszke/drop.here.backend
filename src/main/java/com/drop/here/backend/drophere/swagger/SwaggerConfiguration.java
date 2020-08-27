@@ -26,7 +26,8 @@ public class SwaggerConfiguration {
     private static final Predicate<String> ALWAYS_FALSE_PREDICATE = input -> false;
 
     private static final List<Predicate<String>> NOT_INCLUDE_IN_DOCS = List.of(
-            Predicates.not(PathSelectors.ant("/error"))
+            Predicates.not(PathSelectors.ant("/error")),
+            Predicates.not(PathSelectors.ant("/actuator"))
     );
 
     @Bean

@@ -9,7 +9,8 @@ import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperT
 import org.springframework.stereotype.Service;
 
 import java.math.RoundingMode;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,10 +19,11 @@ public class ProductCustomizationMappingService {
     public ProductCustomizationWrapper toCustomizationWrapper(Product product, ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
         final ProductCustomizationWrapper productCustomizationWrapper = mapToCustomizationWrapper(product, productCustomizationWrapperRequest);
 
-        final List<ProductCustomization> customizations = productCustomizationWrapperRequest.getCustomizations()
+        final AtomicInteger counter = new AtomicInteger(0);
+        final Set<ProductCustomization> customizations = productCustomizationWrapperRequest.getCustomizations()
                 .stream()
-                .map(customization -> toCustomization(customization, productCustomizationWrapper))
-                .collect(Collectors.toList());
+                .map(customization -> toCustomization(customization, productCustomizationWrapper, counter.incrementAndGet()))
+                .collect(Collectors.toSet());
 
         productCustomizationWrapper.setCustomizations(customizations);
 
@@ -36,10 +38,11 @@ public class ProductCustomizationMappingService {
                 .build();
     }
 
-    private ProductCustomization toCustomization(ProductCustomizationRequest customization, ProductCustomizationWrapper wrapper) {
+    private ProductCustomization toCustomization(ProductCustomizationRequest customization, ProductCustomizationWrapper wrapper, int order) {
         return ProductCustomization.builder()
                 .price(customization.getPrice().setScale(2, RoundingMode.DOWN))
                 .value(customization.getValue())
+                .order(order)
                 .wrapper(wrapper)
                 .build();
     }

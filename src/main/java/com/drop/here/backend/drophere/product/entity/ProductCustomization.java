@@ -34,6 +34,10 @@ public class ProductCustomization {
 
     @NotNull
     @PositiveOrZero
+    private Integer order;
+
+    @NotNull
+    @PositiveOrZero
     private BigDecimal price;
 
     @NotBlank

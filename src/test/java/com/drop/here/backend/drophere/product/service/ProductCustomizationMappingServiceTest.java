@@ -35,12 +35,12 @@ class ProductCustomizationMappingServiceTest {
 
         //then
         assertThat(wrapper.getCustomizations()).hasSize(2);
-        assertThat(wrapper.getCustomizations().get(0).getPrice()).isEqualTo(request.getCustomizations().get(0).getPrice());
-        assertThat(wrapper.getCustomizations().get(0).getValue()).isEqualTo(request.getCustomizations().get(0).getValue());
-        assertThat(wrapper.getCustomizations().get(0).getWrapper()).isEqualTo(wrapper);
-        assertThat(wrapper.getCustomizations().get(1).getPrice()).isEqualTo(request.getCustomizations().get(1).getPrice());
-        assertThat(wrapper.getCustomizations().get(1).getValue()).isEqualTo(request.getCustomizations().get(1).getValue());
-        assertThat(wrapper.getCustomizations().get(1).getWrapper()).isEqualTo(wrapper);
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(1)).findFirst().orElseThrow().getPrice()).isEqualTo(request.getCustomizations().get(0).getPrice());
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(1)).findFirst().orElseThrow().getValue()).isEqualTo(request.getCustomizations().get(0).getValue());
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(1)).findFirst().orElseThrow().getWrapper()).isEqualTo(wrapper);
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(2)).findFirst().orElseThrow().getPrice()).isEqualTo(request.getCustomizations().get(1).getPrice());
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(2)).findFirst().orElseThrow().getValue()).isEqualTo(request.getCustomizations().get(1).getValue());
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(2)).findFirst().orElseThrow().getWrapper()).isEqualTo(wrapper);
         assertThat(wrapper.getHeading()).isEqualTo(request.getHeading());
         assertThat(wrapper.getType()).isEqualTo(ProductCustomizationWrapperType.SINGLE);
         assertThat(wrapper.getProduct()).isEqualTo(product);

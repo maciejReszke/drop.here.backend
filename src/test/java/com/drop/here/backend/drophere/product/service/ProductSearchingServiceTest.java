@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.authentication.AuthenticationPrivilegesService;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
@@ -19,8 +20,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
@@ -35,6 +38,9 @@ class ProductSearchingServiceTest {
     private ProductRepository productRepository;
 
     @Mock
+    private ProductCustomizationService productCustomizationService;
+
+    @Mock
     private AuthenticationPrivilegesService authenticationPrivilegesService;
 
     @Test
@@ -45,11 +51,13 @@ class ProductSearchingServiceTest {
         final String[] desiredCategories = new String[0];
         final Account account = AccountDataGenerator.customerAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final Product product = Product.builder().id(1L).deletable(false).build();
 
         when(authenticationPrivilegesService.isOwnCompanyOperation(accountAuthentication, companyUid))
                 .thenReturn(true);
         when(productRepository.findAll(eq(companyUid), isNull(), eq(ProductAvailabilityStatus.values()), eq(pageable)))
-                .thenReturn(new PageImpl<>(List.of(Product.builder().deletable(false).build())));
+                .thenReturn(new PageImpl<>(List.of(product)));
+        when(productCustomizationService.findCustomizations(any())).thenReturn(List.of(ProductCustomizationWrapper.builder().product(product).customizations(Set.of()).build()));
 
         //when
         final Page<ProductResponse> result = productSearchingService.findAll(pageable, companyUid, desiredCategories, accountAuthentication);

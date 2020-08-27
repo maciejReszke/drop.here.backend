@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.product.dto.response.ProductUnitResponse;
 import com.drop.here.backend.drophere.product.service.ProductUnitService;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/units")
 @RequiredArgsConstructor
+@Api(tags = "Product units API")
 public class ProductUnitController {
     private final ProductUnitService productUnitService;
 
