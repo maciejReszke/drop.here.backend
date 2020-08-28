@@ -52,7 +52,7 @@ public class DropManagementService {
         return dropRepository.findByIdAndCompanyUid(dropId, companyUid)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Drop with id %s company %s was not found", dropId, companyUid),
-                        RestExceptionStatusCode.DROP_NOT_FOUND));
+                        RestExceptionStatusCode.DROP_NOT_FOUND_BY_ID));
     }
 
     public ResourceOperationResponse deleteDrop(Long dropId, String companyUid) {
@@ -60,5 +60,13 @@ public class DropManagementService {
         log.info("Deleting drop for company {} with uid {}", companyUid, drop.getUid());
         dropRepository.delete(drop);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, drop.getId());
+    }
+
+    // TODO: 28/08/2020 check czy aktywne i nie ukryte! + test
+    public Drop findDrop(String dropUid, String companyUid) {
+        return dropRepository.findByUidAndCompanyUid(dropUid, companyUid)
+                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                        "Drop with uid %s company %s was not found", dropUid, companyUid),
+                        RestExceptionStatusCode.DROP_NOT_FOUND_BY_UID));
     }
 }

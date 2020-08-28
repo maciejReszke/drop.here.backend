@@ -11,5 +11,7 @@ import java.util.stream.Stream;
 public interface DropRepository extends JpaRepository<Drop, Long> {
     Optional<Drop> findByIdAndCompanyUid(Long dropId, String companyUid);
 
-    Stream<Drop> findAllByCompanyUidAndNameStartsWith(String companyUid, String name);
+    Stream<Drop>  findAllByCompanyUidAndNameStartsWith(String companyUid, String name);
+
+    Optional<Drop> findByUidAndCompanyUid(String dropUid, String companyUid);
 }

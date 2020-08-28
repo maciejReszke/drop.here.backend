@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.drop.service;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropCompanyResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -69,5 +70,10 @@ public class DropMappingService {
                 .createdAt(drop.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                 .lastUpdatedAt(drop.getLastUpdatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                 .build();
+    }
+
+    // TODO: 28/08/2020
+    public DropMembership createMembership(Drop drop, AccountAuthentication authentication) {
+
     }
 }

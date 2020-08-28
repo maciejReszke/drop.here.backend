@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +47,7 @@ public class DropUserController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
+    @PreAuthorize("@authenticationPrivilegesService.isOwnAccountOperation(authentication, #accountId)")
     public ResourceOperationResponse findMemberships(@ApiIgnore AccountAuthentication authentication,
                                                      @ApiParam(value = "Name of drop (prefix)") @RequestParam(required = false) String name,
                                                      @NotNull Pageable pageable) {
@@ -81,6 +83,6 @@ public class DropUserController {
     public ResourceOperationResponse deleteDrop(@ApiIgnore AccountAuthentication authentication,
                                                 @ApiIgnore @PathVariable String dropUid,
                                                 @ApiIgnore @PathVariable String companyUid) {
-        return dropUserService.deleteDrop(dropUid, companyUid, authentication);
+        return dropUserService.deleteDropMembership(dropUid, companyUid, authentication);
     }
 }

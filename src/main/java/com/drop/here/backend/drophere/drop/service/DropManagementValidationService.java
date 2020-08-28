@@ -2,7 +2,9 @@ package com.drop.here.backend.drophere.drop.service;
 
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
+import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
+import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import io.vavr.control.Try;
 import org.apache.commons.lang3.ObjectUtils;
@@ -43,5 +45,10 @@ public class DropManagementValidationService {
                 dropManagementRequest.getXCoordinate(),
                 dropManagementRequest.getYCoordinate(),
                 dropManagementRequest.getEstimatedRadiusMeters());
+    }
+
+    // TODO: 28/08/2020 test, implement
+    public void validateCreatingDropMembershipRequest(Drop drop, DropJoinRequest dropJoinRequest) {
+
     }
 }
