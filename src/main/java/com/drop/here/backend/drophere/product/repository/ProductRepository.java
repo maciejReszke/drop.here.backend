@@ -17,7 +17,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("select p from Product p where " +
             "p.company.uid = :companyUid and " +
-            "(:desiredCategories is null or  p.categoryName in :desiredCategories) and " +
+            "(:desiredCategories is null or p.categoryName in :desiredCategories) and " +
             "p.availabilityStatus in :desiredStatuses")
     Page<Product> findAll(String companyUid, String[] desiredCategories, ProductAvailabilityStatus[] desiredStatuses, Pageable pageable);
 }

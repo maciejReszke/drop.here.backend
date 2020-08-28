@@ -53,7 +53,7 @@ public class ProductController {
     @ApiAuthorizationToken
     public Page<ProductResponse> findAll(@ApiIgnore @PathVariable String companyUid,
                                          @ApiIgnore AccountAuthentication accountAuthentication,
-                                         @ApiParam(value = "Desired property (1... n)") @RequestParam(value = "category", required = false) String[] desiredCategories,
+                                         @ApiParam(value = "Desired category (1... n)") @RequestParam(value = "category", required = false) String[] desiredCategories,
                                          @NotNull Pageable pageable) {
         return productService.findAll(pageable, companyUid, desiredCategories, accountAuthentication);
     }

@@ -17,6 +17,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -32,7 +33,8 @@ import java.time.LocalDateTime;
 @Entity
 @ToString(exclude = "company")
 @EqualsAndHashCode(exclude = "company")
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"company_id", "uid"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"company_id", "uid"}),
+        indexes = @Index(columnList = "name"))
 public class Drop {
 
     @Id
