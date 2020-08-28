@@ -20,9 +20,8 @@ public class ProductMappingService {
     private final ProductUnitService productUnitService;
 
     public Product toEntity(ProductManagementRequest request, AccountAuthentication accountAuthentication) {
-        final LocalDateTime now = LocalDateTime.now();
         final Product product = Product.builder()
-                .createdAt(now)
+                .createdAt(LocalDateTime.now())
                 .deletable(true)
                 .company(accountAuthentication.getCompany())
                 .build();

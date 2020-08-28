@@ -46,7 +46,7 @@ public class ProductManagementRequest {
     @ApiModelProperty(value = "Product price", example = "33.45", required = true)
     private BigDecimal price;
 
-    @Length(max = 2048)
+    @Length(max = 512)
     @ApiModelProperty(value = "Product description", example = "Hot dog is a roll with a dog inside", required = true)
     private String description;
 }

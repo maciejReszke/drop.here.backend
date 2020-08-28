@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @UtilityClass
-public class ProductDataGenerator {
+public class
+ProductDataGenerator {
     public Product product(int i, ProductCategory category, ProductUnit unit, Company company) {
         return Product.builder()
                 .name("productName" + i)
