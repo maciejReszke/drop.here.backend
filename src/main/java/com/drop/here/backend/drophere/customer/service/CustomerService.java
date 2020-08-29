@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.customer.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
@@ -21,13 +22,14 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final ImageService imageService;
     private final CustomerMappingService customerMappingService;
+    private final PrivilegeService privilegeService;
 
-    // TODO: 29/08/2020 + privilege nowe!
     @Transactional
     public void createCustomer(Account account, ExternalAuthenticationResult result) {
         final Customer customer = customerMappingService.toCustomer(account, result);
         customerRepository.save(customer);
         account.setCustomer(customer);
+        privilegeService.addCustomerCreatedPrivilege(account);
         if (ArrayUtils.isNotEmpty(result.getImage())) {
             final Image image = imageService.createImage(result.getImage(), ImageType.CUSTOMER_IMAGE);
             customer.setImage(image);

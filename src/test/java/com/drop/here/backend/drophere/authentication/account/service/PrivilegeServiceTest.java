@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.authentication.account.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.account.entity.Privilege;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
@@ -90,6 +91,22 @@ class PrivilegeServiceTest {
         //then
         assertThat(accountProfile.getPrivileges()).hasSize(1);
         assertThat(accountProfile.getPrivileges().get(0).getName()).isEqualTo("COMPANY_BASIC_MANAGEMENT");
+    }
+
+    @Test
+    void givenAccountWhenAddCustomerCreatedPrivilegeThenAdd() {
+        //given
+        final Account account = Account.builder().build();
+
+        final Privilege privilege = Privilege.builder().build();
+        when(privilegeRepository.save(any())).thenReturn(privilege);
+
+        //when
+        privilegeService.addCustomerCreatedPrivilege(account);
+
+        //then
+        assertThat(account.getPrivileges()).hasSize(1);
+        assertThat(account.getPrivileges().get(0)).isEqualTo(privilege);
     }
 
 }

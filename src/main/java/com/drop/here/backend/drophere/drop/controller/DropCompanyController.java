@@ -36,7 +36,6 @@ import java.util.List;
 public class DropCompanyController {
     private final DropManagementService dropManagementService;
 
-    // TODO: 28/08/2020 test
     @GetMapping
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
@@ -52,7 +51,6 @@ public class DropCompanyController {
         return dropManagementService.findCompanyDrops(companyUid, name);
     }
 
-    // TODO: 27/08/2020 test
     @PostMapping
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.CREATED)
@@ -68,7 +66,6 @@ public class DropCompanyController {
         return dropManagementService.createDrop(dropManagementRequest, companyUid, authentication);
     }
 
-    // TODO: 27/08/2020 test
     @PutMapping("/{dropId}")
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
@@ -85,7 +82,6 @@ public class DropCompanyController {
         return dropManagementService.updateDrop(dropManagementRequest, dropId, companyUid);
     }
 
-    // TODO: 27/08/2020 test
     @DeleteMapping("/{dropId}")
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)

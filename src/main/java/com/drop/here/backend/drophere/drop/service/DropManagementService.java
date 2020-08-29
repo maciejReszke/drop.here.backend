@@ -27,6 +27,7 @@ public class DropManagementService {
 
     public List<DropCompanyResponse> findCompanyDrops(String companyUid, String name) {
         return dropRepository.findAllByCompanyUidAndNameStartsWith(companyUid, StringUtils.defaultIfEmpty(name, ""))
+                .stream()
                 .map(dropMappingService::toDropCompanyResponse)
                 .collect(Collectors.toList());
     }

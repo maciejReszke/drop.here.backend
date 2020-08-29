@@ -89,10 +89,10 @@ class DropMappingServiceTest {
         //given
         final DropManagementRequest dropManagementRequest = DropDataGenerator.dropManagementRequest(1);
         dropManagementRequest.setName("nam");
-        final Drop previousDrop = Drop.builder().build();
+        final Drop drop = Drop.builder().build();
 
         //when
-        final Drop drop = dropMappingService.update(previousDrop, dropManagementRequest);
+        dropMappingService.update(drop, dropManagementRequest);
 
         //then
         assertThat(drop.getName()).isEqualTo(dropManagementRequest.getName());
