@@ -1,7 +1,7 @@
 package com.drop.here.backend.drophere.product.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
-import com.drop.here.backend.drophere.authentication.authentication.AuthenticationPrivilegesService;
+import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationPrivilegesService;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;

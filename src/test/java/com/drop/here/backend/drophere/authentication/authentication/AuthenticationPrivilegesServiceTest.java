@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.authentication.authentication;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
+import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationPrivilegesService;
 import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;

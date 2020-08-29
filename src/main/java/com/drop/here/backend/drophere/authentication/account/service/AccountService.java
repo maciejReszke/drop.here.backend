@@ -5,8 +5,9 @@ import com.drop.here.backend.drophere.authentication.account.dto.AccountInfoResp
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
-import com.drop.here.backend.drophere.authentication.authentication.AuthenticationExecutiveService;
-import com.drop.here.backend.drophere.authentication.authentication.LoginResponse;
+import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
+import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
+import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,11 @@ public class AccountService {
     private final AuthenticationExecutiveService authenticationExecutiveService;
     private final PasswordEncoder passwordEncoder;
     private final PrivilegeService privilegeService;
+
+    // TODO: 29/08/2020
+    public Account createAccount(ExternalAuthenticationResult result) {
+        return null;
+    }
 
     @Transactional
     public LoginResponse createAccount(AccountCreationRequest accountCreationRequest) {
@@ -64,5 +70,10 @@ public class AccountService {
 
     public AccountInfoResponse getAccountInfo(AccountAuthentication accountAuthentication) {
         return accountMappingService.toAccountInfoResponse(accountAuthentication.getPrincipal());
+    }
+
+    // TODO: 29/08/2020
+    public boolean existsByMail(String email) {
+        return false;
     }
 }

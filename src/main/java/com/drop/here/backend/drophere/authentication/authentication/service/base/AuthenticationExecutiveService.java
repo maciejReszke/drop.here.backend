@@ -1,8 +1,9 @@
-package com.drop.here.backend.drophere.authentication.authentication;
+package com.drop.here.backend.drophere.authentication.authentication.service.base;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AuthenticationResponse;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.authentication.token.TokenResponse;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
@@ -45,6 +46,7 @@ public class AuthenticationExecutiveService {
                 .collect(Collectors.toList());
     }
 
+    // TODO: 29/08/2020 czy ma comapny, czy ma customera
     public AuthenticationResponse getAuthenticationInfo(AccountAuthentication accountAuthentication) {
         return accountAuthentication.hasProfile()
                 ? getWithProfileAuthenticationInfo(accountAuthentication)

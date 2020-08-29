@@ -7,6 +7,8 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus
 import com.drop.here.backend.drophere.authentication.account.repository.AccountProfileRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
+import com.drop.here.backend.drophere.authentication.authentication.dto.request.BaseLoginRequest;
+import com.drop.here.backend.drophere.authentication.authentication.dto.request.ProfileLoginRequest;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;

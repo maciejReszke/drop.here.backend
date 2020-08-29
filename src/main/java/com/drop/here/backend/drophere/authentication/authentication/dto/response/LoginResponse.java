@@ -1,4 +1,4 @@
-package com.drop.here.backend.drophere.authentication.authentication;
+package com.drop.here.backend.drophere.authentication.authentication.dto.response;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.drop.here.backend.drophere.authentication.authentication;
+package com.drop.here.backend.drophere.authentication.authentication.service.base;
 
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;

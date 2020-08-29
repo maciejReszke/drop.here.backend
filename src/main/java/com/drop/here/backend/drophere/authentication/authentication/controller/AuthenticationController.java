@@ -1,6 +1,11 @@
-package com.drop.here.backend.drophere.authentication.authentication;
+package com.drop.here.backend.drophere.authentication.authentication.controller;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AuthenticationResponse;
+import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationService;
+import com.drop.here.backend.drophere.authentication.authentication.dto.request.ExternalAuthenticationProviderLoginRequest;
+import com.drop.here.backend.drophere.authentication.authentication.dto.request.BaseLoginRequest;
+import com.drop.here.backend.drophere.authentication.authentication.dto.request.ProfileLoginRequest;
+import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
@@ -61,5 +66,17 @@ public class AuthenticationController {
     })
     public AuthenticationResponse getAuthenticationInfo(@ApiIgnore AccountAuthentication accountAuthentication) {
         return authenticationService.getAuthenticationInfo(accountAuthentication);
+    }
+
+    // TODO: 29/08/2020 test
+    @PostMapping("/external")
+    @ApiOperation("Login via external authentication provider")
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Logged in", response = LoginResponse.class),
+            @ApiResponse(code = HttpServletResponse.SC_UNAUTHORIZED, message = "Unauthorized", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    public LoginResponse loginWithAuthenticationProvider(@Valid @RequestBody ExternalAuthenticationProviderLoginRequest externalAuthenticationProviderLoginRequest) {
+        return authenticationService.loginWithAuthenticationProvider(externalAuthenticationProviderLoginRequest);
     }
 }

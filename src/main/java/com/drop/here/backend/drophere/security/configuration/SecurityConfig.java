@@ -23,6 +23,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtService jwtService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
+    // TODO: 29/08/2020 poprawic security bo niektore dopiero po utworzeniu bazowych informacji company/customera!
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -32,6 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtService))
                 .authorizeRequests(registry -> registry
                         .mvcMatchers(HttpMethod.POST, "/authentication").anonymous()
+                        .mvcMatchers(HttpMethod.POST, "/authentication/external").anonymous()
                         .mvcMatchers(HttpMethod.POST, "/authentication/profile").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.POST, "/accounts/{accountId}/profiles").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.PATCH, "/accounts/{accountId}/profiles/{accountProfileUid}").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)

@@ -4,7 +4,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.service.AccountProfileService;
 import com.drop.here.backend.drophere.authentication.account.service.AccountService;
-import com.drop.here.backend.drophere.authentication.authentication.UnauthorizedRestException;
+import com.drop.here.backend.drophere.authentication.authentication.exception.UnauthorizedRestException;
 import com.drop.here.backend.drophere.common.exceptions.RestException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.company.Company;

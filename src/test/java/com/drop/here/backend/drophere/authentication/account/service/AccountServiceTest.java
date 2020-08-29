@@ -5,8 +5,8 @@ import com.drop.here.backend.drophere.authentication.account.dto.AccountInfoResp
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
-import com.drop.here.backend.drophere.authentication.authentication.AuthenticationExecutiveService;
-import com.drop.here.backend.drophere.authentication.authentication.LoginResponse;
+import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
+import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;

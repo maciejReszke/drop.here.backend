@@ -3,7 +3,7 @@ package com.drop.here.backend.drophere.authentication.account.controller;
 import com.drop.here.backend.drophere.authentication.account.dto.AccountCreationRequest;
 import com.drop.here.backend.drophere.authentication.account.dto.AccountInfoResponse;
 import com.drop.here.backend.drophere.authentication.account.service.AccountService;
-import com.drop.here.backend.drophere.authentication.authentication.LoginResponse;
+import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
