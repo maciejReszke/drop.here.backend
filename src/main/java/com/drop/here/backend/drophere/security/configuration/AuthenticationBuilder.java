@@ -23,6 +23,7 @@ public class AuthenticationBuilder {
                 .authorities(privileges)
                 .tokenValidUntil(preAuthentication.getValidUntil())
                 .company(account.getCompany())
+                .customer(account.getCustomer())
                 .build();
     }
 
@@ -43,6 +44,7 @@ public class AuthenticationBuilder {
                 .tokenValidUntil(preAuthentication.getValidUntil())
                 .profile(profile)
                 .company(account.getCompany())
+                .customer(account.getCustomer())
                 .build();
     }
 

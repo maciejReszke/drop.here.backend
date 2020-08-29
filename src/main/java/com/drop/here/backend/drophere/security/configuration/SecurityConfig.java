@@ -23,7 +23,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtService jwtService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -32,6 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtService))
                 .authorizeRequests(registry -> registry
                         .mvcMatchers(HttpMethod.POST, "/authentication").anonymous()
+                        .mvcMatchers(HttpMethod.POST, "/authentication/external").anonymous()
                         .mvcMatchers(HttpMethod.POST, "/authentication/profile").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.POST, "/accounts/{accountId}/profiles").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.PATCH, "/accounts/{accountId}/profiles/{accountProfileUid}").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
@@ -40,9 +40,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.GET, "/authentication").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/categories").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/units").authenticated()
+                        .mvcMatchers(HttpMethod.GET, "/countries").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/products").authenticated()
-                        .mvcMatchers(HttpMethod.POST, "/companies/{companyUid}/products").hasAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
-                        .mvcMatchers("/companies/{companyUid}/products/{productId}").hasAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.POST, "/companies/{companyUid}/products").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers("/companies/{companyUid}/products/{productId}").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers("/companies/{companyUid}/products/{productId}/customizations/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers("/companies/{companyUid}/drops/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers("/actuator/**").permitAll()
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

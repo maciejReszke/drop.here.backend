@@ -6,8 +6,10 @@ import com.drop.here.backend.drophere.authentication.account.dto.ProfileInfoResp
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountMailStatus;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountRegistrationType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
+import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,7 @@ public class AccountMappingService {
                 .accountMailStatus(AccountMailStatus.UNCONFIRMED)
                 .createdAt(LocalDateTime.now())
                 .isAnyProfileRegistered(false)
+                .registrationType(AccountRegistrationType.FORM)
                 .build();
     }
 
@@ -59,6 +62,18 @@ public class AccountMappingService {
                 .lastName(profile.getLastName())
                 .status(profile.getStatus())
                 .profileType(profile.getProfileType())
+                .build();
+    }
+
+    public Account newAccount(ExternalAuthenticationResult result) {
+        return Account.builder()
+                .mail(result.getEmail())
+                .registrationType(AccountRegistrationType.EXTERNAL_PROVIDER)
+                .accountType(AccountType.CUSTOMER)
+                .accountStatus(AccountStatus.ACTIVE)
+                .accountMailStatus(AccountMailStatus.CONFIRMED)
+                .createdAt(LocalDateTime.now())
+                .isAnyProfileRegistered(false)
                 .build();
     }
 }

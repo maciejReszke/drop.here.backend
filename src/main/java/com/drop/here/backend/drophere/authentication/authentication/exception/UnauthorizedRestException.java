@@ -1,4 +1,4 @@
-package com.drop.here.backend.drophere.authentication.authentication;
+package com.drop.here.backend.drophere.authentication.authentication.exception;
 
 import com.drop.here.backend.drophere.common.exceptions.RestException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;

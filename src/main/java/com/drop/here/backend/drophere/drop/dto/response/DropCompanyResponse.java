@@ -9,6 +9,9 @@ import lombok.Value;
 @Builder
 public class DropCompanyResponse {
 
+    @ApiModelProperty(value = "Drop id", example = "1")
+    Long id;
+
     @ApiModelProperty(value = "Drop name", example = "Ryneczek lidla")
     String name;
 

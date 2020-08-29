@@ -3,7 +3,7 @@ package com.drop.here.backend.drophere.security.configuration;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.entity.Privilege;
-import com.drop.here.backend.drophere.company.Company;
+import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import org.junit.jupiter.api.Test;
@@ -25,9 +25,10 @@ class AuthenticationBuilderTest {
     @Test
     void givenAccountWhenBuildAuthenticationThenBuild() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         account.setPrivileges(List.of(Privilege.builder().name("priv1").build()));
+        final Customer customer = Customer.builder().build();
+        account.setCustomer(customer);
         final LocalDateTime time = LocalDateTime.now().minusMinutes(100);
         final PreAuthentication preAuthentication = PreAuthentication.withoutProfile("mail", time);
 
@@ -43,13 +44,13 @@ class AuthenticationBuilderTest {
         assertThat(result.getPrincipal()).isEqualTo(account);
         assertThat(result.getTokenValidUntil()).isEqualTo(time);
         assertThat(result.getCompany()).isEqualTo(account.getCompany());
+        assertThat(result.getCustomer()).isEqualTo(account.getCustomer());
     }
 
     @Test
     void givenAccountAndProfileWhenBuildAuthenticationThenBuild() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         account.setPrivileges(List.of(Privilege.builder().name("priv1").build()));
         final LocalDateTime time = LocalDateTime.now().minusMinutes(100);
         final PreAuthentication preAuthentication = PreAuthentication.withoutProfile("mail", time);
@@ -68,6 +69,7 @@ class AuthenticationBuilderTest {
         assertThat(result.getPrincipal()).isEqualTo(account);
         assertThat(result.getTokenValidUntil()).isEqualTo(time);
         assertThat(result.getCompany()).isEqualTo(account.getCompany());
+        assertThat(result.getCustomer()).isEqualTo(account.getCustomer());
     }
 
 }

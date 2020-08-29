@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.security.configuration;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.company.Company;
+import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ public class AccountAuthentication implements Authentication {
     private final LocalDateTime tokenValidUntil;
     private final AccountProfile profile;
     private final Company company;
+    private final Customer customer;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -71,5 +73,9 @@ public class AccountAuthentication implements Authentication {
 
     public Company getCompany() {
         return company;
+    }
+
+    public Customer getCustomer() {
+        return customer;
     }
 }

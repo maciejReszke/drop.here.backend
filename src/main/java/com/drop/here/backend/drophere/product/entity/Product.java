@@ -34,7 +34,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
+@Builder
 @Entity
 @ToString(exclude = {"category", "unit", "company"})
 @EqualsAndHashCode(exclude = {"category", "unit", "company"})

@@ -1,8 +1,9 @@
-package com.drop.here.backend.drophere.authentication.authentication;
+package com.drop.here.backend.drophere.authentication.authentication.service.base;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AuthenticationResponse;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.authentication.token.TokenResponse;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
@@ -71,6 +72,8 @@ public class AuthenticationExecutiveService {
                 .accountStatus(account.getAccountStatus())
                 .accountType(account.getAccountType())
                 .mail(account.getMail())
+                .hasCustomerData(account.getCustomer() != null)
+                .hasCompanyData(account.getCompany() != null)
                 .roles(toRoles(accountAuthentication.getAuthorities()))
                 .tokenValidUntil(accountAuthentication.getTokenValidUntil().format(DATE_TIME_FORMAT))
                 .loggedOnProfile(false)

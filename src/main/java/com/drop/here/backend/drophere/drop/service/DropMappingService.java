@@ -27,26 +27,24 @@ public class DropMappingService {
                 .createdAt(LocalDateTime.now())
                 .company(authentication.getCompany())
                 .build();
-        return update(drop, dropManagementRequest);
+        update(drop, dropManagementRequest);
+        return drop;
     }
 
-    public Drop update(Drop drop, DropManagementRequest dropManagementRequest) {
+    public void update(Drop drop, DropManagementRequest dropManagementRequest) {
         final DropLocationType locationType = DropLocationType.valueOf(dropManagementRequest.getLocationDropType());
-
-        return drop.toBuilder()
-                .uid(generateUid(dropManagementRequest.getName()))
-                .yCoordinate(locationType == DropLocationType.GEOLOCATION ? dropManagementRequest.getYCoordinate() : null)
-                .xCoordinate(locationType == DropLocationType.GEOLOCATION ? dropManagementRequest.getXCoordinate() : null)
-                .estimatedRadiusMeters(locationType == DropLocationType.GEOLOCATION ? dropManagementRequest.getEstimatedRadiusMeters() : null)
-                .requiresPassword(dropManagementRequest.isRequiresPassword())
-                .requiresAccept(dropManagementRequest.isRequiresAccept())
-                .password(dropManagementRequest.isRequiresPassword() ? dropManagementRequest.getPassword() : null)
-                .locationType(locationType)
-                .hidden(dropManagementRequest.isHidden())
-                .description(dropManagementRequest.getDescription())
-                .lastUpdatedAt(LocalDateTime.now())
-                .name(dropManagementRequest.getName().trim())
-                .build();
+        drop.setUid(generateUid(dropManagementRequest.getName()));
+        drop.setYCoordinate(locationType == DropLocationType.GEOLOCATION ? dropManagementRequest.getYCoordinate() : null);
+        drop.setXCoordinate(locationType == DropLocationType.GEOLOCATION ? dropManagementRequest.getXCoordinate() : null);
+        drop.setEstimatedRadiusMeters(locationType == DropLocationType.GEOLOCATION ? dropManagementRequest.getEstimatedRadiusMeters() : null);
+        drop.setRequiresPassword(dropManagementRequest.isRequiresPassword());
+        drop.setRequiresAccept(dropManagementRequest.isRequiresAccept());
+        drop.setPassword(dropManagementRequest.isRequiresPassword() ? dropManagementRequest.getPassword() : null);
+        drop.setLocationType(locationType);
+        drop.setHidden(dropManagementRequest.isHidden());
+        drop.setDescription(dropManagementRequest.getDescription());
+        drop.setLastUpdatedAt(LocalDateTime.now());
+        drop.setName(dropManagementRequest.getName().trim());
     }
 
     private String generateUid(String name) {
@@ -56,6 +54,7 @@ public class DropMappingService {
 
     public DropCompanyResponse toDropCompanyResponse(Drop drop) {
         return DropCompanyResponse.builder()
+                .id(drop.getId())
                 .name(drop.getName())
                 .description(drop.getDescription())
                 .uid(drop.getUid())

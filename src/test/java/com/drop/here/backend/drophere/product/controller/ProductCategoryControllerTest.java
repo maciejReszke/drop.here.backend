@@ -49,7 +49,7 @@ class ProductCategoryControllerTest extends IntegrationBaseClass {
     void givenAuthenticatedWhenGetAllCategoriesThenGet() throws Exception {
         //given
         final String url = "/categories";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE + "aaa").build());
         account.setPrivileges(List.of(privilege));
 
@@ -75,7 +75,7 @@ class ProductCategoryControllerTest extends IntegrationBaseClass {
     void givenNotAuthenticatedWhenGetAllCategoriesThen401() throws Exception {
         //given
         final String url = "/categories";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
 
         productCategoryRepository.saveAll(List.of(
                 ProductCategory.builder().name("bbcategory").createdAt(LocalDateTime.now()).build(),

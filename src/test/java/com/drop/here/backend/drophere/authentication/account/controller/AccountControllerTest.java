@@ -98,7 +98,7 @@ class AccountControllerTest extends IntegrationBaseClass {
     @Test
     void givenExistingAccountRequestWhenCreateAccountThenError() throws Exception {
         //given
-        final Account savedAccount = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account savedAccount = accountRepository.save(AccountDataGenerator.companyAccount(1));
         final AccountCreationRequest request = AccountDataGenerator.accountCreationRequest(1);
         request.setMail(savedAccount.getMail());
         final String json = objectMapper.writeValueAsString(request);
@@ -119,7 +119,7 @@ class AccountControllerTest extends IntegrationBaseClass {
     @Test
     void givenOwnAccountValidPrivilegeWhenGetAccountInfoThen200() throws Exception {
         //given
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         privilegeRepository.save(Privilege.builder().name("priv").account(account).build());
         final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
         privilegeRepository.save(Privilege.builder().name("priv2").accountProfile(accountProfile).build());
@@ -138,7 +138,7 @@ class AccountControllerTest extends IntegrationBaseClass {
     @Test
     void givenNotOwnAccountValidPrivilegeWhenGetAccountInfoThen403() throws Exception {
         //given
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         privilegeRepository.save(Privilege.builder().name("priv").account(account).build());
         final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
         privilegeRepository.save(Privilege.builder().name("priv2").accountProfile(accountProfile).build());

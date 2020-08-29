@@ -18,7 +18,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-// TODO: 01/08/2020 get endpoint
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -44,11 +43,11 @@ public class Country {
     @Enumerated(EnumType.STRING)
     private CountryStatus countryStatus;
 
-    @NotBlank
+    @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime createdAt;
 
-    @NotBlank
+    @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime activatedAt;
 }

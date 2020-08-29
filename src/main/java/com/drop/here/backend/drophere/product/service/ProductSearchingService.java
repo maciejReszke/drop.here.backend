@@ -1,6 +1,6 @@
 package com.drop.here.backend.drophere.product.service;
 
-import com.drop.here.backend.drophere.authentication.authentication.AuthenticationPrivilegesService;
+import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationPrivilegesService;
 import com.drop.here.backend.drophere.product.dto.response.ProductCustomizationResponse;
 import com.drop.here.backend.drophere.product.dto.response.ProductCustomizationWrapperResponse;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
@@ -28,7 +28,6 @@ public class ProductSearchingService {
     private final AuthenticationPrivilegesService authenticationPrivilegesService;
     private final ProductCustomizationService productCustomizationService;
 
-    // TODO: 24/08/2020 company musi byc juz dostepne!!!
     public Page<ProductResponse> findAll(Pageable pageable,
                                          String companyUid,
                                          String[] desiredCategories,
@@ -88,7 +87,7 @@ public class ProductSearchingService {
 
     private List<ProductCustomizationResponse> toCustomizations(Set<ProductCustomization> customizations) {
         return customizations.stream()
-                .sorted(Comparator.comparing(ProductCustomization::getOrder))
+                .sorted(Comparator.comparing(ProductCustomization::getOrderNum))
                 .map(this::toCustomization)
                 .collect(Collectors.toList());
     }

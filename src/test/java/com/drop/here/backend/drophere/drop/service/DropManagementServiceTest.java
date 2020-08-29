@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -52,7 +51,7 @@ class DropManagementServiceTest {
         doNothing().when(dropManagementValidationService).validateDropRequest(dropManagementRequest);
         final Company company = Company.builder().build();
         final Drop drop = DropDataGenerator.drop(1, company);
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         when(dropMappingService.toEntity(dropManagementRequest, accountAuthentication)).thenReturn(drop);
         when(dropRepository.save(drop)).thenReturn(drop);
@@ -75,7 +74,7 @@ class DropManagementServiceTest {
         final Drop drop = DropDataGenerator.drop(1, company);
         final Long dropId = 1L;
         when(dropRepository.findByIdAndCompanyUid(dropId, companyUid)).thenReturn(Optional.of(drop));
-        when(dropMappingService.update(drop, dropManagementRequest)).thenReturn(drop);
+        doNothing().when(dropMappingService).update(drop, dropManagementRequest);
         when(dropRepository.save(drop)).thenReturn(drop);
 
         //when
@@ -144,7 +143,7 @@ class DropManagementServiceTest {
 
         final Drop drop = Drop.builder().build();
         final DropCompanyResponse response = DropCompanyResponse.builder().build();
-        when(dropRepository.findAllByCompanyUidAndNameStartsWith(companyUid, name)).thenReturn(Stream.of(drop));
+        when(dropRepository.findAllByCompanyUidAndNameStartsWith(companyUid, name)).thenReturn(List.of(drop));
         when(dropMappingService.toDropCompanyResponse(drop)).thenReturn(response);
         //when
         final List<DropCompanyResponse> result = dropManagementService.findCompanyDrops(companyUid, name);

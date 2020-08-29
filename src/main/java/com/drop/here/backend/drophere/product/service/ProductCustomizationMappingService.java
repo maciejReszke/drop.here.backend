@@ -42,7 +42,7 @@ public class ProductCustomizationMappingService {
         return ProductCustomization.builder()
                 .price(customization.getPrice().setScale(2, RoundingMode.DOWN))
                 .value(customization.getValue())
-                .order(order)
+                .orderNum(order)
                 .wrapper(wrapper)
                 .build();
     }

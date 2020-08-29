@@ -6,6 +6,8 @@ import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import lombok.experimental.UtilityClass;
 
+import java.time.LocalDateTime;
+
 @UtilityClass
 public class DropDataGenerator {
     public Drop drop(int i, Company company) {
@@ -22,6 +24,8 @@ public class DropDataGenerator {
                 .xCoordinate(54.423569)
                 .yCoordinate(18.564037)
                 .uid("dropUid" + i)
+                .lastUpdatedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 

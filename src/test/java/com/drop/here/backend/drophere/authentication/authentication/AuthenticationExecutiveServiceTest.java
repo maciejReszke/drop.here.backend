@@ -3,9 +3,10 @@ package com.drop.here.backend.drophere.authentication.authentication;
 import com.drop.here.backend.drophere.authentication.account.dto.AuthenticationResponse;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
+import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.authentication.token.TokenResponse;
-import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
@@ -34,8 +35,7 @@ class AuthenticationExecutiveServiceTest {
     @Test
     void givenAccountWhenSuccessLoginThenLogin() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
 
         when(jwtService.createToken(account)).thenReturn(new TokenResponse("token", LocalDateTime.of(2000, 1, 1, 1, 1, 1)));
 
@@ -50,8 +50,7 @@ class AuthenticationExecutiveServiceTest {
     @Test
     void givenAccountAuthenticationWithoutProfileWhenGetAuthenticationInfoThenGet() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication authentication = AuthenticationDataGenerator.accountAuthentication(account);
         account.setId(1L);
 
@@ -73,8 +72,7 @@ class AuthenticationExecutiveServiceTest {
     @Test
     void givenAccountAuthenticationWithProfileWhenGetAuthenticationInfoThenGet() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         account.setId(1L);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final AccountAuthentication authentication = AuthenticationDataGenerator.accountAuthenticationWithProfile(account, accountProfile);

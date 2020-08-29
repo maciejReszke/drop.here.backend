@@ -25,24 +25,23 @@ public class ProductMappingService {
                 .deletable(true)
                 .company(accountAuthentication.getCompany())
                 .build();
-        return update(product, request);
+        update(product, request);
+        return product;
     }
 
-    public Product update(Product product, ProductManagementRequest request) {
+    public void update(Product product, ProductManagementRequest request) {
         final ProductCategory category = categoryService.getByName(request.getCategory());
         final ProductUnit unit = productUnitService.getByName(request.getUnit());
         final LocalDateTime now = LocalDateTime.now();
-        return product.toBuilder()
-                .name(request.getName())
-                .category(category)
-                .categoryName(category.getName())
-                .unit(unit)
-                .unitName(unit.getName())
-                .unitValue(request.getUnitValue() == null ? BigDecimal.ONE : request.getUnitValue().setScale(2, RoundingMode.DOWN))
-                .availabilityStatus(ProductAvailabilityStatus.valueOf(request.getAvailabilityStatus()))
-                .price(request.getPrice().setScale(2, RoundingMode.DOWN))
-                .description(request.getDescription())
-                .lastUpdatedAt(now)
-                .build();
+        product.setName(request.getName());
+        product.setCategory(category);
+        product.setCategoryName(category.getName());
+        product.setUnit(unit);
+        product.setUnitName(unit.getName());
+        product.setUnitValue(request.getUnitValue() == null ? BigDecimal.ONE : request.getUnitValue().setScale(2, RoundingMode.DOWN));
+        product.setAvailabilityStatus(ProductAvailabilityStatus.valueOf(request.getAvailabilityStatus()));
+        product.setPrice(request.getPrice().setScale(2, RoundingMode.DOWN));
+        product.setDescription(request.getDescription());
+        product.setLastUpdatedAt(now);
     }
 }

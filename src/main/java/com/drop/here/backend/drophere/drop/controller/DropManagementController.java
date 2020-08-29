@@ -8,7 +8,6 @@ import com.drop.here.backend.drophere.drop.service.DropManagementService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -39,7 +38,6 @@ import java.util.List;
 public class DropManagementController {
     private final DropManagementService dropManagementService;
 
-    // TODO: 28/08/2020 test
     @ApiOperation("Listing companies drops")
     @GetMapping
     @ApiAuthorizationToken
@@ -56,7 +54,6 @@ public class DropManagementController {
         return dropManagementService.findCompanyDrops(companyUid, name);
     }
 
-    // TODO: 27/08/2020 test
     @ApiOperation("Creating drop")
     @PostMapping
     @ApiAuthorizationToken
@@ -73,7 +70,6 @@ public class DropManagementController {
         return dropManagementService.createDrop(dropManagementRequest, companyUid, authentication);
     }
 
-    // TODO: 27/08/2020 test
     @ApiOperation("Updating drop")
     @PutMapping("/{dropId}")
     @ApiAuthorizationToken
@@ -91,7 +87,6 @@ public class DropManagementController {
         return dropManagementService.updateDrop(dropManagementRequest, dropId, companyUid);
     }
 
-    // TODO: 27/08/2020 test
     @ApiOperation("Deleting drop")
     @DeleteMapping("/{dropId}")
     @ApiAuthorizationToken

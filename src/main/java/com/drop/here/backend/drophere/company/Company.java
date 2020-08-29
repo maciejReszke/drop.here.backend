@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.company;
 
+import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.country.Country;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +15,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -25,6 +29,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
+@Table(indexes = @Index(columnList = "uid", unique = true))
 public class Company {
 
     @Id
@@ -35,6 +40,7 @@ public class Company {
     private String name;
 
     // TODO: 24/08/2020 na podstawie nazwy
+    // TODO: 29/08/2020 image!
     @NotBlank
     private String uid;
 
@@ -45,7 +51,7 @@ public class Company {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private CompanyRegistrationStatus registrationStatus;
+    private CompanyVisibilityStatus visibilityStatus;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -55,6 +61,9 @@ public class Company {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime lastUpdatedAt;
 
-    // TODO: 02/08/2020 audyt? + zdjecie i moze galeria?
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    @NotNull
+    private Account account;
 }
 

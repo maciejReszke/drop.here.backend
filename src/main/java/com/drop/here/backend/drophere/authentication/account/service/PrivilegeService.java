@@ -7,8 +7,10 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountProfil
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -20,6 +22,8 @@ public class PrivilegeService {
     public static final String OWN_PROFILE_MANAGEMENT_PRIVILEGE = "OWN_PROFILE_MANAGEMENT";
     public static final String COMPANY_FULL_MANAGEMENT_PRIVILEGE = "COMPANY_FULL_MANAGEMENT";
     public static final String COMPANY_BASIC_MANAGEMENT_PRIVILEGE = "COMPANY_BASIC_MANAGEMENT";
+    public static final String COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE = "COMPANY_RESOURCES_MANAGEMENT";
+    public static final String CUSTOMER_CREATED_PRIVILEGE = "CUSTOMER_FULL_MANAGEMENT";
 
     public void addNewAccountPrivileges(Account account) {
         final Privilege privilege = privilegeRepository.save(Privilege.builder()
@@ -47,5 +51,16 @@ public class PrivilegeService {
         return profileType == AccountProfileType.MAIN
                 ? COMPANY_FULL_MANAGEMENT_PRIVILEGE
                 : COMPANY_BASIC_MANAGEMENT_PRIVILEGE;
+    }
+
+    @Transactional
+    public void addCustomerCreatedPrivilege(Account account) {
+        final Privilege privilege = privilegeRepository.save(Privilege.builder()
+                .name(CUSTOMER_CREATED_PRIVILEGE)
+                .account(account)
+                .build());
+        account.setPrivileges(account.getPrivileges() == null
+                ? List.of(privilege) :
+                ListUtils.union(account.getPrivileges(), List.of(privilege)));
     }
 }

@@ -58,8 +58,7 @@ class ProductServiceTest {
         //given
         final Pageable pageable = Pageable.unpaged();
         final String companyUid = "companyUid";
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Page<ProductResponse> paged = Page.empty();
 
@@ -84,7 +83,7 @@ class ProductServiceTest {
         final ProductCategory category = ProductDataGenerator.category(1);
         final Company company = Company.builder().build();
         final Product product = ProductDataGenerator.product(1, category, unit, company);
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         when(productMappingService.toEntity(productManagementRequest, accountAuthentication)).thenReturn(product);
         when(productRepository.save(product)).thenReturn(product);
@@ -109,7 +108,7 @@ class ProductServiceTest {
         final Product product = ProductDataGenerator.product(1, category, unit, company);
         final Long productId = 1L;
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
-        when(productMappingService.update(product, productManagementRequest)).thenReturn(product);
+        doNothing().when(productMappingService).update(product, productManagementRequest);
         when(productRepository.save(product)).thenReturn(product);
 
         //when
@@ -184,12 +183,13 @@ class ProductServiceTest {
         final ProductCategory category = ProductDataGenerator.category(1);
         final Company company = Company.builder().build();
         final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final AccountAuthentication authentication = AccountAuthentication.builder().build();
 
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
-        when(productCustomizationService.createCustomizations(product, request)).thenReturn(ProductCustomizationWrapper.builder().build());
+        when(productCustomizationService.createCustomizations(product, request, authentication)).thenReturn(ProductCustomizationWrapper.builder().build());
 
         //when
-        final ResourceOperationResponse response = productService.createCustomization(productId, companyUid, request);
+        final ResourceOperationResponse response = productService.createCustomization(productId, companyUid, request, authentication);
 
         //then
         assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
@@ -201,11 +201,12 @@ class ProductServiceTest {
         final Long productId = 1L;
         final String companyUid = "companyUid";
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
+        final AccountAuthentication authentication = AccountAuthentication.builder().build();
 
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> productService.createCustomization(productId, companyUid, request));
+        final Throwable throwable = catchThrowable(() -> productService.createCustomization(productId, companyUid, request, authentication));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
@@ -224,12 +225,13 @@ class ProductServiceTest {
         final ProductCategory category = ProductDataGenerator.category(1);
         final Company company = Company.builder().build();
         final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final AccountAuthentication authentication = AccountAuthentication.builder().build();
 
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
-        when(productCustomizationService.updateCustomization(product, customizationId, request)).thenReturn(ProductCustomizationWrapper.builder().build());
+        when(productCustomizationService.updateCustomization(product, customizationId, request, authentication)).thenReturn(ProductCustomizationWrapper.builder().build());
 
         //when
-        final ResourceOperationResponse response = productService.updateCustomization(productId, companyUid, customizationId, request);
+        final ResourceOperationResponse response = productService.updateCustomization(productId, companyUid, customizationId, request, authentication);
 
         //then
         assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
@@ -242,11 +244,12 @@ class ProductServiceTest {
         final String companyUid = "companyUid";
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
         final Long customizationId = 1L;
+        final AccountAuthentication authentication = AccountAuthentication.builder().build();
 
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> productService.updateCustomization(productId, companyUid, customizationId, request));
+        final Throwable throwable = catchThrowable(() -> productService.updateCustomization(productId, companyUid, customizationId, request, authentication));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
@@ -263,12 +266,13 @@ class ProductServiceTest {
         final ProductCategory category = ProductDataGenerator.category(1);
         final Company company = Company.builder().build();
         final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final AccountAuthentication authentication = AccountAuthentication.builder().build();
 
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
-        doNothing().when(productCustomizationService).deleteCustomization(product, customizationId);
+        doNothing().when(productCustomizationService).deleteCustomization(product, customizationId, authentication);
 
         //when
-        final ResourceOperationResponse response = productService.deleteCustomization(productId, companyUid, customizationId);
+        final ResourceOperationResponse response = productService.deleteCustomization(productId, companyUid, customizationId, authentication);
 
         //then
         assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.DELETED);
@@ -280,11 +284,12 @@ class ProductServiceTest {
         final Long productId = 1L;
         final String companyUid = "companyUid";
         final Long customizationId = 1L;
+        final AccountAuthentication authentication = AccountAuthentication.builder().build();
 
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> productService.deleteCustomization(productId, companyUid, customizationId));
+        final Throwable throwable = catchThrowable(() -> productService.deleteCustomization(productId, companyUid, customizationId, authentication));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
