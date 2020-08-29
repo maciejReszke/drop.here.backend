@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.test_data;
 import com.drop.here.backend.drophere.authentication.account.dto.AccountCreationRequest;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountMailStatus;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountRegistrationType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.company.Company;
@@ -32,6 +33,7 @@ public class AccountDataGenerator {
                 .mailActivatedAt(LocalDateTime.now())
                 .company(company)
                 .password("password1234#" + i)
+                .registrationType(AccountRegistrationType.FORM)
                 .build();
     }
 
@@ -45,6 +47,7 @@ public class AccountDataGenerator {
                 .mail("mailAtCompany" + i + "@pl.pl")
                 .mailActivatedAt(LocalDateTime.now())
                 .password("password1234#" + i)
+                .registrationType(AccountRegistrationType.FORM)
                 .build();
     }
 }

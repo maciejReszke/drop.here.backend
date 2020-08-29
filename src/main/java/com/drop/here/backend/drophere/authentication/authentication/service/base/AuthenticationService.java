@@ -14,7 +14,7 @@ import com.drop.here.backend.drophere.authentication.authentication.dto.response
 import com.drop.here.backend.drophere.authentication.authentication.exception.UnauthorizedRestException;
 import com.drop.here.backend.drophere.authentication.authentication.service.external_provider.ExternalAuthenticationDelegationService;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
-import com.drop.here.backend.drophere.customer.CustomerService;
+import com.drop.here.backend.drophere.customer.service.CustomerService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +65,6 @@ public class AuthenticationService {
         return authenticationExecutiveService.successLogin(account, profile);
     }
 
-    // TODO: 29/08/2020 test, implement
     @Transactional
     public LoginResponse loginWithAuthenticationProvider(ExternalAuthenticationProviderLoginRequest request) {
         final ExternalAuthenticationResult result = externalAuthenticationDelegationService.authenticate(request);

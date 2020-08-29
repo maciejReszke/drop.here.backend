@@ -31,6 +31,12 @@ public class AuthenticationResponse {
     @ApiModelProperty(value = "Account status", example = "ACTIVE")
     private AccountStatus accountStatus;
 
+    @ApiModelProperty(value = "Indicates if user has company data", example = "true")
+    private boolean hasCompanyData;
+
+    @ApiModelProperty(value = "Indicates if user has customer data", example = "true")
+    private boolean hasCustomerData;
+
     @ApiModelProperty(value = "Indicates if user has any profile", example = "true")
     private boolean hasProfile;
 

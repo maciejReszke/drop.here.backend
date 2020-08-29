@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.company;
 
+import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.country.Country;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -35,6 +37,7 @@ public class Company {
     private String name;
 
     // TODO: 24/08/2020 na podstawie nazwy
+    // TODO: 29/08/2020 image!
     @NotBlank
     private String uid;
 
@@ -56,5 +59,10 @@ public class Company {
     private LocalDateTime lastUpdatedAt;
 
     // TODO: 02/08/2020 audyt? + zdjecie i moze galeria?
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    @NotNull
+    private Account account;
 }
 

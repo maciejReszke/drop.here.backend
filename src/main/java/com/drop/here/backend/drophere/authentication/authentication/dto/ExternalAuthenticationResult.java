@@ -1,8 +1,17 @@
 package com.drop.here.backend.drophere.authentication.authentication.dto;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Value;
 
-@Data
+@Value
+@Builder
 public class ExternalAuthenticationResult {
-    private String email;
+
+    String email;
+
+    String firstName;
+
+    String lastName;
+
+    byte[] image;
 }

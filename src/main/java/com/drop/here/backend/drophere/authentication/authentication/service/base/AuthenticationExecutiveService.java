@@ -46,7 +46,6 @@ public class AuthenticationExecutiveService {
                 .collect(Collectors.toList());
     }
 
-    // TODO: 29/08/2020 czy ma comapny, czy ma customera
     public AuthenticationResponse getAuthenticationInfo(AccountAuthentication accountAuthentication) {
         return accountAuthentication.hasProfile()
                 ? getWithProfileAuthenticationInfo(accountAuthentication)
@@ -73,6 +72,8 @@ public class AuthenticationExecutiveService {
                 .accountStatus(account.getAccountStatus())
                 .accountType(account.getAccountType())
                 .mail(account.getMail())
+                .hasCustomerData(account.getCustomer() != null)
+                .hasCompanyData(account.getCompany() != null)
                 .roles(toRoles(accountAuthentication.getAuthorities()))
                 .tokenValidUntil(accountAuthentication.getTokenValidUntil().format(DATE_TIME_FORMAT))
                 .loggedOnProfile(false)

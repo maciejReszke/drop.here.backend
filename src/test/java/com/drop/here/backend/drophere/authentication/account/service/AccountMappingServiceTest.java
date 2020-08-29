@@ -5,11 +5,14 @@ import com.drop.here.backend.drophere.authentication.account.dto.AccountInfoResp
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountMailStatus;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountRegistrationType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
+import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
 import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
+import com.drop.here.backend.drophere.test_data.ExternalAuthenticationDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,6 +52,7 @@ class AccountMappingServiceTest {
         assertThat(response.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
         assertThat(response.getAccountMailStatus()).isEqualTo(AccountMailStatus.UNCONFIRMED);
         assertThat(response.isAnyProfileRegistered()).isFalse();
+        assertThat(response.getRegistrationType()).isEqualTo(AccountRegistrationType.FORM);
     }
 
     @Test
@@ -75,5 +79,25 @@ class AccountMappingServiceTest {
         assertThat(result.getProfiles().get(0).getProfileUid()).isEqualTo(profile.getProfileUid());
         assertThat(result.getProfiles().get(0).getProfileType()).isEqualTo(profile.getProfileType());
         assertThat(result.getProfiles().get(0).getStatus()).isEqualTo(profile.getStatus());
+    }
+
+    @Test
+    void givenExternalAuthenticationResultWhenNewAccountThenCreate() {
+        //given
+        final ExternalAuthenticationResult authenticationResult = ExternalAuthenticationDataGenerator.externalAuthenticationResult(1);
+
+        //when
+        final Account response = accountMappingService.newAccount(authenticationResult);
+
+        //then
+        assertThat(response.getAccountType()).isEqualTo(AccountType.CUSTOMER);
+        assertThat(response.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
+        assertThat(response.getMail()).isEqualTo(authenticationResult.getEmail());
+        assertThat(response.getPassword()).isNull();
+        assertThat(response.getMailActivatedAt()).isNull();
+        assertThat(response.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
+        assertThat(response.getAccountMailStatus()).isEqualTo(AccountMailStatus.CONFIRMED);
+        assertThat(response.isAnyProfileRegistered()).isFalse();
+        assertThat(response.getRegistrationType()).isEqualTo(AccountRegistrationType.EXTERNAL_PROVIDER);
     }
 }

@@ -5,12 +5,14 @@ import com.drop.here.backend.drophere.authentication.account.dto.AccountInfoResp
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
-import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
+import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
+import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
+import com.drop.here.backend.drophere.test_data.ExternalAuthenticationDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -222,4 +224,48 @@ class AccountServiceTest {
         assertThat(response).isEqualTo(accountInfoResponse);
     }
 
+    @Test
+    void givenExistingAccountWhenExistsByMailThenTrue() {
+        //given
+        final String mail = "mail@mail.com";
+
+        when(accountPersistenceService.findByMail(mail)).thenReturn(Optional.of(Account.builder().build()));
+
+        //when
+        final boolean result = accountService.existsByMail(mail);
+
+        //then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void givenNotExistingAccountWhenExistsByMailThenFalse() {
+        //given
+        final String mail = "mail@mail.com";
+
+        when(accountPersistenceService.findByMail(mail)).thenReturn(Optional.empty());
+
+        //when
+        final boolean result = accountService.existsByMail(mail);
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenExternalAuthenticationResultWhenCreateAccountThenCreate() {
+        //given
+        final ExternalAuthenticationResult authenticationResult = ExternalAuthenticationDataGenerator.externalAuthenticationResult(1);
+        final Account account = Account.builder().build();
+
+        when(accountMappingService.newAccount(authenticationResult)).thenReturn(account);
+        doNothing().when(accountPersistenceService).createAccount(account);
+        doNothing().when(privilegeService).addNewAccountPrivileges(account);
+
+        //when
+        final Account result = accountService.createAccount(authenticationResult);
+
+        //then
+        assertThat(result).isEqualTo(account);
+    }
 }

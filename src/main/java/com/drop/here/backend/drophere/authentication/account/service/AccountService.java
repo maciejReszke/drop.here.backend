@@ -26,9 +26,12 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final PrivilegeService privilegeService;
 
-    // TODO: 29/08/2020
+    @Transactional
     public Account createAccount(ExternalAuthenticationResult result) {
-        return null;
+        final Account account = accountMappingService.newAccount(result);
+        accountPersistenceService.createAccount(account);
+        privilegeService.addNewAccountPrivileges(account);
+        return account;
     }
 
     @Transactional
@@ -72,8 +75,7 @@ public class AccountService {
         return accountMappingService.toAccountInfoResponse(accountAuthentication.getPrincipal());
     }
 
-    // TODO: 29/08/2020
     public boolean existsByMail(String email) {
-        return false;
+        return accountPersistenceService.findByMail(email).isPresent();
     }
 }
