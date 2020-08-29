@@ -40,6 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.GET, "/authentication").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/categories").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/units").authenticated()
+                        .mvcMatchers(HttpMethod.GET, "/countries").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/products").authenticated()
                         .mvcMatchers(HttpMethod.POST, "/companies/{companyUid}/products").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers("/companies/{companyUid}/products/{productId}").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)

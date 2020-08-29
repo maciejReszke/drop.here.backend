@@ -18,7 +18,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-// TODO: 01/08/2020 get endpoint
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
