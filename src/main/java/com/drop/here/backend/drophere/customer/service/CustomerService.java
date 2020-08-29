@@ -9,6 +9,7 @@ import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -27,8 +28,10 @@ public class CustomerService {
         final Customer customer = customerMappingService.toCustomer(account, result);
         customerRepository.save(customer);
         account.setCustomer(customer);
-        final Image image = imageService.createImage(result.getImage(), ImageType.CUSTOMER_IMAGE);
+        if (ArrayUtils.isNotEmpty(result.getImage())) {
+            final Image image = imageService.createImage(result.getImage(), ImageType.CUSTOMER_IMAGE);
+            customer.setImage(image);
+        }
         log.info("Creating customer for account with mail {} via external authentication", account.getMail());
-        customer.setImage(image);
     }
 }

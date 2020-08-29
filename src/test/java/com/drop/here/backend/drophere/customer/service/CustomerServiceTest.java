@@ -34,7 +34,7 @@ class CustomerServiceTest {
     private CustomerMappingService customerMappingService;
 
     @Test
-    void givenAccountAndExternalAuthenticationResultWhenCreateCustomerThenCreate() {
+    void givenAccountAndExternalAuthenticationResultWithImageWhenCreateCustomerThenCreate() {
         //given
         final Account account = Account.builder().build();
         final ExternalAuthenticationResult externalAuthenticationResult = ExternalAuthenticationDataGenerator.externalAuthenticationResult(1);
@@ -52,6 +52,27 @@ class CustomerServiceTest {
         //then
         assertThat(account.getCustomer()).isEqualTo(customer);
         assertThat(customer.getImage()).isEqualTo(image);
+    }
+
+    @Test
+    void givenAccountAndExternalAuthenticationResultWithoutImageWhenCreateCustomerThenCreate() {
+        //given
+        final Account account = Account.builder().build();
+        final ExternalAuthenticationResult externalAuthenticationResult = ExternalAuthenticationDataGenerator.externalAuthenticationResult(1)
+                .toBuilder()
+                .image(null)
+                .build();
+        final Customer customer = CustomerDataGenerator.customer(1, account);
+
+        when(customerMappingService.toCustomer(account, externalAuthenticationResult)).thenReturn(customer);
+        when(customerRepository.save(customer)).thenReturn(customer);
+
+        //when
+        customerService.createCustomer(account, externalAuthenticationResult);
+
+        //then
+        assertThat(account.getCustomer()).isEqualTo(customer);
+        assertThat(customer.getImage()).isNull();
     }
 
 

@@ -1,11 +1,11 @@
 package com.drop.here.backend.drophere.authentication.authentication.controller;
 
 import com.drop.here.backend.drophere.authentication.account.dto.AuthenticationResponse;
-import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationService;
-import com.drop.here.backend.drophere.authentication.authentication.dto.request.ExternalAuthenticationProviderLoginRequest;
 import com.drop.here.backend.drophere.authentication.authentication.dto.request.BaseLoginRequest;
+import com.drop.here.backend.drophere.authentication.authentication.dto.request.ExternalAuthenticationProviderLoginRequest;
 import com.drop.here.backend.drophere.authentication.authentication.dto.request.ProfileLoginRequest;
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
+import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationService;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 

@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.authentication.authentication.service.external_provider;
 
 import com.drop.here.backend.drophere.authentication.authentication.enums.ExternalAuthenticationProvider;
+import com.drop.here.backend.drophere.authentication.authentication.service.external_provider.facebook.FacebookExternalAuthenticationProviderService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

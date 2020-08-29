@@ -35,12 +35,12 @@ class ProductCustomizationMappingServiceTest {
 
         //then
         assertThat(wrapper.getCustomizations()).hasSize(2);
-        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(1)).findFirst().orElseThrow().getPrice()).isEqualTo(request.getCustomizations().get(0).getPrice());
-        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(1)).findFirst().orElseThrow().getValue()).isEqualTo(request.getCustomizations().get(0).getValue());
-        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(1)).findFirst().orElseThrow().getWrapper()).isEqualTo(wrapper);
-        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(2)).findFirst().orElseThrow().getPrice()).isEqualTo(request.getCustomizations().get(1).getPrice());
-        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(2)).findFirst().orElseThrow().getValue()).isEqualTo(request.getCustomizations().get(1).getValue());
-        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrder().equals(2)).findFirst().orElseThrow().getWrapper()).isEqualTo(wrapper);
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrderNum().equals(1)).findFirst().orElseThrow().getPrice()).isEqualTo(request.getCustomizations().get(0).getPrice());
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrderNum().equals(1)).findFirst().orElseThrow().getValue()).isEqualTo(request.getCustomizations().get(0).getValue());
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrderNum().equals(1)).findFirst().orElseThrow().getWrapper()).isEqualTo(wrapper);
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrderNum().equals(2)).findFirst().orElseThrow().getPrice()).isEqualTo(request.getCustomizations().get(1).getPrice());
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrderNum().equals(2)).findFirst().orElseThrow().getValue()).isEqualTo(request.getCustomizations().get(1).getValue());
+        assertThat(wrapper.getCustomizations().stream().filter(t -> t.getOrderNum().equals(2)).findFirst().orElseThrow().getWrapper()).isEqualTo(wrapper);
         assertThat(wrapper.getHeading()).isEqualTo(request.getHeading());
         assertThat(wrapper.getType()).isEqualTo(ProductCustomizationWrapperType.SINGLE);
         assertThat(wrapper.getProduct()).isEqualTo(product);

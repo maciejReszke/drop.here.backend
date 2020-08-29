@@ -88,7 +88,7 @@ public class ProductSearchingService {
 
     private List<ProductCustomizationResponse> toCustomizations(Set<ProductCustomization> customizations) {
         return customizations.stream()
-                .sorted(Comparator.comparing(ProductCustomization::getOrder))
+                .sorted(Comparator.comparing(ProductCustomization::getOrderNum))
                 .map(this::toCustomization)
                 .collect(Collectors.toList());
     }

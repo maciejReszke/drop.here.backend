@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.authentication.authentication.service.external_provider;
 
 import com.drop.here.backend.drophere.authentication.authentication.enums.ExternalAuthenticationProvider;
+import com.drop.here.backend.drophere.authentication.authentication.service.external_provider.facebook.FacebookExternalAuthenticationProviderService;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import io.vavr.API;

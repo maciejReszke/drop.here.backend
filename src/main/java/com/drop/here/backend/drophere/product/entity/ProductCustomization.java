@@ -34,7 +34,7 @@ public class ProductCustomization {
 
     @NotNull
     @PositiveOrZero
-    private Integer order;
+    private Integer orderNum;
 
     @NotNull
     @PositiveOrZero
