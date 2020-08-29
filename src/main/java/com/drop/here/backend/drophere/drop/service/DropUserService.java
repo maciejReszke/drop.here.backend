@@ -21,7 +21,7 @@ public class DropUserService {
     private final DropMappingService dropMappingService;
     private final DropMembershipRepository dropMembershipRepository;
 
-    // TODO: 28/08/2020 test, implement - wciaz brakuje customera
+    // TODO: 28/08/2020 test, implement - wciaz brakuje customera + pamietac o tym czy mozna dolaczyc (flaga)!
     public ResourceOperationResponse findMemberships(AccountAuthentication authentication, String name, Pageable pageable) {
         return null;
     }

@@ -73,6 +73,6 @@ public class DropMappingService {
 
     // TODO: 28/08/2020
     public DropMembership createMembership(Drop drop, AccountAuthentication authentication) {
-
+        return null;
     }
 }
