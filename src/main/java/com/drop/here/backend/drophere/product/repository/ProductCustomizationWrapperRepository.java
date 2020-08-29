@@ -16,6 +16,6 @@ public interface ProductCustomizationWrapperRepository extends JpaRepository<Pro
     @Query("select pcw from ProductCustomizationWrapper pcw " +
             "left join fetch pcw.customizations where " +
             "pcw.product.id in :productsIds")
-    List<ProductCustomizationWrapper> findByIdsWithCustomizations(List<Long> productsIds);
+    List<ProductCustomizationWrapper> findByProductsIdsWithCustomizations(List<Long> productsIds);
 
 }

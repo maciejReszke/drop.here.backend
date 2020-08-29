@@ -7,7 +7,6 @@ import com.drop.here.backend.drophere.authentication.account.service.AccountServ
 import com.drop.here.backend.drophere.authentication.authentication.exception.UnauthorizedRestException;
 import com.drop.here.backend.drophere.common.exceptions.RestException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
-import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import org.junit.jupiter.api.Test;
@@ -42,8 +41,7 @@ class JwtAuthenticationProviderTest {
     void givenExistingAccountAuthenticationWithoutProfileWhenAuthenticateThenAuthenticate() {
         //given
         final PreAuthentication authentication = PreAuthentication.withoutProfile("mail", LocalDateTime.now());
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AccountAuthentication.builder().build();
 
         when(accountService.findActiveAccountByMailWithRoles("mail")).thenReturn(Optional.of(account));
@@ -91,8 +89,7 @@ class JwtAuthenticationProviderTest {
     void givenNotExistingProfileAccountAuthenticationWithProfileWhenAuthenticateThenThrowException() {
         //given
         final PreAuthentication authentication = PreAuthentication.withProfile("mail", "profileUid", LocalDateTime.now());
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
 
         when(accountService.findActiveAccountByMailWithRoles("mail")).thenReturn(Optional.of(account));
         when(accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, "profileUid")).thenReturn(Optional.empty());
@@ -109,8 +106,7 @@ class JwtAuthenticationProviderTest {
     void givenExistingProfileAccountAuthenticationWithProfileWhenAuthenticateThenThrowException() {
         //given
         final PreAuthentication authentication = PreAuthentication.withProfile("mail", "profileUid", LocalDateTime.now());
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final AccountAuthentication accountAuthentication = AccountAuthentication.builder().build();
 

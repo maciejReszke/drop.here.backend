@@ -6,6 +6,8 @@ import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWr
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCategory;
+import com.drop.here.backend.drophere.product.entity.ProductCustomization;
+import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperType;
@@ -14,10 +16,10 @@ import lombok.experimental.UtilityClass;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @UtilityClass
-public class
-ProductDataGenerator {
+public class ProductDataGenerator {
     public Product product(int i, ProductCategory category, ProductUnit unit, Company company) {
         return Product.builder()
                 .name("productName" + i)
@@ -31,7 +33,7 @@ ProductDataGenerator {
                 .description("description" + i)
                 .createdAt(LocalDateTime.now())
                 .lastUpdatedAt(LocalDateTime.now())
-                .deletable(false)
+                .deletable(true)
                 .company(company)
                 .build();
     }
@@ -73,5 +75,23 @@ ProductDataGenerator {
                 .price(BigDecimal.valueOf(55.44 + i))
                 .value("customizationName" + i)
                 .build();
+    }
+
+    public ProductCustomizationWrapper productCustomizationWrapper(int i, Product product) {
+        final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder()
+                .heading("header" + i)
+                .product(product)
+                .type(ProductCustomizationWrapperType.SINGLE)
+                .build();
+
+        final ProductCustomization customization = ProductCustomization.builder()
+                .orderNum(i)
+                .price(BigDecimal.valueOf(2 + i))
+                .value("value" + i)
+                .wrapper(wrapper)
+                .build();
+
+        wrapper.setCustomizations(Set.of(customization));
+        return wrapper;
     }
 }

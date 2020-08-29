@@ -44,11 +44,11 @@ public class Country {
     @Enumerated(EnumType.STRING)
     private CountryStatus countryStatus;
 
-    @NotBlank
+    @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime createdAt;
 
-    @NotBlank
+    @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime activatedAt;
 }

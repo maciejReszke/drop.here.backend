@@ -8,7 +8,6 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus
 import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
-import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
@@ -54,9 +53,8 @@ class AccountServiceTest {
     @Test
     void givenValidCreationRequestWhenCreateAccountThenCreate() {
         //given
-        final Company company = Company.builder().build();
         final AccountCreationRequest creationRequest = AccountDataGenerator.accountCreationRequest(1);
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final LoginResponse creationResponse = LoginResponse.builder().build();
 
         when(passwordEncoder.encode(creationRequest.getPassword())).thenReturn("password");
@@ -78,8 +76,7 @@ class AccountServiceTest {
     void givenExistingActiveAccountWhenFindActiveByMailThenGet() {
         //given
         final String mail = "mail";
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         account.setAccountStatus(AccountStatus.ACTIVE);
 
         when(accountPersistenceService.findByMail(mail)).thenReturn(Optional.of(account));
@@ -96,8 +93,7 @@ class AccountServiceTest {
     void givenExistingNotActiveAccountWhenFindActiveByMailThenEmpty() {
         //given
         final String mail = "mail";
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         account.setAccountStatus(AccountStatus.INACTIVE);
 
         when(accountPersistenceService.findByMail(mail)).thenReturn(Optional.of(account));
@@ -113,8 +109,7 @@ class AccountServiceTest {
     void givenExistingActiveAccountWhenFindActiveByMailWithRolesThenGet() {
         //given
         final String mail = "mail";
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         account.setAccountStatus(AccountStatus.ACTIVE);
 
         when(accountPersistenceService.findByMailWithRoles(mail)).thenReturn(Optional.of(account));
@@ -131,8 +126,7 @@ class AccountServiceTest {
     void givenExistingNotActiveAccountWhenFindActiveByMailWithRolesThenEmpty() {
         //given
         final String mail = "mail";
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         account.setAccountStatus(AccountStatus.INACTIVE);
 
         when(accountPersistenceService.findByMailWithRoles(mail)).thenReturn(Optional.of(account));
@@ -147,8 +141,7 @@ class AccountServiceTest {
     @Test
     void givenMatchingPasswordWhenIsPasswordValidThenTrue() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final String password = "password";
         when(passwordEncoder.matches(password, account.getPassword())).thenReturn(true);
 
@@ -162,8 +155,7 @@ class AccountServiceTest {
     @Test
     void givenNotMatchingPasswordWhenIsPasswordValidThenFalse() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final String password = "password";
         when(passwordEncoder.matches(password, account.getPassword())).thenReturn(false);
 
@@ -177,8 +169,7 @@ class AccountServiceTest {
     @Test
     void givenAccountAndFirstProfileCreatedWhenAccountProfileCreatedThenSetProfileRegisteredAndSave() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         account.setAnyProfileRegistered(false);
 
         doNothing().when(accountPersistenceService).updateAccount(account);
@@ -194,8 +185,7 @@ class AccountServiceTest {
     @Test
     void givenAccountAndNextProfileCreatedWhenAccountProfileCreatedThenReturnSubprofile() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         account.setAnyProfileRegistered(true);
 
         //when
@@ -210,8 +200,7 @@ class AccountServiceTest {
     @Test
     void givenAccountAuthenticationWhenGetAccountInfoThenGet() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
         final AccountInfoResponse accountInfoResponse = AccountInfoResponse.builder().build();

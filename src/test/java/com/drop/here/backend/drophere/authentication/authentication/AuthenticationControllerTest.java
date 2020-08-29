@@ -61,7 +61,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
         //given
         final String url = "/authentication";
         final String password = "password";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null)
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1)
                 .toBuilder()
                 .password(passwordEncoder.encode(password))
                 .build());
@@ -88,7 +88,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
         //given
         final String url = "/authentication";
         final String password = "password";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null)
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1)
                 .toBuilder()
                 .password(passwordEncoder.encode(password))
                 .build());
@@ -113,7 +113,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
         //given
         final String url = "/authentication/profile";
         final String password = "password";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         privilegeRepository.save(Privilege.builder().name("OWN_PROFILE_MANAGEMENT").account(account).build());
         final String token = jwtService.createToken(account).getToken();
         final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account)
@@ -145,7 +145,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
         //given
         final String url = "/authentication/profile";
         final String password = "password";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         final String token = jwtService.createToken(account).getToken();
         final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account)
                 .toBuilder()
@@ -173,7 +173,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
         //given
         final String url = "/authentication/profile";
         final String password = "password";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         final String token = jwtService.createToken(account).getToken();
         final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account)
                 .toBuilder()
@@ -200,7 +200,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
     void givenValidTokenWithoutProfileWhenGetAuthenticationThenGet() throws Exception {
         //given
         final String url = "/authentication";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name("privilege").build());
         account.setPrivileges(List.of(privilege));
         final String token = jwtService.createToken(account).getToken();
@@ -229,7 +229,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
     void givenValidTokenWithProfileWhenGetAuthenticationThenGet() throws Exception {
         //given
         final String url = "/authentication";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null).toBuilder()
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1).toBuilder()
                 .isAnyProfileRegistered(true)
                 .build());
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name("privilege").build());
@@ -263,7 +263,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
     void givenNotActiveUserValidTokenWhenGetAuthenticationThen401() throws Exception {
         //given
         final String url = "/authentication";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null).toBuilder()
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1).toBuilder()
                 .accountStatus(AccountStatus.INACTIVE).build());
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name("privilege").build());
         account.setPrivileges(List.of(privilege));
@@ -281,7 +281,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
     void givenInvalidTokenWhenGetAuthenticationThen401() throws Exception {
         //given
         final String url = "/authentication";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name("privilege").build());
         account.setPrivileges(List.of(privilege));
         final String token = jwtService.createToken(account).getToken();
@@ -298,7 +298,7 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
     void givenNotBearerTokenWhenGetAuthenticationThen401() throws Exception {
         //given
         final String url = "/authentication";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1, null));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name("privilege").build());
         account.setPrivileges(List.of(privilege));
         final String token = jwtService.createToken(account).getToken();

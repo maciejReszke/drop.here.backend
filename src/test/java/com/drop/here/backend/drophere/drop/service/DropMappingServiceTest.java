@@ -1,7 +1,6 @@
 package com.drop.here.backend.drophere.drop.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
-import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
@@ -36,8 +35,7 @@ class DropMappingServiceTest {
     void givenGeolocationDropManagementRequestWhenToEntityThenMap() {
         //given
         final DropManagementRequest dropManagementRequest = DropDataGenerator.dropManagementRequest(1);
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         dropManagementRequest.setName("nam");
 
@@ -63,8 +61,7 @@ class DropMappingServiceTest {
     void giveHiddenLocationDropManagementRequestWhenToEntityThenMap() {
         //given
         final DropManagementRequest dropManagementRequest = DropDataGenerator.dropManagementRequest(1);
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         dropManagementRequest.setName("namek");
         dropManagementRequest.setLocationDropType(DropLocationType.HIDDEN.name());

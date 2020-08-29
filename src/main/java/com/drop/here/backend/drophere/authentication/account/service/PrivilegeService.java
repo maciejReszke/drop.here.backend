@@ -20,6 +20,7 @@ public class PrivilegeService {
     public static final String OWN_PROFILE_MANAGEMENT_PRIVILEGE = "OWN_PROFILE_MANAGEMENT";
     public static final String COMPANY_FULL_MANAGEMENT_PRIVILEGE = "COMPANY_FULL_MANAGEMENT";
     public static final String COMPANY_BASIC_MANAGEMENT_PRIVILEGE = "COMPANY_BASIC_MANAGEMENT";
+    public static final String COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE = "COMPANY_RESOURCES_MANAGEMENT";
 
     public void addNewAccountPrivileges(Account account) {
         final Privilege privilege = privilegeRepository.save(Privilege.builder()

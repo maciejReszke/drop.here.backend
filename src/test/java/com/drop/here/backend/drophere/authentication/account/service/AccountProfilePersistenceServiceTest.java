@@ -3,7 +3,6 @@ package com.drop.here.backend.drophere.authentication.account.service;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountProfileRepository;
-import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import org.junit.jupiter.api.Test;
@@ -31,8 +30,7 @@ class AccountProfilePersistenceServiceTest {
     @Test
     void whenFindByAccountAndProfileUidWithRolesThenFind() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final String profileUid = "profileUid";
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
 
@@ -50,8 +48,7 @@ class AccountProfilePersistenceServiceTest {
     @Test
     void whenFindByAccountThenFind() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
 
         when(accountProfileRepository.findByAccount(account)).thenReturn(List.of(accountProfile));
@@ -67,8 +64,7 @@ class AccountProfilePersistenceServiceTest {
     @Test
     void givenAccountProfileWhenCreateThenSave() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
 
         when(accountProfileRepository.save(accountProfile)).thenReturn(accountProfile);
@@ -83,8 +79,7 @@ class AccountProfilePersistenceServiceTest {
     @Test
     void givenAccountProfileWhenUpdateThenSave() {
         //given
-        final Company company = Company.builder().build();
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
 
         when(accountProfileRepository.save(accountProfile)).thenReturn(accountProfile);

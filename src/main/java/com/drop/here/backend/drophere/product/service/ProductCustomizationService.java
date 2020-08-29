@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWr
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,26 +24,26 @@ public class ProductCustomizationService {
     private final ProductCustomizationWrapperRepository customizationWrapperRepository;
 
     @Transactional
-    public ProductCustomizationWrapper createCustomizations(Product product, ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
+    public ProductCustomizationWrapper createCustomizations(Product product, ProductCustomizationWrapperRequest productCustomizationWrapperRequest, AccountAuthentication authentication) {
         validationService.validate(productCustomizationWrapperRequest);
         final ProductCustomizationWrapper customizationWrapper = mappingService.toCustomizationWrapper(product, productCustomizationWrapperRequest);
-        log.info("Saving new customization wrapper for product with id {} company {}", product.getId(), product.getCompany().getUid());
+        log.info("Saving new customization wrapper for product with id {} company {}", product.getId(), authentication.getCompany().getUid());
         return customizationWrapperRepository.save(customizationWrapper);
     }
 
-    public void deleteCustomization(Product product, Long customizationId) {
+    public void deleteCustomization(Product product, Long customizationId, AccountAuthentication authentication) {
         final ProductCustomizationWrapper customizationWrapper = getCustomizationWrapper(product, customizationId);
-        log.info("Deleting customization wrapper {} for product with id {} company {}", customizationWrapper.getId(), product.getId(), product.getCompany().getUid());
+        log.info("Deleting customization wrapper {} for product with id {} company {}", customizationWrapper.getId(), product.getId(), authentication.getCompany().getUid());
         customizationWrapperRepository.delete(customizationWrapper);
     }
 
     @Transactional(propagation = Propagation.NEVER)
-    public ProductCustomizationWrapper updateCustomization(Product product, Long customizationId, ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
+    public ProductCustomizationWrapper updateCustomization(Product product, Long customizationId, ProductCustomizationWrapperRequest productCustomizationWrapperRequest, AccountAuthentication authentication) {
         final ProductCustomizationWrapper wrapper = getCustomizationWrapper(product, customizationId);
         validationService.validate(productCustomizationWrapperRequest);
         final ProductCustomizationWrapper customizationWrapper = mappingService.toCustomizationWrapper(product, productCustomizationWrapperRequest);
         customizationWrapper.setId(wrapper.getId());
-        log.info("Updating customization wrapper {} for product with id {} company {}", wrapper.getId(), product.getId(), product.getCompany().getUid());
+        log.info("Updating customization wrapper {} for product with id {} company {}", wrapper.getId(), product.getId(), authentication.getCompany().getUid());
         return customizationWrapperRepository.save(customizationWrapper);
 
     }
@@ -56,6 +57,6 @@ public class ProductCustomizationService {
     }
 
     public List<ProductCustomizationWrapper> findCustomizations(List<Long> productsIds) {
-        return customizationWrapperRepository.findByIdsWithCustomizations(productsIds);
+        return customizationWrapperRepository.findByProductsIdsWithCustomizations(productsIds);
     }
 }

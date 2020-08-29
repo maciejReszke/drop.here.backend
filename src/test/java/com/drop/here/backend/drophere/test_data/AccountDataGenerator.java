@@ -6,7 +6,6 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountMailSt
 import com.drop.here.backend.drophere.authentication.account.enums.AccountRegistrationType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
-import com.drop.here.backend.drophere.company.Company;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
@@ -22,7 +21,7 @@ public class AccountDataGenerator {
                 .build();
     }
 
-    public Account companyAccount(int i, Company company) {
+    public Account companyAccount(int i) {
         return Account.builder()
                 .accountMailStatus(AccountMailStatus.CONFIRMED)
                 .accountStatus(AccountStatus.ACTIVE)
@@ -31,7 +30,6 @@ public class AccountDataGenerator {
                 .isAnyProfileRegistered(false)
                 .mail("mailAtCompany" + i + "@pl.pl")
                 .mailActivatedAt(LocalDateTime.now())
-                .company(company)
                 .password("password1234#" + i)
                 .registrationType(AccountRegistrationType.FORM)
                 .build();

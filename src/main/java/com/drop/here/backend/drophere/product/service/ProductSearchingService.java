@@ -28,7 +28,6 @@ public class ProductSearchingService {
     private final AuthenticationPrivilegesService authenticationPrivilegesService;
     private final ProductCustomizationService productCustomizationService;
 
-    // TODO: 24/08/2020 company musi byc juz dostepne!!!
     public Page<ProductResponse> findAll(Pageable pageable,
                                          String companyUid,
                                          String[] desiredCategories,

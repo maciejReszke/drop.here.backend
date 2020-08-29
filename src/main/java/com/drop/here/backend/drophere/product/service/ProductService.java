@@ -61,21 +61,21 @@ public class ProductService {
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, productId);
     }
 
-    public ResourceOperationResponse createCustomization(Long productId, String companyUid, ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
+    public ResourceOperationResponse createCustomization(Long productId, String companyUid, ProductCustomizationWrapperRequest productCustomizationWrapperRequest, AccountAuthentication authentication) {
         final Product product = getProduct(productId, companyUid);
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationService.createCustomizations(product, productCustomizationWrapperRequest);
+        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationService.createCustomizations(product, productCustomizationWrapperRequest, authentication);
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, productCustomizationWrapper.getId());
     }
 
-    public ResourceOperationResponse updateCustomization(Long productId, String companyUid, Long customizationId, ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
+    public ResourceOperationResponse updateCustomization(Long productId, String companyUid, Long customizationId, ProductCustomizationWrapperRequest productCustomizationWrapperRequest, AccountAuthentication authentication) {
         final Product product = getProduct(productId, companyUid);
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationService.updateCustomization(product, customizationId, productCustomizationWrapperRequest);
+        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationService.updateCustomization(product, customizationId, productCustomizationWrapperRequest, authentication);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, productCustomizationWrapper.getId());
     }
 
-    public ResourceOperationResponse deleteCustomization(Long productId, String companyUid, Long customizationId) {
+    public ResourceOperationResponse deleteCustomization(Long productId, String companyUid, Long customizationId, AccountAuthentication authentication) {
         final Product product = getProduct(productId, companyUid);
-        productCustomizationService.deleteCustomization(product, customizationId);
+        productCustomizationService.deleteCustomization(product, customizationId, authentication);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, customizationId);
     }
 }

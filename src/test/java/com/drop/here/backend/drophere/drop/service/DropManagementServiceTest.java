@@ -52,7 +52,7 @@ class DropManagementServiceTest {
         doNothing().when(dropManagementValidationService).validateDropRequest(dropManagementRequest);
         final Company company = Company.builder().build();
         final Drop drop = DropDataGenerator.drop(1, company);
-        final Account account = AccountDataGenerator.companyAccount(1, company);
+        final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         when(dropMappingService.toEntity(dropManagementRequest, accountAuthentication)).thenReturn(drop);
         when(dropRepository.save(drop)).thenReturn(drop);

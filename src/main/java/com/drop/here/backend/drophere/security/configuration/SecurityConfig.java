@@ -23,8 +23,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtService jwtService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    // TODO: 29/08/2020 poprawic security bo niektore dopiero po utworzeniu bazowych informacji company/customera!
-    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -43,8 +41,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.GET, "/categories").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/units").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/products").authenticated()
-                        .mvcMatchers(HttpMethod.POST, "/companies/{companyUid}/products").hasAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
-                        .mvcMatchers("/companies/{companyUid}/products/{productId}").hasAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.POST, "/companies/{companyUid}/products").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers("/companies/{companyUid}/products/{productId}").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers("/companies/{companyUid}/products/{productId}/customizations/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers("/actuator/**").permitAll()
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

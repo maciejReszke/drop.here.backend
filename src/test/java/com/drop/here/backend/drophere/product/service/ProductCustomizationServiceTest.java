@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.ProductDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,7 @@ class ProductCustomizationServiceTest {
         final Product product = ProductDataGenerator.product(1, category, unit, company);
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
+        final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
 
         doNothing().when(validationService).validate(request);
         when(mappingService.toCustomizationWrapper(product, request)).thenReturn(wrapper);
@@ -53,7 +55,7 @@ class ProductCustomizationServiceTest {
 
         //when
 
-        final ProductCustomizationWrapper result = productCustomizationService.createCustomizations(product, request);
+        final ProductCustomizationWrapper result = productCustomizationService.createCustomizations(product, request, authentication);
 
         //then
         assertThat(result).isEqualTo(wrapper);
@@ -71,6 +73,7 @@ class ProductCustomizationServiceTest {
         final ProductCustomizationWrapper newWrapper = ProductCustomizationWrapper.builder().heading("h§").build();
         final Long customizationId = 1L;
         wrapper.setId(customizationId);
+        final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
 
         when(customizationWrapperRepository.findByIdAndProduct(customizationId, product)).thenReturn(Optional.of(wrapper));
         doNothing().when(validationService).validate(request);
@@ -78,7 +81,7 @@ class ProductCustomizationServiceTest {
         when(customizationWrapperRepository.save(newWrapper)).thenReturn(newWrapper);
 
         //when
-        final ProductCustomizationWrapper result = productCustomizationService.updateCustomization(product, customizationId, request);
+        final ProductCustomizationWrapper result = productCustomizationService.updateCustomization(product, customizationId, request, authentication);
 
         //then
         assertThat(result).isEqualTo(newWrapper);
@@ -95,12 +98,13 @@ class ProductCustomizationServiceTest {
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
         final Long customizationId = 1L;
+        final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
         wrapper.setId(customizationId);
 
         when(customizationWrapperRepository.findByIdAndProduct(customizationId, product)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> productCustomizationService.updateCustomization(product, customizationId, request));
+        final Throwable throwable = catchThrowable(() -> productCustomizationService.updateCustomization(product, customizationId, request, authentication));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
@@ -115,12 +119,13 @@ class ProductCustomizationServiceTest {
         final Product product = ProductDataGenerator.product(1, category, unit, company);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
         final Long customizationId = 1L;
+        final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
 
         when(customizationWrapperRepository.findByIdAndProduct(customizationId, product)).thenReturn(Optional.of(wrapper));
         doNothing().when(customizationWrapperRepository).delete(wrapper);
 
         //when
-        productCustomizationService.deleteCustomization(product, customizationId);
+        productCustomizationService.deleteCustomization(product, customizationId, authentication);
 
         //then
         verifyNoMoreInteractions(customizationWrapperRepository);
@@ -136,11 +141,12 @@ class ProductCustomizationServiceTest {
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
         final Long customizationId = 1L;
         wrapper.setId(customizationId);
+        final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
 
         when(customizationWrapperRepository.findByIdAndProduct(customizationId, product)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> productCustomizationService.deleteCustomization(product, customizationId));
+        final Throwable throwable = catchThrowable(() -> productCustomizationService.deleteCustomization(product, customizationId, authentication));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
