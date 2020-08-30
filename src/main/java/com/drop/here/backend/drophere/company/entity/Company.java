@@ -1,6 +1,7 @@
-package com.drop.here.backend.drophere.company;
+package com.drop.here.backend.drophere.company.entity;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.country.Country;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

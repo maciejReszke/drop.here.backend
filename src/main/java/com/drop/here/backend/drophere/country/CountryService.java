@@ -18,4 +18,9 @@ public class CountryService {
                 .map(CountryResponse::from)
                 .collect(Collectors.toList());
     }
+
+    // TODO: 30/08/2020
+    public Country findActive(String country) {
+        return null;
+    }
 }

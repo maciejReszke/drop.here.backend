@@ -4,7 +4,7 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountMailSt
 import com.drop.here.backend.drophere.authentication.account.enums.AccountRegistrationType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
-import com.drop.here.backend.drophere.company.Company;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

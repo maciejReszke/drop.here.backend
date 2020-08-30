@@ -18,7 +18,7 @@ public class FacebookExternalAuthenticationProviderService implements ExternalAu
     public ExternalAuthenticationResult authenticate(ExternalAuthenticationProviderLoginRequest request) {
         final FacebookAccessToken accessToken = facebookExecutingService.exchangeToken(request);
         final ExternalAuthenticationResult result = facebookExecutingService.fetchAuthenticationData(accessToken);
-        log.info("Successfully authenticated with facebook user with mail {}", result.getEmail());
+        log.info("Successfully authenticated with facebook user");
         return result;
     }
 }

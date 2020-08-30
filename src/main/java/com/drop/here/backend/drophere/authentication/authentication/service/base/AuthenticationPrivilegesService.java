@@ -1,7 +1,7 @@
 package com.drop.here.backend.drophere.authentication.authentication.service.base;
 
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
-import com.drop.here.backend.drophere.company.CompanyService;
+import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

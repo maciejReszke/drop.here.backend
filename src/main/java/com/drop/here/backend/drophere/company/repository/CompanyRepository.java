@@ -1,5 +1,6 @@
-package com.drop.here.backend.drophere.company;
+package com.drop.here.backend.drophere.company.repository;
 
+import com.drop.here.backend.drophere.company.entity.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
