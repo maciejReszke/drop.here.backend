@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,7 +18,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("select p from Product p where " +
             "p.company.uid = :companyUid and " +
-            "(:desiredCategories is null or  p.categoryName in :desiredCategories) and " +
-            "p.availabilityStatus in :desiredStatuses")
-    Page<Product> findAll(String companyUid, String[] desiredCategories, ProductAvailabilityStatus[] desiredStatuses, Pageable pageable);
+            "((:desiredCategories) is null or lower(p.categoryName) in (:desiredCategories)) and " +
+            "(:name is null or lower(p.name) like :name) and " +
+            "p.availabilityStatus in (:desiredStatuses)")
+    Page<Product> findAll(String companyUid,
+                          List<String> desiredCategories,
+                          String name,
+                          ProductAvailabilityStatus[] desiredStatuses,
+                          Pageable pageable);
 }
