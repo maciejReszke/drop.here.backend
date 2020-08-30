@@ -20,6 +20,7 @@ public class CompanyDataGenerator {
                 .createdAt(LocalDateTime.now())
                 .lastUpdatedAt(LocalDateTime.now())
                 .account(account)
+                .visibilityStatus(CompanyVisibilityStatus.VISIBLE)
                 .build();
     }
 }

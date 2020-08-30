@@ -41,7 +41,6 @@ import javax.validation.constraints.NotNull;
 public class ProductController {
     private final ProductService productService;
 
-    // TODO: 24/08/2020 test
     @GetMapping
     @ApiOperation("Fetching products")
     @ResponseStatus(HttpStatus.OK)
@@ -51,13 +50,14 @@ public class ProductController {
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @ApiAuthorizationToken
-    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(accountAuthentication, #companyUid)" +
-            "||  @authenticationPrivilegesService.isCompanyVisible( #companyUid)")
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid) or " +
+            "@authenticationPrivilegesService.isCompanyVisible(#companyUid)")
     public Page<ProductResponse> findAll(@ApiIgnore @PathVariable String companyUid,
-                                         @ApiIgnore AccountAuthentication accountAuthentication,
-                                         @ApiParam(value = "Desired property (1... n)") @RequestParam(value = "category", required = false) String[] desiredCategories,
+                                         @ApiIgnore AccountAuthentication authentication,
+                                         @ApiParam(value = "Desired category (1... n)") @RequestParam(value = "category", required = false) String[] desiredCategories,
+                                         @ApiParam(value = "Product name (substring)") @RequestParam(value = "name", required = false) String desiredNameSubstring,
                                          @NotNull Pageable pageable) {
-        return productService.findAll(pageable, companyUid, desiredCategories, accountAuthentication);
+        return productService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, authentication);
     }
 
     @PostMapping

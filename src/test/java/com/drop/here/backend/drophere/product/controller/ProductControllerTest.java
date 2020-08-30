@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.authentication.account.repository.Privileg
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.company.Company;
 import com.drop.here.backend.drophere.company.CompanyRepository;
+import com.drop.here.backend.drophere.company.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
@@ -40,9 +41,13 @@ import java.util.List;
 
 import static com.drop.here.backend.drophere.authentication.account.service.PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ProductControllerTest extends IntegrationBaseClass {
@@ -100,6 +105,279 @@ class ProductControllerTest extends IntegrationBaseClass {
         productCategoryRepository.deleteAll();
         productUnitRepository.deleteAll();
         countryRepository.deleteAll();
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationWhenFindProductsThenFind() throws Exception {
+        //given
+        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        preSaved1.setName("Hot dog");
+        preSaved1.setCategoryName("food");
+        productRepository.save(preSaved1);
+        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        preSaved2.setName("Coffee");
+        preSaved2.setCategoryName("drink");
+        productRepository.save(preSaved2);
+        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        preSaved3.setName("Arsenic");
+        preSaved3.setCategoryName("poison");
+        productRepository.save(preSaved3);
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        final String url = String.format("/companies/%s/products", company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*]", hasSize(3)))
+                .andExpect(jsonPath("$.content[0].id", equalTo(preSaved1.getId().intValue())))
+                .andExpect(jsonPath("$.content[1].id", equalTo(preSaved2.getId().intValue())))
+                .andExpect(jsonPath("$.content[2].id", equalTo(preSaved3.getId().intValue())));
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationOneCategoryWhenFindProductsThenFind() throws Exception {
+        //given
+        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        preSaved1.setName("Hot dog");
+        preSaved1.setCategoryName("food");
+        productRepository.save(preSaved1);
+        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        preSaved2.setName("Coffee");
+        preSaved2.setCategoryName("drink");
+        productRepository.save(preSaved2);
+        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        preSaved3.setName("Arsenic");
+        preSaved3.setCategoryName("poison");
+        productRepository.save(preSaved3);
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        final String url = String.format("/companies/%s/products", company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("category", preSaved2.getCategoryName())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*]", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id", equalTo(preSaved2.getId().intValue())));
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationTwoCategoriesWhenFindProductsThenFind() throws Exception {
+        //given
+        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        preSaved1.setName("Hot dog");
+        preSaved1.setCategoryName("food");
+        productRepository.save(preSaved1);
+        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        preSaved2.setName("Coffee");
+        preSaved2.setCategoryName("drink");
+        productRepository.save(preSaved2);
+        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        preSaved3.setName("Arsenic");
+        preSaved3.setCategoryName("poison");
+        productRepository.save(preSaved3);
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        final String url = String.format("/companies/%s/products", company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("category", preSaved2.getCategoryName(), preSaved1.getCategoryName())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*]", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].id", equalTo(preSaved1.getId().intValue())))
+                .andExpect(jsonPath("$.content[1].id", equalTo(preSaved2.getId().intValue())));
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationNameSubstringWhenFindProductsThenFind() throws Exception {
+        //given
+        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        preSaved1.setName("Hoft dog");
+        preSaved1.setCategoryName("food");
+        productRepository.save(preSaved1);
+        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        preSaved2.setName("Coffee");
+        preSaved2.setCategoryName("drink");
+        productRepository.save(preSaved2);
+        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        preSaved3.setName("Arsenic");
+        preSaved3.setCategoryName("poison");
+        productRepository.save(preSaved3);
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        final String url = String.format("/companies/%s/products", company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("name", "of")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*]", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].id", equalTo(preSaved1.getId().intValue())))
+                .andExpect(jsonPath("$.content[1].id", equalTo(preSaved2.getId().intValue())));
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationNameEqualWhenFindProductsThenFind() throws Exception {
+        //given
+        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        preSaved1.setName("Hot dog");
+        preSaved1.setCategoryName("food");
+        productRepository.save(preSaved1);
+        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        preSaved2.setName("Coffee");
+        preSaved2.setCategoryName("drink");
+        productRepository.save(preSaved2);
+        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        preSaved3.setName("Arsenic");
+        preSaved3.setCategoryName("poison");
+        productRepository.save(preSaved3);
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        final String url = String.format("/companies/%s/products", company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("name", "Hot dog")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*]", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id", equalTo(preSaved1.getId().intValue())));
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationNameSubstringAndCategoryWhenFindProductsThenFind() throws Exception {
+        //given
+        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        preSaved1.setName("Hoft dog");
+        preSaved1.setCategoryName("food");
+        productRepository.save(preSaved1);
+        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        preSaved2.setName("Coffee");
+        preSaved2.setCategoryName("drink");
+        productRepository.save(preSaved2);
+        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        preSaved3.setName("Arsenic");
+        preSaved3.setCategoryName("poison");
+        productRepository.save(preSaved3);
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        final String url = String.format("/companies/%s/products", company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("name", "of")
+                .param("category", preSaved1.getCategoryName(), preSaved3.getCategoryName())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*]", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id", equalTo(preSaved1.getId().intValue())));
+    }
+
+
+    @Test
+    void givenValidRequestNotOwnCompanyOperationCompanyNotVisibleWhenGetProductThen403() throws Exception {
+        //given
+        company.setAccount(accountRepository.save(AccountDataGenerator.customerAccount(2)));
+        final String url = String.format("/companies/%s/products", company.getUid());
+        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        preSaved1.setName("Hot dog");
+        preSaved1.setCategoryName("food");
+        productRepository.save(preSaved1);
+        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        preSaved2.setName("Coffee");
+        preSaved2.setCategoryName("drink");
+        productRepository.save(preSaved2);
+        company.setVisibilityStatus(CompanyVisibilityStatus.HIDDEN);
+        companyRepository.save(company);
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+    }
+
+    @Test
+    void givenValidRequestNotOwnCompanyOperationCompanyVisibleWhenGetProductThenGet() throws Exception {
+        //given
+        account.setCompany(null);
+        accountRepository.save(account);
+        final String url = String.format("/companies/%s/products", company.getUid());
+        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        preSaved1.setName("Hot dog");
+        preSaved1.setCategoryName("food");
+        productRepository.save(preSaved1);
+        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        preSaved2.setName("Coffee");
+        preSaved2.setCategoryName("drink");
+        productRepository.save(preSaved2);
+        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        preSaved3.setName("Arsenic");
+        preSaved3.setCategoryName("poison");
+        productRepository.save(preSaved3);
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*]", hasSize(3)))
+                .andExpect(jsonPath("$.content[0].id", equalTo(preSaved1.getId().intValue())))
+                .andExpect(jsonPath("$.content[1].id", equalTo(preSaved2.getId().intValue())))
+                .andExpect(jsonPath("$.content[2].id", equalTo(preSaved3.getId().intValue())));
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationLackOfPrivilegeWhenGetProductThen401() throws Exception {
+        //given
+        privilegeRepository.deleteAll();
+
+        final String url = String.format("/companies/%s/products", company.getUid());
+        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        preSaved1.setName("Hot dog");
+        preSaved1.setCategoryName("food");
+        productRepository.save(preSaved1);
+        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        preSaved2.setName("Coffee");
+        preSaved2.setCategoryName("drink");
+        productRepository.save(preSaved2);
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        //when
+        final ResultActions result = mockMvc.perform(post(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isUnauthorized());
     }
 
     @Test

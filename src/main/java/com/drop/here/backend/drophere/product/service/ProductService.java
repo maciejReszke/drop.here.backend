@@ -27,8 +27,8 @@ public class ProductService {
     private final ProductMappingService productMappingService;
     private final ProductCustomizationService productCustomizationService;
 
-    public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, AccountAuthentication accountAuthentication) {
-        return productSearchingService.findAll(pageable, companyUid, desiredCategories, accountAuthentication);
+    public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring, AccountAuthentication accountAuthentication) {
+        return productSearchingService.findAll(pageable, companyUid, desiredCategories,desiredNameSubstring, accountAuthentication);
     }
 
     public ResourceOperationResponse createProduct(ProductManagementRequest productManagementRequest, String companyUid, AccountAuthentication accountAuthentication) {

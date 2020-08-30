@@ -52,15 +52,16 @@ class ProductSearchingServiceTest {
         final Account account = AccountDataGenerator.customerAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Product product = Product.builder().id(1L).deletable(false).build();
+        final String desiredName = "Name";
 
         when(authenticationPrivilegesService.isOwnCompanyOperation(accountAuthentication, companyUid))
                 .thenReturn(true);
-        when(productRepository.findAll(eq(companyUid), isNull(), eq(ProductAvailabilityStatus.values()), eq(pageable)))
+        when(productRepository.findAll(eq(companyUid), isNull(), eq('%' + desiredName.toLowerCase() + '%'), eq(ProductAvailabilityStatus.values()), eq(pageable)))
                 .thenReturn(new PageImpl<>(List.of(product)));
         when(productCustomizationService.findCustomizations(any())).thenReturn(List.of(ProductCustomizationWrapper.builder().product(product).customizations(Set.of()).build()));
 
         //when
-        final Page<ProductResponse> result = productSearchingService.findAll(pageable, companyUid, desiredCategories, accountAuthentication);
+        final Page<ProductResponse> result = productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredName, accountAuthentication);
 
         //then
         assertThat(result).hasSize(1);
@@ -78,11 +79,11 @@ class ProductSearchingServiceTest {
 
         when(authenticationPrivilegesService.isOwnCompanyOperation(accountAuthentication, companyUid))
                 .thenReturn(false);
-        when(productRepository.findAll(eq(companyUid), isNull(), eq(new ProductAvailabilityStatus[]{ProductAvailabilityStatus.AVAILABLE}), eq(pageable)))
+        when(productRepository.findAll(eq(companyUid), isNull(), isNull(), eq(new ProductAvailabilityStatus[]{ProductAvailabilityStatus.AVAILABLE}), eq(pageable)))
                 .thenReturn(new PageImpl<>(List.of(Product.builder().deletable(false).build())));
 
         //when
-        final Page<ProductResponse> result = productSearchingService.findAll(pageable, companyUid, desiredCategories, accountAuthentication);
+        final Page<ProductResponse> result = productSearchingService.findAll(pageable, companyUid, desiredCategories, "", accountAuthentication);
 
         //then
         assertThat(result).hasSize(1);
