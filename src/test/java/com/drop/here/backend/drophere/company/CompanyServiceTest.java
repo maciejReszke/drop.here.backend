@@ -160,10 +160,11 @@ class CompanyServiceTest {
         //given
         final MockMultipartFile image = new MockMultipartFile("name", "byte".getBytes());
         final Account account = Account.builder().build();
+        final Company company = Company.builder().build();
         final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
                 .account(account)
+                .company(company)
                 .build();
-        final Company company = Company.builder().build();
 
         final Image imageEntity = Image.builder().build();
         when(imageService.createImage(image.getBytes(), ImageType.COMPANY_IMAGE))
@@ -174,7 +175,7 @@ class CompanyServiceTest {
         final ResourceOperationResponse resourceOperationResponse = companyService.updateImage(image, accountAuthentication);
 
         //then
-        assertThat(resourceOperationResponse.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
+        assertThat(resourceOperationResponse.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
         assertThat(company.getImage()).isEqualTo(imageEntity);
     }
 

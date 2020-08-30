@@ -33,6 +33,7 @@ class CompanyValidationServiceTest {
     void givenInvalidRequestWhenValidateThenDoThrowException() {
         //given
         final CompanyManagementRequest request = CompanyDataGenerator.managementRequest(1);
+        request.setVisibilityStatus("ninja");
 
         //when
         final Throwable throwable = catchThrowable(() -> companyValidationService.validate(request));
