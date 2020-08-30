@@ -52,11 +52,11 @@ class ProductSearchingServiceTest {
         final Account account = AccountDataGenerator.customerAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Product product = Product.builder().id(1L).deletable(false).build();
-        final String desiredName = "name";
+        final String desiredName = "Name";
 
         when(authenticationPrivilegesService.isOwnCompanyOperation(accountAuthentication, companyUid))
                 .thenReturn(true);
-        when(productRepository.findAll(eq(companyUid), isNull(), eq(desiredName), eq(ProductAvailabilityStatus.values()), eq(pageable)))
+        when(productRepository.findAll(eq(companyUid), isNull(), eq('%' + desiredName.toLowerCase() + '%'), eq(ProductAvailabilityStatus.values()), eq(pageable)))
                 .thenReturn(new PageImpl<>(List.of(product)));
         when(productCustomizationService.findCustomizations(any())).thenReturn(List.of(ProductCustomizationWrapper.builder().product(product).customizations(Set.of()).build()));
 
