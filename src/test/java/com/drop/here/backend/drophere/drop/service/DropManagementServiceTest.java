@@ -4,7 +4,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
-import com.drop.here.backend.drophere.company.Company;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropCompanyResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;

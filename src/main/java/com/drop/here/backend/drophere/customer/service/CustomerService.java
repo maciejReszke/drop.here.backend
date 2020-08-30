@@ -34,6 +34,6 @@ public class CustomerService {
             final Image image = imageService.createImage(result.getImage(), ImageType.CUSTOMER_IMAGE);
             customer.setImage(image);
         }
-        log.info("Creating customer for account with mail {} via external authentication", account.getMail());
+        log.info("Creating customer for account via external authentication");
     }
 }

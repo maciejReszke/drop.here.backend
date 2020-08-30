@@ -5,8 +5,8 @@ import com.drop.here.backend.drophere.authentication.account.entity.Privilege;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
-import com.drop.here.backend.drophere.company.Company;
-import com.drop.here.backend.drophere.company.CompanyRepository;
+import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
@@ -74,7 +74,6 @@ class DropCompanyControllerTest extends IntegrationBaseClass {
         companyRepository.deleteAll();
         privilegeRepository.deleteAll();
         accountRepository.deleteAll();
-        companyRepository.deleteAll();
         countryRepository.deleteAll();
     }
 

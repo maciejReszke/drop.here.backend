@@ -34,11 +34,11 @@ public class AuthenticationService {
 
     public LoginResponse login(BaseLoginRequest loginRequest) {
         final Account account = accountService.findActiveAccountByMail(loginRequest.getMail())
-                .orElseThrow(() -> new UnauthorizedRestException(String.format("During login account with mail %s was not found", loginRequest.getMail()),
+                .orElseThrow(() -> new UnauthorizedRestException("During login account was not found",
                         RestExceptionStatusCode.LOGIN_ACTIVE_USER_NOT_FOUND));
 
         if (!accountService.isPasswordValid(account, loginRequest.getPassword())) {
-            throw new UnauthorizedRestException(String.format("During login account with mail %s gave invalid password", loginRequest.getMail()),
+            throw new UnauthorizedRestException(String.format("During login account %s gave invalid password", account.getId()),
                     RestExceptionStatusCode.LOGIN_INVALID_PASSWORD);
         }
 
@@ -85,7 +85,7 @@ public class AuthenticationService {
     private Account getCustomerAccount(ExternalAuthenticationProviderLoginRequest request, ExternalAuthenticationResult result) {
         return accountService.findActiveAccountByMail(result.getEmail())
                 .filter(account -> account.getAccountType() == AccountType.CUSTOMER)
-                .orElseThrow(() -> new UnauthorizedRestException(String.format("During login account via %s mail %s was not active or not a customer account", request.getProvider(), result.getEmail()),
+                .orElseThrow(() -> new UnauthorizedRestException(String.format("During login account via %s was not active or not a customer account", request.getProvider()),
                         RestExceptionStatusCode.LOGIN_PROVIDER_CUSTOMER_ACCOUNT_NOT_ACTIVE));
     }
 

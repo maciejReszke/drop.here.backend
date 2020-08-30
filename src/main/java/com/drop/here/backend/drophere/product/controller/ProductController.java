@@ -98,7 +98,7 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Deleting product")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Product deleted", response = ResourceOperationResponse.class),
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Product deleted", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
