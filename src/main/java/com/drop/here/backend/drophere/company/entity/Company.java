@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.company.entity;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.country.Country;
+import com.drop.here.backend.drophere.image.Image;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -68,6 +69,8 @@ public class Company {
     @NotNull
     private Account account;
 
-    // TODO: 29/08/2020 image!
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "image_id")
+    private Image image;
 }
 

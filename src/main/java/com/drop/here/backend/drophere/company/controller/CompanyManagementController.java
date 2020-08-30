@@ -14,11 +14,14 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +34,9 @@ import javax.validation.Valid;
 public class CompanyManagementController {
     private final CompanyService companyService;
 
-    // TODO: 30/08/2020 + get na usera na innym kontrolerze z regionami + get na image
+    private static final String IMAGE_PART_NAME = "image";
+
+    // TODO: 30/08/2020 + get na usera na innym kontrolerze z regionami (ale czy aby na pewno)+ get na image
     @GetMapping
     @ApiOperation("Get own company info")
     @ApiAuthorizationToken
@@ -57,6 +62,20 @@ public class CompanyManagementController {
     public ResourceOperationResponse updateCompany(@ApiIgnore AccountAuthentication authentication,
                                                    @RequestBody @Valid CompanyManagementRequest companyManagementRequest) {
         return companyService.updateCompany(companyManagementRequest, authentication);
+    }
+
+    @PostMapping("/images")
+    @ApiAuthorizationToken
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation("Update company image")
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Image updated", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    public ResourceOperationResponse updateCompanyImage(@ApiIgnore AccountAuthentication authentication,
+                                                        @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
+        return companyService.updateImage(image, authentication);
     }
 
 }

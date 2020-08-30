@@ -1,6 +1,8 @@
 package com.drop.here.backend.drophere.company.service;
 
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
+import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
+import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
@@ -8,11 +10,17 @@ import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResp
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
+import com.drop.here.backend.drophere.image.Image;
+import com.drop.here.backend.drophere.image.ImageService;
+import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +30,7 @@ public class CompanyService {
     private final CompanyValidationService companyValidationService;
     private final CompanyMappingService companyMappingService;
     private final PrivilegeService privilegeService;
+    private final ImageService imageService;
 
     public boolean isVisible(String companyUid) {
         return companyRepository.findByUid(companyUid)
@@ -56,5 +65,20 @@ public class CompanyService {
         companyRepository.save(company);
         privilegeService.addCompanyCreatedPrivilege(authentication.getPrincipal());
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, company.getId());
+    }
+
+    @Transactional
+    public ResourceOperationResponse updateImage(MultipartFile imagePart, AccountAuthentication authentication) {
+        try {
+            final Image image = imageService.createImage(imagePart.getBytes(), ImageType.COMPANY_IMAGE);
+            final Company company = authentication.getCompany();
+            company.setImage(image);
+            log.info("Updating image for company {}", company.getUid());
+            companyRepository.save(company);
+            return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, company.getId());
+        } catch (IOException exception) {
+            throw new RestIllegalRequestValueException("Invalid image " + exception.getMessage(),
+                    RestExceptionStatusCode.UPDATE_COMPANY_IMAGE_INVALID_IMAGE);
+        }
     }
 }

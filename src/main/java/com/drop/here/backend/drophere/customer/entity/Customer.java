@@ -35,7 +35,7 @@ public class Customer {
     private String lastName;
 
     // TODO: 29/08/2020 check na lazy loading
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "image_id")
     private Image image;
 

@@ -12,6 +12,9 @@ import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.company.service.CompanyMappingService;
 import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.company.service.CompanyValidationService;
+import com.drop.here.backend.drophere.image.Image;
+import com.drop.here.backend.drophere.image.ImageService;
+import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import org.junit.jupiter.api.Test;
@@ -19,7 +22,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +48,9 @@ class CompanyServiceTest {
 
     @Mock
     private PrivilegeService privilegeService;
+
+    @Mock
+    private ImageService imageService;
 
     @Test
     void givenVisibleCompanyWhenIsVisibleThenTrue() {
@@ -143,5 +151,28 @@ class CompanyServiceTest {
 
         //then
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
+    }
+
+    @Test
+    void givenImageWhenUpdateImageThenUpdate() throws IOException {
+        //given
+        final MockMultipartFile image = new MockMultipartFile("name", "byte".getBytes());
+        final Account account = Account.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .account(account)
+                .build();
+        final Company company = Company.builder().build();
+
+        final Image imageEntity = Image.builder().build();
+        when(imageService.createImage(image.getBytes(), ImageType.COMPANY_IMAGE))
+                .thenReturn(imageEntity);
+        when(companyRepository.save(company)).thenReturn(company);
+
+        //when
+        final ResourceOperationResponse resourceOperationResponse = companyService.updateImage(image, accountAuthentication);
+
+        //then
+        assertThat(resourceOperationResponse.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
+        assertThat(company.getImage()).isEqualTo(imageEntity);
     }
 }
