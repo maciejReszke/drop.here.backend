@@ -32,7 +32,6 @@ public class CompanyManagementController {
     private final CompanyService companyService;
 
     // TODO: 30/08/2020 + get na usera na innym kontrolerze z regionami + get na image
-    // TODO: 30/08/2020 test
     @GetMapping
     @ApiOperation("Get own company info")
     @ApiAuthorizationToken
@@ -46,7 +45,6 @@ public class CompanyManagementController {
         return companyService.findOwnCompany(authentication);
     }
 
-    // TODO: 30/08/2020 test
     @PutMapping
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)

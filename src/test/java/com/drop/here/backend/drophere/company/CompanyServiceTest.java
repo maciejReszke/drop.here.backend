@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.company;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
@@ -23,6 +24,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +40,9 @@ class CompanyServiceTest {
 
     @Mock
     private CompanyMappingService companyMappingService;
+
+    @Mock
+    private PrivilegeService privilegeService;
 
     @Test
     void givenVisibleCompanyWhenIsVisibleThenTrue() {
@@ -115,6 +120,7 @@ class CompanyServiceTest {
 
         //then
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        verifyNoInteractions(privilegeService);
     }
 
     @Test
@@ -130,11 +136,12 @@ class CompanyServiceTest {
         doNothing().when(companyValidationService).validate(request);
         when(companyMappingService.createCompany(request, account)).thenReturn(company);
         when(companyRepository.save(company)).thenReturn(company);
+        doNothing().when(privilegeService).addCompanyCreatedPrivilege(account);
 
         //when
         final ResourceOperationResponse result = companyService.updateCompany(request, accountAuthentication);
 
         //then
-        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
     }
 }

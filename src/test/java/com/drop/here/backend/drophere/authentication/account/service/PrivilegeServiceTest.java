@@ -109,4 +109,20 @@ class PrivilegeServiceTest {
         assertThat(account.getPrivileges().get(0)).isEqualTo(privilege);
     }
 
+    @Test
+    void givenAccountWhenAddCompanyCreatedPrivilegeThenAdd() {
+        //given
+        final Account account = Account.builder().build();
+
+        final Privilege privilege = Privilege.builder().build();
+        when(privilegeRepository.save(any())).thenReturn(privilege);
+
+        //when
+        privilegeService.addCompanyCreatedPrivilege(account);
+
+        //then
+        assertThat(account.getPrivileges()).hasSize(1);
+        assertThat(account.getPrivileges().get(0)).isEqualTo(privilege);
+    }
+
 }

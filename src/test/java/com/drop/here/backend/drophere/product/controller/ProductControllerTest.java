@@ -6,8 +6,8 @@ import com.drop.here.backend.drophere.authentication.account.repository.AccountR
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
+import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
@@ -101,7 +101,6 @@ class ProductControllerTest extends IntegrationBaseClass {
         companyRepository.deleteAll();
         privilegeRepository.deleteAll();
         accountRepository.deleteAll();
-        companyRepository.deleteAll();
         productCategoryRepository.deleteAll();
         productUnitRepository.deleteAll();
         countryRepository.deleteAll();

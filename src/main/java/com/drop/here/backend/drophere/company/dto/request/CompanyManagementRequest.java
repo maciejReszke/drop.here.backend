@@ -12,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class CompanyManagementRequest {
 
     @ApiModelProperty(value = "Company name", example = "Glodny maciek", required = true)

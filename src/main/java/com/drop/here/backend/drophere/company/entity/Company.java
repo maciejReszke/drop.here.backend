@@ -30,7 +30,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(indexes = @Index(columnList = "uid", unique = true))
+@Table(indexes = {
+        @Index(columnList = "uid", unique = true),
+        @Index(columnList = "account_id", unique = true)
+})
 public class Company {
 
     @Id
@@ -40,8 +43,6 @@ public class Company {
     @NotBlank
     private String name;
 
-    // TODO: 24/08/2020 na podstawie nazwy
-    // TODO: 29/08/2020 image!
     @NotBlank
     private String uid;
 
@@ -66,5 +67,7 @@ public class Company {
     @JoinColumn(name = "account_id")
     @NotNull
     private Account account;
+
+    // TODO: 29/08/2020 image!
 }
 

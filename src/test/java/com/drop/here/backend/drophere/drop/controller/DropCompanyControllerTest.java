@@ -74,7 +74,6 @@ class DropCompanyControllerTest extends IntegrationBaseClass {
         companyRepository.deleteAll();
         privilegeRepository.deleteAll();
         accountRepository.deleteAll();
-        companyRepository.deleteAll();
         countryRepository.deleteAll();
     }
 

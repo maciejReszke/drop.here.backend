@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.company.service;
 
+import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
@@ -20,6 +21,7 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final CompanyValidationService companyValidationService;
     private final CompanyMappingService companyMappingService;
+    private final PrivilegeService privilegeService;
 
     public boolean isVisible(String companyUid) {
         return companyRepository.findByUid(companyUid)
@@ -29,7 +31,9 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public CompanyManagementResponse findOwnCompany(AccountAuthentication authentication) {
-        return companyMappingService.toManagementResponse(authentication.getCompany());
+        final Company company = companyRepository.findByAccount(authentication.getPrincipal())
+                .orElse(null);
+        return companyMappingService.toManagementResponse(company);
     }
 
     public ResourceOperationResponse updateCompany(CompanyManagementRequest companyManagementRequest, AccountAuthentication authentication) {
@@ -50,6 +54,7 @@ public class CompanyService {
         final Company company = companyMappingService.createCompany(companyManagementRequest, authentication.getPrincipal());
         log.info("Creating new company with uid {} for account with id {}", company.getUid(), authentication.getPrincipal().getId());
         companyRepository.save(company);
+        privilegeService.addCompanyCreatedPrivilege(authentication.getPrincipal());
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, company.getId());
     }
 }
