@@ -1,4 +1,4 @@
-package com.drop.here.backend.drophere.dealer;
+package com.drop.here.backend.drophere.image;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,22 +6,30 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.NotBlank;
+import javax.persistence.Lob;
+import javax.validation.constraints.NotNull;
 
 @Entity
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class Dealer {
+public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    private String uid;
+    @NotNull
+    @Enumerated(value = EnumType.STRING)
+    private ImageType type;
+
+    @NotNull
+    @Lob
+    private byte[] bytes;
 }
