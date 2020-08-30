@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.company;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
+import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -174,5 +176,35 @@ class CompanyServiceTest {
         //then
         assertThat(resourceOperationResponse.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
         assertThat(company.getImage()).isEqualTo(imageEntity);
+    }
+
+    @Test
+    void givenExistingCustomerWithImageWhenFindImageThenFind() {
+        //given
+        final String companyUid = "companyUid";
+        final Image image = Image.builder().build();
+        final Company company = Company.builder()
+                .image(image)
+                .build();
+
+        when(companyRepository.findByUidWithImage(companyUid)).thenReturn(Optional.of(company));
+        //when
+        final Image result = companyService.findImage(companyUid);
+
+        //then
+        assertThat(result).isEqualTo(image);
+    }
+
+    @Test
+    void givenNotExistingCustomerWithImageWhenFindImageThenError() {
+        //given
+        final String companyUid = "companyUid";
+
+        when(companyRepository.findByUidWithImage(companyUid)).thenReturn(Optional.empty());
+        //when
+        final Throwable throwable = catchThrowable(() -> companyService.findImage(companyUid));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 }

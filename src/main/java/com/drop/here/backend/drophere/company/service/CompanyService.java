@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.company.service;
 
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
+import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
@@ -80,5 +81,14 @@ public class CompanyService {
             throw new RestIllegalRequestValueException("Invalid image " + exception.getMessage(),
                     RestExceptionStatusCode.UPDATE_COMPANY_IMAGE_INVALID_IMAGE);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Image findImage(String companyUid) {
+        return companyRepository.findByUidWithImage(companyUid)
+                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                        "Image for company %s was not found", companyUid),
+                        RestExceptionStatusCode.COMPANY_IMAGE_WAS_NOT_FOUND))
+                .getImage();
     }
 }

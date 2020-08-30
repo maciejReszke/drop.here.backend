@@ -49,6 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.PUT, "/management/companies").hasAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.POST, "/management/companies/images").hasAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.GET, "/management/companies").hasAnyAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE, PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/images").authenticated()
                         .mvcMatchers("/actuator/**").permitAll()
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

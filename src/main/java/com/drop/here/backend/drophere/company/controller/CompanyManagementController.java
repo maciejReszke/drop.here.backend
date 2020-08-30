@@ -36,7 +36,6 @@ public class CompanyManagementController {
 
     private static final String IMAGE_PART_NAME = "image";
 
-    // TODO: 30/08/2020 + get na usera na innym kontrolerze z regionami (ale czy aby na pewno)+ get na image
     @GetMapping
     @ApiOperation("Get own company info")
     @ApiAuthorizationToken
