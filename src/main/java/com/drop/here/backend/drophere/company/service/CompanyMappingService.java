@@ -42,7 +42,6 @@ public class CompanyMappingService {
         company.setUid(generateUid(name));
         company.setCountry(countryService.findActive(companyManagementRequest.getCountry()));
         company.setVisibilityStatus(CompanyVisibilityStatus.valueOf(companyManagementRequest.getVisibilityStatus()));
-
     }
 
     private String generateUid(String name) {

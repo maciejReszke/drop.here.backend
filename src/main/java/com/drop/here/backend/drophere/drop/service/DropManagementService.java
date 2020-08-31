@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ public class DropManagementService {
     private final DropManagementValidationService dropManagementValidationService;
     private final DropMappingService dropMappingService;
     private final DropRepository dropRepository;
+    private final DropMembershipService dropMembershipService;
 
     public List<DropCompanyResponse> findCompanyDrops(String companyUid, String name) {
         return dropRepository.findAllByCompanyUidAndNameStartsWith(companyUid, StringUtils.defaultIfEmpty(name, ""))
@@ -53,12 +55,14 @@ public class DropManagementService {
         return dropRepository.findByIdAndCompanyUid(dropId, companyUid)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Drop with id %s company %s was not found", dropId, companyUid),
-                        RestExceptionStatusCode.DROP_NOT_FOUND));
+                        RestExceptionStatusCode.DROP_NOT_FOUND_BY_ID));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResourceOperationResponse deleteDrop(Long dropId, String companyUid) {
         final Drop drop = getDrop(dropId, companyUid);
         log.info("Deleting drop for company {} with uid {}", companyUid, drop.getUid());
+        dropMembershipService.deleteMemberships(drop);
         dropRepository.delete(drop);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, drop.getId());
     }

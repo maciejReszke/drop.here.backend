@@ -42,6 +42,9 @@ class DropManagementServiceTest {
     @Mock
     private DropManagementValidationService dropManagementValidationService;
 
+    @Mock
+    private DropMembershipService dropMembershipService;
+
     @Test
     void givenDropManagementRequestWhenCreateDropThenCreate() {
         //given
@@ -111,6 +114,7 @@ class DropManagementServiceTest {
         final Long dropId = 1L;
         when(dropRepository.findByIdAndCompanyUid(dropId, companyUid)).thenReturn(Optional.of(drop));
         doNothing().when(dropRepository).delete(drop);
+        doNothing().when(dropMembershipService).deleteMemberships(drop);
 
         //when
         final ResourceOperationResponse response = dropManagementService.deleteDrop(dropId, companyUid);

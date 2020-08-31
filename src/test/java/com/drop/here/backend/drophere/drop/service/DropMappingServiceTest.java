@@ -1,9 +1,14 @@
 package com.drop.here.backend.drophere.drop.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
+import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
+import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
@@ -107,5 +112,66 @@ class DropMappingServiceTest {
         assertThat(drop.getYCoordinate()).isEqualTo(dropManagementRequest.getYCoordinate());
         assertThat(drop.getCompany()).isNull();
         assertThat(drop.getLocationType()).isEqualTo(DropLocationType.GEOLOCATION);
+    }
+
+    @Test
+    void givenDropWithoutAcceptWhenCreateMembershipThenCreate() {
+        //given
+        final Drop drop = DropDataGenerator.drop(1, null)
+                .toBuilder()
+                .requiresAccept(false)
+                .build();
+        final Customer customer = Customer.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication
+                .builder()
+                .customer(customer)
+                .build();
+
+        //when
+        final DropMembership membership = dropMappingService.createMembership(drop, accountAuthentication);
+
+        //then
+        assertThat(membership.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
+        assertThat(membership.getCustomer()).isEqualTo(customer);
+        assertThat(membership.getDrop()).isEqualTo(drop);
+        assertThat(membership.getMembershipStatus()).isEqualTo(DropMembershipStatus.ACTIVE);
+    }
+
+    @Test
+    void givenDropWithAcceptWhenCreateMembershipThenCreate() {
+        //given
+        final Drop drop = DropDataGenerator.drop(1, null)
+                .toBuilder()
+                .requiresAccept(true)
+                .build();
+        final Customer customer = Customer.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication
+                .builder()
+                .customer(customer)
+                .build();
+
+        //when
+        final DropMembership membership = dropMappingService.createMembership(drop, accountAuthentication);
+
+        //then
+        assertThat(membership.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
+        assertThat(membership.getCustomer()).isEqualTo(customer);
+        assertThat(membership.getDrop()).isEqualTo(drop);
+        assertThat(membership.getMembershipStatus()).isEqualTo(DropMembershipStatus.PENDING);
+    }
+
+    @Test
+    void givenDropMembershipWhenToDropMembershipResponseThenMap() {
+        //given
+        final Company company = Company.builder().build();
+        final Drop drop = DropDataGenerator.drop(1, company);
+        final Customer customer = Customer.builder().build();
+        final DropMembership dropMembership = DropDataGenerator.membership(drop, customer);
+
+        //when
+        final DropMembershipResponse result = dropMappingService.toDropMembershipResponse(dropMembership);
+
+        //then
+        assertThat(result.getDropMembershipStatus()).isEqualTo(dropMembership.getMembershipStatus());
     }
 }

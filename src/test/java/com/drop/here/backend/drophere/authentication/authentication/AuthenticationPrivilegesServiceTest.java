@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationPrivilegesService;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.service.CompanyService;
+import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
@@ -190,4 +191,72 @@ class AuthenticationPrivilegesServiceTest {
         //then
         assertThat(result).isFalse();
     }
+
+    @Test
+    void givenNotCustomerAccountWhenIsOwnCustomerOperationThenFalse() {
+        //given
+        final Customer customer = Customer.builder().id(1L).build();
+        final Account account = AccountDataGenerator.customerAccount(1);
+        account.setCustomer(customer);
+        account.setAccountType(AccountType.COMPANY);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final long customerId = 1L;
+
+        //when
+        final boolean result = authenticationPrivilegesService.isOwnCustomerOperation(accountAuthentication, customerId);
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenLackOfCustomerAccountWhenIsOwnCustomerOperationThenFalse() {
+        //given
+        final Account account = AccountDataGenerator.customerAccount(1);
+        account.setCustomer(null);
+        account.setAccountType(AccountType.CUSTOMER);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final long customerId = 1L;
+
+        //when
+        final boolean result = authenticationPrivilegesService.isOwnCustomerOperation(accountAuthentication, customerId);
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenDifferentCustomerIdAccountWhenIsOwnCustomerOperationThenFalse() {
+        //given
+        final Customer customer = Customer.builder().id(1L).build();
+        final Account account = AccountDataGenerator.customerAccount(1);
+        account.setCustomer(customer);
+        account.setAccountType(AccountType.CUSTOMER);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final long customerId = 2L;
+
+        //when
+        final boolean result = authenticationPrivilegesService.isOwnCustomerOperation(accountAuthentication, customerId);
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenValidSameCustomerAccountWhenIsOwnCustomerOperationThenTrue() {
+        //given
+        final Customer customer = Customer.builder().id(1L).build();
+        final Account account = AccountDataGenerator.customerAccount(1);
+        account.setCustomer(customer);
+        account.setAccountType(AccountType.CUSTOMER);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final long customerId = 1L;
+
+        //when
+        final boolean result = authenticationPrivilegesService.isOwnCustomerOperation(accountAuthentication, customerId);
+
+        //then
+        assertThat(result).isFalse();
+    }
+
 }

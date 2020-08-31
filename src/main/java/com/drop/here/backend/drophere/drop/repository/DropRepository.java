@@ -11,5 +11,7 @@ import java.util.Optional;
 public interface DropRepository extends JpaRepository<Drop, Long> {
     Optional<Drop> findByIdAndCompanyUid(Long dropId, String companyUid);
 
+    Optional<Drop> findByUidAndCompanyUid(String dropUid, String companyUid);
+
     List<Drop> findAllByCompanyUidAndNameStartsWith(String companyUid, String name);
 }

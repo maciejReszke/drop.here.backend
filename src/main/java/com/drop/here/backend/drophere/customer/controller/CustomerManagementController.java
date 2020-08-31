@@ -1,11 +1,10 @@
-package com.drop.here.backend.drophere.company.controller;
+package com.drop.here.backend.drophere.customer.controller;
 
-import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
-import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
-import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
-import com.drop.here.backend.drophere.company.service.CompanyService;
+import com.drop.here.backend.drophere.customer.dto.CustomerManagementRequest;
+import com.drop.here.backend.drophere.customer.dto.CustomerManagementResponse;
+import com.drop.here.backend.drophere.customer.service.CustomerService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
@@ -14,7 +13,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -31,53 +29,51 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/management/companies")
-@Api(tags = "Company management API")
-public class CompanyManagementController {
-    private final CompanyService companyService;
+@RequestMapping("/management/customers")
+@Api(tags = "Customer management API")
+public class CustomerManagementController {
+    private final CustomerService customerService;
 
     private static final String IMAGE_PART_NAME = "image";
 
     @GetMapping
-    @ApiOperation("Get own company info")
+    @ApiOperation("Get own customer info")
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Own company info"),
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Own customer info", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public CompanyManagementResponse findOwnCompany(@ApiIgnore AccountAuthentication authentication) {
-        return companyService.findOwnCompany(authentication);
+    public CustomerManagementResponse findOwnCompany(@ApiIgnore AccountAuthentication authentication) {
+        return customerService.findOwnCustomer(authentication);
     }
 
     @PutMapping
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Update company")
+    @ApiOperation("Update customer")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Company updated", response = ResourceOperationResponse.class),
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Customer updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     public ResourceOperationResponse updateCompany(@ApiIgnore AccountAuthentication authentication,
-                                                   @RequestBody @Valid CompanyManagementRequest companyManagementRequest) {
-        return companyService.updateCompany(companyManagementRequest, authentication);
+                                                   @RequestBody @Valid CustomerManagementRequest customerManagementRequest) {
+        return customerService.updateCustomer(customerManagementRequest, authentication);
     }
 
     @PostMapping("/images")
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Update company image")
+    @ApiOperation("Update image")
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Image updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @PreAuthorize("hasAuthority('" + PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE + "')")
-    public ResourceOperationResponse updateCompanyImage(@ApiIgnore AccountAuthentication authentication,
-                                                        @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
-        return companyService.updateImage(image, authentication);
+    public ResourceOperationResponse updateImage(@ApiIgnore AccountAuthentication authentication,
+                                                 @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
+        return customerService.updateImage(image, authentication);
     }
-
 }

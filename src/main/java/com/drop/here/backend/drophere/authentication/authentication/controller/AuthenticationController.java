@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -69,7 +68,6 @@ public class AuthenticationController {
         return authenticationService.getAuthenticationInfo(accountAuthentication);
     }
 
-    // TODO: 29/08/2020 test
     @PostMapping("/external")
     @ApiOperation("Login via external authentication provider")
     @ApiResponses(value = {

@@ -8,6 +8,8 @@ import com.drop.here.backend.drophere.drop.service.DropManagementService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +35,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/companies/{companyUid}/drops")
 @Api(tags = "Drops management API")
-public class DropCompanyController {
+public class DropManagementController {
     private final DropManagementService dropManagementService;
 
+    @ApiOperation("Listing companies drops")
     @GetMapping
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
@@ -47,10 +50,11 @@ public class DropCompanyController {
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public List<DropCompanyResponse> findDrops(@ApiIgnore AccountAuthentication authentication,
                                                @ApiIgnore @PathVariable String companyUid,
-                                               @RequestParam(required = false) String name) {
+                                               @ApiParam(value = "Name of drop (prefix)") @RequestParam(required = false) String name) {
         return dropManagementService.findCompanyDrops(companyUid, name);
     }
 
+    @ApiOperation("Creating drop")
     @PostMapping
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.CREATED)
@@ -66,6 +70,7 @@ public class DropCompanyController {
         return dropManagementService.createDrop(dropManagementRequest, companyUid, authentication);
     }
 
+    @ApiOperation("Updating drop")
     @PutMapping("/{dropId}")
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
@@ -77,11 +82,12 @@ public class DropCompanyController {
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public ResourceOperationResponse updateDrop(@ApiIgnore AccountAuthentication authentication,
                                                 @ApiIgnore @PathVariable String companyUid,
-                                                @PathVariable Long dropId,
+                                                @ApiIgnore @PathVariable Long dropId,
                                                 @RequestBody @Valid DropManagementRequest dropManagementRequest) {
         return dropManagementService.updateDrop(dropManagementRequest, dropId, companyUid);
     }
 
+    @ApiOperation("Deleting drop")
     @DeleteMapping("/{dropId}")
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
@@ -93,7 +99,7 @@ public class DropCompanyController {
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public ResourceOperationResponse deleteDrop(@ApiIgnore AccountAuthentication authentication,
                                                 @ApiIgnore @PathVariable String companyUid,
-                                                @PathVariable Long dropId) {
+                                                @ApiIgnore @PathVariable Long dropId) {
         return dropManagementService.deleteDrop(dropId, companyUid);
     }
 }
