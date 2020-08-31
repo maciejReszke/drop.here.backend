@@ -1,8 +1,10 @@
 package com.drop.here.backend.drophere.test_data;
 
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import lombok.experimental.UtilityClass;
 
@@ -41,6 +43,14 @@ public class DropDataGenerator {
                 .requiresPassword(true)
                 .xCoordinate(55.423569)
                 .yCoordinate(17.564037)
+                .build();
+    }
+
+    public DropMembership membership(Drop drop, Customer customer) {
+        return DropMembership.builder()
+                .customer(customer)
+                .drop(drop)
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 }

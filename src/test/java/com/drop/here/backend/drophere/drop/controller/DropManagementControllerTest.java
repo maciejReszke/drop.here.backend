@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class DropCompanyControllerTest extends IntegrationBaseClass {
+class DropManagementControllerTest extends IntegrationBaseClass {
 
     @Autowired
     private AccountRepository accountRepository;

@@ -3,7 +3,8 @@ package com.drop.here.backend.drophere.drop.controller;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
-import com.drop.here.backend.drophere.drop.service.DropUserService;
+import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
+import com.drop.here.backend.drophere.drop.service.DropMembershipService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
@@ -12,6 +13,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,22 +37,21 @@ import javax.validation.constraints.NotNull;
 @RequestMapping("/drops")
 @Api(tags = "Drops user API")
 public class DropUserController {
-    private final DropUserService dropUserService;
+    private final DropMembershipService dropUserService;
 
     // TODO: 28/08/2020 test
     @ApiOperation("Listing user's joined (requested) drops")
-    @GetMapping("/drops/memberships")
+    @GetMapping("/memberships")
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "List of drops that user is part of (or created join request)", response = ResourceOperationResponse.class),
+            @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "List of drops that user is part of (or created join request)"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @PreAuthorize("@authenticationPrivilegesService.isOwnAccountOperation(authentication, #accountId)")
-    public ResourceOperationResponse findMemberships(@ApiIgnore AccountAuthentication authentication,
-                                                     @ApiParam(value = "Name of drop (prefix)") @RequestParam(required = false) String name,
-                                                     @NotNull Pageable pageable) {
+    public Page<DropMembershipResponse> findMemberships(@ApiIgnore AccountAuthentication authentication,
+                                                        @ApiParam(value = "Name of drop (prefix)") @RequestParam String name,
+                                                        @NotNull Pageable pageable) {
         return dropUserService.findMemberships(authentication, name, pageable);
     }
 
@@ -64,6 +65,7 @@ public class DropUserController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
+    @PreAuthorize("@authenticationPrivilegesService.isCompanyVisible(#companyUid)")
     public ResourceOperationResponse createDropMembership(@ApiIgnore AccountAuthentication authentication,
                                                           @ApiIgnore @PathVariable String dropUid,
                                                           @ApiIgnore @PathVariable String companyUid,
@@ -71,6 +73,7 @@ public class DropUserController {
         return dropUserService.createDropMembership(dropJoinRequest, dropUid, companyUid, authentication);
     }
 
+    // TODO: 31/08/2020 test
     @ApiOperation("Leaving drop")
     @DeleteMapping("/{dropUid}/companies/{companyUid}/memberships")
     @ApiAuthorizationToken
@@ -80,6 +83,7 @@ public class DropUserController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
+    @PreAuthorize("@authenticationPrivilegesService.isCompanyVisible(#companyUid)")
     public ResourceOperationResponse deleteDrop(@ApiIgnore AccountAuthentication authentication,
                                                 @ApiIgnore @PathVariable String dropUid,
                                                 @ApiIgnore @PathVariable String companyUid) {

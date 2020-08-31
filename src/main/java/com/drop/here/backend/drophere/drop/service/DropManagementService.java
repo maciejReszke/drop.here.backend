@@ -56,6 +56,7 @@ public class DropManagementService {
                         RestExceptionStatusCode.DROP_NOT_FOUND_BY_ID));
     }
 
+    // TODO: 31/08/2020 usunac wszystkie membershipy!
     public ResourceOperationResponse deleteDrop(Long dropId, String companyUid) {
         final Drop drop = getDrop(dropId, companyUid);
         log.info("Deleting drop for company {} with uid {}", companyUid, drop.getUid());
@@ -63,7 +64,7 @@ public class DropManagementService {
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, drop.getId());
     }
 
-    // TODO: 28/08/2020 check czy aktywne i nie ukryte! + test
+    // TODO: 28/08/2020 test
     public Drop findDrop(String dropUid, String companyUid) {
         return dropRepository.findByUidAndCompanyUid(dropUid, companyUid)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(

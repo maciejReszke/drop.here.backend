@@ -2,9 +2,11 @@ package com.drop.here.backend.drophere.drop.service;
 
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropCompanyResponse;
+import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
+import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,8 +73,18 @@ public class DropMappingService {
                 .build();
     }
 
-    // TODO: 28/08/2020
     public DropMembership createMembership(Drop drop, AccountAuthentication authentication) {
-        return null;
+        return DropMembership.builder()
+                .createdAt(LocalDateTime.now())
+                .customer(authentication.getCustomer())
+                .drop(drop)
+                .membershipStatus(drop.isRequiresAccept() ? DropMembershipStatus.PENDING : DropMembershipStatus.ACTIVE)
+                .build();
+    }
+
+    public DropMembershipResponse toDropMembershipResponse(DropMembership dropMembership) {
+        return DropMembershipResponse.builder()
+                .dropMembershipStatus(dropMembership.getMembershipStatus())
+                .build();
     }
 }

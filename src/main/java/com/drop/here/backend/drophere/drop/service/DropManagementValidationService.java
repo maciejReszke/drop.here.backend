@@ -47,7 +47,7 @@ public class DropManagementValidationService {
                 dropManagementRequest.getEstimatedRadiusMeters());
     }
 
-    // TODO: 28/08/2020 test, implement
+    // TODO: 28/08/2020 test, implement (unikalne)
     public void validateCreatingDropMembershipRequest(Drop drop, DropJoinRequest dropJoinRequest) {
 
     }
