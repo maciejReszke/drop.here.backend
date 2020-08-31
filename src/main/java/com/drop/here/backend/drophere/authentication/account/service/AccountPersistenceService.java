@@ -17,15 +17,13 @@ public class AccountPersistenceService {
     private final AccountRepository accountRepository;
 
     public void createAccount(Account account) {
-        log.info("Saving account with mail {} and type {}", account.getMail(), account.getAccountType());
+        log.info("Saving new account with type {}", account.getAccountType());
         accountRepository.save(account);
-        log.info("Successfully saved account with mail {} and type {}", account.getMail(), account.getAccountType());
     }
 
     public void updateAccount(Account account) {
-        log.info("Updating account with mail {} and type {}", account.getMail(), account.getAccountType());
+        log.info("Updating account with id {} and type {}", account.getId(), account.getAccountType());
         accountRepository.save(account);
-        log.info("Successfully updated account with mail {} and type {}", account.getMail(), account.getAccountType());
     }
 
     public Optional<Account> findByMail(String mail) {

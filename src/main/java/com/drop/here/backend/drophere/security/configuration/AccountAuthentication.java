@@ -2,7 +2,7 @@ package com.drop.here.backend.drophere.security.configuration;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
-import com.drop.here.backend.drophere.company.Company;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;

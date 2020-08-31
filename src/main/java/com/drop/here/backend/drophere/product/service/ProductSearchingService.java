@@ -12,10 +12,12 @@ import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -31,11 +33,29 @@ public class ProductSearchingService {
     public Page<ProductResponse> findAll(Pageable pageable,
                                          String companyUid,
                                          String[] desiredCategories,
+                                         String desiredNameSubstring,
                                          AccountAuthentication accountAuthentication) {
         final boolean isOwnCompanyOperation = authenticationPrivilegesService.isOwnCompanyOperation(accountAuthentication, companyUid);
         final ProductAvailabilityStatus[] desiredAvailabilityStatuses = getDesiredAvailabilityStatuses(isOwnCompanyOperation);
-        final Page<Product> products = productRepository.findAll(companyUid, ArrayUtils.isEmpty(desiredCategories) ? null : desiredCategories, desiredAvailabilityStatuses, pageable);
+        final Page<Product> products = productRepository.findAll(
+                companyUid,
+                prepareCategories(desiredCategories),
+                prepareName(desiredNameSubstring),
+                desiredAvailabilityStatuses,
+                pageable);
         return toResponse(products, isOwnCompanyOperation);
+    }
+
+    private String prepareName(String desiredNameSubstring) {
+        return StringUtils.isBlank(desiredNameSubstring)
+                ? null
+                : '%' + desiredNameSubstring.toLowerCase() + '%';
+    }
+
+    private List<String> prepareCategories(String[] desiredCategories) {
+        return ArrayUtils.isEmpty(desiredCategories)
+                ? null
+                : Arrays.stream(desiredCategories).map(String::toLowerCase).collect(Collectors.toList());
     }
 
     private Page<ProductResponse> toResponse(Page<Product> products, boolean isOwnCompanyOperation) {

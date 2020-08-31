@@ -1,6 +1,6 @@
 package com.drop.here.backend.drophere.product.entity;
 
-import com.drop.here.backend.drophere.company.Company;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

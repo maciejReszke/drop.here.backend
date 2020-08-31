@@ -4,7 +4,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
-import com.drop.here.backend.drophere.company.Company;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
@@ -63,10 +63,11 @@ class ProductServiceTest {
         final Page<ProductResponse> paged = Page.empty();
 
         final String[] desiredCategories = new String[0];
-        when(productSearchingService.findAll(pageable, companyUid, desiredCategories, accountAuthentication)).thenReturn(paged);
+        final String desiredName = "aa";
+        when(productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredName, accountAuthentication)).thenReturn(paged);
 
         //when
-        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, desiredCategories, accountAuthentication);
+        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, desiredCategories, desiredName, accountAuthentication);
 
         //then
         assertThat(result).isEqualTo(paged);

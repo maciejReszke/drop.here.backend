@@ -4,15 +4,21 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.entity.Privilege;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountProfileRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
 import com.drop.here.backend.drophere.authentication.authentication.dto.request.BaseLoginRequest;
+import com.drop.here.backend.drophere.authentication.authentication.dto.request.ExternalAuthenticationProviderLoginRequest;
 import com.drop.here.backend.drophere.authentication.authentication.dto.request.ProfileLoginRequest;
+import com.drop.here.backend.drophere.authentication.authentication.enums.ExternalAuthenticationProvider;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
+import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
+import com.drop.here.backend.drophere.image.ImageRepository;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
+import com.drop.here.backend.drophere.test_data.CustomerDataGenerator;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -20,10 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.match.MockRestRequestMatchers;
+import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.equalTo;
@@ -49,11 +60,22 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private ImageRepository imageRepository;
+
     @AfterEach
     void cleanUp() {
+        customerRepository.deleteAll();
         privilegeRepository.deleteAll();
         accountProfileRepository.deleteAll();
         accountRepository.deleteAll();
+        imageRepository.deleteAll();
     }
 
     @Test
@@ -323,4 +345,285 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
         result.andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void givenValidRequestWithImageResponseAndNotExistingAccountAndCustomerWhenLoginWithAuthenticationProviderThenLogin() throws Exception {
+        //given
+        final String url = "/authentication/external";
+        final String json = objectMapper.writeValueAsString(
+                ExternalAuthenticationProviderLoginRequest.builder()
+                        .code("code123")
+                        .provider(ExternalAuthenticationProvider.FACEBOOK.name())
+                        .redirectUri("http://localhost:997/redirectUrl")
+                        .build()
+        );
+
+        final MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate);
+
+        final String userToken = "userToken123";
+
+        // Exchanging token
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/v8.0/oauth/access_token?client_id=clientTestId&client_secret=clientTestSecret&redirect_uri=http://localhost:997/redirectUrl&code=code123"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("{\n" + "  \"access_token\" : \"" + userToken + "\"}", MediaType.APPLICATION_JSON));
+
+        //Fetching user data (with picture)
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/me?access_token=userToken123&fields=email,first_name,last_name,picture"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("{\n" +
+                                "  \"email\": \"customerEmail@gmail.com\",\n" +
+                                "  \"first_name\": \"CustomerName\",\n" +
+                                "  \"last_name\": \"CustomerLastName\",\n" +
+                                "  \"picture\": {\n" +
+                                "    \"data\": {\n" +
+                                "      \"height\": 50,\n" +
+                                "      \"is_silhouette\": false,\n" +
+                                "      \"url\": \"http://pictureUrl.pl\",\n" +
+                                "      \"width\": 50\n" +
+                                "    }\n" +
+                                "  }\n" +
+                                "}", MediaType.APPLICATION_JSON));
+
+        //fetching image
+        server.expect(MockRestRequestMatchers.requestTo("http://pictureUrl.pl"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("image".getBytes(), MediaType.IMAGE_JPEG));
+
+        //when
+        final ResultActions perform = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.token", Matchers.not(Matchers.emptyOrNullString())));
+
+        assertThat(accountRepository.findAll()).hasSize(1);
+        assertThat(privilegeRepository.findAll()).hasSize(2);
+        assertThat(customerRepository.findAll()).hasSize(1);
+        assertThat(imageRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void givenValidRequestWithoutImageResponseAndNotExistingAccountAndCustomerWhenLoginWithAuthenticationProviderThenLogin() throws Exception {
+        //given
+        final String url = "/authentication/external";
+        final String json = objectMapper.writeValueAsString(
+                ExternalAuthenticationProviderLoginRequest.builder()
+                        .code("code123")
+                        .provider(ExternalAuthenticationProvider.FACEBOOK.name())
+                        .redirectUri("http://localhost:997/redirectUrl")
+                        .build()
+        );
+
+        final MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate);
+
+        final String userToken = "userToken123";
+
+        // Exchanging token
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/v8.0/oauth/access_token?client_id=clientTestId&client_secret=clientTestSecret&redirect_uri=http://localhost:997/redirectUrl&code=code123"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("{\n" + "  \"access_token\" : \"" + userToken + "\"}", MediaType.APPLICATION_JSON));
+
+        //Fetching user data (with picture)
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/me?access_token=userToken123&fields=email,first_name,last_name,picture"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("{\n" +
+                                "  \"email\": \"customerEmail@gmail.com\",\n" +
+                                "  \"first_name\": \"CustomerName\",\n" +
+                                "  \"last_name\": \"CustomerLastName\"\n" +
+                                "}", MediaType.APPLICATION_JSON));
+
+        //when
+        final ResultActions perform = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.token", Matchers.not(Matchers.emptyOrNullString())));
+
+        assertThat(accountRepository.findAll()).hasSize(1);
+        assertThat(privilegeRepository.findAll()).hasSize(2);
+        assertThat(customerRepository.findAll()).hasSize(1);
+        assertThat(imageRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void givenValidRequestExistingAccountWithoutCustomerWhenLoginWithAuthenticationProviderThenLogin() throws Exception {
+        //given
+        final Account account = AccountDataGenerator.customerAccount(1);
+        account.setMail("customerEmail@gmail.com");
+        accountRepository.save(account);
+        final String url = "/authentication/external";
+        final String json = objectMapper.writeValueAsString(
+                ExternalAuthenticationProviderLoginRequest.builder()
+                        .code("code123")
+                        .provider(ExternalAuthenticationProvider.FACEBOOK.name())
+                        .redirectUri("http://localhost:997/redirectUrl")
+                        .build()
+        );
+
+        final MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate);
+
+        final String userToken = "userToken123";
+
+        // Exchanging token
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/v8.0/oauth/access_token?client_id=clientTestId&client_secret=clientTestSecret&redirect_uri=http://localhost:997/redirectUrl&code=code123"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("{\n" + "  \"access_token\" : \"" + userToken + "\"}", MediaType.APPLICATION_JSON));
+
+        //Fetching user data (with picture)
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/me?access_token=userToken123&fields=email,first_name,last_name,picture"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("{\n" +
+                                "  \"email\": \"customerEmail@gmail.com\",\n" +
+                                "  \"first_name\": \"CustomerName\",\n" +
+                                "  \"last_name\": \"CustomerLastName\"\n" +
+                                "}", MediaType.APPLICATION_JSON));
+
+        //when
+        final ResultActions perform = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.token", Matchers.not(Matchers.emptyOrNullString())));
+
+        assertThat(accountRepository.findAll()).hasSize(1);
+        assertThat(privilegeRepository.findAll()).hasSize(1);
+        assertThat(customerRepository.findAll()).hasSize(1);
+        assertThat(imageRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void givenValidRequestExistingAccountWithExistingCustomerWhenLoginWithAuthenticationProviderThenLogin() throws Exception {
+        //given
+        final Account account = AccountDataGenerator.customerAccount(1);
+        account.setMail("customerEmail@gmail.com");
+        accountRepository.save(account);
+        customerRepository.save(CustomerDataGenerator.customer(1, account));
+        final String url = "/authentication/external";
+        final String json = objectMapper.writeValueAsString(
+                ExternalAuthenticationProviderLoginRequest.builder()
+                        .code("code123")
+                        .provider(ExternalAuthenticationProvider.FACEBOOK.name())
+                        .redirectUri("http://localhost:997/redirectUrl")
+                        .build()
+        );
+
+        final MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate);
+
+        final String userToken = "userToken123";
+
+        // Exchanging token
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/v8.0/oauth/access_token?client_id=clientTestId&client_secret=clientTestSecret&redirect_uri=http://localhost:997/redirectUrl&code=code123"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("{\n" + "  \"access_token\" : \"" + userToken + "\"}", MediaType.APPLICATION_JSON));
+
+        //Fetching user data (with picture)
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/me?access_token=userToken123&fields=email,first_name,last_name,picture"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("{\n" +
+                                "  \"email\": \"customerEmail@gmail.com\",\n" +
+                                "  \"first_name\": \"CustomerName\",\n" +
+                                "  \"last_name\": \"CustomerLastName\"\n" +
+                                "}", MediaType.APPLICATION_JSON));
+
+        //when
+        final ResultActions perform = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.token", Matchers.not(Matchers.emptyOrNullString())));
+
+        assertThat(accountRepository.findAll()).hasSize(1);
+        assertThat(privilegeRepository.findAll()).isEmpty();
+        assertThat(customerRepository.findAll()).hasSize(1);
+        assertThat(imageRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void givenValidRequestCompanyAccountWhenLoginWithAuthenticationProviderThen401() throws Exception {
+        //given
+        final Account account = AccountDataGenerator.customerAccount(1);
+        account.setMail("customerEmail@gmail.com");
+        account.setAccountType(AccountType.COMPANY);
+        accountRepository.save(account);
+        final String url = "/authentication/external";
+        final String json = objectMapper.writeValueAsString(
+                ExternalAuthenticationProviderLoginRequest.builder()
+                        .code("code123")
+                        .provider(ExternalAuthenticationProvider.FACEBOOK.name())
+                        .redirectUri("http://localhost:997/redirectUrl")
+                        .build()
+        );
+
+        final MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate);
+
+        final String userToken = "userToken123";
+
+        // Exchanging token
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/v8.0/oauth/access_token?client_id=clientTestId&client_secret=clientTestSecret&redirect_uri=http://localhost:997/redirectUrl&code=code123"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("{\n" + "  \"access_token\" : \"" + userToken + "\"}", MediaType.APPLICATION_JSON));
+
+        //Fetching user data (with picture)
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/me?access_token=userToken123&fields=email,first_name,last_name,picture"))
+                .andRespond(MockRestResponseCreators
+                        .withSuccess("{\n" +
+                                "  \"email\": \"customerEmail@gmail.com\",\n" +
+                                "  \"first_name\": \"CustomerName\",\n" +
+                                "  \"last_name\": \"CustomerLastName\"\n" +
+                                "}", MediaType.APPLICATION_JSON));
+
+        //when
+        final ResultActions perform = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json));
+
+        //then
+        perform.andExpect(status().isUnauthorized());
+
+        assertThat(accountRepository.findAll()).hasSize(1);
+        assertThat(privilegeRepository.findAll()).isEmpty();
+        assertThat(customerRepository.findAll()).isEmpty();
+        assertThat(imageRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void givenInvalidAccessTokenWhenLoginWithAuthenticationProviderThen401() throws Exception {
+        //given
+        final String url = "/authentication/external";
+        final String json = objectMapper.writeValueAsString(
+                ExternalAuthenticationProviderLoginRequest.builder()
+                        .code("code123")
+                        .provider(ExternalAuthenticationProvider.FACEBOOK.name())
+                        .redirectUri("http://localhost:997/redirectUrl")
+                        .build()
+        );
+
+        final MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate);
+
+        final String userToken = "userToken123";
+
+        // Exchanging token
+        server.expect(MockRestRequestMatchers.requestTo("https://graph.facebook.com/v8.0/oauth/access_token?client_id=clientTestId&client_secret=clientTestSecret&redirect_uri=http://localhost:997/redirectUrl&code=code123"))
+                .andRespond(MockRestResponseCreators.withBadRequest());
+
+        //when
+        final ResultActions perform = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json));
+
+        //then
+        perform.andExpect(status().isUnauthorized());
+
+        assertThat(accountRepository.findAll()).isEmpty();
+        assertThat(privilegeRepository.findAll()).isEmpty();
+        assertThat(customerRepository.findAll()).isEmpty();
+        assertThat(imageRepository.findAll()).isEmpty();
+    }
 }

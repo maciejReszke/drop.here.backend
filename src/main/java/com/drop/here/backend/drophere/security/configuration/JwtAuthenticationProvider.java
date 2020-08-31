@@ -44,10 +44,10 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
         final AccountProfile profile = accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, profileUid)
                 .orElseThrow(() -> new UnauthorizedRestException(String.format(
-                        "During token authentication didn't find active profile for account %s with id %s", preAuthentication.getMail(), profileUid),
+                        "During token authentication didn't find active profile for account with id %s", profileUid),
                         RestExceptionStatusCode.JWT_AUTHENTICATION_NOT_FOUND_ACTIVE_PROFILE));
 
-        log.info("Account profile {} for mail {} was valid and found", profileUid, preAuthentication.getMail());
+        log.info("Account profile {} for account {} was valid and found", profileUid, account.getId());
 
         return authenticationBuilder.buildAuthentication(account, profile, preAuthentication);
     }

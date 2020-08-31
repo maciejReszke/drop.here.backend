@@ -55,12 +55,20 @@ public class PrivilegeService {
 
     @Transactional
     public void addCustomerCreatedPrivilege(Account account) {
+        addPrivilege(account, CUSTOMER_CREATED_PRIVILEGE);
+    }
+
+    private void addPrivilege(Account account, String customerCreatedPrivilege) {
         final Privilege privilege = privilegeRepository.save(Privilege.builder()
-                .name(CUSTOMER_CREATED_PRIVILEGE)
+                .name(customerCreatedPrivilege)
                 .account(account)
                 .build());
         account.setPrivileges(account.getPrivileges() == null
                 ? List.of(privilege) :
                 ListUtils.union(account.getPrivileges(), List.of(privilege)));
+    }
+
+    public void addCompanyCreatedPrivilege(Account account) {
+        addPrivilege(account, COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE);
     }
 }

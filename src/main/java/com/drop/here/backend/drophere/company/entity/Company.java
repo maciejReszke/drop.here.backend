@@ -1,7 +1,9 @@
-package com.drop.here.backend.drophere.company;
+package com.drop.here.backend.drophere.company.entity;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.country.Country;
+import com.drop.here.backend.drophere.image.Image;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +31,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(indexes = @Index(columnList = "uid", unique = true))
+@Table(indexes = {
+        @Index(columnList = "uid", unique = true),
+        @Index(columnList = "account_id", unique = true)
+})
 public class Company {
 
     @Id
@@ -39,8 +44,6 @@ public class Company {
     @NotBlank
     private String name;
 
-    // TODO: 24/08/2020 na podstawie nazwy
-    // TODO: 29/08/2020 image!
     @NotBlank
     private String uid;
 
@@ -65,5 +68,9 @@ public class Company {
     @JoinColumn(name = "account_id")
     @NotNull
     private Account account;
+
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "image_id")
+    private Image image;
 }
 
