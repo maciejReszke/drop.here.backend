@@ -15,12 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DropMembershipService {
-    private final DropManagementService dropManagementService;
+    private final DropPersistenceService dropPersistenceService;
     private final DropMappingService dropMappingService;
     private final DropMembershipRepository dropMembershipRepository;
     private final DropManagementValidationService dropManagementValidationService;
@@ -31,7 +32,7 @@ public class DropMembershipService {
     }
 
     public ResourceOperationResponse createDropMembership(DropJoinRequest dropJoinRequest, String dropUid, String companyUid, AccountAuthentication authentication) {
-        final Drop drop = dropManagementService.findDrop(dropUid, companyUid);
+        final Drop drop = dropPersistenceService.findDrop(dropUid, companyUid);
         dropManagementValidationService.validateJoinDropRequest(drop, dropJoinRequest, authentication.getCustomer());
         final DropMembership membership = dropMappingService.createMembership(drop, authentication);
         log.info("Creating new drop membership for drop {} customer {}", drop.getUid(), authentication.getCustomer().getId());
@@ -40,7 +41,7 @@ public class DropMembershipService {
     }
 
     public ResourceOperationResponse deleteDropMembership(String dropUid, String companyUid, AccountAuthentication authentication) {
-        final Drop drop = dropManagementService.findDrop(dropUid, companyUid);
+        final Drop drop = dropPersistenceService.findDrop(dropUid, companyUid);
         final DropMembership dropMembership = getDropMembership(drop, authentication);
         log.info("Deleting drop membership for drop {} customer {}", drop.getUid(), authentication.getCustomer().getId());
         dropMembershipRepository.delete(dropMembership);
@@ -53,5 +54,10 @@ public class DropMembershipService {
                         "Drop membership for customer %s drop %s was not found", authentication.getCustomer().getId(), drop.getId()),
                         RestExceptionStatusCode.DROP_MEMBERSHIP_BY_DROP_AND_CUSTOMER_NOT_FOUND
                 ));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteMemberships(Drop drop) {
+        dropMembershipRepository.deleteByDrop(drop);
     }
 }

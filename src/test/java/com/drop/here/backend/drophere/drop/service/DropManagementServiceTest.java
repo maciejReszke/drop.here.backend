@@ -42,6 +42,9 @@ class DropManagementServiceTest {
     @Mock
     private DropManagementValidationService dropManagementValidationService;
 
+    @Mock
+    private DropMembershipService dropMembershipService;
+
     @Test
     void givenDropManagementRequestWhenCreateDropThenCreate() {
         //given
@@ -111,6 +114,7 @@ class DropManagementServiceTest {
         final Long dropId = 1L;
         when(dropRepository.findByIdAndCompanyUid(dropId, companyUid)).thenReturn(Optional.of(drop));
         doNothing().when(dropRepository).delete(drop);
+        doNothing().when(dropMembershipService).deleteMemberships(drop);
 
         //when
         final ResourceOperationResponse response = dropManagementService.deleteDrop(dropId, companyUid);
@@ -151,38 +155,5 @@ class DropManagementServiceTest {
         //then
         assertThat(result).hasSize(1);
         assertThat(result.get(0)).isEqualTo(response);
-    }
-
-    @Test
-    void givenExistingDropWhenFindDropThenFind() {
-        //given
-        final String dropUid = "dropUid";
-        final String companyUid = "companyUid";
-        final Drop drop = Drop.builder().build();
-
-        when(dropRepository.findByUidAndCompanyUid(dropUid, companyUid))
-                .thenReturn(Optional.of(drop));
-
-        //when
-        final Drop result = dropManagementService.findDrop(dropUid, companyUid);
-
-        //then
-        assertThat(result).isEqualTo(drop);
-    }
-
-    @Test
-    void givenNotExistingDropWhenFindDropThenException() {
-        //given
-        final String dropUid = "dropUid";
-        final String companyUid = "companyUid";
-
-        when(dropRepository.findByUidAndCompanyUid(dropUid, companyUid))
-                .thenReturn(Optional.empty());
-
-        //when
-        final Throwable throwable = catchThrowable(() -> dropManagementService.findDrop(dropUid, companyUid));
-
-        //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 }

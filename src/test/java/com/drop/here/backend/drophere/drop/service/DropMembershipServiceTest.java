@@ -26,6 +26,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +36,7 @@ class DropMembershipServiceTest {
     private DropMembershipService dropMembershipService;
 
     @Mock
-    private DropManagementService dropManagementService;
+    private DropPersistenceService dropPersistenceService;
 
     @Mock
     private DropMappingService dropMappingService;
@@ -61,7 +62,7 @@ class DropMembershipServiceTest {
         final Drop drop = DropDataGenerator.drop(1, null);
         final DropMembership membership = DropDataGenerator.membership(drop, customer);
 
-        when(dropManagementService.findDrop(dropUid, companyUid)).thenReturn(drop);
+        when(dropPersistenceService.findDrop(dropUid, companyUid)).thenReturn(drop);
         doNothing().when(dropManagementValidationService).validateJoinDropRequest(drop, dropJoinRequest, customer);
         when(dropMappingService.createMembership(drop, accountAuthentication)).thenReturn(membership);
         when(dropMembershipRepository.save(membership)).thenReturn(membership);
@@ -85,7 +86,7 @@ class DropMembershipServiceTest {
         final Drop drop = DropDataGenerator.drop(1, null);
         final DropMembership membership = DropDataGenerator.membership(drop, customer);
 
-        when(dropManagementService.findDrop(dropUid, companyUid)).thenReturn(drop);
+        when(dropPersistenceService.findDrop(dropUid, companyUid)).thenReturn(drop);
         when(dropMembershipRepository.findByDropAndCustomer(drop, customer))
                 .thenReturn(Optional.of(membership));
         doNothing().when(dropMembershipRepository).delete(membership);
@@ -108,7 +109,7 @@ class DropMembershipServiceTest {
                 .build();
         final Drop drop = DropDataGenerator.drop(1, null);
 
-        when(dropManagementService.findDrop(dropUid, companyUid)).thenReturn(drop);
+        when(dropPersistenceService.findDrop(dropUid, companyUid)).thenReturn(drop);
         when(dropMembershipRepository.findByDropAndCustomer(drop, customer))
                 .thenReturn(Optional.empty());
 
@@ -142,5 +143,19 @@ class DropMembershipServiceTest {
         //then
         assertThat(response.get()).hasSize(1);
         assertThat(response.get().findFirst().orElseThrow()).isEqualTo(dropMembershipResponse);
+    }
+
+    @Test
+    void givenDropWhenDeleteMembershipsThenDelete() {
+        //given
+        final Drop drop = Drop.builder().build();
+
+        doNothing().when(dropMembershipRepository).deleteByDrop(drop);
+
+        //when
+        dropMembershipService.deleteMemberships(drop);
+
+        //then
+        verifyNoMoreInteractions(dropMembershipRepository);
     }
 }

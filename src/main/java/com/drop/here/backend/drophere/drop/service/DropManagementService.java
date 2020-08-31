@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ public class DropManagementService {
     private final DropManagementValidationService dropManagementValidationService;
     private final DropMappingService dropMappingService;
     private final DropRepository dropRepository;
+    private final DropMembershipService dropMembershipService;
 
     public List<DropCompanyResponse> findCompanyDrops(String companyUid, String name) {
         return dropRepository.findAllByCompanyUidAndNameStartsWith(companyUid, StringUtils.defaultIfEmpty(name, ""))
@@ -56,18 +58,12 @@ public class DropManagementService {
                         RestExceptionStatusCode.DROP_NOT_FOUND_BY_ID));
     }
 
-    // TODO: 31/08/2020 usunac wszystkie membershipy!
+    @Transactional(rollbackFor = Exception.class)
     public ResourceOperationResponse deleteDrop(Long dropId, String companyUid) {
         final Drop drop = getDrop(dropId, companyUid);
         log.info("Deleting drop for company {} with uid {}", companyUid, drop.getUid());
+        dropMembershipService.deleteMemberships(drop);
         dropRepository.delete(drop);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, drop.getId());
-    }
-
-    public Drop findDrop(String dropUid, String companyUid) {
-        return dropRepository.findByUidAndCompanyUid(dropUid, companyUid)
-                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
-                        "Drop with uid %s company %s was not found", dropUid, companyUid),
-                        RestExceptionStatusCode.DROP_NOT_FOUND_BY_UID));
     }
 }

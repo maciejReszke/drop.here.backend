@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
+import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
@@ -49,6 +50,7 @@ public class DropDataGenerator {
     public DropMembership membership(Drop drop, Customer customer) {
         return DropMembership.builder()
                 .customer(customer)
+                .membershipStatus(DropMembershipStatus.ACTIVE)
                 .drop(drop)
                 .createdAt(LocalDateTime.now())
                 .build();
