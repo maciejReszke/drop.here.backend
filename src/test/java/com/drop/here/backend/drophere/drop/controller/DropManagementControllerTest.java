@@ -9,14 +9,18 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
+import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
+import com.drop.here.backend.drophere.drop.repository.DropMembershipRepository;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
+import com.drop.here.backend.drophere.test_data.CustomerDataGenerator;
 import com.drop.here.backend.drophere.test_data.DropDataGenerator;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -37,7 +41,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class DropCompanyControllerTest extends IntegrationBaseClass {
+class DropManagementControllerTest extends IntegrationBaseClass {
 
     @Autowired
     private AccountRepository accountRepository;
@@ -57,6 +61,12 @@ class DropCompanyControllerTest extends IntegrationBaseClass {
     @Autowired
     private DropRepository dropRepository;
 
+    @Autowired
+    private DropMembershipRepository dropMembershipRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
     private Company company;
     private Account account;
 
@@ -70,7 +80,9 @@ class DropCompanyControllerTest extends IntegrationBaseClass {
 
     @AfterEach
     void cleanUp() {
+        dropMembershipRepository.deleteAll();
         dropRepository.deleteAll();
+        customerRepository.deleteAll();
         companyRepository.deleteAll();
         privilegeRepository.deleteAll();
         accountRepository.deleteAll();
@@ -248,7 +260,7 @@ class DropCompanyControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidRequestOwnCompanyOperationWhenDeleteDropThenDelete() throws Exception {
+    void givenDropWithoutMembershipsValidRequestOwnCompanyOperationWhenDeleteDropThenDelete() throws Exception {
         //given
         final Drop drop = dropRepository.save(DropDataGenerator.drop(1, company));
         final String url = String.format("/companies/%s/drops/%s", company.getUid(), drop.getId());
@@ -261,6 +273,26 @@ class DropCompanyControllerTest extends IntegrationBaseClass {
         result.andExpect(status().isOk());
 
         assertThat(dropRepository.findAll()).isEmpty();
+        assertThat(dropMembershipRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void givenDropWithMembershipsValidRequestOwnCompanyOperationWhenDeleteDropThenDelete() throws Exception {
+        //given
+        final Drop drop = dropRepository.save(DropDataGenerator.drop(1, company));
+        final Customer customer = customerRepository.save(CustomerDataGenerator.customer(1, account));
+        dropMembershipRepository.save(DropDataGenerator.membership(drop, customer));
+        final String url = String.format("/companies/%s/drops/%s", company.getUid(), drop.getId());
+
+        //when
+        final ResultActions result = mockMvc.perform(delete(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(dropRepository.findAll()).isEmpty();
+        assertThat(dropMembershipRepository.findAll()).isEmpty();
     }
 
     @Test

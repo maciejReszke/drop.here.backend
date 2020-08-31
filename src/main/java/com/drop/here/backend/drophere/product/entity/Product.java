@@ -17,9 +17,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -36,6 +38,7 @@ import java.util.List;
 @Entity
 @ToString(exclude = {"category", "unit", "company"})
 @EqualsAndHashCode(exclude = {"category", "unit", "company"})
+@Table(indexes = @Index(columnList = "categoryName"))
 public class Product {
 
     @Id
