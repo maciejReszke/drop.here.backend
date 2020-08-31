@@ -46,7 +46,7 @@ public class DropMembership {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "drop_id")
     private Drop drop;
 
 }

@@ -32,7 +32,7 @@ public class DropMembershipService {
 
     public ResourceOperationResponse createDropMembership(DropJoinRequest dropJoinRequest, String dropUid, String companyUid, AccountAuthentication authentication) {
         final Drop drop = dropManagementService.findDrop(dropUid, companyUid);
-        dropManagementValidationService.validateCreatingDropMembershipRequest(drop, dropJoinRequest);
+        dropManagementValidationService.validateJoinDropRequest(drop, dropJoinRequest, authentication.getCustomer());
         final DropMembership membership = dropMappingService.createMembership(drop, authentication);
         log.info("Creating new drop membership for drop {} customer {}", drop.getUid(), authentication.getCustomer().getId());
         dropMembershipRepository.save(membership);

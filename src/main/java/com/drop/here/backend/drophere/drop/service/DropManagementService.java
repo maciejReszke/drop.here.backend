@@ -64,7 +64,6 @@ public class DropManagementService {
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, drop.getId());
     }
 
-    // TODO: 28/08/2020 test
     public Drop findDrop(String dropUid, String companyUid) {
         return dropRepository.findByUidAndCompanyUid(dropUid, companyUid)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(

@@ -152,4 +152,37 @@ class DropManagementServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0)).isEqualTo(response);
     }
+
+    @Test
+    void givenExistingDropWhenFindDropThenFind() {
+        //given
+        final String dropUid = "dropUid";
+        final String companyUid = "companyUid";
+        final Drop drop = Drop.builder().build();
+
+        when(dropRepository.findByUidAndCompanyUid(dropUid, companyUid))
+                .thenReturn(Optional.of(drop));
+
+        //when
+        final Drop result = dropManagementService.findDrop(dropUid, companyUid);
+
+        //then
+        assertThat(result).isEqualTo(drop);
+    }
+
+    @Test
+    void givenNotExistingDropWhenFindDropThenException() {
+        //given
+        final String dropUid = "dropUid";
+        final String companyUid = "companyUid";
+
+        when(dropRepository.findByUidAndCompanyUid(dropUid, companyUid))
+                .thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropManagementService.findDrop(dropUid, companyUid));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
 }

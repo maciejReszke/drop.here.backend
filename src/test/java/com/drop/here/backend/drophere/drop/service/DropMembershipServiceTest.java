@@ -54,12 +54,15 @@ class DropMembershipServiceTest {
                 .build();
         final String dropUid = "dropUid";
         final String companyUid = "companyUid";
-        final AccountAuthentication accountAuthentication = AccountAuthentication.builder().build();
+        final Customer customer = Customer.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .customer(customer)
+                .build();
         final Drop drop = DropDataGenerator.drop(1, null);
-        final DropMembership membership = DropDataGenerator.membership(1);
+        final DropMembership membership = DropDataGenerator.membership(drop, customer);
 
         when(dropManagementService.findDrop(dropUid, companyUid)).thenReturn(drop);
-        doNothing().when(dropManagementValidationService).validateCreatingDropMembershipRequest(drop, dropJoinRequest);
+        doNothing().when(dropManagementValidationService).validateJoinDropRequest(drop, dropJoinRequest, customer);
         when(dropMappingService.createMembership(drop, accountAuthentication)).thenReturn(membership);
         when(dropMembershipRepository.save(membership)).thenReturn(membership);
 
@@ -80,7 +83,7 @@ class DropMembershipServiceTest {
                 .customer(customer)
                 .build();
         final Drop drop = DropDataGenerator.drop(1, null);
-        final DropMembership membership = DropDataGenerator.membership(1);
+        final DropMembership membership = DropDataGenerator.membership(drop, customer);
 
         when(dropManagementService.findDrop(dropUid, companyUid)).thenReturn(drop);
         when(dropMembershipRepository.findByDropAndCustomer(drop, customer))
@@ -127,8 +130,8 @@ class DropMembershipServiceTest {
         final String name = "name";
         final Pageable pageable = Pageable.unpaged();
         final DropMembershipResponse dropMembershipResponse = DropMembershipResponse.builder().build();
-
-        final DropMembership membership = DropDataGenerator.membership(1);
+        final Drop drop = Drop.builder().build();
+        final DropMembership membership = DropDataGenerator.membership(drop, customer);
         when(dropMembershipRepository.findByCustomerAndDropNameStartsWith(customer, name, pageable))
                 .thenReturn(new PageImpl<>(List.of(membership)));
         when(dropMappingService.toDropMembershipResponse(membership)).thenReturn(dropMembershipResponse);
