@@ -248,6 +248,8 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
         final String url = "/management/companies/images";
         final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
         final MockMultipartFile file = new MockMultipartFile("image", bytes);
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
 
         //when
         final ResultActions perform = mockMvc.perform(multipart(url)
@@ -266,6 +268,8 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
         final Company company = CompanyDataGenerator.company(1, account, country);
         company.setImage(image);
         companyRepository.save(company);
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
         final String url = "/management/companies/images";
         final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
         final MockMultipartFile file = new MockMultipartFile("image", bytes);
@@ -279,6 +283,24 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
         perform.andExpect(status().isOk());
         assertThat(imageRepository.findAll()).hasSize(1);
         assertThat(imageRepository.findById(image.getId())).isEmpty();
+    }
+
+    @Test
+    void givenValidRequestLackOfResourceManagementPrivilegesWhenUpdateImageThen403() throws Exception {
+        //given
+        companyRepository.save(CompanyDataGenerator.company(1, account, country));
+        final String url = "/management/companies/images";
+        final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
+        final MockMultipartFile file = new MockMultipartFile("image", bytes);
+
+        //when
+        final ResultActions perform = mockMvc.perform(multipart(url)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isForbidden());
+        assertThat(imageRepository.findAll()).isEmpty();
     }
 
     @Test

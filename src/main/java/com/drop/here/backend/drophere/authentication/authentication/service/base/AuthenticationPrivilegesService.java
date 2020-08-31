@@ -29,4 +29,10 @@ public class AuthenticationPrivilegesService {
     public boolean isCompanyVisible(String companyUid) {
         return companyService.isVisible(companyUid);
     }
+
+    public boolean isOwnCustomerOperation(AccountAuthentication accountAuthentication, Long customerId) {
+        return accountAuthentication.getPrincipal().getAccountType() == AccountType.CUSTOMER &&
+                accountAuthentication.getCustomer() != null &&
+                accountAuthentication.getCustomer().getId().equals(customerId);
+    }
 }
