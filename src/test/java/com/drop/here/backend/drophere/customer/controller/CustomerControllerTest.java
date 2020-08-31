@@ -76,7 +76,7 @@ class CustomerControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenCustomerNotOwnExistingCustomerImageWhenGetCustomerThenError() throws Exception {
+    void givenCustomerNotOwnExistingCustomerImageWhenGetCustomerThen403() throws Exception {
         //given
         final String url = String.format("/customers/%s/images", customer.getId() + 1);
 
@@ -85,7 +85,7 @@ class CustomerControllerTest extends IntegrationBaseClass {
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
 
         //then
-        result.andExpect(status().isOk());
+        result.andExpect(status().isForbidden());
     }
 
     @Test

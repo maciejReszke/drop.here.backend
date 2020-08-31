@@ -53,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.PUT, "/management/customers").hasAuthority(PrivilegeService.NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE)
                         .mvcMatchers(HttpMethod.GET, "/management/customers").hasAnyAuthority(PrivilegeService.NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE, PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                         .mvcMatchers(HttpMethod.POST, "/management/customers/images").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
-                        .mvcMatchers(HttpMethod.POST, "/customers/{customerId}/images").authenticated()
+                        .mvcMatchers(HttpMethod.GET, "/customers/{customerId}/images").authenticated()
                         .mvcMatchers("/actuator/**").permitAll()
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
