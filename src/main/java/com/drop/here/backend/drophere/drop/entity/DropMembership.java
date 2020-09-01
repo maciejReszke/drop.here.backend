@@ -49,4 +49,8 @@ public class DropMembership {
     @JoinColumn(name = "drop_id")
     private Drop drop;
 
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime lastUpdatedAt;
+
 }

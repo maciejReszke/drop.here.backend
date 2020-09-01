@@ -14,6 +14,8 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.entity.DropMembership;
+import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import com.drop.here.backend.drophere.drop.repository.DropMembershipRepository;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
@@ -267,6 +269,11 @@ class DropUserControllerTest extends IntegrationBaseClass {
         final Customer anotherCustomer = customerRepository.save(CustomerDataGenerator.customer(2, anotherAccount));
         final Drop anotherDrop = dropRepository.save(DropDataGenerator.drop(3, company));
         dropMembershipRepository.save(DropDataGenerator.membership(anotherDrop, anotherCustomer));
+        final Drop blockedDrop = dropRepository.save(DropDataGenerator.drop(4, company));
+        dropRepository.save(blockedDrop);
+        final DropMembership blockedMembership = DropDataGenerator.membership(blockedDrop, customer);
+        blockedMembership.setMembershipStatus(DropMembershipStatus.BLOCKED);
+        dropMembershipRepository.save(blockedMembership);
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -293,6 +300,11 @@ class DropUserControllerTest extends IntegrationBaseClass {
         final Customer anotherCustomer = customerRepository.save(CustomerDataGenerator.customer(2, anotherAccount));
         final Drop anotherDrop = dropRepository.save(DropDataGenerator.drop(3, company));
         dropMembershipRepository.save(DropDataGenerator.membership(anotherDrop, anotherCustomer));
+        final Drop blockedDrop = dropRepository.save(DropDataGenerator.drop(4, company));
+        dropRepository.save(blockedDrop);
+        final DropMembership blockedMembership = DropDataGenerator.membership(blockedDrop, customer);
+        blockedMembership.setMembershipStatus(DropMembershipStatus.BLOCKED);
+        dropMembershipRepository.save(blockedMembership);
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -319,6 +331,12 @@ class DropUserControllerTest extends IntegrationBaseClass {
         final Customer anotherCustomer = customerRepository.save(CustomerDataGenerator.customer(2, anotherAccount));
         final Drop anotherDrop = dropRepository.save(DropDataGenerator.drop(3, company));
         dropMembershipRepository.save(DropDataGenerator.membership(anotherDrop, anotherCustomer));
+        final Drop blockedDrop = dropRepository.save(DropDataGenerator.drop(4, company));
+        dropRepository.save(blockedDrop);
+        final DropMembership blockedMembership = DropDataGenerator.membership(blockedDrop, customer);
+        blockedMembership.setMembershipStatus(DropMembershipStatus.BLOCKED);
+        dropMembershipRepository.save(blockedMembership);
+
         //given
         final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(CUSTOMER_CREATED_PRIVILEGE))
                 .findFirst().orElseThrow();

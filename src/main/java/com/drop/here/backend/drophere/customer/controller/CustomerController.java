@@ -39,7 +39,8 @@ public class CustomerController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @PreAuthorize("@authenticationPrivilegesService.isOwnCustomerOperation(authentication, #customerId)")
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCustomerOperation(authentication, #customerId) || " +
+            "@authenticationPrivilegesService.isCompaniesCustomer(authentication, #customerId)")
     public ResponseEntity<byte[]> findImage(@ApiIgnore AccountAuthentication authentication,
                                             @ApiIgnore @PathVariable Long customerId) {
         final Image image = customerService.findImage(customerId);

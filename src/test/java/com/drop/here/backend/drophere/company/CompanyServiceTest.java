@@ -13,6 +13,7 @@ import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.company.service.CompanyMappingService;
 import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.company.service.CompanyValidationService;
+import com.drop.here.backend.drophere.drop.service.DropMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
@@ -53,6 +54,9 @@ class CompanyServiceTest {
 
     @Mock
     private ImageService imageService;
+
+    @Mock
+    private DropMembershipService dropMembershipService;
 
     @Test
     void givenVisibleCompanyWhenIsVisibleThenTrue() {
@@ -207,5 +211,35 @@ class CompanyServiceTest {
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenExistingDropMembershipWhenHasRelationThenTrue() {
+        //given
+        final Company company = Company.builder().build();
+        final Long customerId = 5L;
+
+        when(dropMembershipService.existsMembership(company, customerId)).thenReturn(true);
+
+        //when
+        final boolean result = companyService.hasRelation(company, customerId);
+
+        //then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void givenNotExistingMembershipWhenHasRelationThenFalse() {
+        //given
+        final Company company = Company.builder().build();
+        final Long customerId = 5L;
+
+        when(dropMembershipService.existsMembership(company, customerId)).thenReturn(false);
+
+        //when
+        final boolean result = companyService.hasRelation(company, customerId);
+
+        //then
+        assertThat(result).isFalse();
     }
 }

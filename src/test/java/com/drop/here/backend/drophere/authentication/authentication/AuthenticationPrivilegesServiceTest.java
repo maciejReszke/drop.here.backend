@@ -259,4 +259,68 @@ class AuthenticationPrivilegesServiceTest {
         assertThat(result).isFalse();
     }
 
+    @Test
+    void givenNotCompanyAccountWhenIsCompaniesCustomerThenFalse() {
+        //given
+        final Company company = Company.builder().uid("uid").build();
+        final Account account = AccountDataGenerator.companyAccount(1);
+        account.setCompany(company);
+        account.setAccountType(AccountType.CUSTOMER);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+
+        //when
+        final boolean result = authenticationPrivilegesService.isCompaniesCustomer(accountAuthentication, 5L);
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenLackOfCompanyAccountWhenIsCompaniesCustomerThenFalse() {
+        //given
+        final Account account = AccountDataGenerator.companyAccount(1);
+        account.setAccountType(AccountType.COMPANY);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+
+        //when
+        final boolean result = authenticationPrivilegesService.isCompaniesCustomer(accountAuthentication, 5L);
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenFalseRelationWhenIsCompaniesCustomerThenFalse() {
+        //given
+        final Company company = Company.builder().uid("uid").build();
+        final Account account = AccountDataGenerator.companyAccount(1);
+        account.setAccountType(AccountType.COMPANY);
+        account.setCompany(company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        when(companyService.hasRelation(company, 5L)).thenReturn(false);
+
+        //when
+        final boolean result = authenticationPrivilegesService.isCompaniesCustomer(accountAuthentication, 5L);
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenTrueRelationWhenIsCompaniesCustomerThenTrue() {
+        //given
+        final Company company = Company.builder().uid("uid").build();
+        final Account account = AccountDataGenerator.companyAccount(1);
+        account.setAccountType(AccountType.COMPANY);
+        account.setCompany(company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        when(companyService.hasRelation(company, 5L)).thenReturn(true);
+
+        //when
+        final boolean result = authenticationPrivilegesService.isCompaniesCustomer(accountAuthentication, 5L);
+
+        //then
+        assertThat(result).isTrue();
+    }
+
 }

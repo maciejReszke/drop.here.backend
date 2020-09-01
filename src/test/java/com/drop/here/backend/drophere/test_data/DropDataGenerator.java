@@ -52,6 +52,7 @@ public class DropDataGenerator {
                 .customer(customer)
                 .membershipStatus(DropMembershipStatus.ACTIVE)
                 .drop(drop)
+                .lastUpdatedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();
     }
