@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 public class CustomerController {
     private final CustomerService customerService;
 
-    // TODO: 01/09/2020 tutaj jeszcze get jezeli maja z ta firma membership
     @GetMapping("/{customerId}/images")
     @ApiOperation("Get customer image")
     @ApiAuthorizationToken
@@ -40,7 +39,8 @@ public class CustomerController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @PreAuthorize("@authenticationPrivilegesService.isOwnCustomerOperation(authentication, #customerId)")
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCustomerOperation(authentication, #customerId) || " +
+            "@authenticationPrivilegesService.isCompaniesCustomer(authentication, #customerId)")
     public ResponseEntity<byte[]> findImage(@ApiIgnore AccountAuthentication authentication,
                                             @ApiIgnore @PathVariable Long customerId) {
         final Image image = customerService.findImage(customerId);

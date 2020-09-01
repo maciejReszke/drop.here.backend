@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.drop.repository;
 
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
@@ -17,7 +18,7 @@ import java.util.Optional;
 public interface DropMembershipRepository extends JpaRepository<DropMembership, Long> {
     Optional<DropMembership> findByDropAndCustomer(Drop drop, Customer customer);
 
-    Page<DropMembership> findByCustomerAndDropNameStartsWith(Customer customer, String name, Pageable pageable);
+    Page<DropMembership> findByCustomerAndDropNameStartsWithAndMembershipStatusNot(Customer customer, String name, DropMembershipStatus membershipStatus, Pageable pageable);
 
     @Modifying
     void deleteByDrop(Drop drop);
@@ -38,4 +39,6 @@ public interface DropMembershipRepository extends JpaRepository<DropMembership, 
                     "   lower(dm.customer.firstName) like :desiredCustomerSubstring or " +
                     "   lower(dm.customer.lastName) like :desiredCustomerSubstring)")
     Page<DropMembership> findMembershipsWithCustomers(Drop drop, String desiredCustomerSubstring, DropMembershipStatus[] membershipStatuses, Pageable pageable);
+
+    boolean existsByDropCompanyAndCustomerId(Company company, Long customerId);
 }

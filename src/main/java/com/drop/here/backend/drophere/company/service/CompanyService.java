@@ -11,6 +11,7 @@ import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResp
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
+import com.drop.here.backend.drophere.drop.service.DropMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
@@ -32,6 +33,7 @@ public class CompanyService {
     private final CompanyMappingService companyMappingService;
     private final PrivilegeService privilegeService;
     private final ImageService imageService;
+    private final DropMembershipService dropMembershipService;
 
     public boolean isVisible(String companyUid) {
         return companyRepository.findByUid(companyUid)
@@ -90,5 +92,9 @@ public class CompanyService {
                         "Image for company %s was not found", companyUid),
                         RestExceptionStatusCode.COMPANY_IMAGE_WAS_NOT_FOUND))
                 .getImage();
+    }
+
+    public boolean hasRelation(Company company, Long customerId) {
+        return dropMembershipService.existsMembership(company, customerId);
     }
 }

@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.drop.service;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
@@ -92,6 +93,7 @@ class DropMembershipServiceTest {
         when(dropMembershipRepository.findByDropAndCustomer(drop, customer))
                 .thenReturn(Optional.of(membership));
         doNothing().when(dropMembershipRepository).delete(membership);
+        doNothing().when(dropManagementValidationService).validateDeleteDropMembership(membership);
 
         //when
         final ResourceOperationResponse result = dropMembershipService.deleteDropMembership(dropUid, companyUid, accountAuthentication);
@@ -135,7 +137,7 @@ class DropMembershipServiceTest {
         final DropMembershipResponse dropMembershipResponse = DropMembershipResponse.builder().build();
         final Drop drop = Drop.builder().build();
         final DropMembership membership = DropDataGenerator.membership(drop, customer);
-        when(dropMembershipRepository.findByCustomerAndDropNameStartsWith(customer, name, pageable))
+        when(dropMembershipRepository.findByCustomerAndDropNameStartsWithAndMembershipStatusNot(customer, name, DropMembershipStatus.BLOCKED, pageable))
                 .thenReturn(new PageImpl<>(List.of(membership)));
         when(dropMappingService.toDropMembershipResponse(membership)).thenReturn(dropMembershipResponse);
 
@@ -198,5 +200,35 @@ class DropMembershipServiceTest {
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenExistingMembershipWhenExistsMembershipThenTrue() {
+        //given
+        final Company company = Company.builder().build();
+        final Long customerId = 5L;
+
+        when(dropMembershipRepository.existsByDropCompanyAndCustomerId(company, customerId)).thenReturn(true);
+
+        //when
+        final boolean result = dropMembershipService.existsMembership(company, customerId);
+
+        //then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void givenExistingMembershipWhenExistsMembershipThenFalse() {
+        //given
+        final Company company = Company.builder().build();
+        final Long customerId = 5L;
+
+        when(dropMembershipRepository.existsByDropCompanyAndCustomerId(company, customerId)).thenReturn(false);
+
+        //when
+        final boolean result = dropMembershipService.existsMembership(company, customerId);
+
+        //then
+        assertThat(result).isFalse();
     }
 }

@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRe
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import com.drop.here.backend.drophere.drop.repository.DropMembershipRepository;
@@ -83,5 +84,14 @@ public class DropManagementValidationService {
                         "During updating membership the only valid status values are %s and %s but was %s",
                         DropMembershipStatus.ACTIVE, DropMembershipStatus.BLOCKED, companyMembershipManagementRequest.getMembershipStatus()),
                         RestExceptionStatusCode.UPDATE_MEMBERSHIP_BY_COMPANY_INVALID_MEMBERSHIP_STATUS));
+    }
+
+    public void validateDeleteDropMembership(DropMembership dropMembership) {
+        if (dropMembership.getMembershipStatus() == DropMembershipStatus.BLOCKED) {
+            throw new RestIllegalRequestValueException(String.format(
+                    "Cannot delete drop membership with id %s because status is BLOCKED", dropMembership.getId()),
+                    RestExceptionStatusCode.DROP_MEMBERSHIP_DELETE_ATTEMPT_TO_DELETE_BLOCKED_MEMBERSHIP
+            );
+        }
     }
 }

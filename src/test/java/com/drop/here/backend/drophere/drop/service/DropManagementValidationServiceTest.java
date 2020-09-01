@@ -303,4 +303,28 @@ class DropManagementValidationServiceTest {
         //then
         assertThat(throwable).isNull();
     }
+
+    @Test
+    void givenValidDropMembershipWhenValidateDeleteDropMembershipThenDoNothing() {
+        //given
+        final DropMembership membership = DropMembership.builder().membershipStatus(DropMembershipStatus.ACTIVE).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropManagementValidationService.validateDeleteDropMembership(membership));
+
+        //then
+        assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenBlockedDropMembershipWhenValidateDeleteDropMembershipThenThrowException() {
+        //given
+        final DropMembership membership = DropMembership.builder().membershipStatus(DropMembershipStatus.BLOCKED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropManagementValidationService.validateDeleteDropMembership(membership));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
 }

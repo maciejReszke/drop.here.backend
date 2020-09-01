@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropCompanyMembershipResponse;
@@ -33,7 +34,7 @@ public class DropMembershipService {
     private final DropMembershipSearchingService dropMembershipSearchingService;
 
     public Page<DropMembershipResponse> findMemberships(AccountAuthentication authentication, String name, Pageable pageable) {
-        return dropMembershipRepository.findByCustomerAndDropNameStartsWith(authentication.getCustomer(), name, pageable)
+        return dropMembershipRepository.findByCustomerAndDropNameStartsWithAndMembershipStatusNot(authentication.getCustomer(), name, DropMembershipStatus.BLOCKED, pageable)
                 .map(dropMappingService::toDropMembershipResponse);
     }
 
@@ -53,6 +54,7 @@ public class DropMembershipService {
     public ResourceOperationResponse deleteDropMembership(String dropUid, String companyUid, AccountAuthentication authentication) {
         final Drop drop = dropPersistenceService.findDrop(dropUid, companyUid);
         final DropMembership dropMembership = getDropMembership(drop, authentication);
+        dropManagementValidationService.validateDeleteDropMembership(dropMembership);
         log.info("Deleting drop membership for drop {} customer {}", drop.getUid(), authentication.getCustomer().getId());
         dropMembershipRepository.delete(dropMembership);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, dropMembership.getId());
@@ -79,7 +81,6 @@ public class DropMembershipService {
         dropMembershipRepository.deleteByDrop(drop);
     }
 
-    // TODO: 01/09/2020 (zablokowac mozliwosc usuwania gdy jest blocked i nie listowac)
     public ResourceOperationResponse updateMembership(Drop drop, Long membershipId, DropCompanyMembershipManagementRequest companyMembershipManagementRequest) {
         dropManagementValidationService.validateUpdateMembership(companyMembershipManagementRequest);
         final DropMembership dropMembership = getDropMembership(drop, membershipId);
@@ -88,5 +89,9 @@ public class DropMembershipService {
         dropMembershipRepository.save(dropMembership);
         log.info("Updating membership {} status to {}", dropMembership.getId(), companyMembershipManagementRequest.getMembershipStatus());
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, dropMembership.getId());
+    }
+
+    public boolean existsMembership(Company company, Long customerId) {
+        return dropMembershipRepository.existsByDropCompanyAndCustomerId(company, customerId);
     }
 }

@@ -35,4 +35,10 @@ public class AuthenticationPrivilegesService {
                 accountAuthentication.getCustomer() != null &&
                 accountAuthentication.getCustomer().getId().equals(customerId);
     }
+
+    public boolean isCompaniesCustomer(AccountAuthentication accountAuthentication, Long customerId) {
+        return accountAuthentication.getPrincipal().getAccountType() == AccountType.COMPANY &&
+                accountAuthentication.getCompany() != null &&
+                companyService.hasRelation(accountAuthentication.getCompany(), customerId);
+    }
 }
