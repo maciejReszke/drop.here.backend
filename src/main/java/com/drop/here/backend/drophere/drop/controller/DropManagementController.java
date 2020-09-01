@@ -107,7 +107,6 @@ public class DropManagementController {
         return dropManagementService.deleteDrop(dropId, companyUid);
     }
 
-    // TODO: 01/09/2020 test
     @ApiOperation("Listing members of given drop")
     @GetMapping("/{dropId}/memberships")
     @ApiAuthorizationToken
@@ -127,7 +126,6 @@ public class DropManagementController {
         return dropManagementService.findMemberships(dropId, companyUid, desiredCustomerStartingSubstring, membershipStatus, pageable);
     }
 
-    // TODO: 01/09/2020 test
     @ApiOperation("Update membership")
     @PutMapping("/{dropId}/memberships/{membershipId}")
     @ApiAuthorizationToken

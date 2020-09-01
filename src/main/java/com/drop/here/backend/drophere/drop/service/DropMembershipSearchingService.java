@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 public class DropMembershipSearchingService {
     private final DropMembershipRepository dropMembershipRepository;
 
-    // TODO: 01/09/2020  test
     public Page<DropCompanyMembershipResponse> findMemberships(Drop drop, String desiredCustomerSubstring, String membershipStatus, Pageable pageable) {
         return dropMembershipRepository.findMembershipsWithCustomers(
                 drop,
@@ -47,6 +46,6 @@ public class DropMembershipSearchingService {
     private String prepareDesiredCustomerSubstring(String desiredCustomerSubstring) {
         return StringUtils.isEmpty(desiredCustomerSubstring)
                 ? null
-                : desiredCustomerSubstring.toLowerCase();
+                : desiredCustomerSubstring.toLowerCase() + '%';
     }
 }

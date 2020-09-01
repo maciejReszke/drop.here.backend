@@ -3,11 +3,13 @@ package com.drop.here.backend.drophere.drop.service;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropLocationType;
+import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import com.drop.here.backend.drophere.drop.repository.DropMembershipRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -249,5 +251,56 @@ class DropManagementValidationServiceTest {
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
+
+    @Test
+    void givenInvalidMembershipStatusWhenValidateUpdateMembershipThenThrowException() {
+        //given
+        final DropCompanyMembershipManagementRequest request = DropCompanyMembershipManagementRequest.builder().membershipStatus("aa").build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropManagementValidationService.validateUpdateMembership(request));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
+
+    @Test
+    void givenPendingMembershipStatusWhenValidateUpdateMembershipThenThrowException() {
+        //given
+        final DropCompanyMembershipManagementRequest request = DropCompanyMembershipManagementRequest.builder()
+                .membershipStatus(DropMembershipStatus.PENDING.name()).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropManagementValidationService.validateUpdateMembership(request));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
+
+    @Test
+    void givenBlockedMembershipStatusWhenValidateUpdateMembershipThenDoNothing() {
+        //given
+        final DropCompanyMembershipManagementRequest request = DropCompanyMembershipManagementRequest.builder()
+                .membershipStatus(DropMembershipStatus.BLOCKED.name()).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropManagementValidationService.validateUpdateMembership(request));
+
+        //then
+        assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenActiveMembershipStatusWhenValidateUpdateMembershipThenDoNothing() {
+        //given
+        final DropCompanyMembershipManagementRequest request = DropCompanyMembershipManagementRequest.builder()
+                .membershipStatus(DropMembershipStatus.ACTIVE.name()).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropManagementValidationService.validateUpdateMembership(request));
+
+        //then
+        assertThat(throwable).isNull();
     }
 }
