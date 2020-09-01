@@ -105,7 +105,7 @@ class CustomerControllerTest extends IntegrationBaseClass {
     @Test
     void givenCompaniesCustomerExistingCustomerImageWhenGetCustomerThenGet() throws Exception {
         //given
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(2));
         final Country country = countryRepository.save(CountryDataGenerator.poland());
         final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         final Drop drop = dropRepository.save(DropDataGenerator.drop(1, company));
@@ -125,7 +125,7 @@ class CustomerControllerTest extends IntegrationBaseClass {
     @Test
     void givenCompaniesDifferentCustomerExistingCustomerImageWhenGetCustomerThenForbidden() throws Exception {
         //given
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(2));
         final Country country = countryRepository.save(CountryDataGenerator.poland());
         final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         final Drop drop = dropRepository.save(DropDataGenerator.drop(1, company));
@@ -145,10 +145,10 @@ class CustomerControllerTest extends IntegrationBaseClass {
     @Test
     void givenDifferentCompaniesCustomerExistingCustomerImageWhenGetCustomerThenForbidden() throws Exception {
         //given
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(2));
         final Country country = countryRepository.save(CountryDataGenerator.poland());
         companyRepository.save(CompanyDataGenerator.company(1, account, country));
-        final Account account2 = accountRepository.save(AccountDataGenerator.companyAccount(2));
+        final Account account2 = accountRepository.save(AccountDataGenerator.companyAccount(3));
         final Company company2 = companyRepository.save(CompanyDataGenerator.company(2, account2, country));
         final Drop drop = dropRepository.save(DropDataGenerator.drop(1, company2));
         dropMembershipRepository.save(DropDataGenerator.membership(drop, customer));

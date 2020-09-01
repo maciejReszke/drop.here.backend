@@ -41,7 +41,7 @@ class DropMembershipSearchingServiceTest {
 
         final DropMembership membership = DropDataGenerator.membership(drop, customer);
         final Page<DropMembership> dropCompanyMembershipResponses = new PageImpl<>(List.of(membership));
-        when(dropMembershipRepository.findMembershipsWithCustomers(drop, desiredCustomerSubstring, new DropMembershipStatus[]{dropMembershipStatus}, pageable))
+        when(dropMembershipRepository.findMembershipsWithCustomers(drop, desiredCustomerSubstring + '%', new DropMembershipStatus[]{dropMembershipStatus}, pageable))
                 .thenReturn(dropCompanyMembershipResponses);
 
         //when
