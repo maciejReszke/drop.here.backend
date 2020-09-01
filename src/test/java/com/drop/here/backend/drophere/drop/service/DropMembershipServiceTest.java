@@ -4,10 +4,12 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
+import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import com.drop.here.backend.drophere.drop.repository.DropMembershipRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.DropDataGenerator;
@@ -157,5 +159,44 @@ class DropMembershipServiceTest {
 
         //then
         verifyNoMoreInteractions(dropMembershipRepository);
+    }
+
+    @Test
+    void givenDropAndExistingMembershipAndRequestWhenUpdateMembershipThenUpdate() {
+        //given
+        final Drop drop = Drop.builder().build();
+        final DropMembership dropMembership = DropMembership.builder().build();
+        final Long dropMembershipId = 5L;
+        final DropCompanyMembershipManagementRequest request = DropCompanyMembershipManagementRequest.builder()
+                .membershipStatus(DropMembershipStatus.BLOCKED.name()).build();
+
+        when(dropMembershipRepository.findByIdAndDrop(dropMembershipId, drop)).thenReturn(Optional.of(dropMembership));
+        when(dropMembershipRepository.save(dropMembership)).thenReturn(dropMembership);
+
+        //when
+        final ResourceOperationResponse result = dropMembershipService.updateMembership(drop, dropMembershipId, request);
+
+        //then
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+
+        assertThat(dropMembership.getMembershipStatus()).isEqualTo(DropMembershipStatus.BLOCKED);
+    }
+
+    @Test
+    void givenDropAndNotExistingMembershipAndRequestWhenUpdateMembershipThenError() {
+        //given
+        final Drop drop = Drop.builder().build();
+        final Long dropMembershipId = 5L;
+        final DropCompanyMembershipManagementRequest request = DropCompanyMembershipManagementRequest.builder()
+                .membershipStatus(DropMembershipStatus.BLOCKED.name()).build();
+
+        when(dropMembershipRepository.findByIdAndDrop(dropMembershipId, drop)).thenReturn(Optional.empty());
+
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropMembershipService.updateMembership(drop, dropMembershipId, request));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 }

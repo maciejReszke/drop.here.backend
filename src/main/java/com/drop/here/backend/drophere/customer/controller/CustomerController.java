@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 public class CustomerController {
     private final CustomerService customerService;
 
+    // TODO: 01/09/2020 tutaj jeszcze get jezeli maja z ta firma membership
     @GetMapping("/{customerId}/images")
     @ApiOperation("Get customer image")
     @ApiAuthorizationToken

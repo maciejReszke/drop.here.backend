@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.drop.service;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
@@ -72,5 +73,10 @@ public class DropManagementValidationService {
                     "Invalid password during attempt of joining drop %s", drop.getId()),
                     RestExceptionStatusCode.DROP_MEMBERSHIP_INVALID_PASSWORD);
         }
+    }
+
+    // TODO: 01/09/2020
+    public void validateUpdateMembership(DropCompanyMembershipManagementRequest companyMembershipManagementRequest) {
+
     }
 }

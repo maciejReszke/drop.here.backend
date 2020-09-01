@@ -4,10 +4,13 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
+import com.drop.here.backend.drophere.drop.dto.response.DropCompanyMembershipResponse;
 import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
+import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import com.drop.here.backend.drophere.drop.repository.DropMembershipRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -25,10 +30,15 @@ public class DropMembershipService {
     private final DropMappingService dropMappingService;
     private final DropMembershipRepository dropMembershipRepository;
     private final DropManagementValidationService dropManagementValidationService;
+    private final DropMembershipSearchingService dropMembershipSearchingService;
 
     public Page<DropMembershipResponse> findMemberships(AccountAuthentication authentication, String name, Pageable pageable) {
         return dropMembershipRepository.findByCustomerAndDropNameStartsWith(authentication.getCustomer(), name, pageable)
                 .map(dropMappingService::toDropMembershipResponse);
+    }
+
+    public Page<DropCompanyMembershipResponse> findMemberships(Drop drop, String desiredCustomerSubstring, String membershipStatus, Pageable pageable) {
+        return dropMembershipSearchingService.findMemberships(drop, desiredCustomerSubstring, membershipStatus, pageable);
     }
 
     public ResourceOperationResponse createDropMembership(DropJoinRequest dropJoinRequest, String dropUid, String companyUid, AccountAuthentication authentication) {
@@ -56,8 +66,27 @@ public class DropMembershipService {
                 ));
     }
 
+    private DropMembership getDropMembership(Drop drop, Long membershipId) {
+        return dropMembershipRepository.findByIdAndDrop(membershipId, drop)
+                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                        "Drop membership with id %s drop %s was not found", membershipId, drop.getId()),
+                        RestExceptionStatusCode.DROP_MEMBERSHIP_BY_DROP_AND_CUSTOMER_NOT_FOUND
+                ));
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public void deleteMemberships(Drop drop) {
         dropMembershipRepository.deleteByDrop(drop);
+    }
+
+    // TODO: 01/09/2020 (zablokowac mozliwosc usuwania gdy jest blocked i nie listowac)
+    public ResourceOperationResponse updateMembership(Drop drop, Long membershipId, DropCompanyMembershipManagementRequest companyMembershipManagementRequest) {
+        dropManagementValidationService.validateUpdateMembership(companyMembershipManagementRequest);
+        final DropMembership dropMembership = getDropMembership(drop, membershipId);
+        dropMembership.setMembershipStatus(DropMembershipStatus.valueOf(companyMembershipManagementRequest.getMembershipStatus()));
+        dropMembership.setLastUpdatedAt(LocalDateTime.now());
+        dropMembershipRepository.save(dropMembership);
+        log.info("Updating membership {} status to {}", dropMembership.getId(), companyMembershipManagementRequest.getMembershipStatus());
+        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, dropMembership.getId());
     }
 }

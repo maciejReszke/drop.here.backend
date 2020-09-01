@@ -76,6 +76,7 @@ public class DropMappingService {
     public DropMembership createMembership(Drop drop, AccountAuthentication authentication) {
         return DropMembership.builder()
                 .createdAt(LocalDateTime.now())
+                .lastUpdatedAt(LocalDateTime.now())
                 .customer(authentication.getCustomer())
                 .drop(drop)
                 .membershipStatus(drop.isRequiresAccept() ? DropMembershipStatus.PENDING : DropMembershipStatus.ACTIVE)
