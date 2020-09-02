@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.drop.service;
 
+import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropCompanyResponse;
 import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
@@ -73,11 +74,12 @@ public class DropMappingService {
                 .build();
     }
 
-    public DropMembership createMembership(Drop drop, AccountAuthentication authentication) {
+    public DropMembership createMembership(Drop drop, DropJoinRequest dropJoinRequest, AccountAuthentication authentication) {
         return DropMembership.builder()
                 .createdAt(LocalDateTime.now())
                 .lastUpdatedAt(LocalDateTime.now())
                 .customer(authentication.getCustomer())
+                .receiveNotification(dropJoinRequest.isReceiveNotification())
                 .drop(drop)
                 .membershipStatus(drop.isRequiresAccept() ? DropMembershipStatus.PENDING : DropMembershipStatus.ACTIVE)
                 .build();

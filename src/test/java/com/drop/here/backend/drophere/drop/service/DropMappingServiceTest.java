@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.drop.service;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
@@ -126,14 +127,16 @@ class DropMappingServiceTest {
                 .builder()
                 .customer(customer)
                 .build();
+        final DropJoinRequest dropJoinRequest = DropJoinRequest.builder().receiveNotification(true).build();
 
         //when
-        final DropMembership membership = dropMappingService.createMembership(drop, accountAuthentication);
+        final DropMembership membership = dropMappingService.createMembership(drop, dropJoinRequest, accountAuthentication);
 
         //then
         assertThat(membership.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(membership.getCustomer()).isEqualTo(customer);
         assertThat(membership.getDrop()).isEqualTo(drop);
+        assertThat(membership.isReceiveNotification()).isTrue();
         assertThat(membership.getMembershipStatus()).isEqualTo(DropMembershipStatus.ACTIVE);
     }
 
@@ -149,14 +152,16 @@ class DropMappingServiceTest {
                 .builder()
                 .customer(customer)
                 .build();
+        final DropJoinRequest dropJoinRequest = DropJoinRequest.builder().receiveNotification(false).build();
 
         //when
-        final DropMembership membership = dropMappingService.createMembership(drop, accountAuthentication);
+        final DropMembership membership = dropMappingService.createMembership(drop, dropJoinRequest, accountAuthentication);
 
         //then
         assertThat(membership.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(membership.getCustomer()).isEqualTo(customer);
         assertThat(membership.getDrop()).isEqualTo(drop);
+        assertThat(membership.isReceiveNotification()).isFalse();
         assertThat(membership.getMembershipStatus()).isEqualTo(DropMembershipStatus.PENDING);
     }
 

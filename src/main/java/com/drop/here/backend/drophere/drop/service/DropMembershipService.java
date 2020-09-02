@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
+import com.drop.here.backend.drophere.drop.dto.request.DropMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropCompanyMembershipResponse;
 import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
@@ -45,7 +46,7 @@ public class DropMembershipService {
     public ResourceOperationResponse createDropMembership(DropJoinRequest dropJoinRequest, String dropUid, String companyUid, AccountAuthentication authentication) {
         final Drop drop = dropPersistenceService.findDrop(dropUid, companyUid);
         dropManagementValidationService.validateJoinDropRequest(drop, dropJoinRequest, authentication.getCustomer());
-        final DropMembership membership = dropMappingService.createMembership(drop, authentication);
+        final DropMembership membership = dropMappingService.createMembership(drop, dropJoinRequest, authentication);
         log.info("Creating new drop membership for drop {} customer {}", drop.getUid(), authentication.getCustomer().getId());
         dropMembershipRepository.save(membership);
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, membership.getId());
@@ -93,5 +94,14 @@ public class DropMembershipService {
 
     public boolean existsMembership(Company company, Long customerId) {
         return dropMembershipRepository.existsByDropCompanyAndCustomerId(company, customerId);
+    }
+
+    public ResourceOperationResponse updateDropMembership(DropMembershipManagementRequest dropMembershipManagementRequest, String dropUid, String companyUid, AccountAuthentication authentication) {
+        final Drop drop = dropPersistenceService.findDrop(dropUid, companyUid);
+        final DropMembership dropMembership = getDropMembership(drop, authentication);
+        dropMembership.setReceiveNotification(dropMembershipManagementRequest.isReceiveNotification());
+        log.info("Updating drop membership for drop {} customer {}", drop.getUid(), authentication.getCustomer().getId());
+        dropMembershipRepository.save(dropMembership);
+        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, dropMembership.getId());
     }
 }
