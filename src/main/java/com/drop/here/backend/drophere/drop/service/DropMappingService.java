@@ -88,6 +88,7 @@ public class DropMappingService {
     public DropMembershipResponse toDropMembershipResponse(DropMembership dropMembership) {
         return DropMembershipResponse.builder()
                 .dropMembershipStatus(dropMembership.getMembershipStatus())
+                .receiveNotification(dropMembership.isReceiveNotification())
                 .build();
     }
 }

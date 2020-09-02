@@ -4,9 +4,12 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
+import com.drop.here.backend.drophere.company.enums.CompanyCustomerRelationshipStatus;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryService;
+import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
@@ -114,6 +117,23 @@ class CompanyMappingServiceTest {
         assertThat(company.getName()).isEqualTo(companyManagementRequest.getName());
         assertThat(company.getAccount()).isNull();
         assertThat(company.getCountry()).isEqualTo(country);
+    }
+
+    @Test
+    void givenCustomerAndCompanyWhenCreateActiveRelationshipThenCreate() {
+        //given
+        final Customer customer = Customer.builder().build();
+        final Company company = Company.builder().build();
+
+        //when
+        final CompanyCustomerRelationship response = companyMappingService.createActiveRelationship(customer, company);
+
+        //then
+        assertThat(response.getRelationshipStatus()).isEqualTo(CompanyCustomerRelationshipStatus.ACTIVE);
+        assertThat(response.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
+        assertThat(response.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
+        assertThat(response.getCustomer()).isEqualTo(customer);
+        assertThat(response.getCompany()).isEqualTo(company);
     }
 
 }

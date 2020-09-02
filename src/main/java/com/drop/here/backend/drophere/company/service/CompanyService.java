@@ -40,7 +40,7 @@ public class CompanyService {
     private final PrivilegeService privilegeService;
     private final ImageService imageService;
     private final DropMembershipService dropMembershipService;
-    private final CompanyCustomerBlockingService companyCustomerBlockingService;
+    private final CompanyCustomerRelationshipService companyCustomerRelationshipService;
     private final CustomerService customerService;
 
     public boolean isVisible(String companyUid) {
@@ -114,7 +114,8 @@ public class CompanyService {
     }
 
     public boolean hasRelation(Company company, Long customerId) {
-        return dropMembershipService.existsMembership(company, customerId);
+        return dropMembershipService.existsMembership(company, customerId) ||
+                companyCustomerRelationshipService.hasRelationship(company, customerId);
     }
 
     // TODO: 02/09/2020 test, implemetn
@@ -124,13 +125,13 @@ public class CompanyService {
 
     public ResourceOperationResponse updateCustomerRelationship(Long customerId, CompanyCustomerRelationshipManagementRequest companyCustomerManagementRequest, AccountAuthentication accountAuthentication) {
         final Customer customer = customerService.findById(customerId);
-        companyCustomerBlockingService.handleCustomerBlocking(companyCustomerManagementRequest.isBlock(), customer, accountAuthentication.getCompany());
+        companyCustomerRelationshipService.handleCustomerBlocking(companyCustomerManagementRequest.isBlock(), customer, accountAuthentication.getCompany());
         log.info("Updated customer {} with company relation {}", customer, accountAuthentication.getCompany().getUid());
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customerId);
     }
 
     public boolean isBlocked(String companyUid, Customer customer) {
         final Company company = getByUid(companyUid);
-        return companyCustomerBlockingService.isBlocked(company, customer);
+        return companyCustomerRelationshipService.isBlocked(company, customer);
     }
 }

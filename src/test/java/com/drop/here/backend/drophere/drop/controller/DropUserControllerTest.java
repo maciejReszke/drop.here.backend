@@ -6,7 +6,10 @@ import com.drop.here.backend.drophere.authentication.account.repository.AccountR
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
+import com.drop.here.backend.drophere.company.enums.CompanyCustomerRelationshipStatus;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
+import com.drop.here.backend.drophere.company.repository.CompanyCustomerRelationshipRepository;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
@@ -70,14 +73,18 @@ class DropUserControllerTest extends IntegrationBaseClass {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private CompanyCustomerRelationshipRepository companyCustomerRelationshipRepository;
+
     private Company company;
     private Account account;
     private Drop drop;
     private Customer customer;
+    private Country country;
 
     @BeforeEach
     void prepare() {
-        final Country country = countryRepository.save(CountryDataGenerator.poland());
+        country = countryRepository.save(CountryDataGenerator.poland());
         account = accountRepository.save(AccountDataGenerator.customerAccount(1));
         privilegeRepository.save(Privilege.builder().name(CUSTOMER_CREATED_PRIVILEGE).account(account).build());
         company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
@@ -87,6 +94,7 @@ class DropUserControllerTest extends IntegrationBaseClass {
 
     @AfterEach
     void cleanUp() {
+        companyCustomerRelationshipRepository.deleteAll();
         dropMembershipRepository.deleteAll();
         dropRepository.deleteAll();
         customerRepository.deleteAll();
@@ -344,6 +352,17 @@ class DropUserControllerTest extends IntegrationBaseClass {
         final DropMembership blockedMembership = DropDataGenerator.membership(blockedDrop, customer);
         blockedMembership.setMembershipStatus(DropMembershipStatus.BLOCKED);
         dropMembershipRepository.save(blockedMembership);
+
+        final Account anotherAccount2 = accountRepository.save(AccountDataGenerator.companyAccount(3));
+        final Company blockedCompany = companyRepository.save(CompanyDataGenerator.company(2, anotherAccount2, country));
+        final Drop blockedCompanyDrop = dropRepository.save(DropDataGenerator.drop(5, blockedCompany));
+        dropRepository.save(blockedCompanyDrop);
+        final DropMembership blockedCompanyMembership = DropDataGenerator.membership(blockedCompanyDrop, customer);
+        blockedCompanyMembership.setMembershipStatus(DropMembershipStatus.ACTIVE);
+        dropMembershipRepository.save(blockedCompanyMembership);
+        final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(blockedCompany, customer);
+        relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
+        companyCustomerRelationshipRepository.save(relationship);
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
