@@ -34,6 +34,7 @@ public class DropMembershipService {
     private final DropManagementValidationService dropManagementValidationService;
     private final DropMembershipSearchingService dropMembershipSearchingService;
 
+    // TODO: 02/09/2020 pominac zbanowane!
     public Page<DropMembershipResponse> findMemberships(AccountAuthentication authentication, String name, Pageable pageable) {
         return dropMembershipRepository.findByCustomerAndDropNameStartsWithAndMembershipStatusNot(authentication.getCustomer(), name, DropMembershipStatus.BLOCKED, pageable)
                 .map(dropMappingService::toDropMembershipResponse);

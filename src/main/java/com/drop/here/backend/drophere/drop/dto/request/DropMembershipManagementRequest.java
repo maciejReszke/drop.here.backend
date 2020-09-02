@@ -15,6 +15,6 @@ import javax.validation.constraints.NotNull;
 public class DropMembershipManagementRequest {
 
     @NotNull
-    @ApiModelProperty(value = "Does user want to receive notifications", example = "true")
+    @ApiModelProperty(value = "Does user want to receive notifications", example = "true", required = true)
     private boolean receiveNotification;
 }

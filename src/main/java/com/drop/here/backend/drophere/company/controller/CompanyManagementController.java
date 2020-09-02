@@ -79,5 +79,4 @@ public class CompanyManagementController {
                                                         @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
         return companyService.updateImage(image, authentication);
     }
-
 }

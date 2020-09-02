@@ -47,6 +47,13 @@ public class CustomerService {
         log.info("Creating customer for account via external authentication");
     }
 
+    public Customer findById(Long customerId) {
+        return customerRepository.findById(customerId)
+                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                        "Customer with id %s was not found", customerId),
+                        RestExceptionStatusCode.CUSTOMER_BY_ID_NOT_FOUND));
+    }
+
     @Transactional(readOnly = true)
     public CustomerManagementResponse findOwnCustomer(AccountAuthentication authentication) {
         final Customer customer = customerRepository.findByAccount(authentication.getPrincipal())

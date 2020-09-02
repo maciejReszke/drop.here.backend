@@ -165,28 +165,72 @@ class AuthenticationPrivilegesServiceTest {
     }
 
     @Test
-    void givenVisibleCompanyWhenIsCompanyVisibleThenTrue() {
+    void givenVisibleCompanyAndNotBlockedCustomerWhenIsCompanyVisibleForCustomerThenTrue() {
         //given
         final String companyUid = "companyUid";
+        final Customer customer = Customer.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .customer(customer)
+                .build();
 
         when(companyService.isVisible(companyUid)).thenReturn(true);
+        when(companyService.isBlocked(companyUid, customer)).thenReturn(false);
 
         //when
-        final boolean result = authenticationPrivilegesService.isCompanyVisible(companyUid);
+        final boolean result = authenticationPrivilegesService.isCompanyVisibleForCustomer(accountAuthentication, companyUid);
 
         //then
         assertThat(result).isTrue();
     }
 
     @Test
-    void givenNotVisibleCompanyWhenIsCompanyVisibleThenFalse() {
+    void givenVisibleCompanyAndBlockedCustomerWhenIsCompanyVisibleForCustomerThenFalse() {
         //given
         final String companyUid = "companyUid";
+        final Customer customer = Customer.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .customer(customer)
+                .build();
+
+        when(companyService.isVisible(companyUid)).thenReturn(true);
+        when(companyService.isBlocked(companyUid, customer)).thenReturn(true);
+
+        //when
+        final boolean result = authenticationPrivilegesService.isCompanyVisibleForCustomer(accountAuthentication, companyUid);
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenVisibleCompanyAndNullCustomerWhenIsCompanyVisibleForCustomerThenFalse() {
+        //given
+        final String companyUid = "companyUid";
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .build();
+
+        when(companyService.isVisible(companyUid)).thenReturn(true);
+
+        //when
+        final boolean result = authenticationPrivilegesService.isCompanyVisibleForCustomer(accountAuthentication, companyUid);
+
+        //then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenNotVisibleCompanyWhenIsCompanyVisibleForCustomerThenFalse() {
+        //given
+        final String companyUid = "companyUid";
+        final Customer customer = Customer.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .customer(customer)
+                .build();
 
         when(companyService.isVisible(companyUid)).thenReturn(false);
 
         //when
-        final boolean result = authenticationPrivilegesService.isCompanyVisible(companyUid);
+        final boolean result = authenticationPrivilegesService.isCompanyVisibleForCustomer(accountAuthentication, companyUid);
 
         //then
         assertThat(result).isFalse();

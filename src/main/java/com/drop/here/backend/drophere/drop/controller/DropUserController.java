@@ -56,6 +56,7 @@ public class DropUserController {
         return dropUserService.findMemberships(authentication, name, pageable);
     }
 
+    // TODO: 02/09/2020 test z banem
     @ApiOperation("Joining to drop")
     @PostMapping("/{dropUid}/companies/{companyUid}/memberships")
     @ApiAuthorizationToken
@@ -65,7 +66,7 @@ public class DropUserController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @PreAuthorize("@authenticationPrivilegesService.isCompanyVisible(#companyUid)")
+    @PreAuthorize("@authenticationPrivilegesService.isCompanyVisibleForCustomer(authentication, #companyUid)")
     public ResourceOperationResponse createDropMembership(@ApiIgnore AccountAuthentication authentication,
                                                           @ApiIgnore @PathVariable String dropUid,
                                                           @ApiIgnore @PathVariable String companyUid,
