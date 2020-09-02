@@ -73,7 +73,6 @@ public class DropUserController {
         return dropUserService.createDropMembership(dropJoinRequest, dropUid, companyUid, authentication);
     }
 
-    // TODO: 02/09/2020 test
     @ApiOperation("Updating drop membership")
     @PutMapping("/{dropUid}/companies/{companyUid}/memberships")
     @ApiAuthorizationToken

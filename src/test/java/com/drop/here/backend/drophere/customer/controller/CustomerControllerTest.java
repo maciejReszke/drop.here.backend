@@ -74,7 +74,7 @@ class CustomerControllerTest extends IntegrationBaseClass {
         final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
         customer = customerRepository.save(CustomerDataGenerator.customer(1, account));
         customer.setImage(image);
-        customerRepository.save(customer);
+        customer = customerRepository.save(customer);
     }
 
     @AfterEach

@@ -13,6 +13,7 @@ import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
+import com.drop.here.backend.drophere.drop.dto.request.DropMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
@@ -39,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -202,6 +204,74 @@ class DropUserControllerTest extends IntegrationBaseClass {
         //then
         result.andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()));
         assertThat(dropMembershipRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void givenValidRequestWhenUpdateDropMembershipThenUpdate() throws Exception {
+        //given
+        final DropMembership dropMembership = DropDataGenerator.membership(drop, customer);
+        dropMembership.setReceiveNotification(false);
+        dropMembershipRepository.save(dropMembership);
+        final String url = String.format("/drops/%s/companies/%s/memberships", drop.getUid(), company.getUid());
+        final String json = objectMapper.writeValueAsString(DropMembershipManagementRequest.builder().receiveNotification(true).build());
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        //when
+        final ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(dropMembershipRepository.findAll().get(0).isReceiveNotification()).isTrue();
+    }
+
+    @Test
+    void givenValidRequestInvalidPrivilegeWhenUpdateDropMembershipsThen403() throws Exception {
+        //given
+        final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(CUSTOMER_CREATED_PRIVILEGE))
+                .findFirst().orElseThrow();
+        privilege.setName("differentPrivilege");
+        privilegeRepository.save(privilege);
+
+        final DropMembership dropMembership = DropDataGenerator.membership(drop, customer);
+        dropMembership.setReceiveNotification(false);
+        dropMembershipRepository.save(dropMembership);
+        final String url = String.format("/drops/%s/companies/%s/memberships", drop.getUid(), company.getUid());
+        final String json = objectMapper.writeValueAsString(DropMembershipManagementRequest.builder().receiveNotification(true).build());
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        //when
+        final ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+        assertThat(dropMembershipRepository.findAll().get(0).isReceiveNotification()).isFalse();
+    }
+
+    @Test
+    void givenNotFoundMembershipWhenUpdateDropMembershipThen422() throws Exception {
+        //given
+        final String url = String.format("/drops/%s/companies/%s/memberships", drop.getUid(), company.getUid());
+        final String json = objectMapper.writeValueAsString(DropMembershipManagementRequest.builder().receiveNotification(true).build());
+        dropRepository.save(drop);
+        companyRepository.save(company);
+
+        //when
+        final ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
 
     @Test

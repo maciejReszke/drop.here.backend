@@ -61,7 +61,7 @@ class CompanyControllerTest extends IntegrationBaseClass {
         final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
         company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         company.setImage(image);
-        companyRepository.save(company);
+        company = companyRepository.save(company);
     }
 
     @AfterEach
