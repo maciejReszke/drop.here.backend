@@ -22,7 +22,7 @@ public interface DropMembershipRepository extends JpaRepository<DropMembership, 
             "dm.customer =:customer and " +
             "not dm.membershipStatus = :membershipStatus and " +
             "dm.drop.name like concat(:name, '%') " +
-            "and dm.drop.company not in (select c from CompanyCustomerRelationship c where c.relationshipStatus = 'BLOCKED')")
+            "and dm.drop.company not in (select c.company from CompanyCustomerRelationship c where c.relationshipStatus = 'BLOCKED')")
     Page<DropMembership> findByCustomerAndDropNameStartsWithAndMembershipStatusNot(Customer customer, String name, DropMembershipStatus membershipStatus, Pageable pageable);
 
     @Modifying

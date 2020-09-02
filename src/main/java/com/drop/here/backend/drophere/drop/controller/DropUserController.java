@@ -56,7 +56,6 @@ public class DropUserController {
         return dropUserService.findMemberships(authentication, name, pageable);
     }
 
-    // TODO: 02/09/2020 test z banem
     @ApiOperation("Joining to drop")
     @PostMapping("/{dropUid}/companies/{companyUid}/memberships")
     @ApiAuthorizationToken

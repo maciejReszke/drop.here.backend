@@ -5,7 +5,9 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
@@ -28,6 +30,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
+@ToString(exclude = {"customer", "company"})
+@EqualsAndHashCode(exclude = {"customer", "company"})
 @Table(uniqueConstraints = @UniqueConstraint(name = "unique-company-customer-relationship", columnNames = {"customer_id", "company_id"}))
 public class CompanyCustomerRelationship {
 

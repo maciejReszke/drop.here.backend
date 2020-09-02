@@ -169,6 +169,28 @@ class DropUserControllerTest extends IntegrationBaseClass {
     }
 
     @Test
+    void givenValidRequestBlockedCustomerWhenCreateDropMembershipThen403() throws Exception {
+        //given
+        final String url = String.format("/drops/%s/companies/%s/memberships", drop.getUid(), company.getUid());
+        final String json = objectMapper.writeValueAsString(DropJoinRequest.builder().password("pass").build());
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+        final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(company, customer);
+        relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
+        companyCustomerRelationshipRepository.save(relationship);
+
+        //when
+        final ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+        assertThat(dropMembershipRepository.findAll()).isEmpty();
+    }
+
+    @Test
     void givenValidRequestVisibleCompanyInvalidPrivilegeWhenCreateDropMembershipsThen403() throws Exception {
         //given
         final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(CUSTOMER_CREATED_PRIVILEGE))
@@ -356,7 +378,6 @@ class DropUserControllerTest extends IntegrationBaseClass {
         final Account anotherAccount2 = accountRepository.save(AccountDataGenerator.companyAccount(3));
         final Company blockedCompany = companyRepository.save(CompanyDataGenerator.company(2, anotherAccount2, country));
         final Drop blockedCompanyDrop = dropRepository.save(DropDataGenerator.drop(5, blockedCompany));
-        dropRepository.save(blockedCompanyDrop);
         final DropMembership blockedCompanyMembership = DropDataGenerator.membership(blockedCompanyDrop, customer);
         blockedCompanyMembership.setMembershipStatus(DropMembershipStatus.ACTIVE);
         dropMembershipRepository.save(blockedCompanyMembership);
