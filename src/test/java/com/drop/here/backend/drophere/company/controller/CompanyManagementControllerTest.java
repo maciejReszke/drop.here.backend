@@ -9,6 +9,7 @@ import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.company.dto.CompanyCustomerRelationshipManagementRequest;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
 import com.drop.here.backend.drophere.company.enums.CompanyCustomerRelationshipStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyCustomerRelationshipRepository;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
@@ -17,6 +18,7 @@ import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
 import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.repository.DropMembershipRepository;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
 import com.drop.here.backend.drophere.image.Image;
@@ -447,4 +449,167 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
         assertThat(companyCustomerRelationshipRepository.findAll()).isEmpty();
     }
 
+    @Test
+    void givenWithoutParamRequestWhenFindCustomersThenFindCustomers() throws Exception {
+        //given
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
+        prepareFindingCompaniesCustomerData();
+
+
+        final String url = "/management/companies/customers";
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .param("customerName", "")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(4)));
+    }
+
+    @Test
+    void givenWithNameParamRequestWhenFindCustomersThenFindCustomers() throws Exception {
+        //given
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
+        prepareFindingCompaniesCustomerData();
+
+
+        final String url = "/management/companies/customers";
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .param("customerName", "Krzy")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(2)));
+    }
+
+    @Test
+    void givenWithBlockedTrueParamRequestWhenFindCustomersThenFindCustomers() throws Exception {
+        //given
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
+        prepareFindingCompaniesCustomerData();
+
+
+        final String url = "/management/companies/customers";
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .param("customerName", "")
+                .param("blocked", "true")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenWithBlockedFalseParamRequestWhenFindCustomersThenFindCustomers() throws Exception {
+        //given
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
+        prepareFindingCompaniesCustomerData();
+
+
+        final String url = "/management/companies/customers";
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .param("customerName", "")
+                .param("blocked", "false")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(3)));
+    }
+
+    @Test
+    void givenWithBlockedFalseParamAndNameRequestWhenFindCustomersThenFindCustomers() throws Exception {
+        //given
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
+        prepareFindingCompaniesCustomerData();
+
+
+        final String url = "/management/companies/customers";
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .param("customerName", "Michal")
+                .param("blocked", "false")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenWithBlockedTrueParamAndNameRequestWhenFindCustomersThenFindCustomers() throws Exception {
+        //given
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
+        prepareFindingCompaniesCustomerData();
+
+
+        final String url = "/management/companies/customers";
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .param("customerName", "Michal")
+                .param("blocked", "true")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(0)));
+    }
+
+    private void prepareFindingCompaniesCustomerData() {
+        final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
+        companyCustomerRelationshipRepository.save(CompanyDataGenerator.companyCustomerRelationship(company, customer));
+
+        final Account customerAccount2 = accountRepository.save(AccountDataGenerator.customerAccount(3));
+        final Customer customer2 = CustomerDataGenerator.customer(2, customerAccount2);
+        customer2.setFirstName("Michal");
+        customer2.setLastName("Krzywousty");
+        customerRepository.save(customer2);
+        final CompanyCustomerRelationship relationship1 = CompanyDataGenerator.companyCustomerRelationship(company, customer2);
+        relationship1.setRelationshipStatus(CompanyCustomerRelationshipStatus.ACTIVE);
+        companyCustomerRelationshipRepository.save(relationship1);
+
+        final Account customerAccount3 = accountRepository.save(AccountDataGenerator.customerAccount(4));
+        final Customer customer3 = customerRepository.save(CustomerDataGenerator.customer(3, customerAccount3));
+        final Account differentCompanyAccount = accountRepository.save(AccountDataGenerator.customerAccount(5));
+        final Company differentCompany = companyRepository.save(CompanyDataGenerator.company(2, differentCompanyAccount, country));
+        companyCustomerRelationshipRepository.save(CompanyDataGenerator.companyCustomerRelationship(differentCompany, customer3));
+
+        final Account customerAccount4 = accountRepository.save(AccountDataGenerator.customerAccount(6));
+        final Customer customer4 = CustomerDataGenerator.customer(4, customerAccount4);
+        customer4.setFirstName("Krzysztof");
+        customer4.setLastName("Tlusty");
+        customerRepository.save(customer4);
+        final Drop drop = dropRepository.save(DropDataGenerator.drop(1, company));
+        dropMembershipRepository.save(DropDataGenerator.membership(drop, customer4));
+
+        final Account customerAccount5 = accountRepository.save(AccountDataGenerator.customerAccount(7));
+        final Customer customer5 = CustomerDataGenerator.customer(5, customerAccount5);
+        customer5.setFirstName("Cham");
+        customer5.setLastName("Zwykly");
+        customerRepository.save(customer5);
+        final Drop drop2 = dropRepository.save(DropDataGenerator.drop(2, company));
+        final DropMembership membership = DropDataGenerator.membership(drop2, customer5);
+        dropMembershipRepository.save(membership);
+        final CompanyCustomerRelationship relationship2 = CompanyDataGenerator.companyCustomerRelationship(company, customer5);
+        relationship2.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
+        companyCustomerRelationshipRepository.save(relationship2);
+    }
 }

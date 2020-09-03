@@ -21,10 +21,12 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Optional<Customer> findByIdWithImage(Long customerId);
 
     @Query("select distinct c from Customer c " +
-            "left join CompanyCustomerRelationship ccr on (ccr.customer =:c and ccr.company =:company)" +
-            "left join DropMembership dm on (dm.customer = :c and dm.drop.company =:company) where " +
+            "left join CompanyCustomerRelationship ccr on (ccr.customer =c and ccr.company =:company) where " +
+            "(ccr is not null or c in (select dm.customer from DropMembership dm " +
+            "                                             join dm.drop d where " +
+            "                                             d.company = :company)) and " +
             "(" +
-            "   :blocked is null or (:blocked = true and ccr.relationshipStatus = 'BLOCKED') or (:blocked = false and ccr.relationshipStatus = 'ACTIVE')" +
+            "   :blocked is null or (:blocked = true and ccr.relationshipStatus = 'BLOCKED') or (:blocked = false and (ccr is null or ccr.relationshipStatus = 'ACTIVE'))" +
             ") and " +
             "(" +
             "   lower(c.firstName) like concat(lower(:desiredCustomerStartingSubstring), '%') or " +

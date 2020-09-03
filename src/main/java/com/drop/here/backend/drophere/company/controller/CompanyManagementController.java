@@ -87,7 +87,7 @@ public class CompanyManagementController {
         return companyService.updateImage(image, authentication);
     }
 
-    // TODO: 02/09/2020 test
+    // TODO: 03/09/2020 test na zle privilege
     @GetMapping("/customers")
     @ApiOperation("Get company customers")
     @ResponseStatus(HttpStatus.OK)
