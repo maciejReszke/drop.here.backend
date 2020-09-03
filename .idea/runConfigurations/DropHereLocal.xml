@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="DropHereLocal" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <module name="drop.here.backend" />
+    <module name="drop-here" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.drop.here.backend.drophere.DropHereApplication" />
     <option name="ACTIVE_PROFILES" value="local" />
     <option name="ALTERNATIVE_JRE_PATH" />

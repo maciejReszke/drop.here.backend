@@ -5,14 +5,18 @@ import com.drop.here.backend.drophere.authentication.account.service.PrivilegeSe
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.company.dto.CompanyCustomerRelationshipManagementRequest;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
+import com.drop.here.backend.drophere.company.service.CompanyCustomerRelationshipService;
 import com.drop.here.backend.drophere.company.service.CompanyMappingService;
 import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.company.service.CompanyValidationService;
+import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.customer.service.CustomerService;
 import com.drop.here.backend.drophere.drop.service.DropMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
@@ -57,6 +61,12 @@ class CompanyServiceTest {
 
     @Mock
     private DropMembershipService dropMembershipService;
+
+    @Mock
+    private CompanyCustomerRelationshipService companyCustomerRelationshipService;
+
+    @Mock
+    private CustomerService customerService;
 
     @Test
     void givenVisibleCompanyWhenIsVisibleThenTrue() {
@@ -229,17 +239,105 @@ class CompanyServiceTest {
     }
 
     @Test
-    void givenNotExistingMembershipWhenHasRelationThenFalse() {
+    void givenExistingCompanyCustomerRelationshipWhenHasRelationThenTrue() {
         //given
         final Company company = Company.builder().build();
         final Long customerId = 5L;
 
         when(dropMembershipService.existsMembership(company, customerId)).thenReturn(false);
+        when(companyCustomerRelationshipService.hasRelationship(company, customerId)).thenReturn(true);
+
+        //when
+        final boolean result = companyService.hasRelation(company, customerId);
+
+        //then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void givenNotExistingMembershipNorRelationshipWhenHasRelationThenFalse() {
+        //given
+        final Company company = Company.builder().build();
+        final Long customerId = 5L;
+
+        when(dropMembershipService.existsMembership(company, customerId)).thenReturn(false);
+        when(companyCustomerRelationshipService.hasRelationship(company, customerId)).thenReturn(false);
 
         //when
         final boolean result = companyService.hasRelation(company, customerId);
 
         //then
         assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenExistingCompanyForBlockedCustomerWhenIsBlockedThenTrue() {
+        //given
+        final String companyUid = "companyUid";
+        final Customer customer = Customer.builder().build();
+        final Company company = Company.builder().build();
+
+        when(companyRepository.findByUid(companyUid)).thenReturn(Optional.of(company));
+        when(companyCustomerRelationshipService.isBlocked(company, customer)).thenReturn(true);
+
+        //when
+        final boolean blocked = companyService.isBlocked(companyUid, customer);
+
+        //then
+        assertThat(blocked).isTrue();
+    }
+
+    @Test
+    void givenExistingCompanyForNotBlockedCustomerWhenIsBlockedThenFalse() {
+        //given
+        final String companyUid = "companyUid";
+        final Customer customer = Customer.builder().build();
+        final Company company = Company.builder().build();
+
+        when(companyRepository.findByUid(companyUid)).thenReturn(Optional.of(company));
+        when(companyCustomerRelationshipService.isBlocked(company, customer)).thenReturn(false);
+
+        //when
+        final boolean blocked = companyService.isBlocked(companyUid, customer);
+
+        //then
+        assertThat(blocked).isFalse();
+    }
+
+    @Test
+    void givenNotExistingCompanyWhenIsBlockedThenThrowException() {
+        //given
+        final String companyUid = "companyUid";
+        final Customer customer = Customer.builder().build();
+
+        when(companyRepository.findByUid(companyUid)).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> companyService.isBlocked(companyUid, customer));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenValidRequestWhenUpdateCustomerRelationshipThenUpdate() {
+        //given
+        final Long customerId = 1L;
+        final CompanyCustomerRelationshipManagementRequest companyCustomerRelationshipManagementRequest =
+                CompanyCustomerRelationshipManagementRequest.builder().block(true).build();
+        final Company company = Company.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .company(company)
+                .build();
+        final Customer customer = Customer.builder().build();
+
+        when(customerService.findById(customerId)).thenReturn(customer);
+        doNothing().when(companyCustomerRelationshipService).handleCustomerBlocking(true, customer, company);
+
+        //when
+        final ResourceOperationResponse response = companyService.updateCustomerRelationship(customerId, companyCustomerRelationshipManagementRequest, accountAuthentication);
+
+        //then
+        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
     }
 }

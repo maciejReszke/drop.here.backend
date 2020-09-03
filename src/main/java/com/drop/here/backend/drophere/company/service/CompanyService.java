@@ -6,11 +6,15 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerResponse;
+import com.drop.here.backend.drophere.company.dto.CompanyCustomerRelationshipManagementRequest;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
+import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.customer.service.CustomerService;
 import com.drop.here.backend.drophere.drop.service.DropMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
@@ -18,11 +22,14 @@ import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,11 +41,25 @@ public class CompanyService {
     private final PrivilegeService privilegeService;
     private final ImageService imageService;
     private final DropMembershipService dropMembershipService;
+    private final CompanyCustomerRelationshipService companyCustomerRelationshipService;
+    private final CustomerService customerService;
+    private final CompanyCustomerSearchingService companyCustomerSearchingService;
 
     public boolean isVisible(String companyUid) {
-        return companyRepository.findByUid(companyUid)
+        return findByUid(companyUid)
                 .map(company -> company.getVisibilityStatus() == CompanyVisibilityStatus.VISIBLE)
                 .orElse(false);
+    }
+
+    private Optional<Company> findByUid(String companyUid) {
+        return companyRepository.findByUid(companyUid);
+    }
+
+    private Company getByUid(String companyUid) {
+        return findByUid(companyUid)
+                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                        "Company with uid %s was not found", companyUid),
+                        RestExceptionStatusCode.COMPANY_BY_UID_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
@@ -95,6 +116,23 @@ public class CompanyService {
     }
 
     public boolean hasRelation(Company company, Long customerId) {
-        return dropMembershipService.existsMembership(company, customerId);
+        return dropMembershipService.existsMembership(company, customerId) ||
+                companyCustomerRelationshipService.hasRelationship(company, customerId);
+    }
+
+    public Page<CompanyCustomerResponse> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, AccountAuthentication authentication, Pageable pageable) {
+        return companyCustomerSearchingService.findCustomers(desiredCustomerStartingSubstring, blocked, authentication, pageable);
+    }
+
+    public ResourceOperationResponse updateCustomerRelationship(Long customerId, CompanyCustomerRelationshipManagementRequest companyCustomerManagementRequest, AccountAuthentication accountAuthentication) {
+        final Customer customer = customerService.findById(customerId);
+        companyCustomerRelationshipService.handleCustomerBlocking(companyCustomerManagementRequest.isBlock(), customer, accountAuthentication.getCompany());
+        log.info("Updated customer {} with company relation {}", customer, accountAuthentication.getCompany().getUid());
+        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customerId);
+    }
+
+    public boolean isBlocked(String companyUid, Customer customer) {
+        final Company company = getByUid(companyUid);
+        return companyCustomerRelationshipService.isBlocked(company, customer);
     }
 }

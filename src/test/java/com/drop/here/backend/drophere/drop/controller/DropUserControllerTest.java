@@ -6,13 +6,17 @@ import com.drop.here.backend.drophere.authentication.account.repository.AccountR
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
+import com.drop.here.backend.drophere.company.enums.CompanyCustomerRelationshipStatus;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
+import com.drop.here.backend.drophere.company.repository.CompanyCustomerRelationshipRepository;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
+import com.drop.here.backend.drophere.drop.dto.request.DropMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
@@ -39,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -68,14 +73,18 @@ class DropUserControllerTest extends IntegrationBaseClass {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private CompanyCustomerRelationshipRepository companyCustomerRelationshipRepository;
+
     private Company company;
     private Account account;
     private Drop drop;
     private Customer customer;
+    private Country country;
 
     @BeforeEach
     void prepare() {
-        final Country country = countryRepository.save(CountryDataGenerator.poland());
+        country = countryRepository.save(CountryDataGenerator.poland());
         account = accountRepository.save(AccountDataGenerator.customerAccount(1));
         privilegeRepository.save(Privilege.builder().name(CUSTOMER_CREATED_PRIVILEGE).account(account).build());
         company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
@@ -85,6 +94,7 @@ class DropUserControllerTest extends IntegrationBaseClass {
 
     @AfterEach
     void cleanUp() {
+        companyCustomerRelationshipRepository.deleteAll();
         dropMembershipRepository.deleteAll();
         dropRepository.deleteAll();
         customerRepository.deleteAll();
@@ -159,6 +169,28 @@ class DropUserControllerTest extends IntegrationBaseClass {
     }
 
     @Test
+    void givenValidRequestBlockedCustomerWhenCreateDropMembershipThen403() throws Exception {
+        //given
+        final String url = String.format("/drops/%s/companies/%s/memberships", drop.getUid(), company.getUid());
+        final String json = objectMapper.writeValueAsString(DropJoinRequest.builder().password("pass").build());
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+        final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(company, customer);
+        relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
+        companyCustomerRelationshipRepository.save(relationship);
+
+        //when
+        final ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+        assertThat(dropMembershipRepository.findAll()).isEmpty();
+    }
+
+    @Test
     void givenValidRequestVisibleCompanyInvalidPrivilegeWhenCreateDropMembershipsThen403() throws Exception {
         //given
         final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(CUSTOMER_CREATED_PRIVILEGE))
@@ -202,6 +234,74 @@ class DropUserControllerTest extends IntegrationBaseClass {
         //then
         result.andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()));
         assertThat(dropMembershipRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void givenValidRequestWhenUpdateDropMembershipThenUpdate() throws Exception {
+        //given
+        final DropMembership dropMembership = DropDataGenerator.membership(drop, customer);
+        dropMembership.setReceiveNotification(false);
+        dropMembershipRepository.save(dropMembership);
+        final String url = String.format("/drops/%s/companies/%s/memberships", drop.getUid(), company.getUid());
+        final String json = objectMapper.writeValueAsString(DropMembershipManagementRequest.builder().receiveNotification(true).build());
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        //when
+        final ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(dropMembershipRepository.findAll().get(0).isReceiveNotification()).isTrue();
+    }
+
+    @Test
+    void givenValidRequestInvalidPrivilegeWhenUpdateDropMembershipsThen403() throws Exception {
+        //given
+        final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(CUSTOMER_CREATED_PRIVILEGE))
+                .findFirst().orElseThrow();
+        privilege.setName("differentPrivilege");
+        privilegeRepository.save(privilege);
+
+        final DropMembership dropMembership = DropDataGenerator.membership(drop, customer);
+        dropMembership.setReceiveNotification(false);
+        dropMembershipRepository.save(dropMembership);
+        final String url = String.format("/drops/%s/companies/%s/memberships", drop.getUid(), company.getUid());
+        final String json = objectMapper.writeValueAsString(DropMembershipManagementRequest.builder().receiveNotification(true).build());
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        //when
+        final ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+        assertThat(dropMembershipRepository.findAll().get(0).isReceiveNotification()).isFalse();
+    }
+
+    @Test
+    void givenNotFoundMembershipWhenUpdateDropMembershipThen422() throws Exception {
+        //given
+        final String url = String.format("/drops/%s/companies/%s/memberships", drop.getUid(), company.getUid());
+        final String json = objectMapper.writeValueAsString(DropMembershipManagementRequest.builder().receiveNotification(true).build());
+        dropRepository.save(drop);
+        companyRepository.save(company);
+
+        //when
+        final ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
 
     @Test
@@ -274,6 +374,16 @@ class DropUserControllerTest extends IntegrationBaseClass {
         final DropMembership blockedMembership = DropDataGenerator.membership(blockedDrop, customer);
         blockedMembership.setMembershipStatus(DropMembershipStatus.BLOCKED);
         dropMembershipRepository.save(blockedMembership);
+
+        final Account anotherAccount2 = accountRepository.save(AccountDataGenerator.companyAccount(3));
+        final Company blockedCompany = companyRepository.save(CompanyDataGenerator.company(2, anotherAccount2, country));
+        final Drop blockedCompanyDrop = dropRepository.save(DropDataGenerator.drop(5, blockedCompany));
+        final DropMembership blockedCompanyMembership = DropDataGenerator.membership(blockedCompanyDrop, customer);
+        blockedCompanyMembership.setMembershipStatus(DropMembershipStatus.ACTIVE);
+        dropMembershipRepository.save(blockedCompanyMembership);
+        final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(blockedCompany, customer);
+        relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
+        companyCustomerRelationshipRepository.save(relationship);
 
         //when
         final ResultActions result = mockMvc.perform(get(url)

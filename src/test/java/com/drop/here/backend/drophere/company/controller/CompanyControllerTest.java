@@ -7,10 +7,15 @@ import com.drop.here.backend.drophere.authentication.account.repository.Privileg
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
+import com.drop.here.backend.drophere.company.enums.CompanyCustomerRelationshipStatus;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
+import com.drop.here.backend.drophere.company.repository.CompanyCustomerRelationshipRepository;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
+import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageRepository;
 import com.drop.here.backend.drophere.image.ImageType;
@@ -18,6 +23,7 @@ import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
+import com.drop.here.backend.drophere.test_data.CustomerDataGenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,24 +54,31 @@ class CompanyControllerTest extends IntegrationBaseClass {
     @Autowired
     private ImageRepository imageRepository;
 
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private CompanyCustomerRelationshipRepository companyCustomerRelationshipRepository;
+
     private Account account;
-    private Country country;
     private Company company;
 
     @BeforeEach
     void prepare() {
-        country = countryRepository.save(CountryDataGenerator.poland());
+        final Country country = countryRepository.save(CountryDataGenerator.poland());
         account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
                 .account(account).build());
         final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
         company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         company.setImage(image);
-        companyRepository.save(company);
+        company = companyRepository.save(company);
     }
 
     @AfterEach
     void cleanUp() {
+        companyCustomerRelationshipRepository.deleteAll();
+        customerRepository.deleteAll();
         privilegeRepository.deleteAll();
         companyRepository.deleteAll();
         accountRepository.deleteAll();
@@ -91,6 +104,8 @@ class CompanyControllerTest extends IntegrationBaseClass {
         //given
         final String url = String.format("/companies/%s/images", company.getUid());
         final Account otherAccount = accountRepository.save(AccountDataGenerator.customerAccount(2));
+        customerRepository.save(CustomerDataGenerator.customer(1, otherAccount));
+
         privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
                 .account(otherAccount).build());
 
@@ -104,6 +119,27 @@ class CompanyControllerTest extends IntegrationBaseClass {
     }
 
     @Test
+    void givenCompanyNotOwnerExistingCompanyVisibleImageBlockedCustomerWhenGetCompanyThenForbidden() throws Exception {
+        //given
+        final String url = String.format("/companies/%s/images", company.getUid());
+        final Account otherAccount = accountRepository.save(AccountDataGenerator.customerAccount(2));
+        final Customer customer = customerRepository.save(CustomerDataGenerator.customer(1, otherAccount));
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
+                .account(otherAccount).build());
+        final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(company, customer);
+        relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
+        companyCustomerRelationshipRepository.save(relationship);
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " +
+                        jwtService.createToken(otherAccount).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+    }
+
+    @Test
     void givenCompanyNotOwnerExistingCompanyHiddenImageWhenGetCompanyThen403() throws Exception {
         //given
         company.setVisibilityStatus(CompanyVisibilityStatus.HIDDEN);
@@ -112,6 +148,8 @@ class CompanyControllerTest extends IntegrationBaseClass {
         final Account otherAccount = accountRepository.save(AccountDataGenerator.customerAccount(2));
         privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
                 .account(otherAccount).build());
+        customerRepository.save(CustomerDataGenerator.customer(1, otherAccount));
+
         //when
         final ResultActions result = mockMvc.perform(get(url)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(otherAccount).getToken()));
@@ -135,5 +173,4 @@ class CompanyControllerTest extends IntegrationBaseClass {
         //then
         result.andExpect(status().isNotFound());
     }
-
 }

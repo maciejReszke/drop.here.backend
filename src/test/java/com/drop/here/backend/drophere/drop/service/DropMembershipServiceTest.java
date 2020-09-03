@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
+import com.drop.here.backend.drophere.drop.dto.request.DropMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
@@ -67,7 +68,7 @@ class DropMembershipServiceTest {
 
         when(dropPersistenceService.findDrop(dropUid, companyUid)).thenReturn(drop);
         doNothing().when(dropManagementValidationService).validateJoinDropRequest(drop, dropJoinRequest, customer);
-        when(dropMappingService.createMembership(drop, accountAuthentication)).thenReturn(membership);
+        when(dropMappingService.createMembership(drop, dropJoinRequest, accountAuthentication)).thenReturn(membership);
         when(dropMembershipRepository.save(membership)).thenReturn(membership);
 
         //when
@@ -230,5 +231,57 @@ class DropMembershipServiceTest {
 
         //then
         assertThat(result).isFalse();
+    }
+
+    @Test
+    void givenExistingDropWhenUpdateDropMembershipThenUpdate() {
+        //given
+        final String dropUid = "dropUid";
+        final String companyUid = "companyUid";
+        final Customer customer = Customer.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .customer(customer)
+                .build();
+        final Drop drop = DropDataGenerator.drop(1, null);
+        final DropMembership membership = DropDataGenerator.membership(drop, customer);
+
+        when(dropPersistenceService.findDrop(dropUid, companyUid)).thenReturn(drop);
+        when(dropMembershipRepository.findByDropAndCustomer(drop, customer))
+                .thenReturn(Optional.of(membership));
+        when(dropMembershipRepository.save(membership)).thenReturn(membership);
+        final DropMembershipManagementRequest dropMembershipManagementRequest = DropMembershipManagementRequest.builder()
+                .receiveNotification(true)
+                .build();
+
+        //when
+        final ResourceOperationResponse result = dropMembershipService.updateDropMembership(dropMembershipManagementRequest, dropUid, companyUid, accountAuthentication);
+
+        //then
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        assertThat(membership.isReceiveNotification()).isTrue();
+    }
+
+    @Test
+    void givenNotExistingDropWhenUpdateDropMembershipThenThrowException() {
+        //given
+        final String dropUid = "dropUid";
+        final String companyUid = "companyUid";
+        final Customer customer = Customer.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .customer(customer)
+                .build();
+        final Drop drop = DropDataGenerator.drop(1, null);
+
+        when(dropPersistenceService.findDrop(dropUid, companyUid)).thenReturn(drop);
+        when(dropMembershipRepository.findByDropAndCustomer(drop, customer))
+                .thenReturn(Optional.empty());
+        final DropMembershipManagementRequest dropMembershipManagementRequest = DropMembershipManagementRequest.builder()
+                .receiveNotification(true)
+                .build();
+        //when
+        final Throwable throwable = catchThrowable(() -> dropMembershipService.updateDropMembership(dropMembershipManagementRequest, dropUid, companyUid, accountAuthentication));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 }

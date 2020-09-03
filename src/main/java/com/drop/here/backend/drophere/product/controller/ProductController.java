@@ -51,7 +51,7 @@ public class ProductController {
     })
     @ApiAuthorizationToken
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid) or " +
-            "@authenticationPrivilegesService.isCompanyVisible(#companyUid)")
+            "@authenticationPrivilegesService.isCompanyVisibleForCustomer(authentication, #companyUid)")
     public Page<ProductResponse> findAll(@ApiIgnore @PathVariable String companyUid,
                                          @ApiIgnore AccountAuthentication authentication,
                                          @ApiParam(value = "Desired category (1... n)") @RequestParam(value = "category", required = false) String[] desiredCategories,

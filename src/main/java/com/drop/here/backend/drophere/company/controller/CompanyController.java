@@ -40,7 +40,7 @@ public class CompanyController {
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid) or " +
-            "@authenticationPrivilegesService.isCompanyVisible(#companyUid)")
+            "@authenticationPrivilegesService.isCompanyVisibleForCustomer(authentication, #companyUid)")
     public ResponseEntity<byte[]> findImage(@ApiIgnore AccountAuthentication authentication,
                                             @ApiIgnore @PathVariable String companyUid) {
         final Image image = companyService.findImage(companyUid);

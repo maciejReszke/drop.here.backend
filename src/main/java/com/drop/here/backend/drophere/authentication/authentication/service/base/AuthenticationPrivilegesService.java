@@ -26,8 +26,10 @@ public class AuthenticationPrivilegesService {
                 accountAuthentication.getCompany().getUid().equalsIgnoreCase(companyUid);
     }
 
-    public boolean isCompanyVisible(String companyUid) {
-        return companyService.isVisible(companyUid);
+    public boolean isCompanyVisibleForCustomer(AccountAuthentication accountAuthentication, String companyUid) {
+        return companyService.isVisible(companyUid) &&
+                accountAuthentication.getCustomer() != null &&
+                !companyService.isBlocked(companyUid, accountAuthentication.getCustomer());
     }
 
     public boolean isOwnCustomerOperation(AccountAuthentication accountAuthentication, Long customerId) {

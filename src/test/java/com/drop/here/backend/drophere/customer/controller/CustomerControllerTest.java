@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.authentication.account.repository.Privileg
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.company.repository.CompanyCustomerRelationshipRepository;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
@@ -62,6 +63,8 @@ class CustomerControllerTest extends IntegrationBaseClass {
     @Autowired
     private CountryRepository countryRepository;
 
+    @Autowired
+    private CompanyCustomerRelationshipRepository companyCustomerRelationshipRepository;
 
     private Account account;
     private Customer customer;
@@ -74,11 +77,12 @@ class CustomerControllerTest extends IntegrationBaseClass {
         final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
         customer = customerRepository.save(CustomerDataGenerator.customer(1, account));
         customer.setImage(image);
-        customerRepository.save(customer);
+        customer = customerRepository.save(customer);
     }
 
     @AfterEach
     void cleanUp() {
+        companyCustomerRelationshipRepository.deleteAll();
         dropMembershipRepository.deleteAll();
         dropRepository.deleteAll();
         privilegeRepository.deleteAll();
@@ -103,13 +107,32 @@ class CustomerControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenCompaniesCustomerExistingCustomerImageWhenGetCustomerThenGet() throws Exception {
+    void givenCompaniesCustomerByDropMembershipExistingCustomerImageWhenGetCustomerThenGet() throws Exception {
         //given
         final Account account = accountRepository.save(AccountDataGenerator.companyAccount(2));
         final Country country = countryRepository.save(CountryDataGenerator.poland());
         final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         final Drop drop = dropRepository.save(DropDataGenerator.drop(1, company));
         dropMembershipRepository.save(DropDataGenerator.membership(drop, customer));
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
+                .account(account).build());
+        final String url = String.format("/customers/%s/images", customer.getId());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+    }
+
+    @Test
+    void givenCompaniesCustomerByCompanyCustomerRelationshipExistingCustomerImageWhenGetCustomerThenGet() throws Exception {
+        //given
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(2));
+        final Country country = countryRepository.save(CountryDataGenerator.poland());
+        final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
+        companyCustomerRelationshipRepository.save(CompanyDataGenerator.companyCustomerRelationship(company, customer));
         privilegeRepository.save(Privilege.builder().name(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                 .account(account).build());
         final String url = String.format("/customers/%s/images", customer.getId());

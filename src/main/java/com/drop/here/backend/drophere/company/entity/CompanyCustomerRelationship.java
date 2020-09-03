@@ -1,11 +1,13 @@
-package com.drop.here.backend.drophere.drop.entity;
+package com.drop.here.backend.drophere.company.entity;
 
+import com.drop.here.backend.drophere.company.enums.CompanyCustomerRelationshipStatus;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
@@ -17,6 +19,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -26,7 +30,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
-public class DropMembership {
+@ToString(exclude = {"customer", "company"})
+@EqualsAndHashCode(exclude = {"customer", "company"})
+@Table(uniqueConstraints = @UniqueConstraint(name = "unique-company-customer-relationship", columnNames = {"customer_id", "company_id"}))
+public class CompanyCustomerRelationship {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +41,7 @@ public class DropMembership {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private DropMembershipStatus membershipStatus;
+    private CompanyCustomerRelationshipStatus relationshipStatus;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -47,8 +54,8 @@ public class DropMembership {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "drop_id")
-    private Drop drop;
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -57,6 +64,4 @@ public class DropMembership {
     @Version
     private Long version;
 
-    @NotNull
-    private boolean receiveNotification;
 }

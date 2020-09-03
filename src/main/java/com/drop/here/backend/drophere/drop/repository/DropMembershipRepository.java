@@ -12,12 +12,18 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface DropMembershipRepository extends JpaRepository<DropMembership, Long> {
     Optional<DropMembership> findByDropAndCustomer(Drop drop, Customer customer);
 
+    @Query("select dm from DropMembership dm where " +
+            "dm.customer =:customer and " +
+            "not dm.membershipStatus = :membershipStatus and " +
+            "dm.drop.name like concat(:name, '%') " +
+            "and dm.drop.company not in (select c.company from CompanyCustomerRelationship c where c.relationshipStatus = 'BLOCKED')")
     Page<DropMembership> findByCustomerAndDropNameStartsWithAndMembershipStatusNot(Customer customer, String name, DropMembershipStatus membershipStatus, Pageable pageable);
 
     @Modifying
@@ -41,4 +47,14 @@ public interface DropMembershipRepository extends JpaRepository<DropMembership, 
     Page<DropMembership> findMembershipsWithCustomers(Drop drop, String desiredCustomerSubstring, DropMembershipStatus[] membershipStatuses, Pageable pageable);
 
     boolean existsByDropCompanyAndCustomerId(Company company, Long customerId);
+
+    @Query(value = "select dm from DropMembership dm " +
+            "join fetch dm.drop where " +
+            "dm.drop.company =:company and " +
+            "dm.customer.id in (:customersIds)",
+            countQuery = "select count(dm) from DropMembership dm " +
+                    "join dm.drop where " +
+                    "dm.drop.company =:company and " +
+                    "dm.customer.id in (:customersIds)")
+    List<DropMembership> findByDropCompanyAndCustomerIdInJoinFetchDrops(Company company, List<Long> customersIds);
 }
