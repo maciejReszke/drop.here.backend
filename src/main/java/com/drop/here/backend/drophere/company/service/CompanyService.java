@@ -23,6 +23,7 @@ import com.drop.here.backend.drophere.security.configuration.AccountAuthenticati
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +43,7 @@ public class CompanyService {
     private final DropMembershipService dropMembershipService;
     private final CompanyCustomerRelationshipService companyCustomerRelationshipService;
     private final CustomerService customerService;
+    private final CompanyCustomerSearchingService companyCustomerSearchingService;
 
     public boolean isVisible(String companyUid) {
         return findByUid(companyUid)
@@ -118,9 +120,8 @@ public class CompanyService {
                 companyCustomerRelationshipService.hasRelationship(company, customerId);
     }
 
-    // TODO: 02/09/2020 test, implemetn
-    public Page<CompanyCustomerResponse> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, AccountAuthentication authentication) {
-        return null;
+    public Page<CompanyCustomerResponse> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, AccountAuthentication authentication, Pageable pageable) {
+        return companyCustomerSearchingService.findCustomers(desiredCustomerStartingSubstring, blocked, authentication, pageable);
     }
 
     public ResourceOperationResponse updateCustomerRelationship(Long customerId, CompanyCustomerRelationshipManagementRequest companyCustomerManagementRequest, AccountAuthentication accountAuthentication) {

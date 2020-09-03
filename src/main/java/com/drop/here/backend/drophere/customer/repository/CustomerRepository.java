@@ -1,7 +1,10 @@
 package com.drop.here.backend.drophere.customer.repository;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,4 +19,17 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             "join fetch c.image i where " +
             "c.id =:customerId")
     Optional<Customer> findByIdWithImage(Long customerId);
+
+    // TODO: 02/09/2020 test
+    @Query("select distinct c from Customer c " +
+            "left join CompanyCustomerRelationship ccr on (ccr.customer =:c and ccr.company =:company)" +
+            "left join DropMembership dm on (dm.customer = :c and dm.drop.company =:company) where " +
+            "(" +
+            "   :blocked is null or (:blocked = true and ccr.relationshipStatus = 'BLOCKED') or (:blocked = false and ccr.relationshipStatus = 'ACTIVE')" +
+            ") and " +
+            "(" +
+            "   lower(c.firstName) like concat(lower(:desiredCustomerSubstring), '%') or " +
+            "   lower(c.lastName) like concat(lower(:desiredCustomerSubstring), '%')" +
+            ")")
+    Page<Customer> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, Company company, Pageable pageable);
 }

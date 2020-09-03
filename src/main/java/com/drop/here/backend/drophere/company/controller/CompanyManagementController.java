@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -96,10 +97,11 @@ public class CompanyManagementController {
     })
     public Page<CompanyCustomerResponse> findCustomers(@ApiIgnore AccountAuthentication authentication,
                                                        @ApiParam(value = "Customer name (starting with name or starting with surname)")
-                                                       @RequestParam(value = "customerName", required = false) String desiredCustomerStartingSubstring,
+                                                       @RequestParam(value = "customerName") String desiredCustomerStartingSubstring,
                                                        @ApiParam(value = "Is customer blocked (globally)")
-                                                       @RequestParam(value = "blocked", required = false) Boolean blocked) {
-        return companyService.findCustomers(desiredCustomerStartingSubstring, blocked, authentication);
+                                                       @RequestParam(value = "blocked", required = false) Boolean blocked,
+                                                       Pageable pageable) {
+        return companyService.findCustomers(desiredCustomerStartingSubstring, blocked, authentication, pageable);
     }
 
     @PutMapping("/customers/{customerId}")
