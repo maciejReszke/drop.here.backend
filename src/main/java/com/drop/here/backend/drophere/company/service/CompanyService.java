@@ -6,7 +6,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
-import com.drop.here.backend.drophere.company.controller.CompanyCustomerResponse;
+import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerResponse;
 import com.drop.here.backend.drophere.company.dto.CompanyCustomerRelationshipManagementRequest;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;

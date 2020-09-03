@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -75,5 +76,9 @@ public class CompanyCustomerRelationshipService {
 
     public boolean hasRelationship(Company company, Long customerId) {
         return companyCustomerRelationshipRepository.existsByCompanyAndCustomerId(company, customerId);
+    }
+
+    public List<CompanyCustomerRelationship> findRelationships(List<Long> customersIds, Company company) {
+        return companyCustomerRelationshipRepository.findByCompanyAndCustomerIdIn(company, customersIds);
     }
 }

@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,4 +17,6 @@ public interface CompanyCustomerRelationshipRepository extends JpaRepository<Com
     Optional<CompanyCustomerRelationship> findByCompanyAndCustomer(Company company, Customer customer);
 
     boolean existsByCompanyAndCustomerId(Company company, Long customerId);
+
+    List<CompanyCustomerRelationship> findByCompanyAndCustomerIdIn(Company company, List<Long> customersIds);
 }

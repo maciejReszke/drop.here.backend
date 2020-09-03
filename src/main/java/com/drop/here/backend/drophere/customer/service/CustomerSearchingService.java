@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 public class CustomerSearchingService {
     private final CustomerRepository customerRepository;
 
-    // TODO: 02/09/2020
     public Page<Customer> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, Company company, Pageable pageable) {
         return customerRepository.findCustomers(desiredCustomerStartingSubstring, blocked, company, pageable);
     }

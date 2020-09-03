@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -103,5 +104,9 @@ public class DropMembershipService {
         log.info("Updating drop membership for drop {} customer {}", drop.getUid(), authentication.getCustomer().getId());
         dropMembershipRepository.save(dropMembership);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, dropMembership.getId());
+    }
+
+    public List<DropMembership> findMembershipsJoinFetchDrops(List<Long> customersIds, Company company) {
+        return dropMembershipRepository.findByDropCompanyAndCustomerIdInJoinFetchDrops(company, customersIds);
     }
 }

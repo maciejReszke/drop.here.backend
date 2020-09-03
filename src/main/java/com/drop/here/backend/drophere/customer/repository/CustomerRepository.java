@@ -20,7 +20,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             "c.id =:customerId")
     Optional<Customer> findByIdWithImage(Long customerId);
 
-    // TODO: 02/09/2020 test
     @Query("select distinct c from Customer c " +
             "left join CompanyCustomerRelationship ccr on (ccr.customer =:c and ccr.company =:company)" +
             "left join DropMembership dm on (dm.customer = :c and dm.drop.company =:company) where " +
@@ -28,8 +27,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             "   :blocked is null or (:blocked = true and ccr.relationshipStatus = 'BLOCKED') or (:blocked = false and ccr.relationshipStatus = 'ACTIVE')" +
             ") and " +
             "(" +
-            "   lower(c.firstName) like concat(lower(:desiredCustomerSubstring), '%') or " +
-            "   lower(c.lastName) like concat(lower(:desiredCustomerSubstring), '%')" +
+            "   lower(c.firstName) like concat(lower(:desiredCustomerStartingSubstring), '%') or " +
+            "   lower(c.lastName) like concat(lower(:desiredCustomerStartingSubstring), '%')" +
             ")")
     Page<Customer> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, Company company, Pageable pageable);
 }

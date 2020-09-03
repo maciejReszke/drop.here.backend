@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -46,4 +47,14 @@ public interface DropMembershipRepository extends JpaRepository<DropMembership, 
     Page<DropMembership> findMembershipsWithCustomers(Drop drop, String desiredCustomerSubstring, DropMembershipStatus[] membershipStatuses, Pageable pageable);
 
     boolean existsByDropCompanyAndCustomerId(Company company, Long customerId);
+
+    @Query(value = "select dm from DropMembership dm " +
+            "join fetch dm.drop where " +
+            "dm.drop.company =:company and " +
+            "dm.customer.id in (:customersIds)",
+            countQuery = "select count(dm) from DropMembership dm " +
+                    "join dm.drop where " +
+                    "dm.drop.company =:company and " +
+                    "dm.customer.id in (:customersIds)")
+    List<DropMembership> findByDropCompanyAndCustomerIdInJoinFetchDrops(Company company, List<Long> customersIds);
 }

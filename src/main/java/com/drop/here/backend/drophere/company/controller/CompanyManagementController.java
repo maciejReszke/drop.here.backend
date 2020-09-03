@@ -5,6 +5,7 @@ import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.company.dto.CompanyCustomerRelationshipManagementRequest;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
+import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerResponse;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
 import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
