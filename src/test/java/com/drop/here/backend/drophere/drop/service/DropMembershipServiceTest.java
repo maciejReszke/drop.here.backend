@@ -8,7 +8,6 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropMembershipManagementRequest;
-import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
@@ -20,11 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -123,31 +118,6 @@ class DropMembershipServiceTest {
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
-    }
-
-    @Test
-    void givenAuthenticationAndNameWhenFindMembershipsThenFind() {
-        //given
-        final Customer customer = Customer.builder().build();
-        final AccountAuthentication accountAuthentication = AccountAuthentication
-                .builder()
-                .customer(customer)
-                .build();
-        final String name = "name";
-        final Pageable pageable = Pageable.unpaged();
-        final DropMembershipResponse dropMembershipResponse = DropMembershipResponse.builder().build();
-        final Drop drop = Drop.builder().build();
-        final DropMembership membership = DropDataGenerator.membership(drop, customer);
-        when(dropMembershipRepository.findByCustomerAndDropNameStartsWithAndMembershipStatusNot(customer, name, DropMembershipStatus.BLOCKED, pageable))
-                .thenReturn(new PageImpl<>(List.of(membership)));
-        when(dropMappingService.toDropMembershipResponse(membership)).thenReturn(dropMembershipResponse);
-
-        //when
-        final Page<DropMembershipResponse> response = dropMembershipService.findMemberships(accountAuthentication, name, pageable);
-
-        //then
-        assertThat(response.get()).hasSize(1);
-        assertThat(response.get().findFirst().orElseThrow()).isEqualTo(dropMembershipResponse);
     }
 
     @Test

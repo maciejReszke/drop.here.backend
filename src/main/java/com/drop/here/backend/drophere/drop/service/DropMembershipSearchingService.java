@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class DropMembershipSearchingService {
@@ -47,5 +49,9 @@ public class DropMembershipSearchingService {
         return StringUtils.isEmpty(desiredCustomerSubstring)
                 ? null
                 : desiredCustomerSubstring.toLowerCase() + '%';
+    }
+
+    public List<DropMembership> findMemberships(List<Drop> drops, Customer customer) {
+        return dropMembershipRepository.findByCustomerAndDropIn(customer, drops);
     }
 }

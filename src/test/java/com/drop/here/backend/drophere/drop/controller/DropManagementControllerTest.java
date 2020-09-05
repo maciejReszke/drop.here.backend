@@ -15,7 +15,6 @@ import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRe
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
-import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import com.drop.here.backend.drophere.drop.repository.DropMembershipRepository;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
@@ -156,7 +155,8 @@ class DropManagementControllerTest extends IntegrationBaseClass {
         //given
         final String url = String.format("/companies/%s/drops", company.getUid());
         final DropManagementRequest request = DropDataGenerator.dropManagementRequest(1);
-        request.setLocationDropType(DropLocationType.GEOLOCATION.name() + "i");
+        request.setPassword(null);
+        request.setRequiresPassword(true);
         final String json = objectMapper.writeValueAsString(request);
 
 
@@ -247,7 +247,8 @@ class DropManagementControllerTest extends IntegrationBaseClass {
         final String url = String.format("/companies/%s/drops/%s", company.getUid(), drop.getId());
         final DropManagementRequest request = DropDataGenerator.dropManagementRequest(1);
         request.setName("newName123");
-        request.setLocationDropType(DropLocationType.GEOLOCATION.name() + "i");
+        request.setPassword(null);
+        request.setRequiresPassword(true);
         final String json = objectMapper.writeValueAsString(request);
 
 

@@ -1,33 +1,24 @@
 package com.drop.here.backend.drophere.drop.dto.response;
 
+import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
 
 @Value
 @Builder
-public class DropCompanyResponse {
-
-    @ApiModelProperty(value = "Drop id", example = "1")
-    Long id;
-
+public class DropCustomerResponse {
     @ApiModelProperty(value = "Drop name", example = "Ryneczek lidla")
-    String name;
+    String dropName;
 
     @ApiModelProperty(value = "Drop description", example = "Nie ma opisu bo brak dlugopis")
-    String description;
+    String dropDescription;
 
     @ApiModelProperty(value = "Drop uid - required to join via hidden link", example = "name123xz")
-    String uid;
-
-    @ApiModelProperty(value = "Drop hidden status - describes if can be seen on map", example = "true")
-    boolean hidden;
+    String dropUid;
 
     @ApiModelProperty(value = "Is password needed to join given drop", example = "true")
     boolean requiresPassword;
-
-    @ApiModelProperty(value = "Password needed to join drop (if is needed)", example = "Aezakmi")
-    String password;
 
     @ApiModelProperty(value = "Does company owner must accept user to join region", example = "true")
     boolean requiresAccept;
@@ -41,9 +32,13 @@ public class DropCompanyResponse {
     @ApiModelProperty(value = "Estimated radius in meters", example = "200")
     Integer estimatedRadiusMeters;
 
-    @ApiModelProperty(value = "Drop was created at", example = "2020-08-08T12:44:55")
-    String createdAt;
+    @ApiModelProperty(value = "Membership status, null means no membership", example = "ACTIVE", allowableValues = "ACTIVE, PENDING, null")
+    DropMembershipStatus membershipStatus;
 
-    @ApiModelProperty(value = "Drop was created at", example = "2020-08-08T12:44:55")
-    String lastUpdatedAt;
+    @ApiModelProperty(value = "Company name", example = "Glodny maciek")
+    String companyName;
+
+    @ApiModelProperty(value = "Company uid", example = "uid123")
+    String companyUid;
+
 }
