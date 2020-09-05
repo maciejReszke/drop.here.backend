@@ -30,11 +30,12 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(indexes = {
         @Index(columnList = "uid", unique = true),
-        @Index(columnList = "account_id", unique = true)
+        @Index(columnList = "account_id", unique = true),
+        @Index(columnList = "name")
 })
 public class Company {
 

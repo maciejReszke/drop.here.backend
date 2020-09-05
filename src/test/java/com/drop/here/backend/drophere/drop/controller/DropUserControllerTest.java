@@ -355,110 +355,539 @@ class DropUserControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenEmptyNameWhenFindMembershipsThenFind() throws Exception {
+    void givenDropInUserRangeWhenFindDropsThenFind() throws Exception {
         //given
-        final String url = "/drops/memberships";
-        drop.setName("dropName1");
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenDropInRangeDefinedByDropWhenFindDropsThenFind() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(70000);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "0")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenDropNotInRangeWhenFindDropsThenEmpty() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(20000);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "0")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.empty()));
+    }
+
+    @Test
+    void givenInvisibleDropWhenFindDropsThenEmpty() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        drop.setHidden(true);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.empty()));
+    }
+
+    @Test
+    void givenNotVisibleCompanyWhenFindDropsThenEmpty() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        company.setVisibilityStatus(CompanyVisibilityStatus.HIDDEN);
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.empty()));
+    }
+
+    @Test
+    void givenExistingDropByDropNamePrefixWhenFindDropsThenFind() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "spot")
+                .param("radius", "70000")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenNotExistingDropByDropNameWhenFindDropsThenEmpty() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "spotter")
+                .param("radius", "70000")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.empty()));
+    }
+
+    @Test
+    void givenExistingDropByCompanyNameWhenFindDropsThenFind() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "thai c")
+                .param("radius", "70000")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenNotExistingDropByCompanyNameWhenFindDropsThenEmpty() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "thai kurwa")
+                .param("radius", "70000")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.empty()));
+    }
+
+    @Test
+    void givenDropHiddenWithoutMembershipWhenFindDropsThenEmpty() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        drop.setHidden(true);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.empty()));
+    }
+
+    @Test
+    void givenDropHiddenWithMembershipWhenFindDropsThenFind() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setHidden(true);
+        drop.setEstimatedRadiusMeters(500);
         dropRepository.save(drop);
         dropMembershipRepository.save(DropDataGenerator.membership(drop, customer));
-        final Drop secondDrop = dropRepository.save(DropDataGenerator.drop(2, company));
-        secondDrop.setName("chromName1");
-        dropRepository.save(secondDrop);
-        dropMembershipRepository.save(DropDataGenerator.membership(secondDrop, customer));
-        final Account anotherAccount = accountRepository.save(AccountDataGenerator.customerAccount(2));
-        final Customer anotherCustomer = customerRepository.save(CustomerDataGenerator.customer(2, anotherAccount));
-        final Drop anotherDrop = dropRepository.save(DropDataGenerator.drop(3, company));
-        dropMembershipRepository.save(DropDataGenerator.membership(anotherDrop, anotherCustomer));
-        final Drop blockedDrop = dropRepository.save(DropDataGenerator.drop(4, company));
-        dropRepository.save(blockedDrop);
-        final DropMembership blockedMembership = DropDataGenerator.membership(blockedDrop, customer);
-        blockedMembership.setMembershipStatus(DropMembershipStatus.BLOCKED);
-        dropMembershipRepository.save(blockedMembership);
 
-        final Account anotherAccount2 = accountRepository.save(AccountDataGenerator.companyAccount(3));
-        final Company blockedCompany = companyRepository.save(CompanyDataGenerator.company(2, anotherAccount2, country));
-        final Drop blockedCompanyDrop = dropRepository.save(DropDataGenerator.drop(5, blockedCompany));
-        final DropMembership blockedCompanyMembership = DropDataGenerator.membership(blockedCompanyDrop, customer);
-        blockedCompanyMembership.setMembershipStatus(DropMembershipStatus.ACTIVE);
-        dropMembershipRepository.save(blockedCompanyMembership);
-        final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(blockedCompany, customer);
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenBlockedCustomerRelationshipWhenFindDropsThenEmpty() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+        final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(company, customer);
         relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
         companyCustomerRelationshipRepository.save(relationship);
 
         //when
+        //1degree == 111km
         final ResultActions result = mockMvc.perform(get(url)
-                .param("name", "")
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
 
         //then
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(2)));
+                .andExpect(jsonPath("$.[*]", Matchers.empty()));
     }
 
     @Test
-    void givenPrefixNameWhenFindMembershipsThenFind() throws Exception {
+    void givenActiveRelationshipDropWhenFindDropsThenFind() throws Exception {
         //given
-        final String url = "/drops/memberships";
-        drop.setName("dropName1");
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
         dropRepository.save(drop);
-        dropMembershipRepository.save(DropDataGenerator.membership(drop, customer));
-        final Drop secondDrop = dropRepository.save(DropDataGenerator.drop(2, company));
-        secondDrop.setName("chromName1");
-        dropRepository.save(secondDrop);
-        dropMembershipRepository.save(DropDataGenerator.membership(secondDrop, customer));
-        final Account anotherAccount = accountRepository.save(AccountDataGenerator.customerAccount(2));
-        final Customer anotherCustomer = customerRepository.save(CustomerDataGenerator.customer(2, anotherAccount));
-        final Drop anotherDrop = dropRepository.save(DropDataGenerator.drop(3, company));
-        dropMembershipRepository.save(DropDataGenerator.membership(anotherDrop, anotherCustomer));
-        final Drop blockedDrop = dropRepository.save(DropDataGenerator.drop(4, company));
-        dropRepository.save(blockedDrop);
-        final DropMembership blockedMembership = DropDataGenerator.membership(blockedDrop, customer);
-        blockedMembership.setMembershipStatus(DropMembershipStatus.BLOCKED);
-        dropMembershipRepository.save(blockedMembership);
+        final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(company, customer);
+        relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.ACTIVE);
+        companyCustomerRelationshipRepository.save(relationship);
 
         //when
+        //1degree == 111km
         final ResultActions result = mockMvc.perform(get(url)
-                .param("name", "chrom")
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
 
         //then
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(1)));
+                .andExpect(jsonPath("$.[*]", Matchers.hasSize(1)));
     }
 
     @Test
-    void givenInvalidPrivilegeWhenFindMembershipsThen403() throws Exception {
+    void givenNotBlockedMembershipDropWhenFindDropsThenFind() throws Exception {
         //given
-        final String url = "/drops/memberships";
-        drop.setName("dropName1");
-        dropRepository.save(drop);
-        dropMembershipRepository.save(DropDataGenerator.membership(drop, customer));
-        final Drop secondDrop = dropRepository.save(DropDataGenerator.drop(2, company));
-        secondDrop.setName("chromName1");
-        dropRepository.save(secondDrop);
-        dropMembershipRepository.save(DropDataGenerator.membership(secondDrop, customer));
-        final Account anotherAccount = accountRepository.save(AccountDataGenerator.customerAccount(2));
-        final Customer anotherCustomer = customerRepository.save(CustomerDataGenerator.customer(2, anotherAccount));
-        final Drop anotherDrop = dropRepository.save(DropDataGenerator.drop(3, company));
-        dropMembershipRepository.save(DropDataGenerator.membership(anotherDrop, anotherCustomer));
-        final Drop blockedDrop = dropRepository.save(DropDataGenerator.drop(4, company));
-        dropRepository.save(blockedDrop);
-        final DropMembership blockedMembership = DropDataGenerator.membership(blockedDrop, customer);
-        blockedMembership.setMembershipStatus(DropMembershipStatus.BLOCKED);
-        dropMembershipRepository.save(blockedMembership);
+        final String url = "/drops";
 
-        //given
-        final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(CUSTOMER_CREATED_PRIVILEGE))
-                .findFirst().orElseThrow();
-        privilege.setName("differentPrivilege");
-        privilegeRepository.save(privilege);
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+        final DropMembership membership = DropDataGenerator.membership(drop, customer);
+        membership.setMembershipStatus(DropMembershipStatus.ACTIVE);
+        dropMembershipRepository.save(membership);
 
         //when
+        //1degree == 111km
         final ResultActions result = mockMvc.perform(get(url)
-                .param("name", "")
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
 
         //then
-        result.andExpect(status().isForbidden());
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenBlockedMembershipDropWhenFindDropsThenEmpty() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+        final DropMembership membership = DropDataGenerator.membership(drop, customer);
+        membership.setMembershipStatus(DropMembershipStatus.BLOCKED);
+        dropMembershipRepository.save(membership);
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.empty()));
+    }
+
+    @Test
+    void givenMemberTrueAndHasMembershipDropWhenFindDropsThenFind() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+
+        dropMembershipRepository.save(DropDataGenerator.membership(drop, customer));
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
+                .param("member", "true")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenMemberTrueAndHasNotMembershipDropWhenFindDropsThenEmpty() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
+                .param("member", "true")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.empty()));
+    }
+
+    @Test
+    void givenMemberFalseAndHasNotMembershipDropWhenFindDropsThenFind() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
+                .param("member", "false")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenMemberFalseAndHasMembershipDropWhenFindDropsThenEmpty() throws Exception {
+        //given
+        final String url = "/drops";
+
+        company.setName("Thai cuisine");
+        companyRepository.save(company);
+        drop.setName("Spot nr 1");
+        drop.setXCoordinate(122.50);
+        drop.setYCoordinate(50.00);
+        drop.setEstimatedRadiusMeters(500);
+        dropRepository.save(drop);
+
+        dropMembershipRepository.save(DropDataGenerator.membership(drop, customer));
+
+        //when
+        //1degree == 111km
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("xCoordinate", "122.00")
+                .param("yCoordinate", "50.00")
+                .param("namePrefix", "")
+                .param("radius", "70000")
+                .param("member", "false")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.empty()));
     }
 }

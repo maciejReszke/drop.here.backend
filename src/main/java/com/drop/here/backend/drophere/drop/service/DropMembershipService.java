@@ -9,7 +9,7 @@ import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRe
 import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropCompanyMembershipResponse;
-import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
+import com.drop.here.backend.drophere.drop.dto.response.DropCustomerResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
 import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
@@ -34,11 +34,7 @@ public class DropMembershipService {
     private final DropMembershipRepository dropMembershipRepository;
     private final DropManagementValidationService dropManagementValidationService;
     private final DropMembershipSearchingService dropMembershipSearchingService;
-
-    public Page<DropMembershipResponse> findMemberships(AccountAuthentication authentication, String name, Pageable pageable) {
-        return dropMembershipRepository.findByCustomerAndDropNameStartsWithAndMembershipStatusNot(authentication.getCustomer(), name, DropMembershipStatus.BLOCKED, pageable)
-                .map(dropMappingService::toDropMembershipResponse);
-    }
+    private final DropSearchingService dropSearchingService;
 
     public Page<DropCompanyMembershipResponse> findMemberships(Drop drop, String desiredCustomerSubstring, String membershipStatus, Pageable pageable) {
         return dropMembershipSearchingService.findMemberships(drop, desiredCustomerSubstring, membershipStatus, pageable);
@@ -108,5 +104,9 @@ public class DropMembershipService {
 
     public List<DropMembership> findMembershipsJoinFetchDrops(List<Long> customersIds, Company company) {
         return dropMembershipRepository.findByDropCompanyAndCustomerIdInJoinFetchDrops(company, customersIds);
+    }
+
+    public List<DropCustomerResponse> findDrops(AccountAuthentication authentication, Double xCoordinate, Double yCoordinate, Integer radius, Boolean member, String namePrefix, Pageable pageable) {
+        return dropSearchingService.findDrops(authentication, xCoordinate, yCoordinate, radius, member, namePrefix, pageable);
     }
 }

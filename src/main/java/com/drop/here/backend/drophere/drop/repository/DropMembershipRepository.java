@@ -19,13 +19,6 @@ import java.util.Optional;
 public interface DropMembershipRepository extends JpaRepository<DropMembership, Long> {
     Optional<DropMembership> findByDropAndCustomer(Drop drop, Customer customer);
 
-    @Query("select dm from DropMembership dm where " +
-            "dm.customer =:customer and " +
-            "not dm.membershipStatus = :membershipStatus and " +
-            "dm.drop.name like concat(:name, '%') " +
-            "and dm.drop.company not in (select c.company from CompanyCustomerRelationship c where c.relationshipStatus = 'BLOCKED')")
-    Page<DropMembership> findByCustomerAndDropNameStartsWithAndMembershipStatusNot(Customer customer, String name, DropMembershipStatus membershipStatus, Pageable pageable);
-
     @Modifying
     void deleteByDrop(Drop drop);
 
@@ -57,4 +50,6 @@ public interface DropMembershipRepository extends JpaRepository<DropMembership, 
                     "dm.drop.company =:company and " +
                     "dm.customer.id in (:customersIds)")
     List<DropMembership> findByDropCompanyAndCustomerIdInJoinFetchDrops(Company company, List<Long> customersIds);
+
+    List<DropMembership> findByCustomerAndDropIn(Customer customer, List<Drop> drops);
 }
