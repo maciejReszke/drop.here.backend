@@ -36,13 +36,13 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "                                   where dm.drop = d and dm.customer = :customer)" +
             ") and " +
             "(" +
-            "   :customer not in (select c from CompanyCustomerRelationship ccr" +
+            "   :customer not in (select ccr.customer from CompanyCustomerRelationship ccr" +
             "                       where ccr.customer = :customer and " +
             "                             ccr.company = c and " +
             "                             ccr.relationshipStatus = 'BLOCKED')" +
             ") and " +
             "(" +
-            "   :customer not in (select c from DropMembership dm " +
+            "   :customer not in (select dm.customer from DropMembership dm " +
             "                      where dm.drop = d and dm.customer =:customer and " +
             "                       dm.membershipStatus = 'BLOCKED')" +
             ") and " +

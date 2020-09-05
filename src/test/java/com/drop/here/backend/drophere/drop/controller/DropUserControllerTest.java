@@ -80,11 +80,10 @@ class DropUserControllerTest extends IntegrationBaseClass {
     private Account account;
     private Drop drop;
     private Customer customer;
-    private Country country;
 
     @BeforeEach
     void prepare() {
-        country = countryRepository.save(CountryDataGenerator.poland());
+        final Country country = countryRepository.save(CountryDataGenerator.poland());
         account = accountRepository.save(AccountDataGenerator.customerAccount(1));
         privilegeRepository.save(Privilege.builder().name(CUSTOMER_CREATED_PRIVILEGE).account(account).build());
         company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
