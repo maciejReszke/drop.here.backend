@@ -19,6 +19,7 @@ public class AuthenticationDataGenerator {
                 .account(account)
                 .tokenValidUntil(LocalDateTime.now())
                 .company(account.getCompany())
+                .customer(account.getCustomer())
                 .build();
     }
 
