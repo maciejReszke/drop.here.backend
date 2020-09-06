@@ -300,7 +300,7 @@ class AuthenticationPrivilegesServiceTest {
         final boolean result = authenticationPrivilegesService.isOwnCustomerOperation(accountAuthentication, customerId);
 
         //then
-        assertThat(result).isFalse();
+        assertThat(result).isTrue();
     }
 
     @Test
