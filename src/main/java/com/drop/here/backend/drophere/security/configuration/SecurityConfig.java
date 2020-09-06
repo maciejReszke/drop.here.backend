@@ -57,6 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.GET, "/customers/{customerId}/images").authenticated()
                         .mvcMatchers("/drops/**").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                         .mvcMatchers("/actuator/**").permitAll()
+                        .mvcMatchers("/notifications/**").hasAnyAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE, PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(new Http401UnauthorizedEntryPoint(), new AntPathRequestMatcher("/**")));

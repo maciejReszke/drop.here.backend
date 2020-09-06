@@ -34,7 +34,6 @@ import javax.validation.Valid;
 public class NotificationController {
     private final NotificationService notificationService;
 
-    // TODO: 06/09/2020  test
     @GetMapping
     @ApiOperation("Get notifications")
     @ApiAuthorizationToken
