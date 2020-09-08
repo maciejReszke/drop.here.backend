@@ -41,7 +41,7 @@ class FirebaseMappingServiceTest {
         final Notification notification = Notification.builder().build();
 
         when(notificationBroadcastingUtilService.getImageUrl(notification)).thenReturn("url123");
-        when(notificationBroadcastingUtilService.getToken(notification)).thenReturn("token123");
+        when(notificationBroadcastingUtilService.getToken(notification)).thenReturn("");
 
         //when
         final Message message = firebaseMappingService.toMessage(notification);

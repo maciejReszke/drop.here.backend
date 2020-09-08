@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.notification.entity.Notification;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingType;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
+import com.drop.here.backend.drophere.notification.enums.NotificationRecipientType;
 import com.drop.here.backend.drophere.notification.enums.NotificationReferencedSubjectType;
 import com.drop.here.backend.drophere.notification.enums.NotificationType;
 import lombok.experimental.UtilityClass;
@@ -18,6 +19,7 @@ public class NotificationDataGenerator {
         return baseNotification(i)
                 .toBuilder()
                 .recipientCompany(company)
+                .recipientType(NotificationRecipientType.COMPANY)
                 .build();
     }
 
@@ -38,6 +40,7 @@ public class NotificationDataGenerator {
         return baseNotification(i)
                 .toBuilder()
                 .recipientCustomer(customer)
+                .recipientType(NotificationRecipientType.CUSTOMER)
                 .build();
     }
 }

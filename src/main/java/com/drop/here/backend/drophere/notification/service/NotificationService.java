@@ -38,6 +38,7 @@ public class NotificationService {
     private final NotificationValidationService notificationValidationService;
     private final NotificationBroadcastingServiceFactory notificationBroadcastingServiceFactory;
 
+    // TODO: 08/09/2020 account profile
     public Page<NotificationResponse> findNotifications(AccountAuthentication accountAuthentication, String readStatus, Pageable pageable) {
         final List<NotificationReadStatus> desiredReadStatuses = getDesiredReadStatuses(readStatus);
         final Page<Notification> notifications = accountAuthentication.getPrincipal().getAccountType() == AccountType.COMPANY
@@ -60,6 +61,7 @@ public class NotificationService {
                 : List.of(NotificationReadStatus.valueOf(readStatus));
     }
 
+    // TODO: 08/09/2020 dla account profile
     public ResourceOperationResponse updateNotification(AccountAuthentication accountAuthentication, Long notificationId, NotificationManagementRequest notificationManagementRequest) {
         final Notification notification = findNotification(accountAuthentication.getPrincipal(), notificationId);
         notificationValidationService.validateUpdateNotificationRequest(notificationManagementRequest);

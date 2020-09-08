@@ -3,13 +3,11 @@ package com.drop.here.backend.drophere.customer.service;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
-import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.customer.dto.CustomerManagementRequest;
 import com.drop.here.backend.drophere.customer.dto.CustomerManagementResponse;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
@@ -24,10 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -39,7 +35,7 @@ class CustomerServiceTest {
     private CustomerService customerService;
 
     @Mock
-    private CustomerRepository customerRepository;
+    private CustomerStoreService customerStoreService;
 
     @Mock
     private ImageService imageService;
@@ -59,7 +55,7 @@ class CustomerServiceTest {
         final Customer customer = CustomerDataGenerator.customer(1, account);
 
         when(customerMappingService.toCustomer(account, externalAuthenticationResult)).thenReturn(customer);
-        when(customerRepository.save(customer)).thenReturn(customer);
+        doNothing().when(customerStoreService).save(customer);
         when(imageService.createImage(externalAuthenticationResult.getImage(), ImageType.CUSTOMER_IMAGE))
                 .thenReturn(image);
         doNothing().when(privilegeService).addCustomerCreatedPrivilege(account);
@@ -83,7 +79,7 @@ class CustomerServiceTest {
         final Customer customer = CustomerDataGenerator.customer(1, account);
 
         when(customerMappingService.toCustomer(account, externalAuthenticationResult)).thenReturn(customer);
-        when(customerRepository.save(customer)).thenReturn(customer);
+        doNothing().when(customerStoreService).save(customer);
         doNothing().when(privilegeService).addCustomerCreatedPrivilege(account);
 
         //when
@@ -108,7 +104,7 @@ class CustomerServiceTest {
         final Image imageEntity = Image.builder().build();
         when(imageService.createImage(image.getBytes(), ImageType.CUSTOMER_IMAGE))
                 .thenReturn(imageEntity);
-        when(customerRepository.save(customer)).thenReturn(customer);
+        doNothing().when(customerStoreService).save(customer);
 
         //when
         final ResourceOperationResponse resourceOperationResponse = customerService.updateImage(image, accountAuthentication);
@@ -129,7 +125,7 @@ class CustomerServiceTest {
                 .build();
 
         doNothing().when(customerMappingService).updateCustomer(request, customer);
-        when(customerRepository.save(customer)).thenReturn(customer);
+        doNothing().when(customerStoreService).save(customer);
         //when
         final ResourceOperationResponse result = customerService.updateCustomer(request, accountAuthentication);
 
@@ -149,7 +145,7 @@ class CustomerServiceTest {
                 .build();
 
         when(customerMappingService.createCustomer(request, account)).thenReturn(customer);
-        when(customerRepository.save(customer)).thenReturn(customer);
+        doNothing().when(customerStoreService).save(customer);
         doNothing().when(privilegeService).addCustomerCreatedPrivilege(account);
 
         //when
@@ -184,24 +180,11 @@ class CustomerServiceTest {
                 .image(image)
                 .build();
 
-        when(customerRepository.findByIdWithImage(customerId)).thenReturn(Optional.of(customer));
+        when(customerStoreService.findByIdWithImage(customerId)).thenReturn(customer);
         //when
         final Image result = customerService.findImage(customerId);
 
         //then
         assertThat(result).isEqualTo(image);
-    }
-
-    @Test
-    void givenNotExistingCustomerWithImageWhenFindImageThenError() {
-        //given
-        final Long customerId = 1L;
-
-        when(customerRepository.findByIdWithImage(customerId)).thenReturn(Optional.empty());
-        //when
-        final Throwable throwable = catchThrowable(() -> customerService.findImage(customerId));
-
-        //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 }
