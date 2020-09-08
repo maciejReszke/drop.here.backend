@@ -3,13 +3,17 @@ package com.drop.here.backend.drophere.notification.repository;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.notification.entity.Notification;
+import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,4 +26,12 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     Optional<Notification> findByIdAndRecipientCompany(Long notificationId, Company company);
 
     Optional<Notification> findByIdAndRecipientCustomer(Long notificationId, Customer customer);
+
+    List<Notification> findByBroadcastingStatus(NotificationBroadcastingStatus broadcastingStatus, Pageable pageable);
+
+    @Modifying
+    @Query("update Notification n " +
+            "set n.broadcastingStatus = :broadcastingStatus where " +
+            "n in (:notifications)")
+    void updateBroadcastingStatus(List<Notification> notifications, NotificationBroadcastingStatus broadcastingStatus);
 }

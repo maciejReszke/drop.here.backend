@@ -11,13 +11,17 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.notification.dto.NotificationManagementRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
+import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
+import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingService;
+import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingServiceFactory;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +36,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationMappingService notificationMappingService;
     private final NotificationValidationService notificationValidationService;
+    private final NotificationBroadcastingServiceFactory notificationBroadcastingServiceFactory;
 
     public Page<NotificationResponse> findNotifications(AccountAuthentication accountAuthentication, String readStatus, Pageable pageable) {
         final List<NotificationReadStatus> desiredReadStatuses = getDesiredReadStatuses(readStatus);
@@ -71,5 +76,19 @@ public class NotificationService {
         return notification.orElseThrow(() -> new RestEntityNotFoundException(String.format(
                 "Notification with id %s for account %s was not found", notificationId, principal.getId()),
                 RestExceptionStatusCode.NOTIFICATION_BY_ID_FOR_PRINCIPAL_NOT_FOUND));
+    }
+
+    public void sendNotifications() {
+        final NotificationBroadcastingService notificationBroadcastingService = notificationBroadcastingServiceFactory.getNotificationBroadcastingService();
+        final PageRequest pageable = PageRequest.of(0, notificationBroadcastingService.getBatchAmount());
+        final List<Notification> notifications = notificationRepository.findByBroadcastingStatus(NotificationBroadcastingStatus.NOT_SENT, pageable);
+        log.info("Sending batch of notifications {}", notifications.size());
+        final boolean result = notificationBroadcastingService.sendBatch(notifications);
+        if (result) {
+            log.info("Successfully send batch {} of notifications", notifications.size());
+            notificationRepository.updateBroadcastingStatus(notifications, NotificationBroadcastingStatus.SENT);
+        } else {
+            log.info("Failed to send batch {} of notifications", notifications.size());
+        }
     }
 }
