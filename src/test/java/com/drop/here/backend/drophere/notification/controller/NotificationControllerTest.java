@@ -1,7 +1,9 @@
 package com.drop.here.backend.drophere.notification.controller;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.entity.Privilege;
+import com.drop.here.backend.drophere.authentication.account.repository.AccountProfileRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
@@ -18,6 +20,7 @@ import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
+import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
 import com.drop.here.backend.drophere.test_data.CustomerDataGenerator;
@@ -42,6 +45,9 @@ class NotificationControllerTest extends IntegrationBaseClass {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private AccountProfileRepository accountProfileRepository;
 
     @Autowired
     private CompanyRepository companyRepository;
@@ -74,8 +80,31 @@ class NotificationControllerTest extends IntegrationBaseClass {
         customerRepository.deleteAll();
         companyRepository.deleteAll();
         privilegeRepository.deleteAll();
+        accountProfileRepository.deleteAll();
         accountRepository.deleteAll();
         countryRepository.deleteAll();
+    }
+
+    @Test
+    void givenAccountProfileWhenFindNotificationsThenFind() throws Exception {
+        //given
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
+        privilegeRepository.save(Privilege.builder().name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).account(account).build());
+        privilegeRepository.save(Privilege.builder().name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).accountProfile(accountProfile).build());
+        final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
+        notificationRepository.save(NotificationDataGenerator.accountProfileNotification(1, accountProfile));
+        notificationRepository.save(NotificationDataGenerator.companyNotification(2, company));
+
+        final String url = "/notifications";
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account, accountProfile).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(2)));
     }
 
     @Test
@@ -243,7 +272,7 @@ class NotificationControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidRequestOwnNotificationWhenUpdateNotificationThenUpdate() throws Exception {
+    void givenValidRequestOwnCustomerNotificationWhenUpdateNotificationThenUpdate() throws Exception {
         //given
         final Account account = accountRepository.save(AccountDataGenerator.customerAccount(1));
         privilegeRepository.save(Privilege.builder().name(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE).account(account).build());
@@ -269,6 +298,67 @@ class NotificationControllerTest extends IntegrationBaseClass {
         assertThat(notificationRepository.findAll().stream().findFirst().orElseThrow().getReadStatus())
                 .isEqualTo(NotificationReadStatus.UNREAD);
     }
+
+    @Test
+    void givenValidRequestOwnCompanyNotificationWhenUpdateNotificationThenUpdate() throws Exception {
+        //given
+        final Account account = accountRepository.save(AccountDataGenerator.customerAccount(1));
+        privilegeRepository.save(Privilege.builder().name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).account(account).build());
+        final Company customer = companyRepository.save(CompanyDataGenerator.company(1, account, country));
+        final Notification notification = NotificationDataGenerator.companyNotification(1, customer);
+        notification.setReadStatus(NotificationReadStatus.READ);
+        notificationRepository.save(notification);
+        final String url = String.format("/notifications/%s", notification.getId());
+        final NotificationManagementRequest request = NotificationManagementRequest.builder()
+                .readStatus(NotificationReadStatus.UNREAD.name()).build();
+        final String json = objectMapper.writeValueAsString(request);
+
+        //when
+        final ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll().stream().findFirst().orElseThrow().getReadStatus())
+                .isEqualTo(NotificationReadStatus.UNREAD);
+    }
+
+    @Test
+    void givenValidRequestAccountProfileNotificationWhenUpdateNotificationThenUpdate() throws Exception {
+        //given
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1).toBuilder()
+                .isAnyProfileRegistered(true)
+                .build());
+        final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
+        privilegeRepository.save(Privilege.builder().name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).account(account).build());
+        privilegeRepository.save(Privilege.builder().name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).accountProfile(accountProfile).build());
+        companyRepository.save(CompanyDataGenerator.company(1, account, country));
+        final Notification notification = NotificationDataGenerator.accountProfileNotification(1, accountProfile);
+        notification.setReadStatus(NotificationReadStatus.READ);
+        notificationRepository.save(notification);
+        final String url = String.format("/notifications/%s", notification.getId());
+        final NotificationManagementRequest request = NotificationManagementRequest.builder()
+                .readStatus(NotificationReadStatus.UNREAD.name()).build();
+        final String json = objectMapper.writeValueAsString(request);
+
+        //when
+        final ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account, accountProfile).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll().stream().findFirst().orElseThrow().getReadStatus())
+                .isEqualTo(NotificationReadStatus.UNREAD);
+    }
+
 
     @Test
     void givenValidRequestNotOwnNotificationWhenUpdateNotificationThenNotFound() throws Exception {

@@ -14,9 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,7 +90,7 @@ class NotificationBroadcastingUtilServiceTest {
     }
 
     @Test
-    void giveEmptyTokenNotificationWhenGetNotificationTokenTypeThenGetToken() {
+    void giveEmptyTokenNotificationWhenGetNotificationTokenTypeThenThrowException() {
         //given
         final Notification notification = Notification.builder()
                 .recipientType(NotificationRecipientType.COMPANY_PROFILE)
@@ -98,10 +100,10 @@ class NotificationBroadcastingUtilServiceTest {
                 .thenReturn(Optional.empty());
 
         //when
-        final String token = notificationBroadcastingUtilService.getToken(notification);
+        final Throwable throwable = catchThrowable(() -> notificationBroadcastingUtilService.getToken(notification));
 
         //then
-        assertThat(token).isEqualTo("");
+        assertThat(throwable).isInstanceOf(NoSuchElementException.class);
     }
 
     @Test

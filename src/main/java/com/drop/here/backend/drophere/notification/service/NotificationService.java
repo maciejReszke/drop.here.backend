@@ -6,8 +6,6 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
-import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.notification.dto.NotificationManagementRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
@@ -38,21 +36,24 @@ public class NotificationService {
     private final NotificationValidationService notificationValidationService;
     private final NotificationBroadcastingServiceFactory notificationBroadcastingServiceFactory;
 
-    // TODO: 08/09/2020 account profile
     public Page<NotificationResponse> findNotifications(AccountAuthentication accountAuthentication, String readStatus, Pageable pageable) {
         final List<NotificationReadStatus> desiredReadStatuses = getDesiredReadStatuses(readStatus);
-        final Page<Notification> notifications = accountAuthentication.getPrincipal().getAccountType() == AccountType.COMPANY
-                ? findNotifications(accountAuthentication.getCompany(), desiredReadStatuses, pageable)
-                : findNotifications(accountAuthentication.getCustomer(), desiredReadStatuses, pageable);
+        final Page<Notification> notifications = findNotifications(accountAuthentication, pageable, desiredReadStatuses);
         return notifications.map(notificationMappingService::toNotificationResponse);
     }
 
-    private Page<Notification> findNotifications(Company company, List<NotificationReadStatus> desiredReadStatuses, Pageable pageable) {
-        return notificationRepository.findByRecipientCompanyAndReadStatusIn(company, desiredReadStatuses, pageable);
+    private Page<Notification> findNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
+        return accountAuthentication.getPrincipal().getAccountType() == AccountType.COMPANY
+                ? findCompanyNotifications(accountAuthentication, pageable, desiredReadStatuses)
+                : findCustomerNotifications(accountAuthentication, pageable, desiredReadStatuses);
     }
 
-    private Page<Notification> findNotifications(Customer customer, List<NotificationReadStatus> desiredReadStatuses, Pageable pageable) {
-        return notificationRepository.findByRecipientCustomerAndReadStatusIn(customer, desiredReadStatuses, pageable);
+    private Page<Notification> findCustomerNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
+        return notificationRepository.findByRecipientCustomerAndReadStatusIn(accountAuthentication.getCustomer(), desiredReadStatuses, pageable);
+    }
+
+    private Page<Notification> findCompanyNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
+        return notificationRepository.findByRecipientCompanyOrRecipientAccountProfileAndReadStatusIn(accountAuthentication.getCompany(), accountAuthentication.getProfile(), desiredReadStatuses, pageable);
     }
 
     private List<NotificationReadStatus> getDesiredReadStatuses(String readStatus) {
@@ -61,9 +62,8 @@ public class NotificationService {
                 : List.of(NotificationReadStatus.valueOf(readStatus));
     }
 
-    // TODO: 08/09/2020 dla account profile
     public ResourceOperationResponse updateNotification(AccountAuthentication accountAuthentication, Long notificationId, NotificationManagementRequest notificationManagementRequest) {
-        final Notification notification = findNotification(accountAuthentication.getPrincipal(), notificationId);
+        final Notification notification = findNotification(accountAuthentication, notificationId);
         notificationValidationService.validateUpdateNotificationRequest(notificationManagementRequest);
         notificationMappingService.update(notification, notificationManagementRequest);
         log.info("Updating notification with id {}", notificationId);
@@ -71,10 +71,11 @@ public class NotificationService {
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, notificationId);
     }
 
-    private Notification findNotification(Account principal, Long notificationId) {
+    private Notification findNotification(AccountAuthentication authentication, Long notificationId) {
+        final Account principal = authentication.getPrincipal();
         final Optional<Notification> notification = principal.getAccountType() == AccountType.COMPANY
-                ? notificationRepository.findByIdAndRecipientCompany(notificationId, principal.getCompany())
-                : notificationRepository.findByIdAndRecipientCustomer(notificationId, principal.getCustomer());
+                ? notificationRepository.findByIdAndRecipientCompanyOrRecipientAccountProfile(notificationId, authentication.getCompany(), authentication.getProfile())
+                : notificationRepository.findByIdAndRecipientCustomer(notificationId, authentication.getCustomer());
         return notification.orElseThrow(() -> new RestEntityNotFoundException(String.format(
                 "Notification with id %s for account %s was not found", notificationId, principal.getId()),
                 RestExceptionStatusCode.NOTIFICATION_BY_ID_FOR_PRINCIPAL_NOT_FOUND));

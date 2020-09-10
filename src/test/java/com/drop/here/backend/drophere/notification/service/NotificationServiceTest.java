@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.notification.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
@@ -67,13 +68,14 @@ class NotificationServiceTest {
                 .toBuilder()
                 .company(company)
                 .build();
-        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthenticationWithProfile(account, accountProfile);
         final String readStatus = NotificationReadStatus.READ.name();
         final Pageable pageable = Pageable.unpaged();
         final NotificationResponse response = NotificationResponse.builder().build();
         final Notification notification = NotificationDataGenerator.companyNotification(1, company);
 
-        when(notificationRepository.findByRecipientCompanyAndReadStatusIn(company, List.of(NotificationReadStatus.READ), pageable))
+        when(notificationRepository.findByRecipientCompanyOrRecipientAccountProfileAndReadStatusIn(company, accountProfile, List.of(NotificationReadStatus.READ), pageable))
                 .thenReturn(new PageImpl<>(List.of(notification)));
         when(notificationMappingService.toNotificationResponse(notification)).thenReturn(response);
 
@@ -145,11 +147,12 @@ class NotificationServiceTest {
                 .toBuilder()
                 .company(company)
                 .build();
-        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthenticationWithProfile(account, accountProfile);
         final Long notificationId = 5L;
         final NotificationManagementRequest notificationManagementRequest = NotificationManagementRequest.builder().build();
 
-        when(notificationRepository.findByIdAndRecipientCompany(notificationId, company))
+        when(notificationRepository.findByIdAndRecipientCompanyOrRecipientAccountProfile(notificationId, company, accountProfile))
                 .thenReturn(Optional.empty());
 
         //when

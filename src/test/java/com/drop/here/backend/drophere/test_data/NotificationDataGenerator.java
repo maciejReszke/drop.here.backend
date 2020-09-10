@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.test_data;
 
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.notification.entity.Notification;
@@ -22,6 +23,15 @@ public class NotificationDataGenerator {
                 .recipientType(NotificationRecipientType.COMPANY)
                 .build();
     }
+
+    public Notification accountProfileNotification(int i, AccountProfile accountProfile) {
+        return baseNotification(i)
+                .toBuilder()
+                .recipientAccountProfile(accountProfile)
+                .recipientType(NotificationRecipientType.COMPANY_PROFILE)
+                .build();
+    }
+
 
     private Notification baseNotification(int i) {
         return Notification.builder()

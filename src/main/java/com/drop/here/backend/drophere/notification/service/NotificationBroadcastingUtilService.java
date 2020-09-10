@@ -51,7 +51,7 @@ public class NotificationBroadcastingUtilService {
 
     public String getToken(Notification notification) {
         final NotificationTokenType notificationTokenType = getNotificationTokenType(notification);
-        return notificationTokenService.findByType(notification, notificationTokenType).orElse("");
+        return notificationTokenService.findByType(notification, notificationTokenType).orElseThrow();
     }
 
     private NotificationTokenType getNotificationTokenType(Notification notification) {
