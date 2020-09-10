@@ -4,7 +4,9 @@ import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.notification.dto.NotificationManagementRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
+import com.drop.here.backend.drophere.notification.dto.NotificationTokenManagementRequest;
 import com.drop.here.backend.drophere.notification.service.NotificationService;
+import com.drop.here.backend.drophere.notification.service.token.NotificationTokenService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +35,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class NotificationController {
     private final NotificationService notificationService;
+    private final NotificationTokenService notificationTokenService;
 
     @GetMapping
     @ApiOperation("Get notifications")
@@ -62,5 +65,19 @@ public class NotificationController {
                                                         @RequestBody @Valid NotificationManagementRequest notificationManagementRequest,
                                                         @PathVariable Long notificationId) {
         return notificationService.updateNotification(accountAuthentication, notificationId, notificationManagementRequest);
+    }
+
+    @PutMapping("/tokens")
+    @ApiOperation("Update notification token")
+    @ApiAuthorizationToken
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Token updated"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    public ResourceOperationResponse updateNotificationToken(@ApiIgnore AccountAuthentication accountAuthentication,
+                                                             @RequestBody @Valid NotificationTokenManagementRequest notificationTokenManagementRequest) {
+        return notificationTokenService.updateNotificationToken(accountAuthentication, notificationTokenManagementRequest);
     }
 }

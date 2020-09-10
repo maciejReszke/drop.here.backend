@@ -30,6 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout(AbstractHttpConfigurer::disable)
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtService))
                 .authorizeRequests(registry -> registry
+                        .mvcMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
                         .mvcMatchers(HttpMethod.POST, "/authentication").anonymous()
                         .mvcMatchers(HttpMethod.POST, "/authentication/external").anonymous()
                         .mvcMatchers(HttpMethod.POST, "/authentication/profile").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)

@@ -6,15 +6,15 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
-import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerResponse;
 import com.drop.here.backend.drophere.company.dto.CompanyCustomerRelationshipManagementRequest;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
+import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerResponse;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.customer.service.CustomerService;
+import com.drop.here.backend.drophere.customer.service.CustomerStoreService;
 import com.drop.here.backend.drophere.drop.service.DropMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
@@ -42,7 +42,7 @@ public class CompanyService {
     private final ImageService imageService;
     private final DropMembershipService dropMembershipService;
     private final CompanyCustomerRelationshipService companyCustomerRelationshipService;
-    private final CustomerService customerService;
+    private final CustomerStoreService customerStoreService;
     private final CompanyCustomerSearchingService companyCustomerSearchingService;
 
     public boolean isVisible(String companyUid) {
@@ -125,7 +125,7 @@ public class CompanyService {
     }
 
     public ResourceOperationResponse updateCustomerRelationship(Long customerId, CompanyCustomerRelationshipManagementRequest companyCustomerManagementRequest, AccountAuthentication accountAuthentication) {
-        final Customer customer = customerService.findById(customerId);
+        final Customer customer = customerStoreService.findById(customerId);
         companyCustomerRelationshipService.handleCustomerBlocking(companyCustomerManagementRequest.isBlock(), customer, accountAuthentication.getCompany());
         log.info("Updated customer {} with company relation {}", customer, accountAuthentication.getCompany().getUid());
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customerId);

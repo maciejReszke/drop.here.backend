@@ -22,6 +22,8 @@
         <com.auth0-java-jwt.version>3.10.2</com.auth0-java-jwt.version>
         <swagger.version>2.9.2</swagger.version>
         <org.apache.commons.commons-collections4.version>4.4</org.apache.commons.commons-collections4.version>
+        <com.google.firebase-firebase-admin.version>7.0.0</com.google.firebase-firebase-admin.version>
+        <shedlock.version>4.4.0</shedlock.version>
     </properties>
 
     <dependencies>
@@ -100,6 +102,22 @@
             <artifactId>commons-collections4</artifactId>
             <version>${org.apache.commons.commons-collections4.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>${com.google.firebase-firebase-admin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>${shedlock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>${shedlock.version}</version>
+        </dependency>
+
 
 
         <!-- Test -->

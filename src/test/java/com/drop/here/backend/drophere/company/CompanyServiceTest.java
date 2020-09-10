@@ -16,7 +16,7 @@ import com.drop.here.backend.drophere.company.service.CompanyMappingService;
 import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.company.service.CompanyValidationService;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.customer.service.CustomerService;
+import com.drop.here.backend.drophere.customer.service.CustomerStoreService;
 import com.drop.here.backend.drophere.drop.service.DropMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
@@ -66,7 +66,7 @@ class CompanyServiceTest {
     private CompanyCustomerRelationshipService companyCustomerRelationshipService;
 
     @Mock
-    private CustomerService customerService;
+    private CustomerStoreService customerStoreService;
 
     @Test
     void givenVisibleCompanyWhenIsVisibleThenTrue() {
@@ -331,7 +331,7 @@ class CompanyServiceTest {
                 .build();
         final Customer customer = Customer.builder().build();
 
-        when(customerService.findById(customerId)).thenReturn(customer);
+        when(customerStoreService.findById(customerId)).thenReturn(customer);
         doNothing().when(companyCustomerRelationshipService).handleCustomerBlocking(true, customer, company);
 
         //when
