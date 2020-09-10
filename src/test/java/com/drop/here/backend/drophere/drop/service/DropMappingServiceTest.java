@@ -1,13 +1,11 @@
 package com.drop.here.backend.drophere.drop.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
-import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
-import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
-import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
@@ -37,7 +35,7 @@ class DropMappingServiceTest {
     }
 
     @Test
-    void givenGeolocationDropManagementRequestWhenToEntityThenMap() {
+    void givenDropManagementRequestWhenToEntityThenMap() {
         //given
         final DropManagementRequest dropManagementRequest = DropDataGenerator.dropManagementRequest(1);
         final Account account = AccountDataGenerator.companyAccount(1);
@@ -59,34 +57,6 @@ class DropMappingServiceTest {
         assertThat(drop.getXCoordinate()).isEqualTo(dropManagementRequest.getXCoordinate());
         assertThat(drop.getYCoordinate()).isEqualTo(dropManagementRequest.getYCoordinate());
         assertThat(drop.getCompany()).isEqualTo(account.getCompany());
-        assertThat(drop.getLocationType()).isEqualTo(DropLocationType.GEOLOCATION);
-    }
-
-    @Test
-    void giveHiddenLocationDropManagementRequestWhenToEntityThenMap() {
-        //given
-        final DropManagementRequest dropManagementRequest = DropDataGenerator.dropManagementRequest(1);
-        final Account account = AccountDataGenerator.companyAccount(1);
-        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
-        dropManagementRequest.setName("namek");
-        dropManagementRequest.setLocationDropType(DropLocationType.HIDDEN.name());
-        //when
-        final Drop drop = dropMappingService.toEntity(dropManagementRequest, accountAuthentication);
-
-        //then
-        assertThat(drop.getName()).isEqualTo(dropManagementRequest.getName());
-        assertThat(drop.getDescription()).isEqualTo(dropManagementRequest.getDescription());
-        assertThat(drop.getEstimatedRadiusMeters()).isNull();
-        assertThat(drop.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
-        assertThat(drop.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
-        assertThat(drop.getPassword()).isEqualTo(dropManagementRequest.getPassword());
-        assertThat(drop.getUid()).hasSize(10);
-        assertThat(drop.getUid()).startsWith("name");
-        assertThat(drop.getUid()).doesNotContain("namek");
-        assertThat(drop.getXCoordinate()).isNull();
-        assertThat(drop.getYCoordinate()).isNull();
-        assertThat(drop.getCompany()).isEqualTo(account.getCompany());
-        assertThat(drop.getLocationType()).isEqualTo(DropLocationType.HIDDEN);
     }
 
     @Test
@@ -111,7 +81,6 @@ class DropMappingServiceTest {
         assertThat(drop.getXCoordinate()).isEqualTo(dropManagementRequest.getXCoordinate());
         assertThat(drop.getYCoordinate()).isEqualTo(dropManagementRequest.getYCoordinate());
         assertThat(drop.getCompany()).isNull();
-        assertThat(drop.getLocationType()).isEqualTo(DropLocationType.GEOLOCATION);
     }
 
     @Test
@@ -126,14 +95,16 @@ class DropMappingServiceTest {
                 .builder()
                 .customer(customer)
                 .build();
+        final DropJoinRequest dropJoinRequest = DropJoinRequest.builder().receiveNotification(true).build();
 
         //when
-        final DropMembership membership = dropMappingService.createMembership(drop, accountAuthentication);
+        final DropMembership membership = dropMappingService.createMembership(drop, dropJoinRequest, accountAuthentication);
 
         //then
         assertThat(membership.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(membership.getCustomer()).isEqualTo(customer);
         assertThat(membership.getDrop()).isEqualTo(drop);
+        assertThat(membership.isReceiveNotification()).isTrue();
         assertThat(membership.getMembershipStatus()).isEqualTo(DropMembershipStatus.ACTIVE);
     }
 
@@ -149,29 +120,16 @@ class DropMappingServiceTest {
                 .builder()
                 .customer(customer)
                 .build();
+        final DropJoinRequest dropJoinRequest = DropJoinRequest.builder().receiveNotification(false).build();
 
         //when
-        final DropMembership membership = dropMappingService.createMembership(drop, accountAuthentication);
+        final DropMembership membership = dropMappingService.createMembership(drop, dropJoinRequest, accountAuthentication);
 
         //then
         assertThat(membership.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(membership.getCustomer()).isEqualTo(customer);
         assertThat(membership.getDrop()).isEqualTo(drop);
+        assertThat(membership.isReceiveNotification()).isFalse();
         assertThat(membership.getMembershipStatus()).isEqualTo(DropMembershipStatus.PENDING);
-    }
-
-    @Test
-    void givenDropMembershipWhenToDropMembershipResponseThenMap() {
-        //given
-        final Company company = Company.builder().build();
-        final Drop drop = DropDataGenerator.drop(1, company);
-        final Customer customer = Customer.builder().build();
-        final DropMembership dropMembership = DropDataGenerator.membership(drop, customer);
-
-        //when
-        final DropMembershipResponse result = dropMappingService.toDropMembershipResponse(dropMembership);
-
-        //then
-        assertThat(result.getDropMembershipStatus()).isEqualTo(dropMembership.getMembershipStatus());
     }
 }

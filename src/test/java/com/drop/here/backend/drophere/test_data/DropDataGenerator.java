@@ -5,7 +5,6 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
-import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import lombok.experimental.UtilityClass;
 
@@ -20,7 +19,6 @@ public class DropDataGenerator {
                 .estimatedRadiusMeters(600)
                 .hidden(false)
                 .name("dropName" + i)
-                .locationType(DropLocationType.GEOLOCATION)
                 .password("password")
                 .requiresAccept(false)
                 .requiresPassword(true)
@@ -37,7 +35,6 @@ public class DropDataGenerator {
                 .description("description" + i)
                 .estimatedRadiusMeters(600)
                 .hidden(false)
-                .locationDropType(DropLocationType.GEOLOCATION.name())
                 .name("dropName" + i)
                 .password("password" + i)
                 .requiresAccept(false)
@@ -52,6 +49,8 @@ public class DropDataGenerator {
                 .customer(customer)
                 .membershipStatus(DropMembershipStatus.ACTIVE)
                 .drop(drop)
+                .receiveNotification(false)
+                .lastUpdatedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();
     }

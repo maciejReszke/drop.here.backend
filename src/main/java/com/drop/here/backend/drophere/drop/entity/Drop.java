@@ -1,7 +1,6 @@
 package com.drop.here.backend.drophere.drop.entity;
 
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +10,6 @@ import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -58,16 +56,15 @@ public class Drop {
     private String password;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
-    private DropLocationType locationType;
-
-    @NotNull
     private boolean requiresAccept;
 
+    @NotNull
     private Double xCoordinate;
 
+    @NotNull
     private Double yCoordinate;
 
+    @NotNull
     private Integer estimatedRadiusMeters;
 
     @NotNull
@@ -82,4 +79,7 @@ public class Drop {
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime lastUpdatedAt;
+
+    @Version
+    private Long version;
 }

@@ -5,7 +5,9 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
+import com.drop.here.backend.drophere.drop.dto.response.DropCompanyMembershipResponse;
 import com.drop.here.backend.drophere.drop.dto.response.DropCompanyResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
@@ -18,6 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -155,5 +159,81 @@ class DropManagementServiceTest {
         //then
         assertThat(result).hasSize(1);
         assertThat(result.get(0)).isEqualTo(response);
+    }
+
+    @Test
+    void givenExistingDropWhenFindMembershipsThenFind() {
+        //given
+        final Long dropId = 1L;
+        final String companyUid = "companyUid";
+        final String desiredCustomerSubstring = "desiredCustomerSubstring";
+        final String membershipStatus = "membershipStatus";
+        final Pageable pageable = Pageable.unpaged();
+
+        final Drop drop = DropDataGenerator.drop(1, null);
+        final Page<DropCompanyMembershipResponse> page = Page.empty();
+        when(dropRepository.findByIdAndCompanyUid(dropId, companyUid)).thenReturn(Optional.of(drop));
+        when(dropMembershipService.findMemberships(drop, desiredCustomerSubstring, membershipStatus, pageable))
+                .thenReturn(page);
+
+        //when
+        final Page<DropCompanyMembershipResponse> response = dropManagementService.findMemberships(dropId, companyUid, desiredCustomerSubstring, membershipStatus, pageable);
+
+        //then
+        assertThat(response).isEqualTo(page);
+    }
+
+    @Test
+    void givenNotExistingDropWhenFindMembershipsThenError() {
+        //given
+        final Long dropId = 1L;
+        final String companyUid = "companyUid";
+        final String desiredCustomerSubstring = "desiredCustomerSubstring";
+        final String membershipStatus = "membershipStatus";
+        final Pageable pageable = Pageable.unpaged();
+
+        when(dropRepository.findByIdAndCompanyUid(dropId, companyUid)).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropManagementService.findMemberships(dropId, companyUid, desiredCustomerSubstring, membershipStatus, pageable));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenExistingDropWhenUpdateMembershipsThenAccept() {
+        //given
+        final Long dropId = 1L;
+        final String companyUid = "companyUid";
+        final Long membershipId = 2L;
+        final ResourceOperationResponse resourceOperationResponse = new ResourceOperationResponse(ResourceOperationStatus.UPDATED, 1L);
+        final DropCompanyMembershipManagementRequest dropCompanyMembershipManagementRequest = DropCompanyMembershipManagementRequest.builder().build();
+
+        final Drop drop = DropDataGenerator.drop(1, null);
+        when(dropRepository.findByIdAndCompanyUid(dropId, companyUid)).thenReturn(Optional.of(drop));
+        when(dropMembershipService.updateMembership(drop, membershipId, dropCompanyMembershipManagementRequest)).thenReturn(resourceOperationResponse);
+
+        //when
+        final ResourceOperationResponse response = dropManagementService.updateMembership(dropId, companyUid, membershipId, dropCompanyMembershipManagementRequest);
+
+        //then
+        assertThat(response).isEqualTo(resourceOperationResponse);
+    }
+
+    @Test
+    void givenNotExistingDropWhenUpdateMembershipsThenError() {
+        //given
+        final Long dropId = 1L;
+        final String companyUid = "companyUid";
+        final Long membershipId = 2L;
+        when(dropRepository.findByIdAndCompanyUid(dropId, companyUid)).thenReturn(Optional.empty());
+        final DropCompanyMembershipManagementRequest dropCompanyMembershipManagementRequest = DropCompanyMembershipManagementRequest.builder().build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropManagementService.updateMembership(dropId, companyUid, membershipId, dropCompanyMembershipManagementRequest));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 }

@@ -7,10 +7,10 @@ import com.drop.here.backend.drophere.authentication.account.repository.Privileg
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
+import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageRepository;
 import com.drop.here.backend.drophere.image.ImageType;
@@ -48,24 +48,27 @@ class CompanyControllerTest extends IntegrationBaseClass {
     @Autowired
     private ImageRepository imageRepository;
 
+    @Autowired
+    private CustomerRepository customerRepository;
+
     private Account account;
-    private Country country;
     private Company company;
 
     @BeforeEach
     void prepare() {
-        country = countryRepository.save(CountryDataGenerator.poland());
+        final Country country = countryRepository.save(CountryDataGenerator.poland());
         account = accountRepository.save(AccountDataGenerator.companyAccount(1));
-        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE)
                 .account(account).build());
         final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
         company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         company.setImage(image);
-        companyRepository.save(company);
+        company = companyRepository.save(company);
     }
 
     @AfterEach
     void cleanUp() {
+        customerRepository.deleteAll();
         privilegeRepository.deleteAll();
         companyRepository.deleteAll();
         accountRepository.deleteAll();
@@ -74,7 +77,7 @@ class CompanyControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenCompanyOwnerExistingCompanyImageWhenGetCompanyThenGet() throws Exception {
+    void givenExistingCompanyImageWhenGetCompanyThenGet() throws Exception {
         //given
         final String url = String.format("/companies/%s/images", company.getUid());
 
@@ -87,42 +90,7 @@ class CompanyControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenCompanyNotOwnerExistingCompanyVisibleImageWhenGetCompanyThenGet() throws Exception {
-        //given
-        final String url = String.format("/companies/%s/images", company.getUid());
-        final Account otherAccount = accountRepository.save(AccountDataGenerator.customerAccount(2));
-        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
-                .account(otherAccount).build());
-
-        //when
-        final ResultActions result = mockMvc.perform(get(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " +
-                        jwtService.createToken(otherAccount).getToken()));
-
-        //then
-        result.andExpect(status().isOk());
-    }
-
-    @Test
-    void givenCompanyNotOwnerExistingCompanyHiddenImageWhenGetCompanyThen403() throws Exception {
-        //given
-        company.setVisibilityStatus(CompanyVisibilityStatus.HIDDEN);
-        companyRepository.save(company);
-        final String url = String.format("/companies/%s/images", company.getUid());
-        final Account otherAccount = accountRepository.save(AccountDataGenerator.customerAccount(2));
-        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
-                .account(otherAccount).build());
-        //when
-        final ResultActions result = mockMvc.perform(get(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(otherAccount).getToken()));
-
-        //then
-        result.andExpect(status().isForbidden());
-    }
-
-
-    @Test
-    void givenCompanyOwnerNotExistingCompanyImageWhenGetCompanyThen404() throws Exception {
+    void givenCNotExistingCompanyImageWhenGetImageThen404() throws Exception {
         //given
         company.setImage(null);
         companyRepository.save(company);
@@ -135,5 +103,4 @@ class CompanyControllerTest extends IntegrationBaseClass {
         //then
         result.andExpect(status().isNotFound());
     }
-
 }

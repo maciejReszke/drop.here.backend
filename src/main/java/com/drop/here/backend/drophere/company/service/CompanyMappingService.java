@@ -4,8 +4,11 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
+import com.drop.here.backend.drophere.company.enums.CompanyCustomerRelationshipStatus;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.country.CountryService;
+import com.drop.here.backend.drophere.customer.entity.Customer;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,5 +58,15 @@ public class CompanyMappingService {
                 .build();
         updateCompany(companyManagementRequest, company);
         return company;
+    }
+
+    public CompanyCustomerRelationship createActiveRelationship(Customer customer, Company company) {
+        return CompanyCustomerRelationship.builder()
+                .relationshipStatus(CompanyCustomerRelationshipStatus.ACTIVE)
+                .lastUpdatedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .customer(customer)
+                .company(company)
+                .build();
     }
 }

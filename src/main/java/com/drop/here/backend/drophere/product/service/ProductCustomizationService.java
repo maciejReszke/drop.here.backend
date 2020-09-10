@@ -43,6 +43,7 @@ public class ProductCustomizationService {
         validationService.validate(productCustomizationWrapperRequest);
         final ProductCustomizationWrapper customizationWrapper = mappingService.toCustomizationWrapper(product, productCustomizationWrapperRequest);
         customizationWrapper.setId(wrapper.getId());
+        customizationWrapper.setVersion(wrapper.getVersion());
         log.info("Updating customization wrapper {} for product with id {} company {}", wrapper.getId(), product.getId(), authentication.getCompany().getUid());
         return customizationWrapperRepository.save(customizationWrapper);
 

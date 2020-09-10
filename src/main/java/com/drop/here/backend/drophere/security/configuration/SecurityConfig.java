@@ -30,6 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout(AbstractHttpConfigurer::disable)
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtService))
                 .authorizeRequests(registry -> registry
+                        .mvcMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
                         .mvcMatchers(HttpMethod.POST, "/authentication").anonymous()
                         .mvcMatchers(HttpMethod.POST, "/authentication/external").anonymous()
                         .mvcMatchers(HttpMethod.POST, "/authentication/profile").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
@@ -49,6 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.PUT, "/management/companies").hasAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.POST, "/management/companies/images").hasAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.GET, "/management/companies").hasAnyAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE, PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers("/management/companies/customers/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/images").authenticated()
                         .mvcMatchers(HttpMethod.PUT, "/management/customers").hasAuthority(PrivilegeService.NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE)
                         .mvcMatchers(HttpMethod.GET, "/management/customers").hasAnyAuthority(PrivilegeService.NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE, PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
@@ -56,6 +58,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.GET, "/customers/{customerId}/images").authenticated()
                         .mvcMatchers("/drops/**").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                         .mvcMatchers("/actuator/**").permitAll()
+                        .mvcMatchers("/notifications/**").hasAnyAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE, PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(new Http401UnauthorizedEntryPoint(), new AntPathRequestMatcher("/**")));

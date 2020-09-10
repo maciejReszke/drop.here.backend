@@ -26,13 +26,21 @@ public class AuthenticationPrivilegesService {
                 accountAuthentication.getCompany().getUid().equalsIgnoreCase(companyUid);
     }
 
-    public boolean isCompanyVisible(String companyUid) {
-        return companyService.isVisible(companyUid);
+    public boolean isCompanyVisibleForCustomer(AccountAuthentication accountAuthentication, String companyUid) {
+        return companyService.isVisible(companyUid) &&
+                accountAuthentication.getCustomer() != null &&
+                !companyService.isBlocked(companyUid, accountAuthentication.getCustomer());
     }
 
     public boolean isOwnCustomerOperation(AccountAuthentication accountAuthentication, Long customerId) {
         return accountAuthentication.getPrincipal().getAccountType() == AccountType.CUSTOMER &&
                 accountAuthentication.getCustomer() != null &&
                 accountAuthentication.getCustomer().getId().equals(customerId);
+    }
+
+    public boolean isCompaniesCustomer(AccountAuthentication accountAuthentication, Long customerId) {
+        return accountAuthentication.getPrincipal().getAccountType() == AccountType.COMPANY &&
+                accountAuthentication.getCompany() != null &&
+                companyService.hasRelation(accountAuthentication.getCompany(), customerId);
     }
 }

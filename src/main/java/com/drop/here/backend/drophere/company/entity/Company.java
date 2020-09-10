@@ -22,6 +22,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -29,11 +30,12 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(indexes = {
         @Index(columnList = "uid", unique = true),
-        @Index(columnList = "account_id", unique = true)
+        @Index(columnList = "account_id", unique = true),
+        @Index(columnList = "name")
 })
 public class Company {
 
@@ -72,5 +74,8 @@ public class Company {
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "image_id")
     private Image image;
+
+    @Version
+    private Long version;
 }
 

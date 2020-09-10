@@ -4,7 +4,9 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.drop.dto.DropCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
+import com.drop.here.backend.drophere.drop.dto.response.DropCompanyMembershipResponse;
 import com.drop.here.backend.drophere.drop.dto.response.DropCompanyResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
@@ -12,6 +14,8 @@ import com.drop.here.backend.drophere.security.configuration.AccountAuthenticati
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,5 +69,15 @@ public class DropManagementService {
         dropMembershipService.deleteMemberships(drop);
         dropRepository.delete(drop);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, drop.getId());
+    }
+
+    public Page<DropCompanyMembershipResponse> findMemberships(Long dropId, String companyUid, String desiredCustomerSubstring, String membershipStatus, Pageable pageable) {
+        final Drop drop = getDrop(dropId, companyUid);
+        return dropMembershipService.findMemberships(drop, desiredCustomerSubstring, membershipStatus, pageable);
+    }
+
+    public ResourceOperationResponse updateMembership(Long dropId, String companyUid, Long membershipId, DropCompanyMembershipManagementRequest companyMembershipManagementRequest) {
+        final Drop drop = getDrop(dropId, companyUid);
+        return dropMembershipService.updateMembership(drop, membershipId, companyMembershipManagementRequest);
     }
 }

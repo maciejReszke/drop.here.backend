@@ -1,6 +1,5 @@
 package com.drop.here.backend.drophere.drop.dto.response;
 
-import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
@@ -29,9 +28,6 @@ public class DropCompanyResponse {
 
     @ApiModelProperty(value = "Password needed to join drop (if is needed)", example = "Aezakmi")
     String password;
-
-    @ApiModelProperty(value = "Location type", example = "HIDDEN")
-    DropLocationType locationType;
 
     @ApiModelProperty(value = "Does company owner must accept user to join region", example = "true")
     boolean requiresAccept;

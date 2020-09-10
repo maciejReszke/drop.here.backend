@@ -17,6 +17,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -49,4 +50,13 @@ public class DropMembership {
     @JoinColumn(name = "drop_id")
     private Drop drop;
 
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime lastUpdatedAt;
+
+    @Version
+    private Long version;
+
+    @NotNull
+    private boolean receiveNotification;
 }

@@ -46,12 +46,12 @@ class CustomerControllerTest extends IntegrationBaseClass {
     @BeforeEach
     void prepare() {
         account = accountRepository.save(AccountDataGenerator.customerAccount(1));
-        privilegeRepository.save(Privilege.builder().name(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE)
                 .account(account).build());
         final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
         customer = customerRepository.save(CustomerDataGenerator.customer(1, account));
         customer.setImage(image);
-        customerRepository.save(customer);
+        customer = customerRepository.save(customer);
     }
 
     @AfterEach
@@ -63,7 +63,7 @@ class CustomerControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenCustomerExistingCustomerImageWhenGetCustomerImageThenGet() throws Exception {
+    void givenExistingCustomerImageWhenGetCustomerImageThenGet() throws Exception {
         //given
         final String url = String.format("/customers/%s/images", customer.getId());
 
@@ -76,23 +76,11 @@ class CustomerControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenCustomerNotOwnExistingCustomerImageWhenGetCustomerThen403() throws Exception {
-        //given
-        final String url = String.format("/customers/%s/images", customer.getId() + 1);
-
-        //when
-        final ResultActions result = mockMvc.perform(get(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isForbidden());
-    }
-
-    @Test
-    void givenCustomerNotExistingCustomerImageWhenGetCustomerImageThen404() throws Exception {
+    void givenNotExistingCustomerImageWhenGetCustomerImageThen404() throws Exception {
         //given
         customer.setImage(null);
         customerRepository.save(customer);
+        imageRepository.deleteAll();
         final String url = String.format("/customers/%s/images", customer.getId());
 
         //when

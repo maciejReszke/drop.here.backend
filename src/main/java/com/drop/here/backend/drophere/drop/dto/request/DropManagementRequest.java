@@ -44,22 +44,21 @@ public class DropManagementRequest {
     @NotNull
     private boolean requiresAccept;
 
-    @NotBlank
-    @ApiModelProperty(value = "Location type", example = "HIDDEN", required = true)
-    private String locationDropType;
-
-    @ApiModelProperty(value = "X geo location (-180, 180)", example = "130.44213")
+    @ApiModelProperty(value = "X geo location (-180, 180)", example = "130.44213", required = true)
     @Max(180)
     @Min(-180)
+    @NotNull
     private Double xCoordinate;
 
-    @ApiModelProperty(value = "Y geo location (-90, 90)", example = "-45.32132")
+    @ApiModelProperty(value = "Y geo location (-90, 90)", example = "-45.32132", required = true)
     @Max(90)
     @Min(-90)
+    @NotNull
     private Double yCoordinate;
 
-    @ApiModelProperty(value = "Estimated radius in meters", example = "200")
+    @ApiModelProperty(value = "Estimated radius in meters", example = "200", required = true)
     @PositiveOrZero
     @Max(50000)
+    @NotNull
     private Integer estimatedRadiusMeters;
 }

@@ -1,11 +1,10 @@
 package com.drop.here.backend.drophere.drop.service;
 
+import com.drop.here.backend.drophere.drop.dto.request.DropJoinRequest;
 import com.drop.here.backend.drophere.drop.dto.request.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.response.DropCompanyResponse;
-import com.drop.here.backend.drophere.drop.dto.response.DropMembershipResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.entity.DropMembership;
-import com.drop.here.backend.drophere.drop.enums.DropLocationType;
 import com.drop.here.backend.drophere.drop.enums.DropMembershipStatus;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -34,15 +33,13 @@ public class DropMappingService {
     }
 
     public void update(Drop drop, DropManagementRequest dropManagementRequest) {
-        final DropLocationType locationType = DropLocationType.valueOf(dropManagementRequest.getLocationDropType());
         drop.setUid(generateUid(dropManagementRequest.getName()));
-        drop.setYCoordinate(locationType == DropLocationType.GEOLOCATION ? dropManagementRequest.getYCoordinate() : null);
-        drop.setXCoordinate(locationType == DropLocationType.GEOLOCATION ? dropManagementRequest.getXCoordinate() : null);
-        drop.setEstimatedRadiusMeters(locationType == DropLocationType.GEOLOCATION ? dropManagementRequest.getEstimatedRadiusMeters() : null);
+        drop.setYCoordinate(dropManagementRequest.getYCoordinate());
+        drop.setXCoordinate(dropManagementRequest.getXCoordinate());
+        drop.setEstimatedRadiusMeters(dropManagementRequest.getEstimatedRadiusMeters());
         drop.setRequiresPassword(dropManagementRequest.isRequiresPassword());
         drop.setRequiresAccept(dropManagementRequest.isRequiresAccept());
         drop.setPassword(dropManagementRequest.isRequiresPassword() ? dropManagementRequest.getPassword() : null);
-        drop.setLocationType(locationType);
         drop.setHidden(dropManagementRequest.isHidden());
         drop.setDescription(dropManagementRequest.getDescription());
         drop.setLastUpdatedAt(LocalDateTime.now());
@@ -63,7 +60,6 @@ public class DropMappingService {
                 .hidden(drop.isHidden())
                 .requiresPassword(drop.isRequiresPassword())
                 .password(drop.getPassword())
-                .locationType(drop.getLocationType())
                 .requiresAccept(drop.isRequiresAccept())
                 .xCoordinate(drop.getXCoordinate())
                 .yCoordinate(drop.getYCoordinate())
@@ -73,18 +69,14 @@ public class DropMappingService {
                 .build();
     }
 
-    public DropMembership createMembership(Drop drop, AccountAuthentication authentication) {
+    public DropMembership createMembership(Drop drop, DropJoinRequest dropJoinRequest, AccountAuthentication authentication) {
         return DropMembership.builder()
                 .createdAt(LocalDateTime.now())
+                .lastUpdatedAt(LocalDateTime.now())
                 .customer(authentication.getCustomer())
+                .receiveNotification(dropJoinRequest.isReceiveNotification())
                 .drop(drop)
                 .membershipStatus(drop.isRequiresAccept() ? DropMembershipStatus.PENDING : DropMembershipStatus.ACTIVE)
-                .build();
-    }
-
-    public DropMembershipResponse toDropMembershipResponse(DropMembership dropMembership) {
-        return DropMembershipResponse.builder()
-                .dropMembershipStatus(dropMembership.getMembershipStatus())
                 .build();
     }
 }

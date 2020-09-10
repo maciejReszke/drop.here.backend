@@ -3,7 +3,6 @@ package com.drop.here.backend.drophere.customer.service;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
-import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
@@ -11,7 +10,6 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.customer.dto.CustomerManagementRequest;
 import com.drop.here.backend.drophere.customer.dto.CustomerManagementResponse;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
@@ -29,15 +27,15 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 public class CustomerService {
-    private final CustomerRepository customerRepository;
     private final ImageService imageService;
     private final CustomerMappingService customerMappingService;
     private final PrivilegeService privilegeService;
+    private final CustomerStoreService customerStoreService;
 
     @Transactional
     public void createCustomer(Account account, ExternalAuthenticationResult result) {
         final Customer customer = customerMappingService.toCustomer(account, result);
-        customerRepository.save(customer);
+        customerStoreService.save(customer);
         account.setCustomer(customer);
         privilegeService.addCustomerCreatedPrivilege(account);
         if (ArrayUtils.isNotEmpty(result.getImage())) {
@@ -49,8 +47,7 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public CustomerManagementResponse findOwnCustomer(AccountAuthentication authentication) {
-        final Customer customer = customerRepository.findByAccount(authentication.getPrincipal())
-                .orElse(null);
+        final Customer customer = customerStoreService.findOwnCustomer(authentication);
         return customerMappingService.toManagementResponse(customer);
     }
 
@@ -63,7 +60,7 @@ public class CustomerService {
     private ResourceOperationResponse createCustomer(CustomerManagementRequest customerManagementRequest, AccountAuthentication authentication) {
         final Customer customer = customerMappingService.createCustomer(customerManagementRequest, authentication.getPrincipal());
         log.info("Creating new customer for account with id {}", authentication.getPrincipal().getId());
-        customerRepository.save(customer);
+        customerStoreService.save(customer);
         privilegeService.addCustomerCreatedPrivilege(authentication.getPrincipal());
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, customer.getId());
     }
@@ -71,7 +68,7 @@ public class CustomerService {
     private ResourceOperationResponse updateCustomer(CustomerManagementRequest customerManagementRequest, Customer customer) {
         customerMappingService.updateCustomer(customerManagementRequest, customer);
         log.info("Updating customer with id {}", customer.getId());
-        customerRepository.save(customer);
+        customerStoreService.save(customer);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId());
     }
 
@@ -82,7 +79,7 @@ public class CustomerService {
             final Customer customer = authentication.getCustomer();
             customer.setImage(image);
             log.info("Updating image for customer {}", customer.getId());
-            customerRepository.save(customer);
+            customerStoreService.save(customer);
             return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId());
         } catch (IOException exception) {
             throw new RestIllegalRequestValueException("Invalid image " + exception.getMessage(),
@@ -92,10 +89,6 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public Image findImage(Long customerId) {
-        return customerRepository.findByIdWithImage(customerId)
-                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
-                        "Image for customer %s was not found", customerId),
-                        RestExceptionStatusCode.CUSTOMER_IMAGE_WAS_NOT_FOUND))
-                .getImage();
+        return customerStoreService.findByIdWithImage(customerId).getImage();
     }
 }
