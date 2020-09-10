@@ -1,13 +1,15 @@
 package com.drop.here.backend.drophere;
 
+import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class DropHereApplicationTests {
+import static org.assertj.core.api.Assertions.assertThat;
 
-	@Test
-	void contextLoads() {
-	}
+class DropHereApplicationTests extends IntegrationBaseClass {
+
+    @Test
+    void contextLoads() {
+        assertThat(true).isTrue();
+    }
 
 }
