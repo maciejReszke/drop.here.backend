@@ -3,7 +3,9 @@ package com.drop.here.backend.drophere.notification.service.firebase;
 import com.drop.here.backend.drophere.notification.configuration.GoogleCredentialsConfiguration;
 import com.drop.here.backend.drophere.notification.configuration.GoogleCredentialsRequest;
 import com.drop.here.backend.drophere.notification.entity.Notification;
-import com.drop.here.backend.drophere.notification.service.NotificationBroadcastingUtilService;
+import com.drop.here.backend.drophere.notification.entity.NotificationJob;
+import com.drop.here.backend.drophere.notification.entity.NotificationToken;
+import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingUtilService;
 import com.google.firebase.messaging.Message;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,12 +41,13 @@ class FirebaseMappingServiceTest {
     void givenNotificationWhenToMessageThenMap() {
         //given
         final Notification notification = Notification.builder().build();
+        final NotificationToken token = NotificationToken.builder().token("123").build();
+        final NotificationJob notificationJob = NotificationJob.builder().notification(notification).notificationToken(token).build();
 
         when(notificationBroadcastingUtilService.getImageUrl(notification)).thenReturn("url123");
-        when(notificationBroadcastingUtilService.getToken(notification)).thenReturn("t0k3n");
 
         //when
-        final Message message = firebaseMappingService.toMessage(notification);
+        final Message message = firebaseMappingService.toMessage(notificationJob);
 
         //then
         assertThat(message).isNotNull();

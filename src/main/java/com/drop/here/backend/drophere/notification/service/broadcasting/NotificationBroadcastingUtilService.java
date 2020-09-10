@@ -1,9 +1,7 @@
-package com.drop.here.backend.drophere.notification.service;
+package com.drop.here.backend.drophere.notification.service.broadcasting;
 
 import com.drop.here.backend.drophere.notification.entity.Notification;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingType;
-import com.drop.here.backend.drophere.notification.enums.NotificationRecipientType;
-import com.drop.here.backend.drophere.notification.enums.NotificationTokenType;
 import io.vavr.API;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +13,6 @@ import static io.vavr.API.Case;
 @Service
 @RequiredArgsConstructor
 public class NotificationBroadcastingUtilService {
-    private final NotificationTokenService notificationTokenService;
 
     @Value("${server.config.publicUrl}")
     private String serverPublicUrl;
@@ -47,18 +44,5 @@ public class NotificationBroadcastingUtilService {
 
     private String getBroadcastingCompanyImageUrl(Notification notification) {
         return serverPublicUrl + String.format(companyImageEndpoint, notification.getBroadcastingCompany().getId());
-    }
-
-    public String getToken(Notification notification) {
-        final NotificationTokenType notificationTokenType = getNotificationTokenType(notification);
-        return notificationTokenService.findByType(notification, notificationTokenType).orElseThrow();
-    }
-
-    private NotificationTokenType getNotificationTokenType(Notification notification) {
-        return API.Match(notification.getRecipientType()).of(
-                Case($(NotificationRecipientType.COMPANY), NotificationTokenType.COMPANY),
-                Case($(NotificationRecipientType.CUSTOMER), NotificationTokenType.CUSTOMER),
-                Case($(NotificationRecipientType.COMPANY_PROFILE), NotificationTokenType.COMPANY_PROFILE)
-        );
     }
 }

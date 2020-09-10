@@ -1,8 +1,8 @@
 package com.drop.here.backend.drophere.notification.entity;
 
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
-import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingServiceType;
 import com.drop.here.backend.drophere.notification.enums.NotificationTokenType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,15 +37,15 @@ public class NotificationToken {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private NotificationTokenType notificationTokenType;
+    private NotificationTokenType tokenType;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private NotificationBroadcastingServiceType broadcastingServiceType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_customer_id")
     private Customer ownerCustomer;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_company_id")
-    private Company ownerCompany;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_account_profile_id")

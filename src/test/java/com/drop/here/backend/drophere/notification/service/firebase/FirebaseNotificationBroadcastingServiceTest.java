@@ -1,9 +1,6 @@
 package com.drop.here.backend.drophere.notification.service.firebase;
 
-import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.notification.entity.Notification;
-import com.drop.here.backend.drophere.test_data.CustomerDataGenerator;
-import com.drop.here.backend.drophere.test_data.NotificationDataGenerator;
+import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,9 +51,8 @@ class FirebaseNotificationBroadcastingServiceTest {
     @Test
     void givenNotificationsSuccessSendingWhenSendBatchThenSend() throws FirebaseMessagingException, IOException {
         //given
-        final Customer customer = CustomerDataGenerator.customer(1, null);
-        final Notification notification = NotificationDataGenerator.customerNotification(1, customer);
-        final List<Notification> notifications = List.of(notification);
+        final NotificationJob notification = NotificationJob.builder().build();
+        final List<NotificationJob> notifications = List.of(notification);
 
         final Message message = Message.builder().setToken("elo").build();
         doNothing().when(firebaseInitializationService).initialize();
@@ -73,9 +69,8 @@ class FirebaseNotificationBroadcastingServiceTest {
     @Test
     void givenNotificationsFailureSendingWhenSendBatchThenFalse() throws FirebaseMessagingException, IOException {
         //given
-        final Customer customer = CustomerDataGenerator.customer(1, null);
-        final Notification notification = NotificationDataGenerator.customerNotification(1, customer);
-        final List<Notification> notifications = List.of(notification);
+        final NotificationJob notification = NotificationJob.builder().build();
+        final List<NotificationJob> notifications = List.of(notification);
 
         final Message message = Message.builder().setToken("elo").build();
         doNothing().when(firebaseInitializationService).initialize();

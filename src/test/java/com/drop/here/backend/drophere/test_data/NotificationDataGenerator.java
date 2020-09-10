@@ -4,7 +4,6 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.notification.entity.Notification;
-import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingType;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationRecipientType;
@@ -35,7 +34,6 @@ public class NotificationDataGenerator {
 
     private Notification baseNotification(int i) {
         return Notification.builder()
-                .broadcastingStatus(NotificationBroadcastingStatus.NOT_SENT)
                 .createdAt(LocalDateTime.now())
                 .message("Message" + i)
                 .readStatus(NotificationReadStatus.UNREAD)

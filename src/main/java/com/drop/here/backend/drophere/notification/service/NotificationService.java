@@ -9,8 +9,9 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.notification.dto.NotificationManagementRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
-import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingStatus;
+import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
+import com.drop.here.backend.drophere.notification.repository.NotificationJobRepository;
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingService;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingServiceFactory;
@@ -32,6 +33,7 @@ import java.util.Optional;
 @Slf4j
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+    private final NotificationJobRepository notificationJobRepository;
     private final NotificationMappingService notificationMappingService;
     private final NotificationValidationService notificationValidationService;
     private final NotificationBroadcastingServiceFactory notificationBroadcastingServiceFactory;
@@ -84,12 +86,12 @@ public class NotificationService {
     public void sendNotifications() {
         final NotificationBroadcastingService notificationBroadcastingService = notificationBroadcastingServiceFactory.getNotificationBroadcastingService();
         final PageRequest pageable = PageRequest.of(0, notificationBroadcastingService.getBatchAmount());
-        final List<Notification> notifications = notificationRepository.findByBroadcastingStatus(NotificationBroadcastingStatus.NOT_SENT, pageable);
+        final List<NotificationJob> notifications = notificationJobRepository.findAllByNotificationIsNotNull(pageable);
         log.info("Sending batch of notifications {}", notifications.size());
         final boolean result = notificationBroadcastingService.sendBatch(notifications);
         if (result) {
             log.info("Successfully send batch {} of notifications", notifications.size());
-            notificationRepository.updateBroadcastingStatus(notifications, NotificationBroadcastingStatus.SENT);
+            notificationJobRepository.deleteByNotificationJobIn(notifications);
         } else {
             log.info("Failed to send batch {} of notifications", notifications.size());
         }

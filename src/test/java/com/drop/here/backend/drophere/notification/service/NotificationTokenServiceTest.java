@@ -1,12 +1,16 @@
 package com.drop.here.backend.drophere.notification.service;
 
-import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
-import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
+import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.notification.entity.Notification;
+import com.drop.here.backend.drophere.notification.dto.NotificationTokenManagementRequest;
 import com.drop.here.backend.drophere.notification.entity.NotificationToken;
+import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingServiceType;
 import com.drop.here.backend.drophere.notification.enums.NotificationTokenType;
 import com.drop.here.backend.drophere.notification.repository.NotificationTokenRepository;
+import com.drop.here.backend.drophere.notification.service.token.NotificationTokenMappingService;
+import com.drop.here.backend.drophere.notification.service.token.NotificationTokenService;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,82 +30,59 @@ class NotificationTokenServiceTest {
     @Mock
     private NotificationTokenRepository notificationTokenRepository;
 
-    @Test
-    void givenCompanyTypeWhenFindByTypeThenFind() {
-        //given
-        final NotificationTokenType notificationTokenType = NotificationTokenType.COMPANY;
-        final Company company = Company.builder().build();
-        final Notification notification = Notification.builder()
-                .recipientCompany(company)
-                .build();
-
-        final NotificationToken notificationToken = NotificationToken.builder().token("zeberko").build();
-        when(notificationTokenRepository.findByOwnerCompany(company)).thenReturn(Optional.of(notificationToken));
-
-        //when
-        final Optional<String> result = notificationTokenService.findByType(notification, notificationTokenType);
-
-        //then
-        assertThat(result).isNotEmpty();
-        assertThat(result.orElseThrow()).isEqualTo("zeberko");
-    }
+    @Mock
+    private NotificationTokenMappingService notificationTokenMappingService;
 
     @Test
-    void givenCustomerTypeWhenFindByTypeThenFind() {
+    void givenExistingTokenWhenUpdateNotificationTokenThenUpdate() {
         //given
-        final NotificationTokenType notificationTokenType = NotificationTokenType.CUSTOMER;
+        final NotificationToken mappedNotificationToken = NotificationToken.builder().build();
         final Customer customer = Customer.builder().build();
-        final Notification notification = Notification.builder()
-                .recipientCustomer(customer)
+        final NotificationToken savedNotificationToken = NotificationToken.builder()
+                .tokenType(NotificationTokenType.CUSTOMER)
+                .broadcastingServiceType(NotificationBroadcastingServiceType.FIREBASE)
+                .ownerCustomer(customer)
                 .build();
 
-        final NotificationToken notificationToken = NotificationToken.builder().token("zeberko").build();
-        when(notificationTokenRepository.findByOwnerCustomer(customer)).thenReturn(Optional.of(notificationToken));
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder().build();
+        final NotificationTokenManagementRequest notificationTokenManagementRequest = NotificationTokenManagementRequest.builder().build();
+
+        when(notificationTokenMappingService.toNotificationToken(accountAuthentication, notificationTokenManagementRequest))
+                .thenReturn(mappedNotificationToken);
+        when(notificationTokenRepository.findByOwnerCustomerAndBroadcastingServiceType(customer, NotificationBroadcastingServiceType.FIREBASE))
+                .thenReturn(Optional.of(savedNotificationToken));
+        when(notificationTokenRepository.save(savedNotificationToken)).thenReturn(savedNotificationToken);
 
         //when
-        final Optional<String> result = notificationTokenService.findByType(notification, notificationTokenType);
+        final ResourceOperationResponse result = notificationTokenService.updateNotificationToken(accountAuthentication, notificationTokenManagementRequest);
 
         //then
-        assertThat(result).isNotEmpty();
-        assertThat(result.orElseThrow()).isEqualTo("zeberko");
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
     }
 
     @Test
-    void givenCompanyProfileTypeWhenFindByTypeThenFind() {
+    void givenNotExistingTokenWhenUpdateNotificationTokenThenSave() {
         //given
-        final NotificationTokenType notificationTokenType = NotificationTokenType.COMPANY_PROFILE;
-        final AccountProfile accountProfile = AccountProfile.builder().build();
-        final Notification notification = Notification.builder()
-                .recipientAccountProfile(accountProfile)
+        final Customer customer = Customer.builder().build();
+        final NotificationToken mappedNotificationToken = NotificationToken.builder()
+                .tokenType(NotificationTokenType.CUSTOMER)
+                .broadcastingServiceType(NotificationBroadcastingServiceType.FIREBASE)
+                .ownerCustomer(customer)
                 .build();
 
-        final NotificationToken notificationToken = NotificationToken.builder().token("zeberko").build();
-        when(notificationTokenRepository.findByOwnerAccountProfile(accountProfile)).thenReturn(Optional.of(notificationToken));
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder().build();
+        final NotificationTokenManagementRequest notificationTokenManagementRequest = NotificationTokenManagementRequest.builder().build();
+
+        when(notificationTokenMappingService.toNotificationToken(accountAuthentication, notificationTokenManagementRequest))
+                .thenReturn(mappedNotificationToken);
+        when(notificationTokenRepository.findByOwnerCustomerAndBroadcastingServiceType(customer, NotificationBroadcastingServiceType.FIREBASE))
+                .thenReturn(Optional.empty());
+        when(notificationTokenRepository.save(mappedNotificationToken)).thenReturn(mappedNotificationToken);
 
         //when
-        final Optional<String> result = notificationTokenService.findByType(notification, notificationTokenType);
+        final ResourceOperationResponse result = notificationTokenService.updateNotificationToken(accountAuthentication, notificationTokenManagementRequest);
 
         //then
-        assertThat(result).isNotEmpty();
-        assertThat(result.orElseThrow()).isEqualTo("zeberko");
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
     }
-
-    @Test
-    void givenNotExistingWhenFindByTypeThenEmpty() {
-        //given
-        final NotificationTokenType notificationTokenType = NotificationTokenType.COMPANY;
-        final Company company = Company.builder().build();
-        final Notification notification = Notification.builder()
-                .recipientCompany(company)
-                .build();
-
-        when(notificationTokenRepository.findByOwnerCompany(company)).thenReturn(Optional.empty());
-
-        //when
-        final Optional<String> result = notificationTokenService.findByType(notification, notificationTokenType);
-
-        //then
-        assertThat(result).isEmpty();
-    }
-
 }

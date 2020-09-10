@@ -1,6 +1,6 @@
 package com.drop.here.backend.drophere.notification.service.firebase;
 
-import com.drop.here.backend.drophere.notification.entity.Notification;
+import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingService;
 import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class FirebaseNotificationBroadcastingService implements NotificationBroa
     private int maxBatchSize;
 
     @Override
-    public boolean sendBatch(List<Notification> notifications) {
+    public boolean sendBatch(List<NotificationJob> notifications) {
         try {
             firebaseInitializationService.initialize();
 

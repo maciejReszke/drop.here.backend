@@ -1,5 +1,6 @@
-package com.drop.here.backend.drophere.notification.service;
+package com.drop.here.backend.drophere.notification.service.broadcasting;
 
+import com.drop.here.backend.drophere.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;

@@ -3,7 +3,8 @@ package com.drop.here.backend.drophere.notification.service.firebase;
 import com.drop.here.backend.drophere.notification.configuration.GoogleCredentialsConfiguration;
 import com.drop.here.backend.drophere.notification.configuration.GoogleCredentialsRequest;
 import com.drop.here.backend.drophere.notification.entity.Notification;
-import com.drop.here.backend.drophere.notification.service.NotificationBroadcastingUtilService;
+import com.drop.here.backend.drophere.notification.entity.NotificationJob;
+import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingUtilService;
 import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,14 +30,15 @@ public class FirebaseMappingService {
                 .build();
     }
 
-    public Message toMessage(Notification notification) {
+    public Message toMessage(NotificationJob notificationJob) {
+        final Notification notification = notificationJob.getNotification();
         return Message.builder()
                 .setNotification(com.google.firebase.messaging.Notification.builder()
                         .setImage(notificationBroadcastingUtilService.getImageUrl(notification))
                         .setTitle(notification.getTitle())
                         .setBody(notification.getMessage())
                         .build())
-                .setToken(notificationBroadcastingUtilService.getToken(notification))
+                .setToken(notificationJob.getNotificationToken().getToken())
                 .build();
     }
 }

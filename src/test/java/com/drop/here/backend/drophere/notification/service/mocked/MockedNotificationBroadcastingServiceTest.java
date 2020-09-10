@@ -1,6 +1,6 @@
 package com.drop.here.backend.drophere.notification.service.mocked;
 
-import com.drop.here.backend.drophere.notification.entity.Notification;
+import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +19,7 @@ class MockedNotificationBroadcastingServiceTest {
     @Test
     void givenNotificationsWhenSendBatchThenTrue() {
         //given
-        final List<Notification> notifications = List.of();
+        final List<NotificationJob> notifications = List.of();
 
         //when
         final boolean result = mockedNotificationBroadcastingService.sendBatch(notifications);

@@ -10,8 +10,9 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.notification.dto.NotificationManagementRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
-import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingStatus;
+import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
+import com.drop.here.backend.drophere.notification.repository.NotificationJobRepository;
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingService;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingServiceFactory;
@@ -47,6 +48,9 @@ class NotificationServiceTest {
 
     @Mock
     private NotificationRepository notificationRepository;
+
+    @Mock
+    private NotificationJobRepository notificationJobRepository;
 
     @Mock
     private NotificationMappingService notificationMappingService;
@@ -165,14 +169,13 @@ class NotificationServiceTest {
     @Test
     void givenNotificationsSuccessSendWhenSendNotificationsThenSendAndUpdateBroadcastingStatus() {
         //given
-        final List<Notification> notifications = List.of(Notification.builder().build());
+        final List<NotificationJob> notificationJobs = List.of(NotificationJob.builder().build());
 
         when(notificationBroadcastingServiceFactory.getNotificationBroadcastingService()).thenReturn(notificationBroadcastingService);
         when(notificationBroadcastingService.getBatchAmount()).thenReturn(50);
-        when(notificationRepository.findByBroadcastingStatus(NotificationBroadcastingStatus.NOT_SENT, PageRequest.of(0, 50)))
-                .thenReturn(notifications);
-        when(notificationBroadcastingService.sendBatch(notifications)).thenReturn(true);
-        doNothing().when(notificationRepository).updateBroadcastingStatus(notifications, NotificationBroadcastingStatus.SENT);
+        when(notificationJobRepository.findAllByNotificationIsNotNull(PageRequest.of(0, 50))).thenReturn(notificationJobs);
+        when(notificationBroadcastingService.sendBatch(notificationJobs)).thenReturn(true);
+        doNothing().when(notificationJobRepository).deleteByNotificationJobIn(notificationJobs);
 
         //when
         notificationService.sendNotifications();
@@ -184,18 +187,17 @@ class NotificationServiceTest {
     @Test
     void givenNotificationsFailureSendWhenSendNotificationsThenDoNothing() {
         //given
-        final List<Notification> notifications = List.of(Notification.builder().build());
+        final List<NotificationJob> notificationJobs = List.of(NotificationJob.builder().build());
 
         when(notificationBroadcastingServiceFactory.getNotificationBroadcastingService()).thenReturn(notificationBroadcastingService);
         when(notificationBroadcastingService.getBatchAmount()).thenReturn(50);
-        when(notificationRepository.findByBroadcastingStatus(NotificationBroadcastingStatus.NOT_SENT, PageRequest.of(0, 50)))
-                .thenReturn(notifications);
-        when(notificationBroadcastingService.sendBatch(notifications)).thenReturn(false);
+        when(notificationJobRepository.findAllByNotificationIsNotNull(PageRequest.of(0, 50))).thenReturn(notificationJobs);
+        when(notificationBroadcastingService.sendBatch(notificationJobs)).thenReturn(false);
 
         //when
         notificationService.sendNotifications();
 
         //then
-        verifyNoMoreInteractions(notificationRepository);
+        verifyNoMoreInteractions(notificationJobRepository);
     }
 }
