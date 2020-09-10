@@ -36,12 +36,15 @@ class NotificationTokenServiceTest {
     @Test
     void givenExistingTokenWhenUpdateNotificationTokenThenUpdate() {
         //given
-        final NotificationToken mappedNotificationToken = NotificationToken.builder().build();
         final Customer customer = Customer.builder().build();
-        final NotificationToken savedNotificationToken = NotificationToken.builder()
+        final NotificationToken mappedNotificationToken = NotificationToken.builder()
                 .tokenType(NotificationTokenType.CUSTOMER)
-                .broadcastingServiceType(NotificationBroadcastingServiceType.FIREBASE)
                 .ownerCustomer(customer)
+                .broadcastingServiceType(NotificationBroadcastingServiceType.FIREBASE)
+                .build();
+        final NotificationToken savedNotificationToken = NotificationToken.builder()
+                .ownerCustomer(customer)
+                .tokenType(NotificationTokenType.CUSTOMER)
                 .build();
 
         final AccountAuthentication accountAuthentication = AccountAuthentication.builder().build();
