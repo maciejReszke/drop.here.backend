@@ -87,13 +87,15 @@ public class NotificationService {
         final NotificationBroadcastingService notificationBroadcastingService = notificationBroadcastingServiceFactory.getNotificationBroadcastingService();
         final PageRequest pageable = PageRequest.of(0, notificationBroadcastingService.getBatchAmount());
         final List<NotificationJob> notifications = notificationJobRepository.findAllByNotificationIsNotNull(pageable);
-        log.info("Sending batch of notifications {}", notifications.size());
-        final boolean result = notificationBroadcastingService.sendBatch(notifications);
-        if (result) {
-            log.info("Successfully send batch {} of notifications", notifications.size());
-            notificationJobRepository.deleteByNotificationJobIn(notifications);
-        } else {
-            log.info("Failed to send batch {} of notifications", notifications.size());
+        if (!notifications.isEmpty()) {
+            log.info("Sending batch of notifications {}", notifications.size());
+            final boolean result = notificationBroadcastingService.sendBatch(notifications);
+            if (result) {
+                log.info("Successfully send batch {} of notifications", notifications.size());
+                notificationJobRepository.deleteByNotificationJobIn(notifications);
+            } else {
+                log.info("Failed to send batch {} of notifications", notifications.size());
+            }
         }
     }
 }
