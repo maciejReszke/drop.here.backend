@@ -14,16 +14,16 @@ import static io.vavr.API.Case;
 @RequiredArgsConstructor
 public class NotificationBroadcastingUtilService {
 
-    @Value("${server.config.publicUrl}")
+    @Value("${server.config.public_url}")
     private String serverPublicUrl;
 
-    @Value("${server.config.faviconEndpoint}")
+    @Value("${server.config.favicon_endpoint}")
     private String faviconEndpoint;
 
-    @Value("${server.config.getCustomerImageEndpoint}")
+    @Value("${server.config.get_customer_image_endpoint}")
     private String customerImageEndpoint;
 
-    @Value("${server.config.getCompanyImageEndpoint}")
+    @Value("${server.config.get_company_image_endpoint}")
     private String companyImageEndpoint;
 
     public String getImageUrl(Notification notification) {

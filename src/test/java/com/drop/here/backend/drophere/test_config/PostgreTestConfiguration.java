@@ -16,8 +16,8 @@ import javax.sql.DataSource;
 public class PostgreTestConfiguration {
     private final PostgreSQLContainer<?> container;
 
-    public PostgreTestConfiguration(@Value("${test-containers.postgresql.image}") String image,
-                                    @Value("${test-containers.postgresql.port}") int port) {
+    public PostgreTestConfiguration(@Value("${test_containers.postgresql.image}") String image,
+                                    @Value("${test_containers.postgresql.port}") int port) {
         container = new PostgreSQLContainer<>(image)
                 .withExposedPorts(port);
         container.start();

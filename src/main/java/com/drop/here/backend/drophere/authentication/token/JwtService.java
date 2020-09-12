@@ -20,13 +20,13 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    @Value("${authentication.jwt.validInMinutes}")
+    @Value("${authentication.jwt.valid_in_minutes}")
     private int validInMinutes;
 
     @Value("${authentication.jwt.issuer}")
     private String issuer;
 
-    @Value("${authentication.jwt.profileClaimName}")
+    @Value("${authentication.jwt.profile_claim_name}")
     private String profileClaimName;
 
     @Value("${authentication.jwt.secret}")

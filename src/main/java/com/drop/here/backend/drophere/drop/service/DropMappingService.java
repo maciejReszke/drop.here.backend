@@ -17,10 +17,10 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class DropMappingService {
 
-    @Value("${drops.uidGenerator.namePartLength}")
+    @Value("${drops.uid_generator.name_part_length}")
     private int namePartLength;
 
-    @Value("${drops.uidGenerator.randomPartLength}")
+    @Value("${drops.uid_generator.random_part_length}")
     private int randomPartLength;
 
     public Drop toEntity(DropManagementRequest dropManagementRequest, AccountAuthentication authentication) {
