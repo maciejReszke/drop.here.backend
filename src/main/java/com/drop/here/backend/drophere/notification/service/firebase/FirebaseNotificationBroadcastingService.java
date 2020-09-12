@@ -19,7 +19,7 @@ public class FirebaseNotificationBroadcastingService implements NotificationBroa
     private final FirebaseMappingService firebaseMappingService;
     private final FirebaseExecutorService firebaseExecutorService;
 
-    @Value("${notification.firebase.maxBatchSize}")
+    @Value("${notification.firebase.max_batch_size}")
     private int maxBatchSize;
 
     @Override
@@ -35,7 +35,7 @@ public class FirebaseNotificationBroadcastingService implements NotificationBroa
 
             return true;
         } catch (Exception e) {
-            log.info("Exception occurred during sending batch {} of notifications {}", notifications.size(), e.getMessage());
+            log.error("Exception occurred during sending batch {} of notifications {}", notifications.size(), e.getMessage());
             return false;
         }
     }

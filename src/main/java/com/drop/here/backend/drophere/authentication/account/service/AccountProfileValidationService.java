@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountProfileValidationService {
 
-    @Value("${accountCreation.minimalPasswordLength}")
+    @Value("${account_creation.minimal_password_length}")
     private int minimalPasswordLength;
 
     public void validateRequest(AccountProfileCreationRequest accountProfileRequest, Account account) {

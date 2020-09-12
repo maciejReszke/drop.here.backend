@@ -23,7 +23,7 @@ public class FirebaseInitializationService {
 
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 
-    @Value("${googlecredentials.databaseUrl}")
+    @Value("${googlecredentials.database_url}")
     private String databaseUrl;
 
     public void initialize() throws IOException {

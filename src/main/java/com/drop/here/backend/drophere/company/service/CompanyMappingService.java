@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class CompanyMappingService {
     private final CountryService countryService;
 
-    @Value("${companies.uidGenerator.randomPartLength}")
+    @Value("${companies.uid_generator.random_part_length}")
     private int randomUidPart;
 
     @Transactional(readOnly = true)
