@@ -65,8 +65,7 @@ public class ProductSearchingService {
 
         final List<ProductCustomizationWrapper> customizations = productCustomizationService.findCustomizations(productsIds);
 
-        return products
-                .map(product -> toProductResponse(product, isOwnCompanyOperation, findCustomizationWrappersForProduct(product, customizations)));
+        return products.map(product -> toProductResponse(product, isOwnCompanyOperation, findCustomizationWrappersForProduct(product, customizations)));
     }
 
     private List<ProductCustomizationWrapper> findCustomizationWrappersForProduct(Product product, List<ProductCustomizationWrapper> customizations) {
@@ -124,5 +123,13 @@ public class ProductSearchingService {
         return isOwnCompanyOperation
                 ? ProductAvailabilityStatus.values()
                 : new ProductAvailabilityStatus[]{ProductAvailabilityStatus.AVAILABLE};
+    }
+
+    public List<ProductResponse> findProducts(List<Long> productsIds) {
+        final List<Product> products = productRepository.findByIdIn(productsIds);
+        final List<ProductCustomizationWrapper> customizations = productCustomizationService.findCustomizations(productsIds);
+        return products.stream()
+                .map(product -> toProductResponse(product, true, findCustomizationWrappersForProduct(product, customizations)))
+                .collect(Collectors.toList());
     }
 }

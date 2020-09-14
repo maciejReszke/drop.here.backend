@@ -25,8 +25,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString(exclude = {"product"})
-@EqualsAndHashCode(exclude = {"product"})
+@ToString(exclude = {"product", "scheduleTemplate"})
+@EqualsAndHashCode(exclude = {"product", "scheduleTemplate"})
 public class ScheduleTemplateProduct {
 
     @Id
@@ -37,9 +37,12 @@ public class ScheduleTemplateProduct {
     @PositiveOrZero
     private Integer orderNum;
 
+    @NotNull
     private boolean limitedAmount;
 
-    private BigDecimal amount;
+    @NotNull
+    @PositiveOrZero
+    private Integer amount;
 
     @NotNull
     @Positive
@@ -49,4 +52,9 @@ public class ScheduleTemplateProduct {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_template_id")
+    private ScheduleTemplate scheduleTemplate;
 }

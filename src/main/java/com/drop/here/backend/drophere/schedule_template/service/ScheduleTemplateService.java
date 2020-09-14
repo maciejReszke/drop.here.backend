@@ -24,11 +24,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ScheduleTemplateService {
     private final ScheduleTemplateMappingService scheduleTemplateMappingService;
-    private final ScheduleTemplateValidationService scheduleTemplateValidationService;
     private final ScheduleTemplateRepository scheduleTemplateRepository;
 
     public ResourceOperationResponse createTemplate(String companyUid, ScheduleTemplateManagementRequest scheduleTemplateManagementRequest, AccountAuthentication accountAuthentication) {
-        scheduleTemplateValidationService.validate(scheduleTemplateManagementRequest);
         final ScheduleTemplate scheduleTemplate = scheduleTemplateMappingService.toScheduleTemplate(scheduleTemplateManagementRequest, accountAuthentication.getCompany());
         log.info("Saving schedule template for company {} with name {}", companyUid, scheduleTemplateManagementRequest.getName());
         scheduleTemplateRepository.save(scheduleTemplate);
@@ -36,9 +34,8 @@ public class ScheduleTemplateService {
     }
 
     public ResourceOperationResponse updateTemplate(String companyUid, Long scheduleTemplateId, ScheduleTemplateManagementRequest scheduleTemplateManagementRequest, AccountAuthentication accountAuthentication) {
-        scheduleTemplateValidationService.validate(scheduleTemplateManagementRequest);
         final ScheduleTemplate scheduleTemplate = findByIdAndCompany(scheduleTemplateId, accountAuthentication.getCompany());
-        scheduleTemplateMappingService.updateScheduleTemplate(scheduleTemplate, scheduleTemplateManagementRequest);
+        scheduleTemplateMappingService.updateScheduleTemplate(scheduleTemplate, scheduleTemplateManagementRequest, accountAuthentication.getCompany());
         log.info("Saving schedule template for company {} with name {} id {}", companyUid, scheduleTemplateManagementRequest.getName(), scheduleTemplateId);
         scheduleTemplateRepository.save(scheduleTemplate);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, scheduleTemplateId);

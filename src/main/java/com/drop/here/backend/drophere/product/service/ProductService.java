@@ -50,7 +50,7 @@ public class ProductService {
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, productId);
     }
 
-    private Product getProduct(Long productId, String companyUid) {
+    public Product getProduct(Long productId, String companyUid) {
         return productRepository.findByIdAndCompanyUid(productId, companyUid)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format("Product with id %s company %s was not found", productId, companyUid), RestExceptionStatusCode.PRODUCT_NOT_FOUND));
     }

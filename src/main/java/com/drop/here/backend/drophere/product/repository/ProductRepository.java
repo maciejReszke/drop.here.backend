@@ -4,7 +4,6 @@ import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -32,4 +31,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "p.company.uid = :companyUid " +
             "order by p.category")
     List<String> findCategories(String companyUid);
+
+    List<Product> findByIdIn(List<Long> productsIds);
 }

@@ -5,6 +5,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueE
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
+import com.drop.here.backend.drophere.schedule_template.service.ScheduleTemplateService;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

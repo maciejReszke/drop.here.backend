@@ -37,9 +37,6 @@ class ScheduleTemplateServiceTest {
     private ScheduleTemplateMappingService scheduleTemplateMappingService;
 
     @Mock
-    private ScheduleTemplateValidationService scheduleTemplateValidationService;
-
-    @Mock
     private ScheduleTemplateRepository scheduleTemplateRepository;
 
     @Test
@@ -49,11 +46,10 @@ class ScheduleTemplateServiceTest {
         final ScheduleTemplateManagementRequest scheduleTemplateManagementRequest = ScheduleTemplateDataGenerator.request(1);
         final Account account = AccountDataGenerator.companyAccount(1);
         final Company company = CompanyDataGenerator.company(1, account, null);
-        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         account.setCompany(company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final ScheduleTemplate template = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
 
-        doNothing().when(scheduleTemplateValidationService).validate(scheduleTemplateManagementRequest);
         when(scheduleTemplateMappingService.toScheduleTemplate(scheduleTemplateManagementRequest, company))
                 .thenReturn(template);
         when(scheduleTemplateRepository.save(template)).thenReturn(template);
@@ -72,14 +68,13 @@ class ScheduleTemplateServiceTest {
         final ScheduleTemplateManagementRequest scheduleTemplateManagementRequest = ScheduleTemplateDataGenerator.request(1);
         final Account account = AccountDataGenerator.companyAccount(1);
         final Company company = CompanyDataGenerator.company(1, account, null);
+        account.setCompany(company);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long templateId = 15L;
-        account.setCompany(company);
         final ScheduleTemplate template = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
 
         when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.of(template));
-        doNothing().when(scheduleTemplateValidationService).validate(scheduleTemplateManagementRequest);
-        doNothing().when(scheduleTemplateMappingService).updateScheduleTemplate(template, scheduleTemplateManagementRequest);
+        doNothing().when(scheduleTemplateMappingService).updateScheduleTemplate(template, scheduleTemplateManagementRequest, company);
         when(scheduleTemplateRepository.save(template)).thenReturn(template);
 
         //when
@@ -96,8 +91,8 @@ class ScheduleTemplateServiceTest {
         final ScheduleTemplateManagementRequest scheduleTemplateManagementRequest = ScheduleTemplateDataGenerator.request(1);
         final Account account = AccountDataGenerator.companyAccount(1);
         final Company company = CompanyDataGenerator.company(1, account, null);
-        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         account.setCompany(company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long templateId = 15L;
 
         when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.empty());
@@ -115,9 +110,9 @@ class ScheduleTemplateServiceTest {
         final String companyUid = "companyUid";
         final Account account = AccountDataGenerator.companyAccount(1);
         final Company company = CompanyDataGenerator.company(1, account, null);
+        account.setCompany(company);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long templateId = 15L;
-        account.setCompany(company);
         final ScheduleTemplate template = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
 
         when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.of(template));
@@ -127,7 +122,7 @@ class ScheduleTemplateServiceTest {
         final ResourceOperationResponse result = scheduleTemplateService.deleteTemplate(companyUid, templateId, accountAuthentication);
 
         //then
-        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.DELETED);
     }
 
     @Test
@@ -136,8 +131,8 @@ class ScheduleTemplateServiceTest {
         final String companyUid = "companyUid";
         final Account account = AccountDataGenerator.companyAccount(1);
         final Company company = CompanyDataGenerator.company(1, account, null);
-        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         account.setCompany(company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long templateId = 15L;
 
         when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.empty());
@@ -154,8 +149,8 @@ class ScheduleTemplateServiceTest {
         //given
         final Account account = AccountDataGenerator.companyAccount(1);
         final Company company = CompanyDataGenerator.company(1, account, null);
-        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         account.setCompany(company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long templateId = 15L;
         final ScheduleTemplateResponse scheduleTemplateResponse = ScheduleTemplateResponse.builder().build();
         final ScheduleTemplate template = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
@@ -175,14 +170,11 @@ class ScheduleTemplateServiceTest {
         //given
         final Account account = AccountDataGenerator.companyAccount(1);
         final Company company = CompanyDataGenerator.company(1, account, null);
-        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         account.setCompany(company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long templateId = 15L;
-        final ScheduleTemplateResponse scheduleTemplateResponse = ScheduleTemplateResponse.builder().build();
-        final ScheduleTemplate template = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
 
-        when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.of(template));
-        when(scheduleTemplateMappingService.toTemplateResponse(template)).thenReturn(scheduleTemplateResponse);
+        when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> scheduleTemplateService.findById(templateId, accountAuthentication));

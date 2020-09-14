@@ -1,13 +1,29 @@
 package com.drop.here.backend.drophere.schedule_template.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
-// TODO: 14/09/2020
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ScheduleTemplateManagementRequest {
 
+    @ApiModelProperty(value = "Schedule template name", example = "SCHODZI JAK JA PIER", required = true)
+    @NotBlank
+    @Length(max = 255)
     private String name;
+
+    @Valid
+    @Length(max = 255)
+    @ApiModelProperty(value = "Schedule template name", example = "SCHODZI JAK JA PIER")
+    private List<@Valid ScheduleTemplateProductRequest> scheduleTemplateProducts;
 }

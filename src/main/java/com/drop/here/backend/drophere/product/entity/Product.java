@@ -61,7 +61,7 @@ public class Product {
 
     @NotNull
     @PositiveOrZero
-    private BigDecimal unitFraction;
+    private BigDecimal unitValue;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -84,7 +84,7 @@ public class Product {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime lastUpdatedAt;
 
-    // TODO: 14/09/2020  !
+    // TODO: 14/09/2020   -zrobic po prostu nowa encje produktu do scheduletemplate - schedule product czy cos takiego
     @NotNull
     boolean deletable;
 
