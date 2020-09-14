@@ -61,7 +61,7 @@ public class Product {
 
     @NotNull
     @PositiveOrZero
-    private BigDecimal unitValue;
+    private BigDecimal unitFraction;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -84,6 +84,7 @@ public class Product {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime lastUpdatedAt;
 
+    // TODO: 14/09/2020  !
     @NotNull
     boolean deletable;
 

@@ -24,6 +24,9 @@ public class ProductResponse {
     @ApiModelProperty(value = "Unit", example = "piece")
     String unit;
 
+    @ApiModelProperty(value = "Minimal fraction", example = "0.1")
+    BigDecimal unitFraction;
+
     @ApiModelProperty(value = "Availability status", example = "AVAILABLE")
     ProductAvailabilityStatus availabilityStatus;
 

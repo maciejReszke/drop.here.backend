@@ -25,7 +25,7 @@ public class ProductDataGenerator {
                 .category("category" + i)
                 .unit(unit)
                 .unitName(unit.getName())
-                .unitValue(BigDecimal.valueOf(15.12))
+                .unitFraction(BigDecimal.valueOf(15.12))
                 .availabilityStatus(ProductAvailabilityStatus.AVAILABLE)
                 .price(BigDecimal.valueOf(123 + i))
                 .description("description" + i)

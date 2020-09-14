@@ -34,8 +34,8 @@ public class ProductManagementRequest {
     private String unit;
 
     @PositiveOrZero
-    @ApiModelProperty(value = "Product unit value per order", example = "10", required = true)
-    private BigDecimal unitValue;
+    @ApiModelProperty(value = "Product unit minimal fraction per order", example = "0.1 (for kg it means 100g)", required = true)
+    private BigDecimal unitFraction;
 
     @NotBlank
     @ApiModelProperty(value = "Product availability status", example = "UNAVAILABLE", required = true)

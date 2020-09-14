@@ -82,6 +82,7 @@ public class ProductSearchingService {
                 .name(product.getName())
                 .category(product.getCategory())
                 .unit(product.getUnitName())
+                .unitFraction(product.getUnitFraction())
                 .availabilityStatus(product.getAvailabilityStatus())
                 .price(product.getPrice())
                 .description(product.getDescription())
