@@ -5,7 +5,6 @@ import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationRe
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
@@ -20,11 +19,10 @@ import java.util.Set;
 
 @UtilityClass
 public class ProductDataGenerator {
-    public Product product(int i, ProductCategory category, ProductUnit unit, Company company) {
+    public Product product(int i, ProductUnit unit, Company company) {
         return Product.builder()
                 .name("productName" + i)
-                .category(category)
-                .categoryName(category.getName())
+                .category("category" + i)
                 .unit(unit)
                 .unitName(unit.getName())
                 .unitValue(BigDecimal.valueOf(15.12))
@@ -42,12 +40,6 @@ public class ProductDataGenerator {
         return ProductUnit.builder()
                 .createdAt(LocalDateTime.now())
                 .name("unit" + i)
-                .build();
-    }
-
-    public ProductCategory category(int i) {
-        return ProductCategory.builder()
-                .name("category" + i)
                 .build();
     }
 

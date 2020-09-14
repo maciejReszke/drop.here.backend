@@ -12,12 +12,10 @@ import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperType;
-import com.drop.here.backend.drophere.product.repository.ProductCategoryRepository;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.product.repository.ProductUnitRepository;
@@ -25,7 +23,6 @@ import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
-import com.drop.here.backend.drophere.test_data.ProductCategoryDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductUnitDataGenerator;
 import org.junit.jupiter.api.AfterEach;
@@ -59,9 +56,6 @@ class ProductControllerTest extends IntegrationBaseClass {
     private ProductUnitRepository productUnitRepository;
 
     @Autowired
-    private ProductCategoryRepository productCategoryRepository;
-
-    @Autowired
     private AccountRepository accountRepository;
 
     @Autowired
@@ -82,7 +76,6 @@ class ProductControllerTest extends IntegrationBaseClass {
     private Company company;
     private Account account;
     private ProductUnit productUnit;
-    private ProductCategory productCategory;
 
     @BeforeEach
     void prepare() {
@@ -91,7 +84,6 @@ class ProductControllerTest extends IntegrationBaseClass {
         privilegeRepository.save(Privilege.builder().name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).account(account).build());
         company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         productUnit = productUnitRepository.save(ProductUnitDataGenerator.productUnit(1));
-        productCategory = productCategoryRepository.save(ProductCategoryDataGenerator.productCategory(1));
     }
 
     @AfterEach
@@ -101,7 +93,6 @@ class ProductControllerTest extends IntegrationBaseClass {
         companyRepository.deleteAll();
         privilegeRepository.deleteAll();
         accountRepository.deleteAll();
-        productCategoryRepository.deleteAll();
         productUnitRepository.deleteAll();
         countryRepository.deleteAll();
     }
@@ -109,17 +100,17 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenFindProductsThenFind() throws Exception {
         //given
-        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        final Product preSaved1 = ProductDataGenerator.product(1, productUnit, company);
         preSaved1.setName("Hot dog");
-        preSaved1.setCategoryName("food");
+        preSaved1.setCategory("food");
         productRepository.save(preSaved1);
-        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        final Product preSaved2 = ProductDataGenerator.product(2, productUnit, company);
         preSaved2.setName("Coffee");
-        preSaved2.setCategoryName("drink");
+        preSaved2.setCategory("drink");
         productRepository.save(preSaved2);
-        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        final Product preSaved3 = ProductDataGenerator.product(3, productUnit, company);
         preSaved3.setName("Arsenic");
-        preSaved3.setCategoryName("poison");
+        preSaved3.setCategory("poison");
         productRepository.save(preSaved3);
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
@@ -141,17 +132,17 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationOneCategoryWhenFindProductsThenFind() throws Exception {
         //given
-        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        final Product preSaved1 = ProductDataGenerator.product(1, productUnit, company);
         preSaved1.setName("Hot dog");
-        preSaved1.setCategoryName("food");
+        preSaved1.setCategory("food");
         productRepository.save(preSaved1);
-        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        final Product preSaved2 = ProductDataGenerator.product(2, productUnit, company);
         preSaved2.setName("Coffee");
-        preSaved2.setCategoryName("drink");
+        preSaved2.setCategory("drink");
         productRepository.save(preSaved2);
-        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        final Product preSaved3 = ProductDataGenerator.product(3, productUnit, company);
         preSaved3.setName("Arsenic");
-        preSaved3.setCategoryName("poison");
+        preSaved3.setCategory("poison");
         productRepository.save(preSaved3);
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
@@ -160,7 +151,7 @@ class ProductControllerTest extends IntegrationBaseClass {
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
-                .param("category", preSaved2.getCategoryName())
+                .param("category", preSaved2.getCategory())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
 
         //then
@@ -172,17 +163,17 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationTwoCategoriesWhenFindProductsThenFind() throws Exception {
         //given
-        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        final Product preSaved1 = ProductDataGenerator.product(1, productUnit, company);
         preSaved1.setName("Hot dog");
-        preSaved1.setCategoryName("food");
+        preSaved1.setCategory("food");
         productRepository.save(preSaved1);
-        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        final Product preSaved2 = ProductDataGenerator.product(2, productUnit, company);
         preSaved2.setName("Coffee");
-        preSaved2.setCategoryName("drink");
+        preSaved2.setCategory("drink");
         productRepository.save(preSaved2);
-        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        final Product preSaved3 = ProductDataGenerator.product(3, productUnit, company);
         preSaved3.setName("Arsenic");
-        preSaved3.setCategoryName("poison");
+        preSaved3.setCategory("poison");
         productRepository.save(preSaved3);
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
@@ -191,7 +182,7 @@ class ProductControllerTest extends IntegrationBaseClass {
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
-                .param("category", preSaved2.getCategoryName(), preSaved1.getCategoryName())
+                .param("category", preSaved2.getCategory(), preSaved1.getCategory())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
 
         //then
@@ -204,17 +195,17 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationNameSubstringWhenFindProductsThenFind() throws Exception {
         //given
-        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        final Product preSaved1 = ProductDataGenerator.product(1, productUnit, company);
         preSaved1.setName("Hoft dog");
-        preSaved1.setCategoryName("food");
+        preSaved1.setCategory("food");
         productRepository.save(preSaved1);
-        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        final Product preSaved2 = ProductDataGenerator.product(2, productUnit, company);
         preSaved2.setName("Coffee");
-        preSaved2.setCategoryName("drink");
+        preSaved2.setCategory("drink");
         productRepository.save(preSaved2);
-        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        final Product preSaved3 = ProductDataGenerator.product(3, productUnit, company);
         preSaved3.setName("Arsenic");
-        preSaved3.setCategoryName("poison");
+        preSaved3.setCategory("poison");
         productRepository.save(preSaved3);
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
@@ -236,17 +227,17 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationNameEqualWhenFindProductsThenFind() throws Exception {
         //given
-        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        final Product preSaved1 = ProductDataGenerator.product(1, productUnit, company);
         preSaved1.setName("Hot dog");
-        preSaved1.setCategoryName("food");
+        preSaved1.setCategory("food");
         productRepository.save(preSaved1);
-        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        final Product preSaved2 = ProductDataGenerator.product(2, productUnit, company);
         preSaved2.setName("Coffee");
-        preSaved2.setCategoryName("drink");
+        preSaved2.setCategory("drink");
         productRepository.save(preSaved2);
-        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        final Product preSaved3 = ProductDataGenerator.product(3, productUnit, company);
         preSaved3.setName("Arsenic");
-        preSaved3.setCategoryName("poison");
+        preSaved3.setCategory("poison");
         productRepository.save(preSaved3);
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
@@ -267,17 +258,17 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationNameSubstringAndCategoryWhenFindProductsThenFind() throws Exception {
         //given
-        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        final Product preSaved1 = ProductDataGenerator.product(1, productUnit, company);
         preSaved1.setName("Hoft dog");
-        preSaved1.setCategoryName("food");
+        preSaved1.setCategory("food");
         productRepository.save(preSaved1);
-        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        final Product preSaved2 = ProductDataGenerator.product(2, productUnit, company);
         preSaved2.setName("Coffee");
-        preSaved2.setCategoryName("drink");
+        preSaved2.setCategory("drink");
         productRepository.save(preSaved2);
-        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        final Product preSaved3 = ProductDataGenerator.product(3, productUnit, company);
         preSaved3.setName("Arsenic");
-        preSaved3.setCategoryName("poison");
+        preSaved3.setCategory("poison");
         productRepository.save(preSaved3);
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
@@ -287,7 +278,7 @@ class ProductControllerTest extends IntegrationBaseClass {
         //when
         final ResultActions result = mockMvc.perform(get(url)
                 .param("name", "of")
-                .param("category", preSaved1.getCategoryName(), preSaved3.getCategoryName())
+                .param("category", preSaved1.getCategory(), preSaved3.getCategory())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
 
         //then
@@ -302,13 +293,13 @@ class ProductControllerTest extends IntegrationBaseClass {
         //given
         company.setAccount(accountRepository.save(AccountDataGenerator.customerAccount(2)));
         final String url = String.format("/companies/%s/products", company.getUid());
-        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        final Product preSaved1 = ProductDataGenerator.product(1, productUnit, company);
         preSaved1.setName("Hot dog");
-        preSaved1.setCategoryName("food");
+        preSaved1.setCategory("food");
         productRepository.save(preSaved1);
-        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        final Product preSaved2 = ProductDataGenerator.product(2, productUnit, company);
         preSaved2.setName("Coffee");
-        preSaved2.setCategoryName("drink");
+        preSaved2.setCategory("drink");
         productRepository.save(preSaved2);
         company.setVisibilityStatus(CompanyVisibilityStatus.HIDDEN);
         companyRepository.save(company);
@@ -327,17 +318,17 @@ class ProductControllerTest extends IntegrationBaseClass {
         account.setCompany(null);
         accountRepository.save(account);
         final String url = String.format("/companies/%s/products", company.getUid());
-        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        final Product preSaved1 = ProductDataGenerator.product(1, productUnit, company);
         preSaved1.setName("Hot dog");
-        preSaved1.setCategoryName("food");
+        preSaved1.setCategory("food");
         productRepository.save(preSaved1);
-        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        final Product preSaved2 = ProductDataGenerator.product(2, productUnit, company);
         preSaved2.setName("Coffee");
-        preSaved2.setCategoryName("drink");
+        preSaved2.setCategory("drink");
         productRepository.save(preSaved2);
-        final Product preSaved3 = ProductDataGenerator.product(3, productCategory, productUnit, company);
+        final Product preSaved3 = ProductDataGenerator.product(3, productUnit, company);
         preSaved3.setName("Arsenic");
-        preSaved3.setCategoryName("poison");
+        preSaved3.setCategory("poison");
         productRepository.save(preSaved3);
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
@@ -360,13 +351,13 @@ class ProductControllerTest extends IntegrationBaseClass {
         privilegeRepository.deleteAll();
 
         final String url = String.format("/companies/%s/products", company.getUid());
-        final Product preSaved1 = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        final Product preSaved1 = ProductDataGenerator.product(1, productUnit, company);
         preSaved1.setName("Hot dog");
-        preSaved1.setCategoryName("food");
+        preSaved1.setCategory("food");
         productRepository.save(preSaved1);
-        final Product preSaved2 = ProductDataGenerator.product(2, productCategory, productUnit, company);
+        final Product preSaved2 = ProductDataGenerator.product(2, productUnit, company);
         preSaved2.setName("Coffee");
-        preSaved2.setCategoryName("drink");
+        preSaved2.setCategory("drink");
         productRepository.save(preSaved2);
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
@@ -386,7 +377,6 @@ class ProductControllerTest extends IntegrationBaseClass {
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
                 .unit(productUnit.getName())
-                .category(productCategory.getName())
                 .build());
 
         //when
@@ -408,7 +398,6 @@ class ProductControllerTest extends IntegrationBaseClass {
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
                 .unit(productUnit.getName())
-                .category(productCategory.getName())
                 .build());
 
         //when
@@ -433,7 +422,6 @@ class ProductControllerTest extends IntegrationBaseClass {
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
                 .unit(productUnit.getName())
-                .category(productCategory.getName())
                 .build());
 
         //when
@@ -453,7 +441,6 @@ class ProductControllerTest extends IntegrationBaseClass {
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
                 .unit(productUnit.getName())
-                .category(productCategory.getName())
                 .availabilityStatus(ProductAvailabilityStatus.AVAILABLE + "ttt")
                 .build());
 
@@ -470,13 +457,12 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenUpdateProductThenUpdate() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
                 .name("newName")
                 .unit(productUnit.getName())
-                .category(productCategory.getName())
                 .build());
 
         //when
@@ -495,13 +481,12 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestNotOwnCompanyOperationWhenUpdateProductThen403() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s", company.getUid() + "ii", product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
                 .name("newName")
                 .unit(productUnit.getName())
-                .category(productCategory.getName())
                 .build());
 
         //when
@@ -522,13 +507,12 @@ class ProductControllerTest extends IntegrationBaseClass {
         privilege.setName("differentPrivilege");
         privilegeRepository.save(privilege);
 
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
                 .unit(productUnit.getName())
                 .name("newName")
-                .category(productCategory.getName())
                 .build());
 
         //when
@@ -544,12 +528,11 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenInvalidRequestOwnCompanyOperationWhenUpdateProductThen422() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
                 .unit(productUnit.getName())
-                .category(productCategory.getName())
                 .name("newName")
                 .availabilityStatus(ProductAvailabilityStatus.AVAILABLE + "ttt")
                 .build());
@@ -567,7 +550,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenDeleteProductThenDelete() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
 
         //when
@@ -583,7 +566,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestNotOwnCompanyOperationWhenDeleteProductThen403() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s", company.getUid() + "ii", product.getId());
 
         //when
@@ -603,7 +586,7 @@ class ProductControllerTest extends IntegrationBaseClass {
         privilege.setName("differentPrivilege");
         privilegeRepository.save(privilege);
 
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
 
         //when
@@ -618,7 +601,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenUndeletableProductOwnCompanyOperationWhenDeleteProductThen422() throws Exception {
         //given
-        final Product preSavedProduct = ProductDataGenerator.product(1, productCategory, productUnit, company);
+        final Product preSavedProduct = ProductDataGenerator.product(1, productUnit, company);
         preSavedProduct.setDeletable(false);
         final Product product = productRepository.save(preSavedProduct);
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
@@ -635,7 +618,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenCreateCustomizationsWrapperThenCreate() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s/customizations", company.getUid(), product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.productCustomizationWrapperRequest(1));
 
@@ -656,7 +639,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestNotOwnCompanyOperationWhenCreateCustomizationsThen403() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s/customizations", company.getUid() + "I", product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.productCustomizationWrapperRequest(1));
 
@@ -675,7 +658,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationInvalidPrivilegeWhenCreateCustomizationsThen403() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE))
                 .findFirst().orElseThrow();
         privilege.setName("differentPrivilege");
@@ -699,7 +682,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenInvalidRequestOwnCompanyOperationWhenCreateCustomizatonsThen422() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s/customizations", company.getUid(), product.getId());
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
         request.setType(ProductCustomizationWrapperType.SINGLE + "keke");
@@ -720,7 +703,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenUpdateCustomizationsWrapperThenUpdate() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
                 ProductDataGenerator.productCustomizationWrapper(1, product));
 
@@ -744,7 +727,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestNotOwnCompanyOperationWhenUpdateCustomizationsThen403() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
                 ProductDataGenerator.productCustomizationWrapper(1, product));
 
@@ -768,7 +751,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationInvalidPrivilegeWhenUpdateCustomizationsThen403() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE))
                 .findFirst().orElseThrow();
         privilege.setName("differentPrivilege");
@@ -797,7 +780,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenInvalidRequestOwnCompanyOperationWhenUpdateCustomizatonsThen422() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
                 ProductDataGenerator.productCustomizationWrapper(1, product));
 
@@ -823,7 +806,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenDeleteCustomizationsWrapperThenDelete() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
                 ProductDataGenerator.productCustomizationWrapper(1, product));
 
@@ -842,7 +825,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestNotOwnCompanyOperationWhenDeleteCustomizationsThen403() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
                 ProductDataGenerator.productCustomizationWrapper(1, product));
 
@@ -862,7 +845,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationInvalidPrivilegeWhenDeleteCustomizationsThen403() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE))
                 .findFirst().orElseThrow();
         privilege.setName("differentPrivilege");
@@ -887,7 +870,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenNotExistingCustomizationOwnCompanyOperationWhenDeleteCustomizatonsThen404() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productCategory, productUnit, company));
+        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
 
         final String url = String.format("/companies/%s/products/%s/customizations/%s", company.getUid(), product.getId(), 1234);
 

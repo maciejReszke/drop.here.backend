@@ -1,6 +1,5 @@
 package com.drop.here.backend.drophere.product.dto.response;
 
-import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Value;
 
@@ -10,7 +9,7 @@ public class ProductCategoryResponse {
     @ApiModelProperty(value = "Category name", example = "Junk food")
     String name;
 
-    public static ProductCategoryResponse from(ProductCategory productCategory) {
-        return new ProductCategoryResponse(productCategory.getName());
+    public static ProductCategoryResponse from(String category) {
+        return new ProductCategoryResponse(category);
     }
 }

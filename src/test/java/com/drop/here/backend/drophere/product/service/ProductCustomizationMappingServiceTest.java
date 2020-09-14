@@ -3,7 +3,6 @@ package com.drop.here.backend.drophere.product.service;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperType;
@@ -25,9 +24,8 @@ class ProductCustomizationMappingServiceTest {
     void givenRequestAndProductWhenToCustomizationWrapperThenMap() {
         //given
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
 
         //when
