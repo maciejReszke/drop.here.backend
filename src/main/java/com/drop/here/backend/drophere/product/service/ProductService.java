@@ -17,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,7 +30,7 @@ public class ProductService {
     private final ProductCustomizationService productCustomizationService;
 
     public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring, AccountAuthentication accountAuthentication) {
-        return productSearchingService.findAll(pageable, companyUid, desiredCategories,desiredNameSubstring, accountAuthentication);
+        return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, accountAuthentication);
     }
 
     public ResourceOperationResponse createProduct(ProductManagementRequest productManagementRequest, String companyUid, AccountAuthentication accountAuthentication) {
@@ -77,5 +79,9 @@ public class ProductService {
         final Product product = getProduct(productId, companyUid);
         productCustomizationService.deleteCustomization(product, customizationId, authentication);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, customizationId);
+    }
+
+    public List<String> findCategories(String companyUid) {
+        return productRepository.findCategories(companyUid);
     }
 }

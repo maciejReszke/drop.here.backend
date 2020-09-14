@@ -47,7 +47,7 @@ public class DropManagementController {
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "List of drops", response = ResourceOperationResponse.class),
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "List of drops"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })

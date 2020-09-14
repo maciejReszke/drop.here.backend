@@ -2,7 +2,6 @@ package com.drop.here.backend.drophere.product.service;
 
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
@@ -16,7 +15,6 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class ProductMappingService {
-    private final ProductCategoryService categoryService;
     private final ProductUnitService productUnitService;
 
     public Product toEntity(ProductManagementRequest request, AccountAuthentication accountAuthentication) {
@@ -30,12 +28,10 @@ public class ProductMappingService {
     }
 
     public void update(Product product, ProductManagementRequest request) {
-        final ProductCategory category = categoryService.getByName(request.getCategory());
         final ProductUnit unit = productUnitService.getByName(request.getUnit());
         final LocalDateTime now = LocalDateTime.now();
         product.setName(request.getName());
-        product.setCategory(category);
-        product.setCategoryName(category.getName());
+        product.setCategory(request.getCategory());
         product.setUnit(unit);
         product.setUnitName(unit.getName());
         product.setUnitValue(request.getUnitValue() == null ? BigDecimal.ONE : request.getUnitValue().setScale(2, RoundingMode.DOWN));

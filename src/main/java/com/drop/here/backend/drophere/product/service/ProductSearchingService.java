@@ -80,7 +80,7 @@ public class ProductSearchingService {
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
-                .category(product.getCategoryName())
+                .category(product.getCategory())
                 .unit(product.getUnitName())
                 .availabilityStatus(product.getAvailabilityStatus())
                 .price(product.getPrice())

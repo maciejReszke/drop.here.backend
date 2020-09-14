@@ -12,11 +12,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class ProductValidationService {
-    private final ProductCategoryService productCategoryService;
     private final ProductUnitService productUnitService;
 
     public void validateProductRequest(ProductManagementRequest productManagementRequest) {
-        validateCategory(productManagementRequest);
         validateUnit(productManagementRequest);
         validateStatus(productManagementRequest);
     }
@@ -31,10 +29,6 @@ public class ProductValidationService {
 
     private void validateUnit(ProductManagementRequest productManagementRequest) {
         productUnitService.getByName(productManagementRequest.getUnit());
-    }
-
-    private void validateCategory(ProductManagementRequest productManagementRequest) {
-        productCategoryService.getByName(productManagementRequest.getCategory());
     }
 
     public void validateProductDelete(Product product) {

@@ -4,7 +4,6 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
@@ -42,9 +41,8 @@ class ProductCustomizationServiceTest {
     void givenRequestWhenCreateCustomizationsThenSave() {
         //given
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
         final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
@@ -65,9 +63,9 @@ class ProductCustomizationServiceTest {
     void givenExistingWrapperWhenUpdateThenUpdate() {
         //given
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
+
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
         final ProductCustomizationWrapper newWrapper = ProductCustomizationWrapper.builder().heading("h§").build();
@@ -92,9 +90,9 @@ class ProductCustomizationServiceTest {
     void givenNotExistingWrapperWhenUpdateThenError() {
         //given
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
+
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
         final Long customizationId = 1L;
@@ -114,9 +112,9 @@ class ProductCustomizationServiceTest {
     void givenExistingWrapperWhenDeleteThenDelete() {
         //given
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
+
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
         final Long customizationId = 1L;
         final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
@@ -135,9 +133,9 @@ class ProductCustomizationServiceTest {
     void givenNotExistingWrapperWhenDeleteThenError() {
         //given
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
+
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
         final Long customizationId = 1L;
         wrapper.setId(customizationId);

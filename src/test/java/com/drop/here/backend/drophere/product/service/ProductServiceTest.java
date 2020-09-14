@@ -9,7 +9,6 @@ import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWr
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
@@ -81,9 +80,9 @@ class ProductServiceTest {
 
         doNothing().when(productValidationService).validateProductRequest(productManagementRequest);
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
+
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         when(productMappingService.toEntity(productManagementRequest, accountAuthentication)).thenReturn(product);
@@ -104,9 +103,9 @@ class ProductServiceTest {
 
         doNothing().when(productValidationService).validateProductRequest(productManagementRequest);
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
+
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final Long productId = 1L;
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
         doNothing().when(productMappingService).update(product, productManagementRequest);
@@ -142,9 +141,9 @@ class ProductServiceTest {
         final String companyUid = "companyUid";
 
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
+
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final Long productId = 1L;
         doNothing().when(productValidationService).validateProductDelete(product);
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
@@ -181,9 +180,9 @@ class ProductServiceTest {
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
 
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
+
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final AccountAuthentication authentication = AccountAuthentication.builder().build();
 
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
@@ -223,9 +222,9 @@ class ProductServiceTest {
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
 
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
+
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final AccountAuthentication authentication = AccountAuthentication.builder().build();
 
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
@@ -264,9 +263,9 @@ class ProductServiceTest {
         final String companyUid = "companyUid";
 
         final ProductUnit unit = ProductDataGenerator.unit(1);
-        final ProductCategory category = ProductDataGenerator.category(1);
+
         final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, category, unit, company);
+        final Product product = ProductDataGenerator.product(1, unit, company);
         final AccountAuthentication authentication = AccountAuthentication.builder().build();
 
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));

@@ -38,7 +38,7 @@ import java.util.List;
 @Entity
 @ToString(exclude = {"category", "unit", "company"})
 @EqualsAndHashCode(exclude = {"category", "unit", "company"})
-@Table(indexes = @Index(columnList = "categoryName"))
+@Table(indexes = @Index(columnList = "category"))
 public class Product {
 
     @Id
@@ -48,13 +48,8 @@ public class Product {
     @NotBlank
     private String name;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private ProductCategory category;
-
     @NotBlank
-    private String categoryName;
+    private String category;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

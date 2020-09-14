@@ -3,7 +3,6 @@ package com.drop.here.backend.drophere.product.service;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import org.junit.jupiter.api.Test;
@@ -22,9 +21,6 @@ class ProductValidationServiceTest {
     private ProductValidationService productValidationService;
 
     @Mock
-    private ProductCategoryService productCategoryService;
-
-    @Mock
     private ProductUnitService productUnitService;
 
     @Test
@@ -37,7 +33,6 @@ class ProductValidationServiceTest {
                 .build();
 
         when(productUnitService.getByName(productManagementRequest.getUnit())).thenReturn(ProductUnit.builder().build());
-        when(productCategoryService.getByName(productManagementRequest.getCategory())).thenReturn(ProductCategory.builder().build());
 
         //when
         final Throwable throwable = catchThrowable(() -> productValidationService.validateProductRequest(productManagementRequest));
@@ -56,7 +51,6 @@ class ProductValidationServiceTest {
                 .build();
 
         when(productUnitService.getByName(productManagementRequest.getUnit())).thenReturn(ProductUnit.builder().build());
-        when(productCategoryService.getByName(productManagementRequest.getCategory())).thenReturn(ProductCategory.builder().build());
 
         //when
         final Throwable throwable = catchThrowable(() -> productValidationService.validateProductRequest(productManagementRequest));

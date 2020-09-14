@@ -39,7 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.POST, "/accounts").anonymous()
                         .mvcMatchers(HttpMethod.GET, "/accounts/{accountId}").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/authentication").authenticated()
-                        .mvcMatchers(HttpMethod.GET, "/categories").authenticated()
+                        .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/categories").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/units").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/countries").authenticated()
                         .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/products").authenticated()
