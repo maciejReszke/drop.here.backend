@@ -29,7 +29,7 @@ public class ProductValidationService {
 
     private void validateUnit(ProductManagementRequest productManagementRequest) {
         final ProductUnit productUnit = productUnitService.getByName(productManagementRequest.getUnit());
-        if (productManagementRequest.getUnitFraction().scale() > 0 && !productUnit.isFractionable()) {
+        if (productManagementRequest.getUnitFraction() != null && productManagementRequest.getUnitFraction().scale() > 0 && !productUnit.isFractionable()) {
             throw new RestIllegalRequestValueException(
                     String.format("Product with name %s has fraction not integer %s but product unit %s can must be integer",
                             productManagementRequest.getName(), productManagementRequest.getUnitFraction(), productUnit.getName()),
