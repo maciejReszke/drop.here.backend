@@ -8,7 +8,6 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateManagementRequest;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateResponse;
 import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplate;
-import com.drop.here.backend.drophere.schedule_template.repository.ScheduleTemplateRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
@@ -37,7 +36,7 @@ class ScheduleTemplateServiceTest {
     private ScheduleTemplateMappingService scheduleTemplateMappingService;
 
     @Mock
-    private ScheduleTemplateRepository scheduleTemplateRepository;
+    private ScheduleTemplateStoreService scheduleTemplateStoreService;
 
     @Test
     void givenRequestWhenCreateTemplateThenCreate() {
@@ -52,7 +51,7 @@ class ScheduleTemplateServiceTest {
 
         when(scheduleTemplateMappingService.toScheduleTemplate(scheduleTemplateManagementRequest, company))
                 .thenReturn(template);
-        when(scheduleTemplateRepository.save(template)).thenReturn(template);
+        doNothing().when(scheduleTemplateStoreService).save(template);
 
         //when
         final ResourceOperationResponse result = scheduleTemplateService.createTemplate(companyUid, scheduleTemplateManagementRequest, accountAuthentication);
@@ -73,9 +72,9 @@ class ScheduleTemplateServiceTest {
         final Long templateId = 15L;
         final ScheduleTemplate template = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
 
-        when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.of(template));
+        when(scheduleTemplateStoreService.findByIdAndCompany(templateId, company)).thenReturn(Optional.of(template));
         doNothing().when(scheduleTemplateMappingService).updateScheduleTemplate(template, scheduleTemplateManagementRequest, company);
-        when(scheduleTemplateRepository.save(template)).thenReturn(template);
+        doNothing().when(scheduleTemplateStoreService).save(template);
 
         //when
         final ResourceOperationResponse result = scheduleTemplateService.updateTemplate(companyUid, templateId, scheduleTemplateManagementRequest, accountAuthentication);
@@ -95,7 +94,7 @@ class ScheduleTemplateServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long templateId = 15L;
 
-        when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.empty());
+        when(scheduleTemplateStoreService.findByIdAndCompany(templateId, company)).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> scheduleTemplateService.updateTemplate(companyUid, templateId, scheduleTemplateManagementRequest, accountAuthentication));
@@ -115,8 +114,8 @@ class ScheduleTemplateServiceTest {
         final Long templateId = 15L;
         final ScheduleTemplate template = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
 
-        when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.of(template));
-        doNothing().when(scheduleTemplateRepository).delete(template);
+        when(scheduleTemplateStoreService.findByIdAndCompany(templateId, company)).thenReturn(Optional.of(template));
+        doNothing().when(scheduleTemplateStoreService).delete(template);
 
         //when
         final ResourceOperationResponse result = scheduleTemplateService.deleteTemplate(companyUid, templateId, accountAuthentication);
@@ -135,7 +134,7 @@ class ScheduleTemplateServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long templateId = 15L;
 
-        when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.empty());
+        when(scheduleTemplateStoreService.findByIdAndCompany(templateId, company)).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> scheduleTemplateService.deleteTemplate(companyUid, templateId, accountAuthentication));
@@ -155,7 +154,7 @@ class ScheduleTemplateServiceTest {
         final ScheduleTemplateResponse scheduleTemplateResponse = ScheduleTemplateResponse.builder().build();
         final ScheduleTemplate template = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
 
-        when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.of(template));
+        when(scheduleTemplateStoreService.findByIdAndCompanyWithScheduleTemplateProducts(templateId, company)).thenReturn(Optional.of(template));
         when(scheduleTemplateMappingService.toTemplateResponse(template)).thenReturn(scheduleTemplateResponse);
 
         //when
@@ -174,7 +173,7 @@ class ScheduleTemplateServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long templateId = 15L;
 
-        when(scheduleTemplateRepository.findByIdAndCompany(templateId, company)).thenReturn(Optional.empty());
+        when(scheduleTemplateStoreService.findByIdAndCompanyWithScheduleTemplateProducts(templateId, company)).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> scheduleTemplateService.findById(templateId, accountAuthentication));

@@ -36,9 +36,6 @@ public class ProductResponse {
     @ApiModelProperty(value = "Product description", example = "Matka zona policjanta przynosi do hotelu blanta")
     String description;
 
-    @ApiModelProperty(value = "Is deletable", example = "true")
-    Boolean deletable;
-
     @ApiModelProperty(value = "Product customizations")
     List<ProductCustomizationWrapperResponse> customizationsWrappers;
 }

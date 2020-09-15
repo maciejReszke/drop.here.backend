@@ -9,7 +9,6 @@ import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateMana
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateProductRequest;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateProductResponse;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateResponse;
-import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateShortResponse;
 import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplate;
 import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplateProduct;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +54,7 @@ public class ScheduleTemplateMappingService {
 
     private ScheduleTemplateProduct buildScheduleTemplateProduct(ScheduleTemplateProductRequest scheduleTemplateProductRequest, ScheduleTemplate scheduleTemplate, Company company, int counter) {
         return ScheduleTemplateProduct.builder()
-                .amount(scheduleTemplateProductRequest.isLimitedAmount() ? scheduleTemplateProductRequest.getAmount() : 0)
+                .amount(scheduleTemplateProductRequest.isLimitedAmount() && scheduleTemplateProductRequest.getAmount() != null ? scheduleTemplateProductRequest.getAmount() : 0)
                 .limitedAmount(scheduleTemplateProductRequest.isLimitedAmount())
                 .orderNum(counter)
                 .price(scheduleTemplateProductRequest.getPrice().setScale(2, RoundingMode.DOWN))
@@ -100,14 +99,6 @@ public class ScheduleTemplateMappingService {
                 .limitedAmount(scheduleTemplateProduct.isLimitedAmount())
                 .price(scheduleTemplateProduct.getPrice())
                 .productResponse(productResponse)
-                .build();
-    }
-
-    public ScheduleTemplateShortResponse toTemplateShortResponse(ScheduleTemplate scheduleTemplate) {
-        return ScheduleTemplateShortResponse.builder()
-                .name(scheduleTemplate.getName())
-                .id(scheduleTemplate.getId())
-                .productsAmount(scheduleTemplate.getScheduleTemplateProducts().size())
                 .build();
     }
 }

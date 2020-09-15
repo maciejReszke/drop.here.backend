@@ -10,12 +10,14 @@ import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
+import com.drop.here.backend.drophere.schedule_template.service.ScheduleTemplateStoreService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class ProductService {
     private final ProductValidationService productValidationService;
     private final ProductMappingService productMappingService;
     private final ProductCustomizationService productCustomizationService;
+    private final ScheduleTemplateStoreService scheduleTemplateStoreService;
 
     public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring, AccountAuthentication accountAuthentication) {
         return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, accountAuthentication);
@@ -55,10 +58,11 @@ public class ProductService {
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format("Product with id %s company %s was not found", productId, companyUid), RestExceptionStatusCode.PRODUCT_NOT_FOUND));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResourceOperationResponse deleteProduct(Long productId, String companyUid) {
         final Product product = getProduct(productId, companyUid);
-        productValidationService.validateProductDelete(product);
         log.info("Deleting product {} for company {} with name {}", productId, companyUid, product.getName());
+        scheduleTemplateStoreService.deleteScheduleTemplateProductByProduct(product);
         productRepository.delete(product);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, productId);
     }

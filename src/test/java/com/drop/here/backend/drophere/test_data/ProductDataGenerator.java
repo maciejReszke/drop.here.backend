@@ -31,7 +31,6 @@ public class ProductDataGenerator {
                 .description("description" + i)
                 .createdAt(LocalDateTime.now())
                 .lastUpdatedAt(LocalDateTime.now())
-                .deletable(true)
                 .company(company)
                 .build();
     }

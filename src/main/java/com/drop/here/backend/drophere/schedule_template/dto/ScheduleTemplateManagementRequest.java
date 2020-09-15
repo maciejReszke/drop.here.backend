@@ -23,7 +23,6 @@ public class ScheduleTemplateManagementRequest {
     private String name;
 
     @Valid
-    @Length(max = 255)
-    @ApiModelProperty(value = "Schedule template name", example = "SCHODZI JAK JA PIER")
+    @ApiModelProperty(value = "Schedule template name")
     private List<@Valid ScheduleTemplateProductRequest> scheduleTemplateProducts;
 }

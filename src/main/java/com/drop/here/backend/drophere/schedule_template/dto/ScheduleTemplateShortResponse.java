@@ -1,19 +1,20 @@
 package com.drop.here.backend.drophere.schedule_template.dto;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@Builder
-@Value
+@AllArgsConstructor
+@Data
 public class ScheduleTemplateShortResponse {
 
     @ApiModelProperty(value = "Schedule template id", example = "5")
-    Long id;
+    private Long id;
 
     @ApiModelProperty(value = "Schedule template name", example = "Best seler")
-    String name;
+    private String name;
 
     @ApiModelProperty(value = "Amount of products in template", example = "15")
-    Integer productsAmount;
+    private int productsAmount;
+
 }

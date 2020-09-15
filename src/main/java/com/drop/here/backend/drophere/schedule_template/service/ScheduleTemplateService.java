@@ -9,7 +9,6 @@ import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateMana
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateResponse;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateShortResponse;
 import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplate;
-import com.drop.here.backend.drophere.schedule_template.repository.ScheduleTemplateRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +23,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ScheduleTemplateService {
     private final ScheduleTemplateMappingService scheduleTemplateMappingService;
-    private final ScheduleTemplateRepository scheduleTemplateRepository;
+    private final ScheduleTemplateStoreService scheduleTemplateStoreService;
 
     public ResourceOperationResponse createTemplate(String companyUid, ScheduleTemplateManagementRequest scheduleTemplateManagementRequest, AccountAuthentication accountAuthentication) {
         final ScheduleTemplate scheduleTemplate = scheduleTemplateMappingService.toScheduleTemplate(scheduleTemplateManagementRequest, accountAuthentication.getCompany());
         log.info("Saving schedule template for company {} with name {}", companyUid, scheduleTemplateManagementRequest.getName());
-        scheduleTemplateRepository.save(scheduleTemplate);
+        scheduleTemplateStoreService.save(scheduleTemplate);
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, scheduleTemplate.getId());
     }
 
@@ -37,12 +36,12 @@ public class ScheduleTemplateService {
         final ScheduleTemplate scheduleTemplate = findByIdAndCompany(scheduleTemplateId, accountAuthentication.getCompany());
         scheduleTemplateMappingService.updateScheduleTemplate(scheduleTemplate, scheduleTemplateManagementRequest, accountAuthentication.getCompany());
         log.info("Saving schedule template for company {} with name {} id {}", companyUid, scheduleTemplateManagementRequest.getName(), scheduleTemplateId);
-        scheduleTemplateRepository.save(scheduleTemplate);
+        scheduleTemplateStoreService.save(scheduleTemplate);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, scheduleTemplateId);
     }
 
     private ScheduleTemplate findByIdAndCompany(Long scheduleTemplateId, Company company) {
-        return scheduleTemplateRepository.findByIdAndCompany(scheduleTemplateId, company)
+        return scheduleTemplateStoreService.findByIdAndCompany(scheduleTemplateId, company)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Schedule template for company %s with id %s was not found", company.getUid(), scheduleTemplateId),
                         RestExceptionStatusCode.SCHEDULE_TEMPLATE_BY_ID_AND_COMPANY_NOT_FOUND
@@ -52,19 +51,26 @@ public class ScheduleTemplateService {
     public ResourceOperationResponse deleteTemplate(String companyUid, Long scheduleTemplateId, AccountAuthentication accountAuthentication) {
         final ScheduleTemplate scheduleTemplate = findByIdAndCompany(scheduleTemplateId, accountAuthentication.getCompany());
         log.info("Deleting schedule template for company {} with name {} id {}", companyUid, scheduleTemplate.getName(), scheduleTemplateId);
-        scheduleTemplateRepository.delete(scheduleTemplate);
+        scheduleTemplateStoreService.delete(scheduleTemplate);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, scheduleTemplateId);
     }
 
     public ScheduleTemplateResponse findById(Long scheduleTemplateId, AccountAuthentication accountAuthentication) {
-        return scheduleTemplateMappingService.toTemplateResponse(findByIdAndCompany(scheduleTemplateId, accountAuthentication.getCompany()));
+        return scheduleTemplateMappingService.toTemplateResponse(findByIdAndCompanyWithScheduleTemplateProducts(scheduleTemplateId, accountAuthentication.getCompany()));
+    }
+
+    private ScheduleTemplate findByIdAndCompanyWithScheduleTemplateProducts(Long scheduleTemplateId, Company company) {
+        return scheduleTemplateStoreService.findByIdAndCompanyWithScheduleTemplateProducts(scheduleTemplateId, company)
+                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                        "Schedule template for company %s with id %s was not found", company.getUid(), scheduleTemplateId),
+                        RestExceptionStatusCode.SCHEDULE_TEMPLATE_BY_ID_AND_COMPANY_NOT_FOUND
+                ));
     }
 
 
     public List<ScheduleTemplateShortResponse> findTemplates(AccountAuthentication accountAuthentication) {
-        return scheduleTemplateRepository.findByCompany(accountAuthentication.getCompany())
+        return scheduleTemplateStoreService.findByCompany(accountAuthentication.getCompany())
                 .stream()
-                .map(scheduleTemplateMappingService::toTemplateShortResponse)
                 .sorted(Comparator.comparing(ScheduleTemplateShortResponse::getName, String::compareToIgnoreCase))
                 .collect(Collectors.toList());
     }

@@ -61,7 +61,7 @@ public class Product {
 
     @NotNull
     @PositiveOrZero
-    private BigDecimal unitValue;
+    private BigDecimal unitFraction;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -83,10 +83,6 @@ public class Product {
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime lastUpdatedAt;
-
-    // TODO: 14/09/2020   -zrobic po prostu nowa encje produktu do scheduletemplate - schedule product czy cos takiego
-    @NotNull
-    boolean deletable;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

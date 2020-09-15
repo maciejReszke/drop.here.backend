@@ -36,7 +36,6 @@ import java.util.List;
 public class ScheduleTemplateController {
     private final ScheduleTemplateService scheduleTemplateService;
 
-    // TODO: 14/09/2020 test
     @ApiOperation("Find templates")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -51,7 +50,21 @@ public class ScheduleTemplateController {
         return scheduleTemplateService.findTemplates(accountAuthentication);
     }
 
-    // TODO: 14/09/2020 test
+    @GetMapping("/{scheduleTemplateId}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Found schedule template"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    @ApiOperation("Find schedule template")
+    public ScheduleTemplateResponse findTemplate(@ApiIgnore @PathVariable String companyUid,
+                                                 @ApiIgnore @PathVariable Long scheduleTemplateId,
+                                                 @ApiIgnore AccountAuthentication accountAuthentication) {
+        return scheduleTemplateService.findById(scheduleTemplateId, accountAuthentication);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation("Creating new template")
@@ -67,7 +80,6 @@ public class ScheduleTemplateController {
         return scheduleTemplateService.createTemplate(companyUid, scheduleTemplateManagementRequest, accountAuthentication);
     }
 
-    // TODO: 14/09/2020 test
     @PutMapping("/{scheduleTemplateId}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
@@ -84,7 +96,6 @@ public class ScheduleTemplateController {
         return scheduleTemplateService.updateTemplate(companyUid, scheduleTemplateId, scheduleTemplateManagementRequest, accountAuthentication);
     }
 
-    // TODO: 14/09/2020 test
     @DeleteMapping("/{scheduleTemplateId}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
@@ -101,19 +112,4 @@ public class ScheduleTemplateController {
     }
 
 
-    // TODO: 14/09/2020 test
-    @GetMapping("/{scheduleTemplateId}")
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Found schedule template"),
-            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
-            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
-    })
-    @ApiOperation("Find schedule template")
-    public ScheduleTemplateResponse findTemplate(@ApiIgnore @PathVariable String companyUid,
-                                                 @ApiIgnore @PathVariable Long scheduleTemplateId,
-                                                 @ApiIgnore AccountAuthentication accountAuthentication) {
-        return scheduleTemplateService.findById(scheduleTemplateId, accountAuthentication);
-    }
 }

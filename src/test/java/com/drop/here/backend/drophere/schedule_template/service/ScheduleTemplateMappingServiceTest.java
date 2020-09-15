@@ -7,7 +7,6 @@ import com.drop.here.backend.drophere.product.service.ProductSearchingService;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateManagementRequest;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateResponse;
-import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateShortResponse;
 import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplate;
 import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplateProduct;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
@@ -39,21 +38,6 @@ class ScheduleTemplateMappingServiceTest {
 
     @Mock
     private ProductSearchingService productSearchingService;
-
-    @Test
-    void givenScheduleTemplateWhenToTemplateShortResponseThenMap() {
-        //given
-        final Company company = CompanyDataGenerator.company(1, null, null);
-        final ScheduleTemplate scheduleTemplate = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
-        scheduleTemplate.setScheduleTemplateProducts(Set.of());
-
-        //when
-        final ScheduleTemplateShortResponse response = scheduleTemplateMappingService.toTemplateShortResponse(scheduleTemplate);
-
-        //then
-        assertThat(response.getName()).isEqualTo(scheduleTemplate.getName());
-        assertThat(response.getProductsAmount()).isZero();
-    }
 
     @Test
     void givenRequestWhenToScheduleTemplateThenMap() {

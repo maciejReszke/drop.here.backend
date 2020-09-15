@@ -18,13 +18,11 @@ public class ProductUnitService {
     private final ProductUnitRepository productUnitRepository;
     private static final String SORT_BY_NAME_ATTRIBUTE = "name";
 
-    // TODO: 14/09/2020 is can have fraction!
     public ProductUnit getByName(String name) {
         return productUnitRepository.findByName(name)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Product unit with name %s was not found", name),
                         RestExceptionStatusCode.PRODUCT_UNIT_NOT_FOUND_BY_NAME));
-
     }
 
     public List<ProductUnitResponse> findAll() {
