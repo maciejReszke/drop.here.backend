@@ -23,7 +23,6 @@ public class ProductUnitService {
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Product unit with name %s was not found", name),
                         RestExceptionStatusCode.PRODUCT_UNIT_NOT_FOUND_BY_NAME));
-
     }
 
     public List<ProductUnitResponse> findAll() {

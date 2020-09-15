@@ -3,7 +3,7 @@ package com.drop.here.backend.drophere.product.service;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
-import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +28,13 @@ public class ProductValidationService {
     }
 
     private void validateUnit(ProductManagementRequest productManagementRequest) {
-        productUnitService.getByName(productManagementRequest.getUnit());
-    }
-
-    public void validateProductDelete(Product product) {
-        if (!product.isDeletable()) {
-            throw new RestIllegalRequestValueException(String.format(
-                    "Product to be removed with id %s is not deletable", product.getId()),
-                    RestExceptionStatusCode.PRODUCT_DELETE_NOT_DELETABLE);
+        final ProductUnit productUnit = productUnitService.getByName(productManagementRequest.getUnit());
+        if (productManagementRequest.getUnitFraction() != null && productManagementRequest.getUnitFraction().scale() > 0 && !productUnit.isFractionable()) {
+            throw new RestIllegalRequestValueException(
+                    String.format("Product with name %s has fraction not integer %s but product unit %s can must be integer",
+                            productManagementRequest.getName(), productManagementRequest.getUnitFraction(), productUnit.getName()),
+                    RestExceptionStatusCode.PRODUCT_FRACTION_VALUE_NOT_INTEGER
+            );
         }
     }
 }

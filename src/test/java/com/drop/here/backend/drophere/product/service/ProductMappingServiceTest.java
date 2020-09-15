@@ -56,7 +56,6 @@ class ProductMappingServiceTest {
         assertThat(result.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(result.getUnitName()).isEqualTo(productUnit.getName());
         assertThat(result.getUnit()).isEqualTo(productUnit);
-        assertThat(result.isDeletable()).isTrue();
         assertThat(result.getCompany()).isEqualTo(company);
         assertThat(result.getDescription()).isEqualTo(productManagementRequest.getDescription());
     }
@@ -84,7 +83,6 @@ class ProductMappingServiceTest {
         assertThat(product.getUnitName()).isEqualTo(productUnit.getName());
         assertThat(product.getUnit()).isEqualTo(productUnit);
         assertThat(product.getCompany()).isNull();
-        assertThat(product.isDeletable()).isFalse();
         assertThat(product.getDescription()).isEqualTo(productManagementRequest.getDescription());
     }
 }

@@ -43,7 +43,7 @@ public class ProductSearchingService {
                 prepareName(desiredNameSubstring),
                 desiredAvailabilityStatuses,
                 pageable);
-        return toResponse(products, isOwnCompanyOperation);
+        return toResponse(products);
     }
 
     private String prepareName(String desiredNameSubstring) {
@@ -58,15 +58,14 @@ public class ProductSearchingService {
                 : Arrays.stream(desiredCategories).map(String::toLowerCase).collect(Collectors.toList());
     }
 
-    private Page<ProductResponse> toResponse(Page<Product> products, boolean isOwnCompanyOperation) {
+    private Page<ProductResponse> toResponse(Page<Product> products) {
         final List<Long> productsIds = products.stream()
                 .map(Product::getId)
                 .collect(Collectors.toList());
 
         final List<ProductCustomizationWrapper> customizations = productCustomizationService.findCustomizations(productsIds);
 
-        return products
-                .map(product -> toProductResponse(product, isOwnCompanyOperation, findCustomizationWrappersForProduct(product, customizations)));
+        return products.map(product -> toProductResponse(product, findCustomizationWrappersForProduct(product, customizations)));
     }
 
     private List<ProductCustomizationWrapper> findCustomizationWrappersForProduct(Product product, List<ProductCustomizationWrapper> customizations) {
@@ -76,16 +75,16 @@ public class ProductSearchingService {
                 .collect(Collectors.toList());
     }
 
-    private ProductResponse toProductResponse(Product product, boolean isOwnCompanyOperation, List<ProductCustomizationWrapper> customizationWrappers) {
+    private ProductResponse toProductResponse(Product product, List<ProductCustomizationWrapper> customizationWrappers) {
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .category(product.getCategory())
                 .unit(product.getUnitName())
+                .unitFraction(product.getUnitFraction())
                 .availabilityStatus(product.getAvailabilityStatus())
                 .price(product.getPrice())
                 .description(product.getDescription())
-                .deletable(isOwnCompanyOperation ? product.isDeletable() : null)
                 .customizationsWrappers(toCustomizationWrappers(customizationWrappers))
                 .build();
     }
@@ -123,5 +122,13 @@ public class ProductSearchingService {
         return isOwnCompanyOperation
                 ? ProductAvailabilityStatus.values()
                 : new ProductAvailabilityStatus[]{ProductAvailabilityStatus.AVAILABLE};
+    }
+
+    public List<ProductResponse> findProducts(List<Long> productsIds) {
+        final List<Product> products = productRepository.findByIdIn(productsIds);
+        final List<ProductCustomizationWrapper> customizations = productCustomizationService.findCustomizations(productsIds);
+        return products.stream()
+                .map(product -> toProductResponse(product, findCustomizationWrappersForProduct(product, customizations)))
+                .collect(Collectors.toList());
     }
 }

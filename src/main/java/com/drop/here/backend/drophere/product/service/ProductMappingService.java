@@ -20,7 +20,6 @@ public class ProductMappingService {
     public Product toEntity(ProductManagementRequest request, AccountAuthentication accountAuthentication) {
         final Product product = Product.builder()
                 .createdAt(LocalDateTime.now())
-                .deletable(true)
                 .company(accountAuthentication.getCompany())
                 .build();
         update(product, request);
@@ -34,7 +33,7 @@ public class ProductMappingService {
         product.setCategory(request.getCategory());
         product.setUnit(unit);
         product.setUnitName(unit.getName());
-        product.setUnitValue(request.getUnitValue() == null ? BigDecimal.ONE : request.getUnitValue().setScale(2, RoundingMode.DOWN));
+        product.setUnitFraction(request.getUnitFraction() == null ? BigDecimal.ONE : request.getUnitFraction().setScale(2, RoundingMode.DOWN));
         product.setAvailabilityStatus(ProductAvailabilityStatus.valueOf(request.getAvailabilityStatus()));
         product.setPrice(request.getPrice().setScale(2, RoundingMode.DOWN));
         product.setDescription(request.getDescription());
