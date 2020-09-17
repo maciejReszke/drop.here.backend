@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -94,7 +95,7 @@ public class Product {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
     private List<ProductCustomizationWrapper> customizationWrappers;
 
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "image_id")
     private Image image;
 }

@@ -100,7 +100,6 @@ public class ProductController {
         return productService.updateProduct(productManagementRequest, productId, companyUid);
     }
 
-    // TODO: 17/09/2020 image
     @DeleteMapping("/{productId}")
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)

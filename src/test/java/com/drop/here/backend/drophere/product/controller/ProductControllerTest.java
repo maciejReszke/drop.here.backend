@@ -572,7 +572,10 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenDeleteProductThenDelete() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
+        product.setImage(image);
+        productRepository.save(product);
         final ScheduleTemplate scheduleTemplate = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
         scheduleTemplate.setScheduleTemplateProducts(Set.of(
                 ScheduleTemplateProduct.builder()
@@ -598,6 +601,7 @@ class ProductControllerTest extends IntegrationBaseClass {
         assertThat(productRepository.findAll()).isEmpty();
         assertThat(scheduleTemplateRepository.findByIdAndCompanyWithScheduleTemplateProducts(scheduleTemplate.getId(), company)
                 .orElseThrow().getScheduleTemplateProducts()).isEmpty();
+        assertThat(imageRepository.findAll()).isEmpty();
     }
 
     @Test
