@@ -5,6 +5,9 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.image.Image;
+import com.drop.here.backend.drophere.image.ImageService;
+import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
@@ -24,7 +27,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,6 +59,9 @@ class ProductServiceTest {
 
     @Mock
     private ProductCustomizationService productCustomizationService;
+
+    @Mock
+    private ImageService imageService;
 
     @Test
     void givenRequestWhenFindAllThenFindAll() {
@@ -298,4 +306,55 @@ class ProductServiceTest {
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 
+    @Test
+    void givenImageWhenUpdateImageThenUpdate() throws IOException {
+        //given
+        final MockMultipartFile image = new MockMultipartFile("name", "byte".getBytes());
+        final Product product = Product.builder().build();
+        final Long productId = 1L;
+        final String companyId = "companyId";
+        final Image imageEntity = Image.builder().build();
+        when(productRepository.findByIdAndCompanyUid(productId, companyId)).thenReturn(Optional.of(product));
+        when(imageService.createImage(image.getBytes(), ImageType.PRODUCT_IMAGE))
+                .thenReturn(imageEntity);
+        when(productRepository.save(product)).thenReturn(product);
+
+        //when
+        final ResourceOperationResponse resourceOperationResponse = productService.updateImage(productId, companyId, image, AccountAuthentication.builder().build());
+
+        //then
+        assertThat(resourceOperationResponse.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        assertThat(product.getImage()).isEqualTo(imageEntity);
+    }
+
+    @Test
+    void givenExistingProductWithImageWhenFindImageThenFind() {
+        //given
+        final String companyId = "companyId";
+        final Long productId = 5L;
+        final Image image = Image.builder().build();
+        final Product product = Product.builder()
+                .image(image)
+                .build();
+
+        when(productRepository.findByIdAndCompanyUidWithImage(productId, companyId)).thenReturn(Optional.of(product));
+        //when
+        final Image result = productService.findImage(productId, companyId);
+
+        //then
+        assertThat(result).isEqualTo(image);
+    }
+
+    @Test
+    void givenNotExistingCustomerWithImageWhenFindImageThenError() {
+        //given
+        final String companyId = "companyId";
+        final Long productId = 5L;
+        when(productRepository.findByIdAndCompanyUidWithImage(productId, companyId)).thenReturn(Optional.empty());
+        //when
+        final Throwable throwable = catchThrowable(() -> productService.findImage(productId, companyId));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
 }

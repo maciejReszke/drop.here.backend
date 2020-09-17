@@ -41,7 +41,7 @@ public class AccountProfilePersistenceService {
     }
 
     @Transactional(readOnly = true)
-    public Image findByUidWithImage(String profileUid) {
+    public Image findImage(String profileUid) {
         return accountProfileRepository.findByProfileUidWithImage(profileUid)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Image for account profile %s was not found", profileUid),

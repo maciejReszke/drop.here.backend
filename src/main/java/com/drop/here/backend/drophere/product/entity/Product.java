@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.product.entity;
 
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
@@ -36,8 +38,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
-@ToString(exclude = {"category", "unit", "company"})
-@EqualsAndHashCode(exclude = {"category", "unit", "company"})
+@ToString(exclude = {"unit", "company", "image"})
+@EqualsAndHashCode(exclude = {"unit", "company", "image"})
 @Table(indexes = @Index(columnList = "category"))
 public class Product {
 
@@ -91,4 +93,8 @@ public class Product {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
     private List<ProductCustomizationWrapper> customizationWrappers;
+
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "image_id")
+    private Image image;
 }

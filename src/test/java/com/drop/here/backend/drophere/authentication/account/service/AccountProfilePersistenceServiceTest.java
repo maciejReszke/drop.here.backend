@@ -105,7 +105,7 @@ class AccountProfilePersistenceServiceTest {
 
         when(accountProfileRepository.findByProfileUidWithImage(profileUid)).thenReturn(Optional.of(accountProfile));
         //when
-        final Image result = accountProfilePersistenceService.findByUidWithImage(profileUid);
+        final Image result = accountProfilePersistenceService.findImage(profileUid);
 
         //then
         assertThat(result).isEqualTo(image);
@@ -118,7 +118,7 @@ class AccountProfilePersistenceServiceTest {
 
         when(accountProfileRepository.findByProfileUidWithImage(profileUid)).thenReturn(Optional.empty());
         //when
-        final Throwable throwable = catchThrowable(() -> accountProfilePersistenceService.findByUidWithImage(profileUid));
+        final Throwable throwable = catchThrowable(() -> accountProfilePersistenceService.findImage(profileUid));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);

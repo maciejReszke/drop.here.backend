@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.product.controller;
 
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
+import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,8 +29,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +45,8 @@ import javax.validation.constraints.NotNull;
 @Api(tags = "Products management API")
 public class ProductController {
     private final ProductService productService;
+
+    private static final String IMAGE_PART_NAME = "image";
 
     @GetMapping
     @ApiOperation("Fetching products")
@@ -93,6 +100,7 @@ public class ProductController {
         return productService.updateProduct(productManagementRequest, productId, companyUid);
     }
 
+    // TODO: 17/09/2020 image
     @DeleteMapping("/{productId}")
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
@@ -107,6 +115,42 @@ public class ProductController {
                                                    @ApiIgnore @PathVariable Long productId,
                                                    @ApiIgnore AccountAuthentication authentication) {
         return productService.deleteProduct(productId, companyUid);
+    }
+
+    @PostMapping("/{productId}/images")
+    @ApiAuthorizationToken
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation("Update product image")
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Image updated", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
+    public ResourceOperationResponse updateImage(@ApiIgnore AccountAuthentication authentication,
+                                                 @ApiIgnore @PathVariable String companyUid,
+                                                 @ApiIgnore @PathVariable Long productId,
+                                                 @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
+        return productService.updateImage(productId, companyUid, image, authentication);
+    }
+
+    @GetMapping("/{productId}/images")
+    @ApiOperation("Get product image")
+    @ApiAuthorizationToken
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Product image"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    public ResponseEntity<byte[]> findImage(@ApiIgnore @PathVariable String companyUid,
+                                            @ApiIgnore @PathVariable Long productId) {
+        final Image image = productService.findImage(productId, companyUid);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .eTag(productId + "" + image.getId())
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(image.getBytes());
     }
 
     @PostMapping("/{productId}/customizations")
