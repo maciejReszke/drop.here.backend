@@ -255,7 +255,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
         profile.setImage(image);
         accountProfileRepository.save(profile);
         privilegeRepository.save(Privilege.builder().accountProfile(profile).name("aa").build());
-        final String url = "/management/companies/images";
+        final String url = "/accounts/profiles/images";
         final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
         final MockMultipartFile file = new MockMultipartFile("image", bytes);
 
@@ -279,7 +279,8 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
         final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).build());
         account.setPrivileges(List.of(privilege));
         final AccountProfile profile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
-        final String url = "/management/companies/images";
+        privilegeRepository.save(Privilege.builder().accountProfile(profile).name("aa").build());
+        final String url = "/accounts/profiles/images";
         final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
         final MockMultipartFile file = new MockMultipartFile("image", bytes);
 
@@ -289,7 +290,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account, profile).getToken()));
 
         //then
-        perform.andExpect(status().isForbidden());
+         perform.andExpect(status().isForbidden());
         assertThat(imageRepository.findAll()).isEmpty();
     }
 }
