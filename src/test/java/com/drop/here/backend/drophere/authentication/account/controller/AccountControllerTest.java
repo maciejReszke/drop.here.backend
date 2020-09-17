@@ -124,7 +124,7 @@ class AccountControllerTest extends IntegrationBaseClass {
         final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
         privilegeRepository.save(Privilege.builder().name("priv2").accountProfile(accountProfile).build());
 
-        final String url = String.format("/accounts/%s", account.getId());
+        final String url = "/accounts";
 
         //when
         final ResultActions perform = mockMvc.perform(get(url)
@@ -134,23 +134,4 @@ class AccountControllerTest extends IntegrationBaseClass {
         perform.andExpect(status().isOk())
                 .andExpect(jsonPath("$.accountType", Matchers.equalTo("COMPANY")));
     }
-
-    @Test
-    void givenNotOwnAccountValidPrivilegeWhenGetAccountInfoThen403() throws Exception {
-        //given
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
-        privilegeRepository.save(Privilege.builder().name("priv").account(account).build());
-        final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
-        privilegeRepository.save(Privilege.builder().name("priv2").accountProfile(accountProfile).build());
-
-        final String url = String.format("/accounts/%s", account.getId() + 1);
-
-        //when
-        final ResultActions perform = mockMvc.perform(get(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        perform.andExpect(status().isForbidden());
-    }
-
 }

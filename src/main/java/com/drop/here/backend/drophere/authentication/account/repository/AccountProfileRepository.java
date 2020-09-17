@@ -19,4 +19,9 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
     Optional<AccountProfile> findByAccountAndProfileUidWithRoles(Account account, String profileUid);
 
     List<AccountProfile> findByAccount(Account account);
+
+    @Query("select ap from AccountProfile ap " +
+            "join fetch ap.image where " +
+            "ap.profileUid = :profileUid")
+    Optional<AccountProfile> findByProfileUidWithImage(String profileUid);
 }
