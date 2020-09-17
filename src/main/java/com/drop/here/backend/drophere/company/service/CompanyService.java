@@ -111,7 +111,7 @@ public class CompanyService {
         return companyRepository.findByUidWithImage(companyUid)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Image for company %s was not found", companyUid),
-                        RestExceptionStatusCode.COMPANY_IMAGE_WAS_NOT_FOUND))
+                        RestExceptionStatusCode.ACCOUNT_PROFILE_IMAGE_WAS_NOT_FOUND))
                 .getImage();
     }
 

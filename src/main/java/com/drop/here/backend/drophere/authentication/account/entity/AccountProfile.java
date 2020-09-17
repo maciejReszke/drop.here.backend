@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.authentication.account.entity;
 
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileStatus;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
+import com.drop.here.backend.drophere.image.Image;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
@@ -82,4 +84,9 @@ public class AccountProfile {
     @NotNull
     @Enumerated(EnumType.STRING)
     private AccountProfileType profileType;
+
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "image_id")
+    private Image image;
+
 }
