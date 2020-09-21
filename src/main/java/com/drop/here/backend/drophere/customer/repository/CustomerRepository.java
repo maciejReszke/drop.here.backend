@@ -22,8 +22,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query("select distinct c from Customer c " +
             "left join CompanyCustomerRelationship ccr on (ccr.customer =c and ccr.company =:company) where " +
-            "(ccr is not null or c in (select dm.customer from DropMembership dm " +
-            "                                             join dm.drop d where " +
+            "(ccr is not null or c in (select dm.customer from SpotMembership dm " +
+            "                                             join dm.spot d where " +
             "                                             d.company = :company)) and " +
             "(" +
             "   :blocked is null or (:blocked = true and ccr.relationshipStatus = 'BLOCKED') or (:blocked = false and (ccr is null or ccr.relationshipStatus = 'ACTIVE'))" +
