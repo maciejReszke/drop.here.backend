@@ -86,6 +86,6 @@ public class AccountProfileService {
     }
 
     public Image findImage(String profileUid) {
-        return accountProfilePersistenceService.findByUidWithImage(profileUid);
+        return accountProfilePersistenceService.findImage(profileUid);
     }
 }

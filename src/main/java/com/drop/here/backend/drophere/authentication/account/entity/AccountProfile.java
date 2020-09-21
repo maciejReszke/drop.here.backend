@@ -39,8 +39,8 @@ import java.util.List;
         @Index(unique = true, columnList = "profileUid"),
         @Index(columnList = "account_id")
 })
-@ToString(exclude = {"account", "privileges"})
-@EqualsAndHashCode(exclude = {"account", "privileges"})
+@ToString(exclude = {"account", "privileges", "image"})
+@EqualsAndHashCode(exclude = {"account", "privileges", "image"})
 public class AccountProfile {
 
     @Id

@@ -33,4 +33,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<String> findCategories(String companyUid);
 
     List<Product> findByIdIn(List<Long> productsIds);
+
+    @Query("select p from Product p " +
+            "join fetch p.image where " +
+            "p.id = :productId and " +
+            "p.company.uid = :companyUid")
+    Optional<Product> findByIdAndCompanyUidWithImage(Long productId, String companyUid);
 }

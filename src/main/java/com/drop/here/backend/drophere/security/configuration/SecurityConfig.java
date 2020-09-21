@@ -47,6 +47,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/products").authenticated()
                         .mvcMatchers(HttpMethod.POST, "/companies/{companyUid}/products").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers("/companies/{companyUid}/products/{productId}").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.POST, "/companies/{companyUid}/products/{productId}/images").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/products/{productId}/images").permitAll()
                         .mvcMatchers("/companies/{companyUid}/products/{productId}/customizations/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers("/companies/{companyUid}/drops/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.PUT, "/management/companies").hasAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)

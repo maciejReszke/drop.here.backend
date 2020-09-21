@@ -2,8 +2,12 @@ package com.drop.here.backend.drophere.product.service;
 
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
+import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.image.Image;
+import com.drop.here.backend.drophere.image.ImageService;
+import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
@@ -18,7 +22,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -31,6 +37,7 @@ public class ProductService {
     private final ProductMappingService productMappingService;
     private final ProductCustomizationService productCustomizationService;
     private final ScheduleTemplateStoreService scheduleTemplateStoreService;
+    private final ImageService imageService;
 
     public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring, AccountAuthentication accountAuthentication) {
         return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, accountAuthentication);
@@ -87,5 +94,28 @@ public class ProductService {
 
     public List<String> findCategories(String companyUid) {
         return productRepository.findCategories(companyUid);
+    }
+
+    public ResourceOperationResponse updateImage(Long productId, String companyUid, MultipartFile imagePart, AccountAuthentication authentication) {
+        try {
+            final Product product = getProduct(productId, companyUid);
+            final Image image = imageService.createImage(imagePart.getBytes(), ImageType.PRODUCT_IMAGE);
+            product.setImage(image);
+            log.info("Updating image for product {} company {}", productId, companyUid);
+            productRepository.save(product);
+            return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, product.getId());
+        } catch (IOException exception) {
+            throw new RestIllegalRequestValueException("Invalid image " + exception.getMessage(),
+                    RestExceptionStatusCode.UPDATE_PRODUCT_IMAGE_INVALID_IMAGE);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public Image findImage(Long productId, String companyUid) {
+        return productRepository.findByIdAndCompanyUidWithImage(productId, companyUid)
+                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                        "Image for product %s company %s was not found", productId, companyUid),
+                        RestExceptionStatusCode.PRODUCT_IMAGE_WAS_NOT_FOUND))
+                .getImage();
     }
 }

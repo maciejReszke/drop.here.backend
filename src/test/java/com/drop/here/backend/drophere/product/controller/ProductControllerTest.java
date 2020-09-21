@@ -4,12 +4,16 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.Privilege;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
+import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
+import com.drop.here.backend.drophere.image.Image;
+import com.drop.here.backend.drophere.image.ImageRepository;
+import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
@@ -33,11 +37,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +55,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -82,6 +90,9 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Autowired
     private ProductCustomizationWrapperRepository productCustomizationWrapperRepository;
 
+    @Autowired
+    private ImageRepository imageRepository;
+
     private Company company;
     private Account account;
     private ProductUnit productUnit;
@@ -105,6 +116,7 @@ class ProductControllerTest extends IntegrationBaseClass {
         accountRepository.deleteAll();
         productUnitRepository.deleteAll();
         countryRepository.deleteAll();
+        imageRepository.deleteAll();
     }
 
     @Test
@@ -560,7 +572,10 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenDeleteProductThenDelete() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
+        product.setImage(image);
+        productRepository.save(product);
         final ScheduleTemplate scheduleTemplate = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
         scheduleTemplate.setScheduleTemplateProducts(Set.of(
                 ScheduleTemplateProduct.builder()
@@ -586,6 +601,7 @@ class ProductControllerTest extends IntegrationBaseClass {
         assertThat(productRepository.findAll()).isEmpty();
         assertThat(scheduleTemplateRepository.findByIdAndCompanyWithScheduleTemplateProducts(scheduleTemplate.getId(), company)
                 .orElseThrow().getScheduleTemplateProducts()).isEmpty();
+        assertThat(imageRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -688,7 +704,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenInvalidRequestOwnCompanyOperationWhenCreateCustomizatonsThen422() throws Exception {
+    void givenInvalidRequestOwnCompanyOperationWhenCreateCustomizationsThen422() throws Exception {
         //given
         final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final String url = String.format("/companies/%s/products/%s/customizations", company.getUid(), product.getId());
@@ -786,7 +802,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenInvalidRequestOwnCompanyOperationWhenUpdateCustomizatonsThen422() throws Exception {
+    void givenInvalidRequestOwnCompanyOperationWhenUpdateCustomizationsThen422() throws Exception {
         //given
         final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
         final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
@@ -876,7 +892,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenNotExistingCustomizationOwnCompanyOperationWhenDeleteCustomizatonsThen404() throws Exception {
+    void givenNotExistingCustomizationOwnCompanyOperationWhenDeleteCustomizationsThen404() throws Exception {
         //given
         final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
 
@@ -888,5 +904,108 @@ class ProductControllerTest extends IntegrationBaseClass {
 
         //then
         result.andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+    }
+
+    @Test
+    void givenExistingProductImageWhenGetProductImageThenGet() throws Exception {
+        //given
+        final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setImage(image);
+        productRepository.save(product);
+        final String url = String.format("/companies/%s/products/%s/images", company.getUid(), product.getId());
+
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+    }
+
+    @Test
+    void givenNotImageWhenGetProductImageThen404() throws Exception {
+        //given
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        productRepository.save(product);
+        final String url = String.format("/companies/%s/products/%s/images", company.getUid(), product.getId());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void givenValidRequestNotExistingImageWhenUpdateImageThenUpdate() throws Exception {
+        //given
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        productRepository.save(product);
+        final String url = String.format("/companies/%s/products/%s/images", company.getUid(), product.getId());
+
+        final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
+        final MockMultipartFile file = new MockMultipartFile("image", bytes);
+
+        privilegeRepository.deleteAll();
+        privilegeRepository.save(Privilege.builder().account(account).name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).build());
+
+        //when
+        final ResultActions perform = mockMvc.perform(multipart(url)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk());
+        assertThat(imageRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void givenValidRequestExistingImageWhenUpdateImageThenUpdate() throws Exception {
+        //given
+        final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setImage(image);
+        productRepository.save(product);
+        final String url = String.format("/companies/%s/products/%s/images", company.getUid(), product.getId());
+        final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
+        final MockMultipartFile file = new MockMultipartFile("image", bytes);
+
+        privilegeRepository.deleteAll();
+        privilegeRepository.save(Privilege.builder().account(account).name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).build());
+
+        //when
+        final ResultActions perform = mockMvc.perform(multipart(url)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk());
+        assertThat(imageRepository.findAll()).hasSize(1);
+        assertThat(imageRepository.findById(image.getId())).isEmpty();
+    }
+
+    @Test
+    void givenValidRequestInvalidPrivilegeWhenUpdateImageThen403() throws Exception {
+        //given
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        productRepository.save(product);
+        final String url = String.format("/companies/%s/products/%s/images", company.getUid(), product.getId());
+        final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
+        final MockMultipartFile file = new MockMultipartFile("image", bytes);
+
+        privilegeRepository.deleteAll();
+        privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE).build());
+
+        //when
+        final ResultActions perform = mockMvc.perform(multipart(url)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isForbidden());
+        assertThat(imageRepository.findAll()).isEmpty();
     }
 }
