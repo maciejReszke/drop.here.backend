@@ -1,14 +1,14 @@
 package com.drop.here.backend.drophere.company.service;
 
-import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerDropMembershipResponse;
+import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerSpotMembershipResponse;
 import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerResponse;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
 import com.drop.here.backend.drophere.company.enums.CompanyCustomerRelationshipStatus;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.service.CustomerSearchingService;
-import com.drop.here.backend.drophere.drop.entity.DropMembership;
-import com.drop.here.backend.drophere.drop.service.DropMembershipService;
+import com.drop.here.backend.drophere.spot.entity.SpotMembership;
+import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CompanyCustomerSearchingService {
     private final CustomerSearchingService customerSearchingService;
-    private final DropMembershipService dropMembershipService;
+    private final SpotMembershipService spotMembershipService;
     private final CompanyCustomerRelationshipService companyCustomerRelationshipService;
 
     public Page<CompanyCustomerResponse> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, AccountAuthentication authentication, Pageable pageable) {
@@ -38,12 +38,12 @@ public class CompanyCustomerSearchingService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        final List<DropMembership> dropMemberships = dropMembershipService.findMembershipsJoinFetchDrops(customersIds, company);
+        final List<SpotMembership> spotMemberships = spotMembershipService.findMembershipsJoinFetchSpots(customersIds, company);
         final List<CompanyCustomerRelationship> relationships = companyCustomerRelationshipService.findRelationships(customersIds, company);
 
         return customers.map(customer -> toCompanyCustomerResponse(
                 customer,
-                findDropMembershipsForCustomer(customer, dropMemberships),
+                findSpotMembershipsForCustomer(customer, spotMemberships),
                 findRelationshipForCustomer(customer, relationships)
         ));
     }
@@ -55,30 +55,30 @@ public class CompanyCustomerSearchingService {
                 .orElseGet(() -> CompanyCustomerRelationship.builder().relationshipStatus(CompanyCustomerRelationshipStatus.ACTIVE).build());
     }
 
-    private List<DropMembership> findDropMembershipsForCustomer(Customer customer, List<DropMembership> dropMemberships) {
-        return dropMemberships.stream()
-                .filter(dropMembership -> dropMembership.getCustomer().getId().equals(customer.getId()))
-                .sorted(Comparator.comparing(DropMembership::getId))
+    private List<SpotMembership> findSpotMembershipsForCustomer(Customer customer, List<SpotMembership> spotMemberships) {
+        return spotMemberships.stream()
+                .filter(spotMembership -> spotMembership.getCustomer().getId().equals(customer.getId()))
+                .sorted(Comparator.comparing(SpotMembership::getId))
                 .collect(Collectors.toList());
     }
 
-    private CompanyCustomerResponse toCompanyCustomerResponse(Customer customer, List<DropMembership> dropMemberships, CompanyCustomerRelationship relationshipForCustomer) {
+    private CompanyCustomerResponse toCompanyCustomerResponse(Customer customer, List<SpotMembership> spotMemberships, CompanyCustomerRelationship relationshipForCustomer) {
         return CompanyCustomerResponse.builder()
                 .customerId(customer.getId())
                 .firstName(customer.getFirstName())
                 .lastName(customer.getLastName())
                 .relationshipStatus(relationshipForCustomer.getRelationshipStatus())
-                .companyCustomerDropMemberships(toCompanyCustomerDropMembershipResponse(dropMemberships))
+                .companyCustomerSpotMemberships(toCompanyCustomerSpotMembershipResponse(spotMemberships))
                 .build();
     }
 
-    private List<CompanyCustomerDropMembershipResponse> toCompanyCustomerDropMembershipResponse(List<DropMembership> dropMemberships) {
-        return dropMemberships.stream()
-                .map(dropMembership -> CompanyCustomerDropMembershipResponse.builder()
-                        .membershipStatus(dropMembership.getMembershipStatus())
-                        .dropId(dropMembership.getId())
-                        .dropName(dropMembership.getDrop().getName())
-                        .dropUid(dropMembership.getDrop().getUid())
+    private List<CompanyCustomerSpotMembershipResponse> toCompanyCustomerSpotMembershipResponse(List<SpotMembership> spotMemberships) {
+        return spotMemberships.stream()
+                .map(spotMembership -> CompanyCustomerSpotMembershipResponse.builder()
+                        .membershipStatus(spotMembership.getMembershipStatus())
+                        .spotId(spotMembership.getId())
+                        .spotName(spotMembership.getSpot().getName())
+                        .spotUid(spotMembership.getSpot().getUid())
                         .build())
                 .collect(Collectors.toList());
     }
