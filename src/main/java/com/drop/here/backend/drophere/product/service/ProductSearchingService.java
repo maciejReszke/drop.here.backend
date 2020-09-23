@@ -9,7 +9,7 @@ import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class ProductSearchingService {

@@ -2,11 +2,11 @@ package com.drop.here.backend.drophere.spot.controller;
 
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCustomerResponse;
 import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,11 +27,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,18 +45,18 @@ public class SpotUserController {
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "All filtered out spots"),
+            @ApiResponse(code = 200, message = "All filtered out spots"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public List<SpotCustomerResponse> findspots(@ApiIgnore AccountAuthentication authentication,
+    public Flux<SpotCustomerResponse> findSpots(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
                                                 @ApiParam(value = "Searching x coordinate", required = true) @RequestParam Double xCoordinate,
                                                 @ApiParam(value = "Searching y coordinate", required = true) @RequestParam Double yCoordinate,
                                                 @ApiParam(value = "Searching radius (meters)", required = true) @RequestParam Integer radius,
                                                 @ApiParam(value = "Is/is not a member") @RequestParam(required = false) Boolean member,
                                                 @ApiParam(value = "Name of drop/company (prefix)", required = true) @RequestParam String namePrefix,
                                                 Pageable pageable) {
-        return spotMembershipService.findSpots(authentication, xCoordinate, yCoordinate, radius, member, namePrefix, pageable);
+        return accountAuthenticationMono.flatMapMany(accountAuthentication -> spotMembershipService.findSpots(accountAuthentication, xCoordinate, yCoordinate, radius, member, namePrefix, pageable));
     }
 
     @ApiOperation("Joining to spot")
@@ -64,16 +64,17 @@ public class SpotUserController {
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.CREATED)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Joined to drop", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 201, message = "Joined to drop", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isCompanyVisibleForCustomer(authentication, #companyUid)")
-    public ResourceOperationResponse createSpotMembership(@ApiIgnore AccountAuthentication authentication,
-                                                          @ApiIgnore @PathVariable String spotUid,
-                                                          @ApiIgnore @PathVariable String companyUid,
-                                                          @RequestBody @Valid SpotJoinRequest spotJoinRequest) {
-        return spotMembershipService.createSpotMembership(spotJoinRequest, spotUid, companyUid, authentication);
+    public Mono<ResourceOperationResponse> createSpotMembership(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
+                                                                @ApiIgnore @PathVariable String spotUid,
+                                                                @ApiIgnore @PathVariable String companyUid,
+                                                                @RequestBody @Valid Mono<SpotJoinRequest> spotJoinRequestMono) {
+        return accountAuthenticationMono.zipWith(spotJoinRequestMono)
+                .flatMap(tuple -> spotMembershipService.createSpotMembership(tuple.getT2(), spotUid, companyUid, tuple.getT1()));
     }
 
     @ApiOperation("Updating spot membership")
@@ -81,15 +82,16 @@ public class SpotUserController {
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Membership updated", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 200, message = "Membership updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public ResourceOperationResponse updateSpotMembership(@ApiIgnore AccountAuthentication authentication,
-                                                          @ApiIgnore @PathVariable String spotUid,
-                                                          @ApiIgnore @PathVariable String companyUid,
-                                                          @RequestBody @Valid SpotMembershipManagementRequest spotMembershipManagementRequest) {
-        return spotMembershipService.updateSpotMembership(spotMembershipManagementRequest, spotUid, companyUid, authentication);
+    public Mono<ResourceOperationResponse> updateSpotMembership(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
+                                                                @ApiIgnore @PathVariable String spotUid,
+                                                                @ApiIgnore @PathVariable String companyUid,
+                                                                @RequestBody @Valid Mono<SpotMembershipManagementRequest> spotMembershipManagementRequestMono) {
+        return accountAuthenticationMono.zipWith(spotMembershipManagementRequestMono)
+                .flatMap(tuple -> spotMembershipService.updateSpotMembership(tuple.getT2(), spotUid, companyUid, tuple.getT1()));
     }
 
 
@@ -98,13 +100,13 @@ public class SpotUserController {
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Left from drop", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 200, message = "Left from drop", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public ResourceOperationResponse deleteSpot(@ApiIgnore AccountAuthentication authentication,
-                                                @ApiIgnore @PathVariable String spotUid,
-                                                @ApiIgnore @PathVariable String companyUid) {
-        return spotMembershipService.deleteSpotMembership(spotUid, companyUid, authentication);
+    public Mono<ResourceOperationResponse> deleteSpot(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
+                                                      @ApiIgnore @PathVariable String spotUid,
+                                                      @ApiIgnore @PathVariable String companyUid) {
+        return accountAuthenticationMono.flatMap(accountAuthentication -> spotMembershipService.deleteSpotMembership(spotUid, companyUid, accountAuthentication));
     }
 }

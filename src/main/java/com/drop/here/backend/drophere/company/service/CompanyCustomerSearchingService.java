@@ -9,7 +9,7 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.service.CustomerSearchingService;
 import com.drop.here.backend.drophere.spot.entity.SpotMembership;
 import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class CompanyCustomerSearchingService {

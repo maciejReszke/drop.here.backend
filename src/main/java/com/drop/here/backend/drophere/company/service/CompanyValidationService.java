@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import io.vavr.control.Try;
 import org.springframework.stereotype.Service;
 
+// TODO MONO:
 @Service
 public class CompanyValidationService {
 

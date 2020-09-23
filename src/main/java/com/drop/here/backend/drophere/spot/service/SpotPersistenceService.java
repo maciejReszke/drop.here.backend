@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.spot.repository.SpotRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class SpotPersistenceService {

@@ -7,7 +7,7 @@ import com.drop.here.backend.drophere.authentication.authentication.dto.request.
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationService;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -37,45 +37,46 @@ public class AuthenticationController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Logging in")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Logged in", response = LoginResponse.class),
-            @ApiResponse(code = HttpServletResponse.SC_UNAUTHORIZED, message = "Unauthorized", response = ExceptionMessage.class)
+            @ApiResponse(code = 200, message = "Logged in", response = LoginResponse.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ExceptionMessage.class)
     })
-    public LoginResponse login(@Valid @RequestBody BaseLoginRequest loginRequest) {
-        return authenticationService.login(loginRequest);
+    public Mono<LoginResponse> login(@Valid @RequestBody Mono<BaseLoginRequest> baseLoginRequestMono) {
+        return baseLoginRequestMono.flatMap(authenticationService::login);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Logging in on profile")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Logged in on profile", response = LoginResponse.class),
-            @ApiResponse(code = HttpServletResponse.SC_UNAUTHORIZED, message = "Unauthorized", response = ExceptionMessage.class)
+            @ApiResponse(code = 200, message = "Logged in on profile", response = LoginResponse.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ExceptionMessage.class)
     })
     @ApiAuthorizationToken
     @PostMapping("/profile")
-    public LoginResponse loginOnProfile(@Valid @RequestBody ProfileLoginRequest loginRequest,
-                                        @ApiIgnore AccountAuthentication accountAuthentication) {
-        return authenticationService.loginOnProfile(loginRequest, accountAuthentication);
+    public Mono<LoginResponse> loginOnProfile(@Valid @RequestBody Mono<ProfileLoginRequest> loginRequestMono,
+                                              @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return loginRequestMono.zipWith(accountAuthenticationMono)
+                .flatMap(tuple -> authenticationService.loginOnProfile(tuple.getT1(), tuple.getT2()));
     }
 
     @GetMapping
     @ApiOperation("Authentication info")
     @ApiAuthorizationToken
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Authentication info", response = LoginResponse.class),
-            @ApiResponse(code = HttpServletResponse.SC_UNAUTHORIZED, message = "Unauthorized", response = ExceptionMessage.class)
+            @ApiResponse(code = 200, message = "Authentication info", response = LoginResponse.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ExceptionMessage.class)
     })
-    public AuthenticationResponse getAuthenticationInfo(@ApiIgnore AccountAuthentication accountAuthentication) {
-        return authenticationService.getAuthenticationInfo(accountAuthentication);
+    public Mono<AuthenticationResponse> getAuthenticationInfo(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return accountAuthenticationMono.flatMap(authenticationService::getAuthenticationInfo);
     }
 
     @PostMapping("/external")
     @ApiOperation("Login via external authentication provider")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Logged in", response = LoginResponse.class),
-            @ApiResponse(code = HttpServletResponse.SC_UNAUTHORIZED, message = "Unauthorized", response = ExceptionMessage.class),
+            @ApiResponse(code = 200, message = "Logged in", response = LoginResponse.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public LoginResponse loginWithAuthenticationProvider(@Valid @RequestBody ExternalAuthenticationProviderLoginRequest externalAuthenticationProviderLoginRequest) {
-        return authenticationService.loginWithAuthenticationProvider(externalAuthenticationProviderLoginRequest);
+    public Mono<LoginResponse> loginWithAuthenticationProvider(@Valid @RequestBody Mono<ExternalAuthenticationProviderLoginRequest> externalAuthenticationProviderLoginRequestMono) {
+        return externalAuthenticationProviderLoginRequestMono.flatMap(authenticationService::loginWithAuthenticationProvider);
     }
 }

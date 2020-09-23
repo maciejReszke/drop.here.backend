@@ -2,11 +2,11 @@ package com.drop.here.backend.drophere.schedule_template.controller;
 
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateManagementRequest;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateResponse;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateShortResponse;
 import com.drop.here.backend.drophere.schedule_template.service.ScheduleTemplateService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -23,11 +23,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,75 +40,77 @@ public class ScheduleTemplateController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Company's schedule templates"),
+            @ApiResponse(code = 200, message = "Company's schedule templates"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public List<ScheduleTemplateShortResponse> findTemplates(@ApiIgnore @PathVariable String companyUid,
-                                                             @ApiIgnore AccountAuthentication accountAuthentication) {
-        return scheduleTemplateService.findTemplates(accountAuthentication);
+    public Flux<ScheduleTemplateShortResponse> findTemplates(@ApiIgnore @PathVariable String companyUid,
+                                                             @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return accountAuthenticationMono.flatMapMany(scheduleTemplateService::findTemplates);
     }
 
     @GetMapping("/{scheduleTemplateId}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Found schedule template"),
+            @ApiResponse(code = 200, message = "Found schedule template"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @ApiOperation("Find schedule template")
-    public ScheduleTemplateResponse findTemplate(@ApiIgnore @PathVariable String companyUid,
-                                                 @ApiIgnore @PathVariable Long scheduleTemplateId,
-                                                 @ApiIgnore AccountAuthentication accountAuthentication) {
-        return scheduleTemplateService.findById(scheduleTemplateId, accountAuthentication);
+    public Mono<ScheduleTemplateResponse> findTemplate(@ApiIgnore @PathVariable String companyUid,
+                                                       @ApiIgnore @PathVariable Long scheduleTemplateId,
+                                                       @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return accountAuthenticationMono.flatMap(accountAuthentication -> scheduleTemplateService.findById(scheduleTemplateId, accountAuthentication));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation("Creating new template")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Schedule template created"),
+            @ApiResponse(code = 201, message = "Schedule template created"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse createTemplate(@ApiIgnore @PathVariable String companyUid,
-                                                    @RequestBody @Valid ScheduleTemplateManagementRequest scheduleTemplateManagementRequest,
-                                                    @ApiIgnore AccountAuthentication accountAuthentication) {
-        return scheduleTemplateService.createTemplate(companyUid, scheduleTemplateManagementRequest, accountAuthentication);
+    public Mono<ResourceOperationResponse> createTemplate(@ApiIgnore @PathVariable String companyUid,
+                                                          @RequestBody @Valid Mono<ScheduleTemplateManagementRequest> scheduleTemplateManagementRequestMono,
+                                                          @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return scheduleTemplateManagementRequestMono.zipWith(accountAuthenticationMono)
+                .flatMap(tuple -> scheduleTemplateService.createTemplate(companyUid, tuple.getT1(), tuple.getT2()));
     }
 
     @PutMapping("/{scheduleTemplateId}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Schedule template updated"),
+            @ApiResponse(code = 200, message = "Schedule template updated"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @ApiOperation("Updating template")
-    public ResourceOperationResponse updateTemplate(@ApiIgnore @PathVariable String companyUid,
-                                                    @ApiIgnore @PathVariable Long scheduleTemplateId,
-                                                    @RequestBody @Valid ScheduleTemplateManagementRequest scheduleTemplateManagementRequest,
-                                                    @ApiIgnore AccountAuthentication accountAuthentication) {
-        return scheduleTemplateService.updateTemplate(companyUid, scheduleTemplateId, scheduleTemplateManagementRequest, accountAuthentication);
+    public Mono<ResourceOperationResponse> updateTemplate(@ApiIgnore @PathVariable String companyUid,
+                                                          @ApiIgnore @PathVariable Long scheduleTemplateId,
+                                                          @RequestBody @Valid Mono<ScheduleTemplateManagementRequest> scheduleTemplateManagementRequestMono,
+                                                          @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return scheduleTemplateManagementRequestMono.zipWith(accountAuthenticationMono)
+                .flatMap(tuple -> scheduleTemplateService.updateTemplate(companyUid, scheduleTemplateId, tuple.getT1(), tuple.getT2()));
     }
 
     @DeleteMapping("/{scheduleTemplateId}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Schedule template deleted"),
+            @ApiResponse(code = 200, message = "Schedule template deleted"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @ApiOperation("Deleting template")
-    public ResourceOperationResponse deleteTemplate(@ApiIgnore @PathVariable String companyUid,
-                                                    @ApiIgnore @PathVariable Long scheduleTemplateId,
-                                                    @ApiIgnore AccountAuthentication accountAuthentication) {
-        return scheduleTemplateService.deleteTemplate(companyUid, scheduleTemplateId, accountAuthentication);
+    public Mono<ResourceOperationResponse> deleteTemplate(@ApiIgnore @PathVariable String companyUid,
+                                                          @ApiIgnore @PathVariable Long scheduleTemplateId,
+                                                          @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return accountAuthenticationMono.flatMap(accountAuthentication -> scheduleTemplateService.deleteTemplate(companyUid, scheduleTemplateId, accountAuthentication));
     }
 
 

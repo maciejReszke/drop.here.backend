@@ -8,7 +8,7 @@ import com.drop.here.backend.drophere.company.dto.request.CompanyManagementReque
 import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerResponse;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
 import com.drop.here.backend.drophere.company.service.CompanyService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,9 +16,9 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,10 +30,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -50,12 +50,12 @@ public class CompanyManagementController {
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Own company info"),
+            @ApiResponse(code = 200, message = "Own company info"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public CompanyManagementResponse findOwnCompany(@ApiIgnore AccountAuthentication authentication) {
-        return companyService.findOwnCompany(authentication);
+    public Mono<CompanyManagementResponse> findOwnCompany(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return accountAuthenticationMono.flatMap(companyService::findOwnCompany);
     }
 
     @PutMapping
@@ -63,13 +63,14 @@ public class CompanyManagementController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Update company")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Company updated", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 200, message = "Company updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public ResourceOperationResponse updateCompany(@ApiIgnore AccountAuthentication authentication,
-                                                   @RequestBody @Valid CompanyManagementRequest companyManagementRequest) {
-        return companyService.updateCompany(companyManagementRequest, authentication);
+    public Mono<ResourceOperationResponse> updateCompany(@ApiIgnore Mono<AccountAuthentication> authenticationMono,
+                                                         @RequestBody @Valid Mono<CompanyManagementRequest> companyManagementRequestMono) {
+        return authenticationMono.zipWith(companyManagementRequestMono)
+                .flatMap(tuple -> companyService.updateCompany(tuple.getT2(), tuple.getT1()));
     }
 
     @PostMapping("/images")
@@ -77,45 +78,48 @@ public class CompanyManagementController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Update company image")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Image updated", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 200, message = "Image updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("hasAuthority('" + PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE + "')")
-    public ResourceOperationResponse updateCompanyImage(@ApiIgnore AccountAuthentication authentication,
-                                                        @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
-        return companyService.updateImage(image, authentication);
+    public Mono<ResourceOperationResponse> updateCompanyImage(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
+                                                              @RequestPart(name = IMAGE_PART_NAME) Mono<FilePart> imageMono) {
+        return accountAuthenticationMono.zipWith(imageMono)
+                .flatMap(tuple -> companyService.updateImage(tuple.getT2(), tuple.getT1()));
     }
 
     @GetMapping("/customers")
     @ApiOperation("Get company customers")
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Company customers"),
+            @ApiResponse(code = 200, message = "Company customers"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public Page<CompanyCustomerResponse> findCustomers(@ApiIgnore AccountAuthentication authentication,
+    public Flux<CompanyCustomerResponse> findCustomers(@ApiIgnore Mono<AccountAuthentication> authenticationMono,
                                                        @ApiParam(value = "Customer name (starting with name or starting with surname)")
                                                        @RequestParam(value = "customerName") String desiredCustomerStartingSubstring,
                                                        @ApiParam(value = "Is customer blocked (globally)")
                                                        @RequestParam(value = "blocked", required = false) Boolean blocked,
                                                        Pageable pageable) {
-        return companyService.findCustomers(desiredCustomerStartingSubstring, blocked, authentication, pageable);
+        return authenticationMono.flatMapMany(accountAuthentication ->
+                companyService.findCustomers(desiredCustomerStartingSubstring, blocked, accountAuthentication, pageable));
     }
 
     @PutMapping("/customers/{customerId}")
     @ApiOperation("Update companies customer relationship")
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Customer updated"),
+            @ApiResponse(code = 200, message = "Customer updated"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isCompaniesCustomer(authentication, #customerId)")
-    public ResourceOperationResponse updateCustomerRelationship(@ApiIgnore AccountAuthentication authentication,
-                                                                @ApiIgnore @PathVariable Long customerId,
-                                                                @RequestBody @Valid CompanyCustomerRelationshipManagementRequest companyCustomerManagementRequest) {
-        return companyService.updateCustomerRelationship(customerId, companyCustomerManagementRequest, authentication);
+    public Mono<ResourceOperationResponse> updateCustomerRelationship(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
+                                                                      @ApiIgnore @PathVariable Long customerId,
+                                                                      @RequestBody @Valid Mono<CompanyCustomerRelationshipManagementRequest> customerRelationshipManagementRequestMono) {
+        return accountAuthenticationMono.zipWith(customerRelationshipManagementRequestMono)
+                .flatMap(tuple -> companyService.updateCustomerRelationship(customerId, tuple.getT2(), tuple.getT1()));
     }
 }

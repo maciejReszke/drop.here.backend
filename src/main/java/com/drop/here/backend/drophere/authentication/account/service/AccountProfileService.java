@@ -12,20 +12,21 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
-import java.util.Optional;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -39,21 +40,25 @@ public class AccountProfileService {
     private final PrivilegeService privilegeService;
     private final ImageService imageService;
 
-    public Optional<AccountProfile> findActiveByAccountAndProfileUidWithRoles(Account account, String profileUid) {
-        return accountProfilePersistenceService.findByAccountAndProfileUidWithRoles(account, profileUid)
-                .filter(profile -> profile.getStatus() == AccountProfileStatus.ACTIVE);
+    public Mono<AccountProfile> findActiveProfile(Account account, String profileUid) {
+        return account.getProfiles().stream()
+                .filter(accountProfile -> accountProfile.getProfileUid().equalsIgnoreCase(profileUid))
+                .filter(accountProfile -> accountProfile.getStatus() == AccountProfileStatus.ACTIVE)
+                .findFirst()
+                .map(Mono::just)
+                .orElse(Mono.empty());
     }
 
     public boolean isPasswordValid(AccountProfile profile, String rawPassword) {
         return passwordEncoder.matches(rawPassword, profile.getPassword());
     }
 
-    @Transactional
-    public LoginResponse createAccountProfile(AccountProfileCreationRequest accountProfileRequest, AccountAuthentication accountAuthentication) {
+    // todo bylo transactional
+    public Mono<LoginResponse> createAccountProfile(AccountProfileCreationRequest accountProfileRequest, AccountAuthentication accountAuthentication) {
         final Account account = accountAuthentication.getPrincipal();
         profileValidationService.validateRequest(accountProfileRequest, account);
         final String encodedPassword = encodePassword(accountProfileRequest);
-        final AccountProfileType profileType = accountService.accountProfileCreated(account);
+        final AccountProfileType profileType = accountService.addProfile(account, );
         final AccountProfile accountProfile = accountProfileMappingService.newAccountProfile(accountProfileRequest, encodedPassword, profileType, account);
         accountProfilePersistenceService.createProfile(accountProfile);
         privilegeService.addNewAccountProfilePrivileges(accountProfile);
@@ -64,14 +69,14 @@ public class AccountProfileService {
         return passwordEncoder.encode(accountCreationRequest.getPassword().trim());
     }
 
-    public void updateAccountProfile(AccountProfileUpdateRequest accountCreationRequest, AccountAuthentication accountAuthentication) {
+    public Mono<Void> updateAccountProfile(AccountProfileUpdateRequest accountCreationRequest, AccountAuthentication accountAuthentication) {
         final AccountProfile profile = accountAuthentication.getProfile();
         profile.setFirstName(accountCreationRequest.getFirstName());
         profile.setLastName(accountCreationRequest.getLastName());
         accountProfilePersistenceService.updateProfile(profile);
     }
 
-    public ResourceOperationResponse updateImage(MultipartFile imagePart, AccountAuthentication authentication) {
+    public Mono<ResourceOperationResponse> updateImage(FilePart filePart, AccountAuthentication authentication) {
         try {
             final Image image = imageService.createImage(imagePart.getBytes(), ImageType.ACCOUNT_PROFILE_IMAGE);
             final AccountProfile accountProfile = authentication.getProfile();
@@ -85,7 +90,7 @@ public class AccountProfileService {
         }
     }
 
-    public Image findImage(String profileUid) {
+    public Mono<Image> findImage(String profileUid) {
         return accountProfilePersistenceService.findImage(profileUid);
     }
 }

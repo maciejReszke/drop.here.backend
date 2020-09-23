@@ -14,16 +14,18 @@
     <name>drop-here</name>
     <description>DropHere</description>
 
+    <!--TODO-->
+
     <properties>
         <java.version>11</java.version>
         <io-vavr.version>0.10.2</io-vavr.version>
         <commons-lang3.version>3.11</commons-lang3.version>
-        <testcontainers-psql.version>1.14.3</testcontainers-psql.version>
+        <testcontainers-mongo.version>1.14.3</testcontainers-mongo.version>
         <com.auth0-java-jwt.version>3.10.2</com.auth0-java-jwt.version>
         <swagger.version>2.9.2</swagger.version>
         <org.apache.commons.commons-collections4.version>4.4</org.apache.commons.commons-collections4.version>
         <com.google.firebase-firebase-admin.version>7.0.0</com.google.firebase-firebase-admin.version>
-        <shedlock.version>4.4.0</shedlock.version>
+        <shedlock.version>4.12.0</shedlock.version>
     </properties>
 
     <dependencies>
@@ -33,15 +35,15 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -54,9 +56,9 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.12.7</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -114,7 +116,7 @@
         </dependency>
         <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
-            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <artifactId>shedlock-provider-mongo-reactivestreams</artifactId>
             <version>${shedlock.version}</version>
         </dependency>
 
@@ -134,9 +136,15 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${testcontainers-psql.version}</version>
+            <artifactId>mongodb</artifactId>
+            <version>${testcontainers-mongo.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

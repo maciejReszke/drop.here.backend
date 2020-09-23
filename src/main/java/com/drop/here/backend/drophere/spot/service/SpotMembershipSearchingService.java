@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class SpotMembershipSearchingService {

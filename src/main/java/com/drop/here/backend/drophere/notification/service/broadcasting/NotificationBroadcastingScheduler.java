@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class NotificationBroadcastingScheduler {
     private final NotificationService notificationService;
 
+    // TODO: 23/09/2020 mono
     @Scheduled(cron = "${notification.broadcasting.scheduling.cron}")
     @SchedulerLock(name = "notificationBroadcastingSchedule",
             lockAtMostFor = "${notification.broadcasting.scheduling.lock}",

@@ -5,7 +5,7 @@ import com.drop.here.backend.drophere.authentication.account.dto.AccountInfoResp
 import com.drop.here.backend.drophere.authentication.account.service.AccountService;
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -35,21 +35,21 @@ public class AccountController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation("Creating new account")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Created account", response = LoginResponse.class),
+            @ApiResponse(code = 201, message = "Created account", response = LoginResponse.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public LoginResponse createAccount(@Valid @RequestBody AccountCreationRequest accountCreationRequest) {
-        return accountService.createAccount(accountCreationRequest);
+    public Mono<LoginResponse> createAccount(@Valid @RequestBody Mono<AccountCreationRequest> accountCreationRequestMono) {
+        return accountCreationRequestMono.flatMap(accountService::createAccount);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Fetching account information")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Account info", response = AccountInfoResponse.class)
+            @ApiResponse(code = 200, message = "Account info", response = AccountInfoResponse.class)
     })
     @ApiAuthorizationToken
-    public AccountInfoResponse getAccountInfo(@ApiIgnore AccountAuthentication accountAuthentication) {
-        return accountService.getAccountInfo(accountAuthentication);
+    public Mono<AccountInfoResponse> getAccountInfo(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return accountAuthenticationMono.flatMap(accountService::getAccountInfo);
     }
 }

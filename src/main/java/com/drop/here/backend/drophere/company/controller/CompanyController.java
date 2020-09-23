@@ -2,7 +2,6 @@ package com.drop.here.backend.drophere.company.controller;
 
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.company.service.CompanyService;
-import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,9 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 import springfox.documentation.annotations.ApiIgnore;
-
-import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,16 +31,16 @@ public class CompanyController {
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Company image"),
+            @ApiResponse(code = 200, message = "Company image"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public ResponseEntity<byte[]> findImage(@ApiIgnore @PathVariable String companyUid) {
-        final Image image = companyService.findImage(companyUid);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .eTag(companyUid + image.getId())
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(image.getBytes());
+    public Mono<ResponseEntity<byte[]>> findImage(@ApiIgnore @PathVariable String companyUid) {
+        return companyService.findImage(companyUid)
+                .map(image -> ResponseEntity
+                        .status(HttpStatus.OK)
+                        .eTag(companyUid + image.getId())
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(image.getBytes()));
     }
 }

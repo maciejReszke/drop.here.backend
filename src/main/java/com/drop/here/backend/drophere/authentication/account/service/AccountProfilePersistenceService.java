@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -40,7 +41,7 @@ public class AccountProfilePersistenceService {
         return accountProfileRepository.findByAccount(account);
     }
 
-    @Transactional(readOnly = true)
+    // todo bylo transactional(readOnly = true)
     public Image findImage(String profileUid) {
         return accountProfileRepository.findByProfileUidWithImage(profileUid)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(

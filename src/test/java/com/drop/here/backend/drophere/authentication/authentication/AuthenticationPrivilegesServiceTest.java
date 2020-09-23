@@ -6,7 +6,7 @@ import com.drop.here.backend.drophere.authentication.authentication.service.base
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import org.junit.jupiter.api.Test;

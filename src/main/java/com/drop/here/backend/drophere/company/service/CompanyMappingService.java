@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class CompanyMappingService {
@@ -25,7 +26,7 @@ public class CompanyMappingService {
     @Value("${companies.uid_generator.random_part_length}")
     private int randomUidPart;
 
-    @Transactional(readOnly = true)
+    // todo bylo transactional(readOnly = true)
     public CompanyManagementResponse toManagementResponse(Company company) {
         return company == null ?
                 CompanyManagementResponse.builder().registered(false).build()

@@ -12,12 +12,14 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class AccountMappingService {
@@ -35,10 +37,11 @@ public class AccountMappingService {
                 .createdAt(LocalDateTime.now())
                 .isAnyProfileRegistered(false)
                 .registrationType(AccountRegistrationType.FORM)
+                .profiles(List.of())
                 .build();
     }
 
-    public AccountInfoResponse toAccountInfoResponse(Account account) {
+    public Mono<AccountInfoResponse> toAccountInfoResponse(Account account) {
         final List<ProfileInfoResponse> profiles = accountProfilePersistenceService.findByAccount(account)
                 .stream()
                 .map(this::toProfileInfoResponse)
@@ -74,6 +77,7 @@ public class AccountMappingService {
                 .accountMailStatus(AccountMailStatus.CONFIRMED)
                 .createdAt(LocalDateTime.now())
                 .isAnyProfileRegistered(false)
+                .profiles(List.of())
                 .build();
     }
 }

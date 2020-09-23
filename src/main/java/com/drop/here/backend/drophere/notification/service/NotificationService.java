@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.notification.dto.NotificationManagementRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
@@ -15,7 +16,6 @@ import com.drop.here.backend.drophere.notification.repository.NotificationJobRep
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingService;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingServiceFactory;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,11 +23,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -38,7 +41,7 @@ public class NotificationService {
     private final NotificationValidationService notificationValidationService;
     private final NotificationBroadcastingServiceFactory notificationBroadcastingServiceFactory;
 
-    public Page<NotificationResponse> findNotifications(AccountAuthentication accountAuthentication, String readStatus, Pageable pageable) {
+    public Flux<NotificationResponse> findNotifications(AccountAuthentication accountAuthentication, String readStatus, Pageable pageable) {
         final List<NotificationReadStatus> desiredReadStatuses = getDesiredReadStatuses(readStatus);
         final Page<Notification> notifications = findNotifications(accountAuthentication, pageable, desiredReadStatuses);
         return notifications.map(notificationMappingService::toNotificationResponse);
@@ -64,7 +67,7 @@ public class NotificationService {
                 : List.of(NotificationReadStatus.valueOf(readStatus));
     }
 
-    public ResourceOperationResponse updateNotification(AccountAuthentication accountAuthentication, Long notificationId, NotificationManagementRequest notificationManagementRequest) {
+    public Mono<ResourceOperationResponse> updateNotification(AccountAuthentication accountAuthentication, Long notificationId, NotificationManagementRequest notificationManagementRequest) {
         final Notification notification = findNotification(accountAuthentication, notificationId);
         notificationValidationService.validateUpdateNotificationRequest(notificationManagementRequest);
         notificationMappingService.update(notification, notificationManagementRequest);

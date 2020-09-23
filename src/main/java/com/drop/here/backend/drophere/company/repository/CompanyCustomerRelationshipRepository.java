@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+// TODO MONO:
 @Repository
 public interface CompanyCustomerRelationshipRepository extends JpaRepository<CompanyCustomerRelationship, Long> {
     boolean existsByCompanyAndCustomerAndRelationshipStatus(Company company, Customer customer, CompanyCustomerRelationshipStatus blocked);

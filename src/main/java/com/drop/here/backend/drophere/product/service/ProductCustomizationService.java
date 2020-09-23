@@ -6,7 +6,7 @@ import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWr
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,7 +24,7 @@ public class ProductCustomizationService {
     private final ProductCustomizationMappingService mappingService;
     private final ProductCustomizationWrapperRepository customizationWrapperRepository;
 
-    @Transactional
+    // todo bylo transactional
     public ProductCustomizationWrapper createCustomizations(Product product, ProductCustomizationWrapperRequest productCustomizationWrapperRequest, AccountAuthentication authentication) {
         validationService.validate(productCustomizationWrapperRequest);
         final ProductCustomizationWrapper customizationWrapper = mappingService.toCustomizationWrapper(product, productCustomizationWrapperRequest);
@@ -37,7 +38,7 @@ public class ProductCustomizationService {
         customizationWrapperRepository.delete(customizationWrapper);
     }
 
-    @Transactional(propagation = Propagation.NEVER)
+    // todo bylo transactional(propagation = Propagation.NEVER)
     public ProductCustomizationWrapper updateCustomization(Product product, Long customizationId, ProductCustomizationWrapperRequest productCustomizationWrapperRequest, AccountAuthentication authentication) {
         final ProductCustomizationWrapper wrapper = getCustomizationWrapper(product, customizationId);
         validationService.validate(productCustomizationWrapperRequest);

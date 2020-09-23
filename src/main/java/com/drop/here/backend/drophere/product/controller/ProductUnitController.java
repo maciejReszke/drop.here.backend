@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
+import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/units")
@@ -29,12 +27,12 @@ public class ProductUnitController {
     @ResponseStatus(HttpStatus.OK)
     @ApiAuthorizationToken
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "List of units sorted by name", response = ProductUnitResponse.class, responseContainer = "List"),
+            @ApiResponse(code = 200, message = "List of units sorted by name", response = ProductUnitResponse.class, responseContainer = "List"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @ApiOperation("Get all units")
-    public List<ProductUnitResponse> findAll() {
+    public Flux<ProductUnitResponse> findAll() {
         return productUnitService.findAll();
     }
 }

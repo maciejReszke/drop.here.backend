@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class PrivilegeService {
@@ -53,7 +54,7 @@ public class PrivilegeService {
                 : COMPANY_BASIC_MANAGEMENT_PRIVILEGE;
     }
 
-    @Transactional
+    // todo bylo transactional
     public void addCustomerCreatedPrivilege(Account account) {
         addPrivilege(account, CUSTOMER_CREATED_PRIVILEGE);
     }

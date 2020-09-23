@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+// TODO MONO:
 @Repository
 public interface NotificationJobRepository extends JpaRepository<NotificationJob, Long> {
 
@@ -17,7 +18,7 @@ public interface NotificationJobRepository extends JpaRepository<NotificationJob
     List<NotificationJob> findAllByNotificationIsNotNull(PageRequest pageable);
 
     @Modifying
-    @Transactional
+    // todo bylo transactional
     @Query("delete from NotificationJob n where " +
             "n in (:notifications)")
     void deleteByNotificationJobIn(List<NotificationJob> notifications);

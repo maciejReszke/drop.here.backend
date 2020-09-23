@@ -11,7 +11,7 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.CustomerDataGenerator;
 import com.drop.here.backend.drophere.test_data.ExternalAuthenticationDataGenerator;
 import org.junit.jupiter.api.Test;

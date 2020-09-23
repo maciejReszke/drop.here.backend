@@ -16,7 +16,7 @@ import com.drop.here.backend.drophere.notification.repository.NotificationJobRep
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingService;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingServiceFactory;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import com.drop.here.backend.drophere.test_data.NotificationDataGenerator;

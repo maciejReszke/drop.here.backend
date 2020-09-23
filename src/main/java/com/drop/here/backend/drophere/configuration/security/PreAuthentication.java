@@ -1,4 +1,4 @@
-package com.drop.here.backend.drophere.security.configuration;
+package com.drop.here.backend.drophere.configuration.security;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

@@ -2,12 +2,11 @@ package com.drop.here.backend.drophere.product.controller;
 
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
-import com.drop.here.backend.drophere.image.Image;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.service.ProductService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -15,7 +14,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,9 +31,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -52,19 +51,19 @@ public class ProductController {
     @ApiOperation("Fetching products")
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "List of products, response is list of dto", response = ProductResponse.class, responseContainer = "Page"),
+            @ApiResponse(code = 200, message = "List of products, response is list of dto", response = ProductResponse.class, responseContainer = "Page"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @ApiAuthorizationToken
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid) or " +
             "@authenticationPrivilegesService.isCompanyVisibleForCustomer(authentication, #companyUid)")
-    public Page<ProductResponse> findAll(@ApiIgnore @PathVariable String companyUid,
-                                         @ApiIgnore AccountAuthentication authentication,
+    public Flux<ProductResponse> findAll(@ApiIgnore @PathVariable String companyUid,
+                                         @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
                                          @ApiParam(value = "Desired category (1... n)") @RequestParam(value = "category", required = false) String[] desiredCategories,
                                          @ApiParam(value = "Product name (substring)") @RequestParam(value = "name", required = false) String desiredNameSubstring,
                                          @NotNull Pageable pageable) {
-        return productService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, authentication);
+        return accountAuthenticationMono.flatMapMany(accountAuthentication -> productService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, accountAuthentication));
     }
 
     @PostMapping
@@ -72,15 +71,16 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation("Creating product")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Product created", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 201, message = "Product created", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse createProduct(@ApiIgnore @PathVariable String companyUid,
-                                                   @ApiIgnore AccountAuthentication authentication,
-                                                   @RequestBody @Valid ProductManagementRequest productManagementRequest) {
-        return productService.createProduct(productManagementRequest, companyUid, authentication);
+    public Mono<ResourceOperationResponse> createProduct(@ApiIgnore @PathVariable String companyUid,
+                                                         @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
+                                                         @RequestBody @Valid Mono<ProductManagementRequest> productManagementRequestMono) {
+        return accountAuthenticationMono.zipWith(productManagementRequestMono)
+                .flatMap(tuple -> productService.createProduct(tuple.getT2(), companyUid, tuple.getT1()));
     }
 
     @PutMapping("/{productId}")
@@ -88,16 +88,17 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Updating product")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Product updated", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 200, message = "Product updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse updateProduct(@ApiIgnore @PathVariable String companyUid,
-                                                   @ApiIgnore @PathVariable Long productId,
-                                                   @ApiIgnore AccountAuthentication authentication,
-                                                   @RequestBody @Valid ProductManagementRequest productManagementRequest) {
-        return productService.updateProduct(productManagementRequest, productId, companyUid);
+    public Mono<ResourceOperationResponse> updateProduct(@ApiIgnore @PathVariable String companyUid,
+                                                         @ApiIgnore @PathVariable Long productId,
+                                                         @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
+                                                         @RequestBody @Valid Mono<ProductManagementRequest> productManagementRequestMono) {
+        return accountAuthenticationMono.zipWith(productManagementRequestMono)
+                .flatMap(tuple -> productService.updateProduct(tuple.getT2(), productId, companyUid));
     }
 
     @DeleteMapping("/{productId}")
@@ -105,15 +106,15 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Deleting product")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Product deleted", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 200, message = "Product deleted", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse deleteProduct(@ApiIgnore @PathVariable String companyUid,
-                                                   @ApiIgnore @PathVariable Long productId,
-                                                   @ApiIgnore AccountAuthentication authentication) {
-        return productService.deleteProduct(productId, companyUid);
+    public Mono<ResourceOperationResponse> deleteProduct(@ApiIgnore @PathVariable String companyUid,
+                                                         @ApiIgnore @PathVariable Long productId,
+                                                         @ApiIgnore Mono<AccountAuthentication> authentication) {
+        return authentication.flatMap(ignore -> productService.deleteProduct(productId, companyUid));
     }
 
     @PostMapping("/{productId}/images")
@@ -121,16 +122,16 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Update product image")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Image updated", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 200, message = "Image updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse updateImage(@ApiIgnore AccountAuthentication authentication,
-                                                 @ApiIgnore @PathVariable String companyUid,
-                                                 @ApiIgnore @PathVariable Long productId,
-                                                 @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
-        return productService.updateImage(productId, companyUid, image, authentication);
+    public Mono<ResourceOperationResponse> updateImage(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
+                                                       @ApiIgnore @PathVariable String companyUid,
+                                                       @ApiIgnore @PathVariable Long productId,
+                                                       @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
+        return accountAuthenticationMono.flatMap(accountAuthentication -> productService.updateImage(productId, companyUid, image, accountAuthentication));
     }
 
     @GetMapping("/{productId}/images")
@@ -138,18 +139,18 @@ public class ProductController {
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Product image"),
+            @ApiResponse(code = 200, message = "Product image"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public ResponseEntity<byte[]> findImage(@ApiIgnore @PathVariable String companyUid,
-                                            @ApiIgnore @PathVariable Long productId) {
-        final Image image = productService.findImage(productId, companyUid);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .eTag(productId + "" + image.getId())
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(image.getBytes());
+    public Mono<ResponseEntity<byte[]>> findImage(@ApiIgnore @PathVariable String companyUid,
+                                                  @ApiIgnore @PathVariable Long productId) {
+        return productService.findImage(productId, companyUid)
+                .map(image -> ResponseEntity
+                        .status(HttpStatus.OK)
+                        .eTag(productId + "" + image.getId())
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(image.getBytes()));
     }
 
     @PostMapping("/{productId}/customizations")
@@ -157,16 +158,17 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation("Creating customizations wrapper")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Customizations created", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 201, message = "Customizations created", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse createCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
-                                                                 @ApiIgnore @PathVariable Long productId,
-                                                                 @ApiIgnore AccountAuthentication authentication,
-                                                                 @RequestBody @Valid ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
-        return productService.createCustomization(productId, companyUid, productCustomizationWrapperRequest, authentication);
+    public Mono<ResourceOperationResponse> createCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
+                                                                       @ApiIgnore @PathVariable Long productId,
+                                                                       @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
+                                                                       @RequestBody @Valid Mono<ProductCustomizationWrapperRequest> productCustomizationWrapperRequestMono) {
+        return accountAuthenticationMono.zipWith(productCustomizationWrapperRequestMono)
+                .flatMap(tuple -> productService.createCustomization(productId, companyUid, tuple.getT2(), tuple.getT1()));
     }
 
     @PutMapping("/{productId}/customizations/{customizationId}")
@@ -174,17 +176,18 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Updating customizations wrapper")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Customizations updated", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 200, message = "Customizations updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse updateCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
-                                                                 @ApiIgnore @PathVariable Long productId,
-                                                                 @ApiIgnore @PathVariable Long customizationId,
-                                                                 @ApiIgnore AccountAuthentication authentication,
-                                                                 @RequestBody @Valid ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
-        return productService.updateCustomization(productId, companyUid, customizationId, productCustomizationWrapperRequest, authentication);
+    public Mono<ResourceOperationResponse> updateCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
+                                                                       @ApiIgnore @PathVariable Long productId,
+                                                                       @ApiIgnore @PathVariable Long customizationId,
+                                                                       @ApiIgnore Mono<AccountAuthentication> authenticationMono,
+                                                                       @RequestBody @Valid Mono<ProductCustomizationWrapperRequest> productCustomizationWrapperRequestMono) {
+        return authenticationMono.zipWith(productCustomizationWrapperRequestMono)
+                .flatMap(tuple -> productService.updateCustomization(productId, companyUid, customizationId, tuple.getT2(), tuple.getT1()));
     }
 
     @DeleteMapping("/{productId}/customizations/{customizationId}")
@@ -192,15 +195,15 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Deleting customizations wrapper")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Customizations deleted", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 200, message = "Customizations deleted", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse deleteCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
-                                                                 @ApiIgnore @PathVariable Long productId,
-                                                                 @ApiIgnore @PathVariable Long customizationId,
-                                                                 @ApiIgnore AccountAuthentication authentication) {
-        return productService.deleteCustomization(productId, companyUid, customizationId, authentication);
+    public Mono<ResourceOperationResponse> deleteCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
+                                                                       @ApiIgnore @PathVariable Long productId,
+                                                                       @ApiIgnore @PathVariable Long customizationId,
+                                                                       @ApiIgnore Mono<AccountAuthentication> authenticationMono) {
+        return authenticationMono.flatMap(accountAuthentication -> productService.deleteCustomization(productId, companyUid, customizationId, accountAuthentication));
     }
 }

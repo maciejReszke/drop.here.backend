@@ -8,7 +8,9 @@ import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class AccountValidationService {
@@ -17,7 +19,7 @@ public class AccountValidationService {
     @Value("${account-creation.minimal-password-length}")
     private int minimalPasswordLength;
 
-    public void validateRequest(AccountCreationRequest accountCreationRequest) {
+    public Mono<AccountCreationRequest> validateRequest(AccountCreationRequest accountCreationRequest) {
         final String mail = accountCreationRequest.getMail();
         validatePassword(accountCreationRequest.getPassword(), mail);
         validateAccountType(accountCreationRequest.getAccountType(), mail);

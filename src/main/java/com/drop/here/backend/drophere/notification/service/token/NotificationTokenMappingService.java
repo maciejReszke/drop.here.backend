@@ -8,10 +8,11 @@ import com.drop.here.backend.drophere.notification.dto.NotificationTokenManageme
 import com.drop.here.backend.drophere.notification.entity.NotificationToken;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingServiceType;
 import com.drop.here.backend.drophere.notification.enums.NotificationTokenType;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import io.vavr.control.Try;
 import org.springframework.stereotype.Service;
 
+// TODO MONO:
 @Service
 public class NotificationTokenMappingService {
 

@@ -1,4 +1,4 @@
-package com.drop.here.backend.drophere.security.configuration;
+package com.drop.here.backend.drophere.configuration.configuration;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class Http401UnauthorizedEntryPointTest {
@@ -23,7 +22,7 @@ class Http401UnauthorizedEntryPointTest {
     @Test
     void givenResponseWhenCommenceThenSend401() throws IOException {
         //given
-        doNothing().when(response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        doNothing().when(response).sendError(401, "Unauthorized");
 
         //when
         entryPoint.commence(null, response, null);

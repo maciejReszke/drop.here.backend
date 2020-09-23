@@ -6,11 +6,12 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.authentication.token.TokenResponse;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -46,15 +47,15 @@ public class AuthenticationExecutiveService {
                 .collect(Collectors.toList());
     }
 
-    public AuthenticationResponse getAuthenticationInfo(AccountAuthentication accountAuthentication) {
+    public Mono<AuthenticationResponse> getAuthenticationInfo(AccountAuthentication accountAuthentication) {
         return accountAuthentication.hasProfile()
                 ? getWithProfileAuthenticationInfo(accountAuthentication)
-                : getBaseAuthenticationInfo(accountAuthentication);
+                : Mono.just(getBaseAuthenticationInfo(accountAuthentication));
     }
 
-    private AuthenticationResponse getWithProfileAuthenticationInfo(AccountAuthentication accountAuthentication) {
+    private Mono<AuthenticationResponse> getWithProfileAuthenticationInfo(AccountAuthentication accountAuthentication) {
         final AccountProfile profile = accountAuthentication.getProfile();
-        return getBaseAuthenticationInfo(accountAuthentication)
+        return Mono.just(getBaseAuthenticationInfo(accountAuthentication)
                 .toBuilder()
                 .hasProfile(true)
                 .loggedOnProfile(true)
@@ -62,7 +63,7 @@ public class AuthenticationExecutiveService {
                 .profileFirstName(profile.getFirstName())
                 .profileLastName(profile.getLastName())
                 .profileType(profile.getProfileType())
-                .build();
+                .build());
     }
 
     private AuthenticationResponse getBaseAuthenticationInfo(AccountAuthentication accountAuthentication) {

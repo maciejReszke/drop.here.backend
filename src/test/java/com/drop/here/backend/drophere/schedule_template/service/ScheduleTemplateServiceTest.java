@@ -8,7 +8,7 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateManagementRequest;
 import com.drop.here.backend.drophere.schedule_template.dto.ScheduleTemplateResponse;
 import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplate;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;

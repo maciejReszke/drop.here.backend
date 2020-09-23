@@ -8,10 +8,11 @@ import com.drop.here.backend.drophere.product.repository.ProductUnitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class ProductUnitService {
@@ -25,7 +26,7 @@ public class ProductUnitService {
                         RestExceptionStatusCode.PRODUCT_UNIT_NOT_FOUND_BY_NAME));
     }
 
-    public List<ProductUnitResponse> findAll() {
+    public Flux<ProductUnitResponse> findAll() {
         return productUnitRepository.findAll(Sort.by(SORT_BY_NAME_ATTRIBUTE)).stream()
                 .map(ProductUnitResponse::from)
                 .collect(Collectors.toList());

@@ -12,12 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class ScheduleTemplateStoreService {
     private final ScheduleTemplateRepository scheduleTemplateRepository;
 
-    @Transactional(rollbackFor = Exception.class)
+    // todo bylo transactional(rollbackFor = Exception.class)
     public void deleteScheduleTemplateProductByProduct(Product product) {
         scheduleTemplateRepository.deleteScheduleTemplateProductByProduct(product);
     }

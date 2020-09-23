@@ -18,9 +18,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Objects;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class FacebookExecutingService {
+    // TODO: 23/09/2020
     private final RestTemplate restTemplate;
     private final FacebookConfiguration facebookConfiguration;
 

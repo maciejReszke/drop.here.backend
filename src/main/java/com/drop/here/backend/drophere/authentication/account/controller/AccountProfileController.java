@@ -7,8 +7,7 @@ import com.drop.here.backend.drophere.authentication.account.service.AccountProf
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
-import com.drop.here.backend.drophere.image.Image;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,10 +27,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -46,26 +45,28 @@ public class AccountProfileController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation("Creating new account profile")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Created account profile", response = LoginResponse.class),
+            @ApiResponse(code = 201, message = "Created account profile", response = LoginResponse.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @ApiAuthorizationToken
-    public LoginResponse createAccountProfile(@Valid @RequestBody AccountProfileCreationRequest accountCreationRequest,
-                                              @ApiIgnore AccountAuthentication accountAuthentication) {
-        return accountProfileService.createAccountProfile(accountCreationRequest, accountAuthentication);
+    public Mono<LoginResponse> createAccountProfile(@Valid @RequestBody Mono<AccountProfileCreationRequest> accountProfileCreationRequestMono,
+                                                    @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return accountProfileCreationRequestMono.zipWith(accountAuthenticationMono)
+                .flatMap(tuple -> accountProfileService.createAccountProfile(tuple.getT1(), tuple.getT2()));
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation("Updating account profile")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_NO_CONTENT, message = "Updated account profile"),
+            @ApiResponse(code = 204, message = "Updated account profile"),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PatchMapping
     @ApiAuthorizationToken
-    public void updateAccountProfile(@Valid @RequestBody AccountProfileUpdateRequest accountCreationRequest,
-                                     @ApiIgnore AccountAuthentication accountAuthentication) {
-        accountProfileService.updateAccountProfile(accountCreationRequest, accountAuthentication);
+    public Mono<Void> updateAccountProfile(@Valid @RequestBody Mono<AccountProfileUpdateRequest> accountProfileUpdateRequestMono,
+                                           @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono) {
+        return accountProfileUpdateRequestMono.zipWith(accountAuthenticationMono)
+                .flatMap(tuple -> accountProfileService.updateAccountProfile(tuple.getT1(), tuple.getT2()));
     }
 
     @PostMapping("/images")
@@ -73,13 +74,14 @@ public class AccountProfileController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("Update account profile image")
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Image updated", response = ResourceOperationResponse.class),
+            @ApiResponse(code = 200, message = "Image updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public ResourceOperationResponse updateImage(@ApiIgnore AccountAuthentication authentication,
-                                                 @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
-        return accountProfileService.updateImage(image, authentication);
+    public Mono<ResourceOperationResponse> updateImage(@ApiIgnore Mono<AccountAuthentication> authenticationMono,
+                                                       @RequestPart(name = IMAGE_PART_NAME) Mono<FilePart> monoImage) {
+        return authenticationMono.zipWith(monoImage)
+                .flatMap(tuple -> accountProfileService.updateImage(tuple.getT2(), tuple.getT1()));
     }
 
     @GetMapping("/{profileUid}/images")
@@ -87,16 +89,16 @@ public class AccountProfileController {
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Account profile image"),
+            @ApiResponse(code = 200, message = "Account profile image"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public ResponseEntity<byte[]> findImage(@ApiIgnore @PathVariable String profileUid) {
-        final Image image = accountProfileService.findImage(profileUid);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .eTag(profileUid + image.getId())
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(image.getBytes());
+    public Mono<ResponseEntity<byte[]>> findImage(@ApiIgnore @PathVariable String profileUid) {
+        return accountProfileService.findImage(profileUid)
+                .map(image -> ResponseEntity
+                        .status(HttpStatus.OK)
+                        .eTag(profileUid + image.getId())
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(image.getBytes()));
     }
 }

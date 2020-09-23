@@ -8,6 +8,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class RestBeanConfiguration {
 
+    // TODO: 23/09/2020
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplateBuilder().build();

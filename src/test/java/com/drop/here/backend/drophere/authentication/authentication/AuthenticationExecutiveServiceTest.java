@@ -7,7 +7,7 @@ import com.drop.here.backend.drophere.authentication.authentication.dto.response
 import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.authentication.token.TokenResponse;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;

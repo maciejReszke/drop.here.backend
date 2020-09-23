@@ -5,7 +5,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
@@ -20,11 +20,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+// TODO MONO:
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -40,7 +42,7 @@ public class SpotMembershipService {
         return spotMembershipSearchingService.findMemberships(spot, desiredCustomerSubstring, membershipStatus, pageable);
     }
 
-    public ResourceOperationResponse createSpotMembership(SpotJoinRequest spotJoinRequest, String spotUid, String companyUid, AccountAuthentication authentication) {
+    public Mono<ResourceOperationResponse> createSpotMembership(SpotJoinRequest spotJoinRequest, String spotUid, String companyUid, AccountAuthentication authentication) {
         final Spot spot = spotPersistenceService.findSpot(spotUid, companyUid);
         spotManagementValidationService.validateJoinSpotRequest(spot, spotJoinRequest, authentication.getCustomer());
         final SpotMembership membership = spotMappingService.createMembership(spot, spotJoinRequest, authentication);
@@ -49,7 +51,7 @@ public class SpotMembershipService {
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, membership.getId());
     }
 
-    public ResourceOperationResponse deleteSpotMembership(String spotUid, String companyUid, AccountAuthentication authentication) {
+    public Mono<ResourceOperationResponse> deleteSpotMembership(String spotUid, String companyUid, AccountAuthentication authentication) {
         final Spot spot = spotPersistenceService.findSpot(spotUid, companyUid);
         final SpotMembership spotMembership = getSpotMembership(spot, authentication);
         spotManagementValidationService.validateDeleteSpotMembership(spotMembership);
@@ -74,12 +76,12 @@ public class SpotMembershipService {
                 ));
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    // todo bylo transactional(rollbackFor = Exception.class)
     public void deleteMemberships(Spot spot) {
         spotMembershipRepository.deleteBySpot(spot);
     }
 
-    public ResourceOperationResponse updateMembership(Spot spot, Long membershipId, SpotCompanyMembershipManagementRequest companyMembershipManagementRequest) {
+    public Mono<ResourceOperationResponse> updateMembership(Spot spot, Long membershipId, SpotCompanyMembershipManagementRequest companyMembershipManagementRequest) {
         spotManagementValidationService.validateUpdateMembership(companyMembershipManagementRequest);
         final SpotMembership spotMembership = getSpotMembership(spot, membershipId);
         spotMembership.setMembershipStatus(SpotMembershipStatus.valueOf(companyMembershipManagementRequest.getMembershipStatus()));
@@ -93,7 +95,7 @@ public class SpotMembershipService {
         return spotMembershipRepository.existsBySpotCompanyAndCustomerId(company, customerId);
     }
 
-    public ResourceOperationResponse updateSpotMembership(SpotMembershipManagementRequest spotMembershipManagementRequest, String spotUid, String companyUid, AccountAuthentication authentication) {
+    public Mono<ResourceOperationResponse> updateSpotMembership(SpotMembershipManagementRequest spotMembershipManagementRequest, String spotUid, String companyUid, AccountAuthentication authentication) {
         final Spot spot = spotPersistenceService.findSpot(spotUid, companyUid);
         final SpotMembership spotMembership = getSpotMembership(spot, authentication);
         spotMembership.setReceiveNotification(spotMembershipManagementRequest.isReceiveNotification());
@@ -106,7 +108,7 @@ public class SpotMembershipService {
         return spotMembershipRepository.findBySpotCompanyAndCustomerIdInJoinFetchSpots(company, customersIds);
     }
 
-    public List<SpotCustomerResponse> findSpots(AccountAuthentication authentication, Double xCoordinate, Double yCoordinate, Integer radius, Boolean member, String namePrefix, Pageable pageable) {
+    public Flux<SpotCustomerResponse> findSpots(AccountAuthentication authentication, Double xCoordinate, Double yCoordinate, Integer radius, Boolean member, String namePrefix, Pageable pageable) {
         return spotSearchingService.findSpots(authentication, xCoordinate, yCoordinate, radius, member, namePrefix, pageable);
     }
 }

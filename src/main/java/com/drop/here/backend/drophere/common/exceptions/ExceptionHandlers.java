@@ -12,6 +12,7 @@ import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
+// TODO: 23/09/2020 na reaktywne!
 @Slf4j
 @ControllerAdvice
 public class ExceptionHandlers {

@@ -1,4 +1,4 @@
-package com.drop.here.backend.drophere.security.configuration;
+package com.drop.here.backend.drophere.configuration.configuration;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
@@ -92,7 +92,7 @@ class JwtAuthenticationProviderTest {
         final Account account = AccountDataGenerator.companyAccount(1);
 
         when(accountService.findActiveAccountByMailWithRoles("mail")).thenReturn(Optional.of(account));
-        when(accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, "profileUid")).thenReturn(Optional.empty());
+        when(accountProfileService.findActiveProfile(account, "profileUid")).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> jwtAuthenticationProvider.authenticate(authentication));
@@ -111,7 +111,7 @@ class JwtAuthenticationProviderTest {
         final AccountAuthentication accountAuthentication = AccountAuthentication.builder().build();
 
         when(accountService.findActiveAccountByMailWithRoles("mail")).thenReturn(Optional.of(account));
-        when(accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, "profileUid")).thenReturn(Optional.of(accountProfile));
+        when(accountProfileService.findActiveProfile(account, "profileUid")).thenReturn(Optional.of(accountProfile));
         when(authenticationBuilder.buildAuthentication(account, accountProfile, authentication)).thenReturn(accountAuthentication);
 
         //when

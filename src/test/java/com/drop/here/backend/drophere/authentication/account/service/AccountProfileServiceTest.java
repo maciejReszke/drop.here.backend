@@ -13,7 +13,7 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
@@ -71,7 +71,7 @@ class AccountProfileServiceTest {
         profile.setStatus(AccountProfileStatus.ACTIVE);
         when(accountProfilePersistenceService.findByAccountAndProfileUidWithRoles(account, profileUid)).thenReturn(Optional.of(profile));
         //when
-        final Optional<AccountProfile> result = accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, profileUid);
+        final Optional<AccountProfile> result = accountProfileService.findActiveProfile(account, profileUid);
 
         //then
         assertThat(result.orElseThrow()).isEqualTo(profile);
@@ -86,7 +86,7 @@ class AccountProfileServiceTest {
         profile.setStatus(AccountProfileStatus.INACTIVE);
         when(accountProfilePersistenceService.findByAccountAndProfileUidWithRoles(account, profileUid)).thenReturn(Optional.of(profile));
         //when
-        final Optional<AccountProfile> result = accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, profileUid);
+        final Optional<AccountProfile> result = accountProfileService.findActiveProfile(account, profileUid);
 
         //then
         assertThat(result).isEmpty();
@@ -135,7 +135,7 @@ class AccountProfileServiceTest {
         when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
         when(accountProfileMappingService.newAccountProfile(request, "encodedPassword", AccountProfileType.MAIN, account)).thenReturn(accountProfile);
         doNothing().when(privilegeService).addNewAccountProfilePrivileges(accountProfile);
-        when(accountService.accountProfileCreated(account)).thenReturn(AccountProfileType.MAIN);
+        when(accountService.addProfile(account)).thenReturn(AccountProfileType.MAIN);
         when(authenticationExecutiveService.successLogin(account, accountProfile)).thenReturn(loginResponse);
         doNothing().when(accountProfilePersistenceService).createProfile(accountProfile);
 

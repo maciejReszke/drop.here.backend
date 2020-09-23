@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+// TODO MONO:
 @Repository
 public interface SpotRepository extends JpaRepository<Spot, Long> {
     Optional<Spot> findByIdAndCompanyUid(Long spotId, String companyUid);

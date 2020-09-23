@@ -3,18 +3,17 @@ package com.drop.here.backend.drophere.authentication.account.service;
 import com.drop.here.backend.drophere.authentication.account.dto.AccountCreationRequest;
 import com.drop.here.backend.drophere.authentication.account.dto.AccountInfoResponse;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus;
 import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -26,35 +25,26 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final PrivilegeService privilegeService;
 
-    @Transactional
-    public Account createAccount(ExternalAuthenticationResult result) {
+    public Mono<Account> createAccount(ExternalAuthenticationResult result) {
         final Account account = accountMappingService.newAccount(result);
-        accountPersistenceService.createAccount(account);
         privilegeService.addNewAccountPrivileges(account);
-        return account;
+        return accountPersistenceService.createAccount(account);
     }
 
-    @Transactional
-    public LoginResponse createAccount(AccountCreationRequest accountCreationRequest) {
-        accountValidationService.validateRequest(accountCreationRequest);
-        final String encodedPassword = encodePassword(accountCreationRequest);
-        final Account account = accountMappingService.newAccount(accountCreationRequest, encodedPassword);
-        accountPersistenceService.createAccount(account);
-        privilegeService.addNewAccountPrivileges(account);
-        return authenticationExecutiveService.successLogin(account);
+    public Mono<LoginResponse> createAccount(AccountCreationRequest accountCreationRequest) {
+        return accountValidationService.validateRequest(accountCreationRequest)
+                .map(request -> accountMappingService.newAccount(request, encodePassword(accountCreationRequest)))
+                .doOnNext(privilegeService::addNewAccountPrivileges)
+                .flatMap(accountPersistenceService::createAccount)
+                .map(authenticationExecutiveService::successLogin);
     }
 
     private String encodePassword(AccountCreationRequest accountCreationRequest) {
         return passwordEncoder.encode(accountCreationRequest.getPassword().trim());
     }
 
-    public Optional<Account> findActiveAccountByMail(String mail) {
+    public Mono<Account> findActiveAccountByMail(String mail) {
         return accountPersistenceService.findByMail(mail)
-                .filter(account -> account.getAccountStatus() == AccountStatus.ACTIVE);
-    }
-
-    public Optional<Account> findActiveAccountByMailWithRoles(String mail) {
-        return accountPersistenceService.findByMailWithRoles(mail)
                 .filter(account -> account.getAccountStatus() == AccountStatus.ACTIVE);
     }
 
@@ -62,20 +52,28 @@ public class AccountService {
         return passwordEncoder.matches(rawPassword, account.getPassword());
     }
 
-    public AccountProfileType accountProfileCreated(Account account) {
-        if (account.isAnyProfileRegistered()) {
-            return AccountProfileType.SUBPROFILE;
-        }
-        account.setAnyProfileRegistered(true);
-        accountPersistenceService.updateAccount(account);
-        return AccountProfileType.MAIN;
+    // TODO: 23/09/2020 test
+    public AccountProfileType getProfileType(Account account, AccountProfile accountProfile) {
+        return account.isAnyProfileRegistered()
+                ? AccountProfileType.SUBPROFILE
+                : AccountProfileType.MAIN;
     }
 
-    public AccountInfoResponse getAccountInfo(AccountAuthentication accountAuthentication) {
+    public Mono<AccountProfileType> addProfile(Account account, AccountProfile accountProfile) {
+        if (account.isAnyProfileRegistered()) {
+            return Mono.just(AccountProfileType.SUBPROFILE);
+        }
+        account.setAnyProfileRegistered(true);
+        return accountPersistenceService.updateAccount(account)
+                .thenReturn(AccountProfileType.MAIN);
+    }
+
+    public Mono<AccountInfoResponse> getAccountInfo(AccountAuthentication accountAuthentication) {
         return accountMappingService.toAccountInfoResponse(accountAuthentication.getPrincipal());
     }
 
-    public boolean existsByMail(String email) {
-        return accountPersistenceService.findByMail(email).isPresent();
+    public Mono<Boolean> existsByMail(String email) {
+        return accountPersistenceService.findByMail(email)
+                .map(ignore -> true);
     }
 }

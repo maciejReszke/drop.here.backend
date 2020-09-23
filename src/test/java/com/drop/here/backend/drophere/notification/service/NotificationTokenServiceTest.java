@@ -10,7 +10,7 @@ import com.drop.here.backend.drophere.notification.enums.NotificationTokenType;
 import com.drop.here.backend.drophere.notification.repository.NotificationTokenRepository;
 import com.drop.here.backend.drophere.notification.service.token.NotificationTokenMappingService;
 import com.drop.here.backend.drophere.notification.service.token.NotificationTokenService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// TODO: 23/09/2020 customizacje rezaem
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

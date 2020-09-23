@@ -2,10 +2,11 @@ package com.drop.here.backend.drophere.authentication.authentication.service.bas
 
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.company.service.CompanyService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class AuthenticationPrivilegesService {

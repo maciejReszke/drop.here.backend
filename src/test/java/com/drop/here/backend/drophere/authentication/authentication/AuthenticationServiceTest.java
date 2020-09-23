@@ -18,7 +18,7 @@ import com.drop.here.backend.drophere.authentication.authentication.service.exte
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.service.CustomerService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
@@ -143,7 +143,7 @@ class AuthenticationServiceTest {
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
-        when(accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, "profileUid")).thenReturn(Optional.of(accountProfile));
+        when(accountProfileService.findActiveProfile(account, "profileUid")).thenReturn(Optional.of(accountProfile));
         when(accountProfileService.isPasswordValid(accountProfile, "password")).thenReturn(true);
         when(authenticationExecutiveService.successLogin(account, accountProfile)).thenReturn(response);
 
@@ -164,7 +164,7 @@ class AuthenticationServiceTest {
         final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
-        when(accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, "profileUid")).thenReturn(Optional.empty());
+        when(accountProfileService.findActiveProfile(account, "profileUid")).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> authenticationService.loginOnProfile(loginRequest, accountAuthentication));
@@ -185,7 +185,7 @@ class AuthenticationServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
 
-        when(accountProfileService.findActiveByAccountAndProfileUidWithRoles(account, "profileUid")).thenReturn(Optional.of(accountProfile));
+        when(accountProfileService.findActiveProfile(account, "profileUid")).thenReturn(Optional.of(accountProfile));
         when(accountProfileService.isPasswordValid(accountProfile, "password")).thenReturn(false);
         //when
         final Throwable throwable = catchThrowable(() -> authenticationService.loginOnProfile(loginRequest, accountAuthentication));

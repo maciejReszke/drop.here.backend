@@ -8,7 +8,7 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountStatus
 import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import com.drop.here.backend.drophere.test_data.ExternalAuthenticationDataGenerator;
@@ -175,7 +175,7 @@ class AccountServiceTest {
         doNothing().when(accountPersistenceService).updateAccount(account);
 
         //when
-        final AccountProfileType result = accountService.accountProfileCreated(account);
+        final AccountProfileType result = accountService.addProfile(account);
 
         //then
         assertThat(result).isEqualTo(AccountProfileType.MAIN);
@@ -189,7 +189,7 @@ class AccountServiceTest {
         account.setAnyProfileRegistered(true);
 
         //when
-        final AccountProfileType result = accountService.accountProfileCreated(account);
+        final AccountProfileType result = accountService.addProfile(account);
 
         //then
         assertThat(result).isEqualTo(AccountProfileType.SUBPROFILE);

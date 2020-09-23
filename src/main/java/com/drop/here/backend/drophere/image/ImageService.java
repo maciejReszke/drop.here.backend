@@ -5,12 +5,13 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class ImageService {
     private final ImageRepository imageRepository;
 
-    @Transactional
+    // todo bylo transactional
     public Image createImage(byte[] image, ImageType imageType) {
         return imageRepository.save(
                 Image.builder()

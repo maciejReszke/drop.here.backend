@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.authentication.authentication.dto.External
 import com.drop.here.backend.drophere.authentication.authentication.dto.request.ExternalAuthenticationProviderLoginRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -11,7 +12,7 @@ public class ExternalAuthenticationDelegationService {
     private final ExternalAuthenticationValidationService externalAuthenticationValidationService;
     private final ExternalAuthenticationFactoryService externalAuthenticationFactoryService;
 
-    public ExternalAuthenticationResult authenticate(ExternalAuthenticationProviderLoginRequest request) {
+    public Mono<ExternalAuthenticationResult> authenticate(ExternalAuthenticationProviderLoginRequest request) {
         externalAuthenticationValidationService.validateRequest(request);
         return externalAuthenticationFactoryService.getProvider(request.getProvider())
                 .authenticate(request);

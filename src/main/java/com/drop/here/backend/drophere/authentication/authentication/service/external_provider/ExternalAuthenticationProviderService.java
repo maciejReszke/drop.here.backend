@@ -2,7 +2,8 @@ package com.drop.here.backend.drophere.authentication.authentication.service.ext
 
 import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
 import com.drop.here.backend.drophere.authentication.authentication.dto.request.ExternalAuthenticationProviderLoginRequest;
+import reactor.core.publisher.Mono;
 
 public interface ExternalAuthenticationProviderService {
-    ExternalAuthenticationResult authenticate(ExternalAuthenticationProviderLoginRequest request);
+    Mono<ExternalAuthenticationResult> authenticate(ExternalAuthenticationProviderLoginRequest request);
 }

@@ -1,4 +1,4 @@
-package com.drop.here.backend.drophere.security.configuration;
+package com.drop.here.backend.drophere.configuration.configuration;
 
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import org.junit.jupiter.api.Test;

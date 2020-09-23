@@ -7,22 +7,23 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.customer.dto.CustomerManagementRequest;
 import com.drop.here.backend.drophere.customer.dto.CustomerManagementResponse;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,8 +33,8 @@ public class CustomerService {
     private final PrivilegeService privilegeService;
     private final CustomerStoreService customerStoreService;
 
-    @Transactional
-    public void createCustomer(Account account, ExternalAuthenticationResult result) {
+    // todo bylo transactional
+    public Mono<Customer> createCustomer(Account account, ExternalAuthenticationResult result) {
         final Customer customer = customerMappingService.toCustomer(account, result);
         customerStoreService.save(customer);
         account.setCustomer(customer);
@@ -45,13 +46,13 @@ public class CustomerService {
         log.info("Creating customer for account via external authentication");
     }
 
-    @Transactional(readOnly = true)
-    public CustomerManagementResponse findOwnCustomer(AccountAuthentication authentication) {
+    // todo bylo transactional(readOnly = true)
+    public Mono<CustomerManagementResponse> findOwnCustomer(AccountAuthentication authentication) {
         final Customer customer = customerStoreService.findOwnCustomer(authentication);
         return customerMappingService.toManagementResponse(customer);
     }
 
-    public ResourceOperationResponse updateCustomer(CustomerManagementRequest customerManagementRequest, AccountAuthentication authentication) {
+    public Mono<ResourceOperationResponse> updateCustomer(CustomerManagementRequest customerManagementRequest, AccountAuthentication authentication) {
         return authentication.getCustomer() == null
                 ? createCustomer(customerManagementRequest, authentication)
                 : updateCustomer(customerManagementRequest, authentication.getCustomer());
@@ -72,8 +73,8 @@ public class CustomerService {
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId());
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public ResourceOperationResponse updateImage(MultipartFile imagePart, AccountAuthentication authentication) {
+    // todo bylo transactional(rollbackFor = Exception.class)
+    public Mono<ResourceOperationResponse> updateImage(FilePart imagePart, AccountAuthentication authentication) {
         try {
             final Image image = imageService.createImage(imagePart.getBytes(), ImageType.CUSTOMER_IMAGE);
             final Customer customer = authentication.getCustomer();
@@ -87,8 +88,8 @@ public class CustomerService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public Image findImage(Long customerId) {
+    // todo bylo transactional(readOnly = true)
+    public Mono<Image> findImage(Long customerId) {
         return customerStoreService.findByIdWithImage(customerId).getImage();
     }
 }

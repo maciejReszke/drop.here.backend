@@ -7,16 +7,18 @@ import com.drop.here.backend.drophere.notification.entity.Notification;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.Optional;
 
+// TODO MONO:
 @Repository
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
+public interface NotificationRepository extends ReactiveMongoRepository<Notification, Long> {
 
+    // TODO: 23/09/2020
     @Query("select n from Notification n where " +
             "(n.recipientCompany = :company or n.recipientAccountProfile =:accountProfile) and " +
             "n.readStatus in (:desiredReadStatuses)")

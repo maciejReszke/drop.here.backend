@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+// TODO MONO:
 @Repository
 public interface NotificationTokenRepository extends JpaRepository<NotificationToken, Long> {
 

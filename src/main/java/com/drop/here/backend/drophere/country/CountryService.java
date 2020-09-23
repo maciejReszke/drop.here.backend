@@ -5,17 +5,18 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
+// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class CountryService {
     private final CountryRepository countryRepository;
     private static final String SORT_BY_NAME_ATTRIBUTE = "name";
 
-    public List<CountryResponse> findAllActive() {
+    public Flux<CountryResponse> findAllActive() {
         return countryRepository.findAllByCountryStatus(CountryStatus.ACTIVE, Sort.by(SORT_BY_NAME_ATTRIBUTE)).stream()
                 .map(CountryResponse::from)
                 .collect(Collectors.toList());

@@ -22,11 +22,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -78,8 +78,9 @@ public class Account {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime mailActivatedAt;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "account")
-    private List<Privilege> privileges;
+    @Valid
+    @NotNull
+    private List<@Valid Privilege> privileges;
 
     @NotNull
     private boolean isAnyProfileRegistered;
@@ -92,4 +93,8 @@ public class Account {
 
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "account")
     private Customer customer;
+
+    @Valid
+    @NotNull
+    private List<@Valid AccountProfile> profiles;
 }
