@@ -117,7 +117,7 @@ public class CompanyManagementController {
     })
     @PreAuthorize("@authenticationPrivilegesService.isCompaniesCustomer(authentication, #customerId)")
     public Mono<ResourceOperationResponse> updateCustomerRelationship(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
-                                                                      @ApiIgnore @PathVariable Long customerId,
+                                                                      @ApiIgnore @PathVariable String customerId,
                                                                       @RequestBody @Valid Mono<CompanyCustomerRelationshipManagementRequest> customerRelationshipManagementRequestMono) {
         return accountAuthenticationMono.zipWith(customerRelationshipManagementRequestMono)
                 .flatMap(tuple -> companyService.updateCustomerRelationship(customerId, tuple.getT2(), tuple.getT1()));

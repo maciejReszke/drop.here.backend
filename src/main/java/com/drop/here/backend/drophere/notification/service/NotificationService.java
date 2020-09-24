@@ -18,8 +18,8 @@ import com.drop.here.backend.drophere.notification.service.broadcasting.Notifica
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingServiceFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 // TODO MONO:
 @Service
@@ -43,21 +42,21 @@ public class NotificationService {
 
     public Flux<NotificationResponse> findNotifications(AccountAuthentication accountAuthentication, String readStatus, Pageable pageable) {
         final List<NotificationReadStatus> desiredReadStatuses = getDesiredReadStatuses(readStatus);
-        final Page<Notification> notifications = findNotifications(accountAuthentication, pageable, desiredReadStatuses);
-        return notifications.map(notificationMappingService::toNotificationResponse);
+        return findNotifications(accountAuthentication, pageable, desiredReadStatuses)
+                .map(notificationMappingService::toNotificationResponse);
     }
 
-    private Page<Notification> findNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
+    private Flux<Notification> findNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
         return accountAuthentication.getPrincipal().getAccountType() == AccountType.COMPANY
                 ? findCompanyNotifications(accountAuthentication, pageable, desiredReadStatuses)
                 : findCustomerNotifications(accountAuthentication, pageable, desiredReadStatuses);
     }
 
-    private Page<Notification> findCustomerNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
+    private Flux<Notification> findCustomerNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
         return notificationRepository.findByRecipientCustomerAndReadStatusIn(accountAuthentication.getCustomer(), desiredReadStatuses, pageable);
     }
 
-    private Page<Notification> findCompanyNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
+    private Flux<Notification> findCompanyNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
         return notificationRepository.findByRecipientCompanyOrRecipientAccountProfileAndReadStatusIn(accountAuthentication.getCompany(), accountAuthentication.getProfile(), desiredReadStatuses, pageable);
     }
 
@@ -67,38 +66,52 @@ public class NotificationService {
                 : List.of(NotificationReadStatus.valueOf(readStatus));
     }
 
-    public Mono<ResourceOperationResponse> updateNotification(AccountAuthentication accountAuthentication, Long notificationId, NotificationManagementRequest notificationManagementRequest) {
-        final Notification notification = findNotification(accountAuthentication, notificationId);
-        notificationValidationService.validateUpdateNotificationRequest(notificationManagementRequest);
-        notificationMappingService.update(notification, notificationManagementRequest);
-        log.info("Updating notification with id {}", notificationId);
-        notificationRepository.save(notification);
-        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, notificationId);
+    public Mono<ResourceOperationResponse> updateNotification(AccountAuthentication accountAuthentication, String notificationId, NotificationManagementRequest notificationManagementRequest) {
+        return findNotification(accountAuthentication, notificationId)
+                .doOnNext(notification -> notificationValidationService.validateUpdateNotificationRequest(notificationManagementRequest))
+                .doOnNext(notification -> notificationMappingService.update(notification, notificationManagementRequest))
+                .flatMap(notificationRepository::save)
+                .map(notification -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, notificationId));
     }
 
-    private Notification findNotification(AccountAuthentication authentication, Long notificationId) {
+    private Mono<Notification> findNotification(AccountAuthentication authentication, String notificationId) {
         final Account principal = authentication.getPrincipal();
-        final Optional<Notification> notification = principal.getAccountType() == AccountType.COMPANY
+        final Mono<Notification> notification = principal.getAccountType() == AccountType.COMPANY
                 ? notificationRepository.findByIdAndRecipientCompanyOrRecipientAccountProfile(notificationId, authentication.getCompany(), authentication.getProfile())
                 : notificationRepository.findByIdAndRecipientCustomer(notificationId, authentication.getCustomer());
-        return notification.orElseThrow(() -> new RestEntityNotFoundException(String.format(
+        return notification.switchIfEmpty(Mono.error(() -> new RestEntityNotFoundException(String.format(
                 "Notification with id %s for account %s was not found", notificationId, principal.getId()),
-                RestExceptionStatusCode.NOTIFICATION_BY_ID_FOR_PRINCIPAL_NOT_FOUND));
+                RestExceptionStatusCode.NOTIFICATION_BY_ID_FOR_PRINCIPAL_NOT_FOUND)));
     }
 
-    public void sendNotifications() {
+    public Mono<Void> sendNotifications() {
         final NotificationBroadcastingService notificationBroadcastingService = notificationBroadcastingServiceFactory.getNotificationBroadcastingService();
         final PageRequest pageable = PageRequest.of(0, notificationBroadcastingService.getBatchAmount());
-        final List<NotificationJob> notifications = notificationJobRepository.findAllByNotificationIsNotNull(pageable);
-        if (!notifications.isEmpty()) {
-            log.info("Sending batch of notifications {}", notifications.size());
-            final boolean result = notificationBroadcastingService.sendBatch(notifications);
-            if (result) {
-                log.info("Successfully send batch {} of notifications", notifications.size());
-                notificationJobRepository.deleteByNotificationJobIn(notifications);
-            } else {
-                log.info("Failed to send batch {} of notifications", notifications.size());
-            }
-        }
+        return notificationJobRepository.findAllByNotificationIsNotNull(pageable)
+                .collectList()
+                .filter(CollectionUtils::isNotEmpty)
+                .flatMap(notificationJobs -> sendNotifications(notificationJobs, notificationBroadcastingService));
+    }
+
+    private Mono<Void> sendNotifications(List<NotificationJob> notifications, NotificationBroadcastingService notificationBroadcastingService) {
+        log.info("Sending batch of notifications {}", notifications.size());
+        return notificationBroadcastingService.sendBatch(notifications)
+                .flatMap(result -> handleSendingNotificationsResult(result, notifications));
+    }
+
+    private Mono<Void> handleSendingNotificationsResult(boolean result, List<NotificationJob> notifications) {
+        return result
+                ? handleSuccessSendingNotificationsResult(notifications)
+                : handleFailureSendingNotificationsResult(notifications);
+    }
+
+    private Mono<Void> handleSuccessSendingNotificationsResult(List<NotificationJob> notifications) {
+        log.info("Successfully send batch {} of notifications", notifications.size());
+        return notificationJobRepository.deleteByNotificationJobIn(notifications);
+    }
+
+    private Mono<Void> handleFailureSendingNotificationsResult(List<NotificationJob> notifications) {
+        log.info("Failed to send batch {} of notifications", notifications.size());
+        return Mono.empty();
     }
 }

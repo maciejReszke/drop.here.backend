@@ -9,23 +9,14 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -35,37 +26,29 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@Document
 @Builder(toBuilder = true)
-@Table(indexes = @Index(columnList = "mail"),
-        uniqueConstraints = @UniqueConstraint(columnNames = "mail"))
-@ToString(exclude = {"privileges", "company"})
-@EqualsAndHashCode(exclude = {"privileges", "company"})
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @NotBlank
+    @Indexed(unique = true)
     private String mail;
 
     private String password;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     private AccountRegistrationType registrationType;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     private AccountStatus accountStatus;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     private AccountMailStatus accountMailStatus;
 
     @NotNull
@@ -88,10 +71,10 @@ public class Account {
     @Version
     private Long version;
 
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "account")
+    @DBRef
     private Company company;
 
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "account")
+    @DBRef
     private Customer customer;
 
     @Valid

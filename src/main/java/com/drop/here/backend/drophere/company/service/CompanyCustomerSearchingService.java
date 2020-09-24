@@ -1,19 +1,20 @@
 package com.drop.here.backend.drophere.company.service;
 
-import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerSpotMembershipResponse;
 import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerResponse;
+import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerSpotMembershipResponse;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
 import com.drop.here.backend.drophere.company.enums.CompanyCustomerRelationshipStatus;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.service.CustomerSearchingService;
 import com.drop.here.backend.drophere.spot.entity.SpotMembership;
 import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
-import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.Comparator;
 import java.util.List;
@@ -27,7 +28,7 @@ public class CompanyCustomerSearchingService {
     private final SpotMembershipService spotMembershipService;
     private final CompanyCustomerRelationshipService companyCustomerRelationshipService;
 
-    public Page<CompanyCustomerResponse> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, AccountAuthentication authentication, Pageable pageable) {
+    public Flux<CompanyCustomerResponse> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, AccountAuthentication authentication, Pageable pageable) {
         final Company company = authentication.getCompany();
         final Page<Customer> customers = customerSearchingService.findCustomers(desiredCustomerStartingSubstring, blocked, company, pageable);
         return mapToCompanyCustomerResponses(customers, company);

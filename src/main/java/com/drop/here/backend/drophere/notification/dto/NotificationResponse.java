@@ -12,8 +12,8 @@ import lombok.Value;
 @Value
 public class NotificationResponse {
 
-    @ApiModelProperty(value = "Notification id", example = "5")
-    Long id;
+    @ApiModelProperty(value = "Notification id", example = "Abc123")
+    String id;
 
     @ApiModelProperty(value = "Notification title", example = "ęśąćż")
     String title;

@@ -8,18 +8,18 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountProfil
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
-// TODO MONO:
 @Service
 public class AccountProfileMappingService {
 
     public AccountProfile newAccountProfile(AccountProfileCreationRequest accountProfileRequest, String encodedPassword, AccountProfileType profileType, Account account) {
         return AccountProfile.builder()
                 .status(AccountProfileStatus.ACTIVE)
-                .account(account)
+                .privileges(List.of())
                 .password(encodedPassword)
-                .profileUid(UUID.randomUUID().toString())
+                .profileUid(account.getId() + UUID.randomUUID().toString())
                 .profileType(profileType)
                 .createdAt(LocalDateTime.now())
                 .firstName(accountProfileRequest.getFirstName().trim())

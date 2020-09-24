@@ -100,7 +100,7 @@ class AuthenticationPrivilegesServiceTest {
                 .customer(customer)
                 .build();
 
-        when(companyService.isVisible(companyUid)).thenReturn(true);
+        when(companyService.getVisible(companyUid)).thenReturn(true);
         when(companyService.isBlocked(companyUid, customer)).thenReturn(false);
 
         //when
@@ -119,7 +119,7 @@ class AuthenticationPrivilegesServiceTest {
                 .customer(customer)
                 .build();
 
-        when(companyService.isVisible(companyUid)).thenReturn(true);
+        when(companyService.getVisible(companyUid)).thenReturn(true);
         when(companyService.isBlocked(companyUid, customer)).thenReturn(true);
 
         //when
@@ -136,7 +136,7 @@ class AuthenticationPrivilegesServiceTest {
         final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
                 .build();
 
-        when(companyService.isVisible(companyUid)).thenReturn(true);
+        when(companyService.getVisible(companyUid)).thenReturn(true);
 
         //when
         final boolean result = authenticationPrivilegesService.isCompanyVisibleForCustomer(accountAuthentication, companyUid);
@@ -154,7 +154,7 @@ class AuthenticationPrivilegesServiceTest {
                 .customer(customer)
                 .build();
 
-        when(companyService.isVisible(companyUid)).thenReturn(false);
+        when(companyService.getVisible(companyUid)).thenReturn(false);
 
         //when
         final boolean result = authenticationPrivilegesService.isCompanyVisibleForCustomer(accountAuthentication, companyUid);

@@ -11,9 +11,12 @@ import com.drop.here.backend.drophere.authentication.authentication.dto.response
 import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -53,19 +56,20 @@ public class AccountService {
     }
 
     // TODO: 23/09/2020 test
-    public AccountProfileType getProfileType(Account account, AccountProfile accountProfile) {
+    public AccountProfileType getProfileType(Account account) {
         return account.isAnyProfileRegistered()
                 ? AccountProfileType.SUBPROFILE
                 : AccountProfileType.MAIN;
     }
 
-    public Mono<AccountProfileType> addProfile(Account account, AccountProfile accountProfile) {
-        if (account.isAnyProfileRegistered()) {
-            return Mono.just(AccountProfileType.SUBPROFILE);
+    // TODO: 23/09/2020 test
+    public Mono<AccountProfile> addProfile(Account account, AccountProfile accountProfile) {
+        if (!account.isAnyProfileRegistered()) {
+            account.setAnyProfileRegistered(true);
         }
-        account.setAnyProfileRegistered(true);
+        account.setProfiles(ListUtils.union(account.getProfiles(), List.of(accountProfile)));
         return accountPersistenceService.updateAccount(account)
-                .thenReturn(AccountProfileType.MAIN);
+                .map(ignore -> accountProfile);
     }
 
     public Mono<AccountInfoResponse> getAccountInfo(AccountAuthentication accountAuthentication) {
@@ -75,5 +79,15 @@ public class AccountService {
     public Mono<Boolean> existsByMail(String email) {
         return accountPersistenceService.findByMail(email)
                 .map(ignore -> true);
+    }
+
+    // TODO: 23/09/2020 (powinno znalezc i nadpisac + test)
+    public Mono<Void> updateProfile(Account principal, AccountProfile profile) {
+        return null;
+    }
+
+    // TODO: 24/09/2020  (generowanie uid powinno byc na podstawie id!)
+    public Mono<Account> findByProfileUid(String profileUid) {
+        return null;
     }
 }

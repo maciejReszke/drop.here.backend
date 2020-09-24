@@ -1,13 +1,11 @@
 package com.drop.here.backend.drophere.product.repository;
 
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-
-// TODO MONO:
 @Repository
-public interface ProductUnitRepository extends JpaRepository<ProductUnit, Long> {
-    Optional<ProductUnit> findByName(String name);
+public interface ProductUnitRepository extends ReactiveMongoRepository<ProductUnit, Long> {
+    Mono<ProductUnit> findByName(String name);
 }

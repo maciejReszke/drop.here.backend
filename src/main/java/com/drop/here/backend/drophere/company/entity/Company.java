@@ -31,17 +31,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-@Entity
-@Table(indexes = {
-        @Index(columnList = "uid", unique = true),
-        @Index(columnList = "account_id", unique = true),
-        @Index(columnList = "name")
-})
+
 public class Company {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @NotBlank
     private String name;

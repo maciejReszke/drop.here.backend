@@ -1,10 +1,9 @@
 package com.drop.here.backend.drophere.customer.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.service.AccountPersistenceService;
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.authentication.dto.ExternalAuthenticationResult;
-import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
-import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
@@ -21,9 +20,6 @@ import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,24 +28,31 @@ public class CustomerService {
     private final CustomerMappingService customerMappingService;
     private final PrivilegeService privilegeService;
     private final CustomerStoreService customerStoreService;
+    private final AccountPersistenceService accountPersistenceService;
 
-    // todo bylo transactional
+
+    // TODO: 24/09/2020 transakcja
     public Mono<Customer> createCustomer(Account account, ExternalAuthenticationResult result) {
         final Customer customer = customerMappingService.toCustomer(account, result);
-        customerStoreService.save(customer);
-        account.setCustomer(customer);
         privilegeService.addCustomerCreatedPrivilege(account);
-        if (ArrayUtils.isNotEmpty(result.getImage())) {
-            final Image image = imageService.createImage(result.getImage(), ImageType.CUSTOMER_IMAGE);
-            customer.setImage(image);
-        }
-        log.info("Creating customer for account via external authentication");
+        return accountPersistenceService.updateAccount(account)
+                .flatMap(saved -> customerStoreService.save(customer))
+                .flatMap(saved -> createImageIfNotEmpty(result.getImage(), saved))
+                .doOnNext(saved -> log.info("Creating customer for account via external authentication with id {}", account.getId()))
+                .thenReturn(customer);
     }
 
-    // todo bylo transactional(readOnly = true)
+    private Mono<Customer> createImageIfNotEmpty(byte[] image, Customer customer) {
+        return ArrayUtils.isNotEmpty(image)
+                ? imageService.createImage(image, ImageType.CUSTOMER_IMAGE, customer.getId())
+                .map(ignore -> customer)
+                : Mono.just(customer);
+    }
+
     public Mono<CustomerManagementResponse> findOwnCustomer(AccountAuthentication authentication) {
-        final Customer customer = customerStoreService.findOwnCustomer(authentication);
-        return customerMappingService.toManagementResponse(customer);
+        return customerStoreService.findOwnCustomer(authentication)
+                .map(customerMappingService::toManagementResponse)
+                .switchIfEmpty(Mono.defer(() -> Mono.just(customerMappingService.toManagementResponse(null))));
     }
 
     public Mono<ResourceOperationResponse> updateCustomer(CustomerManagementRequest customerManagementRequest, AccountAuthentication authentication) {
@@ -58,38 +61,31 @@ public class CustomerService {
                 : updateCustomer(customerManagementRequest, authentication.getCustomer());
     }
 
-    private ResourceOperationResponse createCustomer(CustomerManagementRequest customerManagementRequest, AccountAuthentication authentication) {
-        final Customer customer = customerMappingService.createCustomer(customerManagementRequest, authentication.getPrincipal());
-        log.info("Creating new customer for account with id {}", authentication.getPrincipal().getId());
-        customerStoreService.save(customer);
-        privilegeService.addCustomerCreatedPrivilege(authentication.getPrincipal());
-        return new ResourceOperationResponse(ResourceOperationStatus.CREATED, customer.getId());
+    // TODO: 24/09/2020 transakcja
+    private Mono<ResourceOperationResponse> createCustomer(CustomerManagementRequest customerManagementRequest, AccountAuthentication authentication) {
+        final Account account = authentication.getPrincipal();
+        final Customer customer = customerMappingService.createCustomer(customerManagementRequest, account);
+        log.info("Creating new customer for account with id {}", account.getId());
+        privilegeService.addCustomerCreatedPrivilege(account);
+        return accountPersistenceService.updateAccount(account)
+                .flatMap(saved -> customerStoreService.save(customer))
+                .map(createdCustomer -> new ResourceOperationResponse(ResourceOperationStatus.CREATED, createdCustomer.getId()));
     }
 
-    private ResourceOperationResponse updateCustomer(CustomerManagementRequest customerManagementRequest, Customer customer) {
+    private Mono<ResourceOperationResponse> updateCustomer(CustomerManagementRequest customerManagementRequest, Customer customer) {
         customerMappingService.updateCustomer(customerManagementRequest, customer);
         log.info("Updating customer with id {}", customer.getId());
-        customerStoreService.save(customer);
-        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId());
+        return customerStoreService.save(customer)
+                .map(saved -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId()));
     }
 
-    // todo bylo transactional(rollbackFor = Exception.class)
     public Mono<ResourceOperationResponse> updateImage(FilePart imagePart, AccountAuthentication authentication) {
-        try {
-            final Image image = imageService.createImage(imagePart.getBytes(), ImageType.CUSTOMER_IMAGE);
-            final Customer customer = authentication.getCustomer();
-            customer.setImage(image);
-            log.info("Updating image for customer {}", customer.getId());
-            customerStoreService.save(customer);
-            return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId());
-        } catch (IOException exception) {
-            throw new RestIllegalRequestValueException("Invalid image " + exception.getMessage(),
-                    RestExceptionStatusCode.UPDATE_CUSTOMER_IMAGE_INVALID_IMAGE);
-        }
+        final Customer customer = authentication.getCustomer();
+        return imageService.createImage(imagePart, ImageType.CUSTOMER_IMAGE, customer.getId())
+                .map(image -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId()));
     }
 
-    // todo bylo transactional(readOnly = true)
-    public Mono<Image> findImage(Long customerId) {
-        return customerStoreService.findByIdWithImage(customerId).getImage();
+    public Mono<Image> findImage(String customerId) {
+        return imageService.findImage(customerId, ImageType.CUSTOMER_IMAGE);
     }
 }

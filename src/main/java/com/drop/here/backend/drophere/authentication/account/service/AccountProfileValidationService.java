@@ -8,7 +8,6 @@ import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueE
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-// TODO MONO:
 @Service
 public class AccountProfileValidationService {
 

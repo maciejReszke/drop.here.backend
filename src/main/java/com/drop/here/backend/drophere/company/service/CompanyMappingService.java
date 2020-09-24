@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +25,6 @@ public class CompanyMappingService {
     @Value("${companies.uid_generator.random_part_length}")
     private int randomUidPart;
 
-    // todo bylo transactional(readOnly = true)
     public CompanyManagementResponse toManagementResponse(Company company) {
         return company == null ?
                 CompanyManagementResponse.builder().registered(false).build()

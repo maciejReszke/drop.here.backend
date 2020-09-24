@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
-// TODO MONO:
 @Service
 public class CustomerMappingService {
 

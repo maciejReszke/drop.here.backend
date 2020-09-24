@@ -9,6 +9,6 @@ public class ResourceOperationResponse {
     @ApiModelProperty(value = "Operation status", example = "CREATED")
     ResourceOperationStatus operationStatus;
 
-    @ApiModelProperty(value = "Resource id", example = "5")
-    Long id;
+    @ApiModelProperty(value = "Resource id", example = "Abcdef")
+    String id;
 }

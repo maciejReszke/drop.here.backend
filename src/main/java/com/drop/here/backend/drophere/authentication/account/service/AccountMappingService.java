@@ -19,12 +19,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class AccountMappingService {
-    private final AccountProfilePersistenceService accountProfilePersistenceService;
-
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     public Account newAccount(AccountCreationRequest accountCreationRequest, String encodedPassword) {
@@ -38,16 +35,17 @@ public class AccountMappingService {
                 .isAnyProfileRegistered(false)
                 .registrationType(AccountRegistrationType.FORM)
                 .profiles(List.of())
+                .privileges(List.of())
                 .build();
     }
 
     public Mono<AccountInfoResponse> toAccountInfoResponse(Account account) {
-        final List<ProfileInfoResponse> profiles = accountProfilePersistenceService.findByAccount(account)
+        final List<ProfileInfoResponse> profiles = account.getProfiles()
                 .stream()
                 .map(this::toProfileInfoResponse)
                 .collect(Collectors.toList());
 
-        return AccountInfoResponse.builder()
+        return Mono.just(AccountInfoResponse.builder()
                 .mail(account.getMail())
                 .accountType(account.getAccountType())
                 .accountStatus(account.getAccountStatus())
@@ -55,7 +53,7 @@ public class AccountMappingService {
                 .createdAt(account.getCreatedAt().format(TIME_FORMATTER))
                 .isAnyProfileRegistered(account.isAnyProfileRegistered())
                 .profiles(profiles)
-                .build();
+                .build());
     }
 
     private ProfileInfoResponse toProfileInfoResponse(AccountProfile profile) {

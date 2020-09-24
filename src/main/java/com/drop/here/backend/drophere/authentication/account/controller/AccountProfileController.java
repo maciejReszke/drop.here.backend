@@ -97,7 +97,7 @@ public class AccountProfileController {
         return accountProfileService.findImage(profileUid)
                 .map(image -> ResponseEntity
                         .status(HttpStatus.OK)
-                        .eTag(profileUid + image.getId())
+                        .eTag(profileUid + image.getId() + image.getVersion())
                         .contentType(MediaType.IMAGE_JPEG)
                         .body(image.getBytes()));
     }

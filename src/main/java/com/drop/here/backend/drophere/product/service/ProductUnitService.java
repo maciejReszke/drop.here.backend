@@ -9,26 +9,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.stream.Collectors;
-
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class ProductUnitService {
     private final ProductUnitRepository productUnitRepository;
     private static final String SORT_BY_NAME_ATTRIBUTE = "name";
 
-    public ProductUnit getByName(String name) {
+    public Mono<ProductUnit> getByName(String name) {
         return productUnitRepository.findByName(name)
-                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                .switchIfEmpty(Mono.error(() -> new RestEntityNotFoundException(String.format(
                         "Product unit with name %s was not found", name),
-                        RestExceptionStatusCode.PRODUCT_UNIT_NOT_FOUND_BY_NAME));
+                        RestExceptionStatusCode.PRODUCT_UNIT_NOT_FOUND_BY_NAME)));
     }
 
     public Flux<ProductUnitResponse> findAll() {
-        return productUnitRepository.findAll(Sort.by(SORT_BY_NAME_ATTRIBUTE)).stream()
-                .map(ProductUnitResponse::from)
-                .collect(Collectors.toList());
+        return productUnitRepository.findAll(Sort.by(SORT_BY_NAME_ATTRIBUTE))
+                .map(ProductUnitResponse::from);
     }
 }

@@ -77,7 +77,7 @@ class CompanyServiceTest {
                 .build()));
 
         //when
-        final boolean result = companyService.isVisible(uid);
+        final boolean result = companyService.getVisible(uid);
 
         //then
         assertThat(result).isTrue();
@@ -92,7 +92,7 @@ class CompanyServiceTest {
                 .build()));
 
         //when
-        final boolean result = companyService.isVisible(uid);
+        final boolean result = companyService.getVisible(uid);
 
         //then
         assertThat(result).isFalse();
@@ -105,7 +105,7 @@ class CompanyServiceTest {
         when(companyRepository.findByUid(uid)).thenReturn(Optional.empty());
 
         //when
-        final boolean result = companyService.isVisible(uid);
+        final boolean result = companyService.getVisible(uid);
 
         //then
         assertThat(result).isFalse();

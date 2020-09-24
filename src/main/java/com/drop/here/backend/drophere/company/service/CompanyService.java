@@ -1,9 +1,10 @@
 package com.drop.here.backend.drophere.company.service;
 
+import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.service.AccountPersistenceService;
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
-import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.dto.CompanyCustomerRelationshipManagementRequest;
@@ -28,10 +29,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-import java.util.Optional;
-
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -45,29 +42,28 @@ public class CompanyService {
     private final CompanyCustomerRelationshipService companyCustomerRelationshipService;
     private final CustomerStoreService customerStoreService;
     private final CompanyCustomerSearchingService companyCustomerSearchingService;
+    private final AccountPersistenceService accountPersistenceService;
 
-    public boolean isVisible(String companyUid) {
+    public Mono<Company> getVisible(String companyUid) {
         return findByUid(companyUid)
-                .map(company -> company.getVisibilityStatus() == CompanyVisibilityStatus.VISIBLE)
-                .orElse(false);
+                .filter(company -> company.getVisibilityStatus() == CompanyVisibilityStatus.VISIBLE);
     }
 
-    private Optional<Company> findByUid(String companyUid) {
+    private Mono<Company> findByUid(String companyUid) {
         return companyRepository.findByUid(companyUid);
     }
 
-    private Company getByUid(String companyUid) {
+    private Mono<Company> getByUid(String companyUid) {
         return findByUid(companyUid)
-                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                .switchIfEmpty(Mono.error(() -> new RestEntityNotFoundException(String.format(
                         "Company with uid %s was not found", companyUid),
-                        RestExceptionStatusCode.COMPANY_BY_UID_NOT_FOUND));
+                        RestExceptionStatusCode.COMPANY_BY_UID_NOT_FOUND)));
     }
 
-    // todo bylo transactional(readOnly = true)
     public Mono<CompanyManagementResponse> findOwnCompany(AccountAuthentication authentication) {
-        final Company company = companyRepository.findByAccount(authentication.getPrincipal())
-                .orElse(null);
-        return companyMappingService.toManagementResponse(company);
+        return companyRepository.findByAccount(authentication.getPrincipal())
+                .map(companyMappingService::toManagementResponse)
+                .switchIfEmpty(Mono.defer((() -> Mono.just(companyMappingService.toManagementResponse(null)))));
     }
 
     public Mono<ResourceOperationResponse> updateCompany(CompanyManagementRequest companyManagementRequest, AccountAuthentication authentication) {
@@ -80,40 +76,31 @@ public class CompanyService {
     private Mono<ResourceOperationResponse> updateCompany(CompanyManagementRequest companyManagementRequest, Company company) {
         companyMappingService.updateCompany(companyManagementRequest, company);
         log.info("Updating company with uid {}", company.getUid());
-        companyRepository.save(company);
-        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, company.getId());
+        return companyRepository.save(company)
+                .map(savedCompany -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, company.getId()));
     }
 
+    // TODO: 24/09/2020 transakcja!
     private Mono<ResourceOperationResponse> createCompany(CompanyManagementRequest companyManagementRequest, AccountAuthentication authentication) {
         final Company company = companyMappingService.createCompany(companyManagementRequest, authentication.getPrincipal());
         log.info("Creating new company with uid {} for account with id {}", company.getUid(), authentication.getPrincipal().getId());
-        companyRepository.save(company);
-        privilegeService.addCompanyCreatedPrivilege(authentication.getPrincipal());
-        return new ResourceOperationResponse(ResourceOperationStatus.CREATED, company.getId());
+        final Account account = authentication.getPrincipal();
+        privilegeService.addCompanyCreatedPrivilege(account);
+        return accountPersistenceService.updateAccount(account)
+                .flatMap(saved -> companyRepository.save(company))
+                .map(saved -> new ResourceOperationResponse(ResourceOperationStatus.CREATED, company.getId()));
     }
 
-    // todo bylo transactional
     public Mono<ResourceOperationResponse> updateImage(FilePart imagePart, AccountAuthentication authentication) {
-        try {
-            final Image image = imageService.createImage(imagePart.getBytes(), ImageType.COMPANY_IMAGE);
-            final Company company = authentication.getCompany();
-            company.setImage(image);
-            log.info("Updating image for company {}", company.getUid());
-            companyRepository.save(company);
-            return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, company.getId());
-        } catch (IOException exception) {
-            throw new RestIllegalRequestValueException("Invalid image " + exception.getMessage(),
-                    RestExceptionStatusCode.UPDATE_COMPANY_IMAGE_INVALID_IMAGE);
-        }
+        final Company company = authentication.getCompany();
+        return imageService.createImage(imagePart, ImageType.COMPANY_IMAGE, company.getId())
+                .doOnNext(image -> log.info("Updating image for company {}", company.getUid()))
+                .map(image -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, company.getId()));
     }
 
-    // todo bylo transactional(readOnly = true)
     public Mono<Image> findImage(String companyUid) {
-        return companyRepository.findByUidWithImage(companyUid)
-                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
-                        "Image for company %s was not found", companyUid),
-                        RestExceptionStatusCode.ACCOUNT_PROFILE_IMAGE_WAS_NOT_FOUND))
-                .getImage();
+        return companyRepository.findByUid(companyUid)
+                .flatMap(company -> imageService.findImage(company.getId(), ImageType.COMPANY_IMAGE));
     }
 
     public boolean hasRelation(Company company, Long customerId) {
@@ -125,16 +112,16 @@ public class CompanyService {
         return companyCustomerSearchingService.findCustomers(desiredCustomerStartingSubstring, blocked, authentication, pageable);
     }
 
-
-    public Mono<ResourceOperationResponse> updateCustomerRelationship(Long customerId, CompanyCustomerRelationshipManagementRequest companyCustomerManagementRequest, AccountAuthentication accountAuthentication) {
-        final Customer customer = customerStoreService.findById(customerId);
-        companyCustomerRelationshipService.handleCustomerBlocking(companyCustomerManagementRequest.isBlock(), customer, accountAuthentication.getCompany());
-        log.info("Updated customer {} with company relation {}", customer, accountAuthentication.getCompany().getUid());
-        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customerId);
+    public Mono<ResourceOperationResponse> updateCustomerRelationship(String customerId, CompanyCustomerRelationshipManagementRequest companyCustomerManagementRequest, AccountAuthentication accountAuthentication) {
+        return customerStoreService.findById(customerId)
+                .doOnNext(customer -> log.info("Updating customer {} with company relation {}", customer, accountAuthentication.getCompany().getUid()))
+                .flatMap(customer -> companyCustomerRelationshipService.handleCustomerBlocking(companyCustomerManagementRequest.isBlock(), customer, accountAuthentication.getCompany()))
+                .thenReturn(new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customerId));
     }
 
-    public boolean isBlocked(String companyUid, Customer customer) {
-        final Company company = getByUid(companyUid);
-        return companyCustomerRelationshipService.isBlocked(company, customer);
+    public Mono<Boolean> isBlocked(String companyUid, Customer customer) {
+        return getByUid(companyUid)
+                .flatMap(company -> companyCustomerRelationshipService.isBlocked(company, customer))
+                .switchIfEmpty(Mono.just(false));
     }
 }

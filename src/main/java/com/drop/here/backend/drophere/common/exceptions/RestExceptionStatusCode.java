@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.common.exceptions;
 
+// TODO: 24/09/2020
 public enum RestExceptionStatusCode {
     INVALID_ARGUMENTS_CONSTRAINTS_EXCEPTION,
     INVALID_ARGUMENTS_FOR_TRANSFER_TYPE_EXCEPTION,

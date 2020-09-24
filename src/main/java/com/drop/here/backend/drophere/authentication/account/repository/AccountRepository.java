@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface AccountRepository extends ReactiveMongoRepository<Account, Long> {
+public interface AccountRepository extends ReactiveMongoRepository<Account, String> {
     Mono<Account> findByMail(String mail);
 }

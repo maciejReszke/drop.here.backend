@@ -148,7 +148,7 @@ public class ProductController {
         return productService.findImage(productId, companyUid)
                 .map(image -> ResponseEntity
                         .status(HttpStatus.OK)
-                        .eTag(productId + "" + image.getId())
+                        .eTag(productId + "" + image.getId() + image.getVersion())
                         .contentType(MediaType.IMAGE_JPEG)
                         .body(image.getBytes()));
     }

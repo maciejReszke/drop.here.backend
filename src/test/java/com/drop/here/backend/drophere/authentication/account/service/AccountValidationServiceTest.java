@@ -13,11 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,17 +33,19 @@ class AccountValidationServiceTest {
     }
 
     @Test
-    void givenValidRequestWhenValidateRequestThenDoNothing() {
+    void givenValidRequestWhenValidateRequestThenReturnRequest() {
         //given
         final AccountCreationRequest request = AccountDataGenerator.accountCreationRequest(1);
 
-        when(accountPersistenceService.findByMail(request.getMail())).thenReturn(Optional.empty());
+        when(accountPersistenceService.findByMail(request.getMail())).thenReturn(Mono.empty());
 
         //when
-        accountValidationService.validateRequest(request);
+        final Mono<AccountCreationRequest> result = accountValidationService.validateRequest(request);
 
         //then
-        assertThat(true).isTrue();
+        StepVerifier.create(result)
+                .expectNext(request)
+                .verifyComplete();
     }
 
     @Test
@@ -54,11 +55,17 @@ class AccountValidationServiceTest {
         request.setPassword("abc");
 
         //when
-        final Throwable throwable = catchThrowable(() -> accountValidationService.validateRequest(request));
+
+        //when
+        final Mono<AccountCreationRequest> result = accountValidationService.validateRequest(request);
 
         //then
-        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
-        assertThat(((RestIllegalRequestValueException) (throwable)).getCode()).isEqualTo(RestExceptionStatusCode.INVALID_BODY_ARGUMENT_ACCOUNT_CREATION_PASSWORD_LENGTH.ordinal());
+        StepVerifier.create(result)
+                .consumeErrorWith(throwable -> {
+                    assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+                    assertThat(((RestIllegalRequestValueException) (throwable)).getCode()).isEqualTo(RestExceptionStatusCode.INVALID_BODY_ARGUMENT_ACCOUNT_CREATION_PASSWORD_LENGTH.ordinal());
+                })
+                .verify();
     }
 
     @Test
@@ -68,25 +75,33 @@ class AccountValidationServiceTest {
         request.setAccountType(AccountType.COMPANY + "aa");
 
         //when
-        final Throwable throwable = catchThrowable(() -> accountValidationService.validateRequest(request));
+        final Mono<AccountCreationRequest> result = accountValidationService.validateRequest(request);
 
         //then
-        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
-        assertThat(((RestIllegalRequestValueException) (throwable)).getCode()).isEqualTo(RestExceptionStatusCode.INVALID_BODY_ARGUMENT_ACCOUNT_CREATION_ACCOUNT_TYPE.ordinal());
+        StepVerifier.create(result)
+                .consumeErrorWith(throwable -> {
+                    assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+                    assertThat(((RestIllegalRequestValueException) (throwable)).getCode()).isEqualTo(RestExceptionStatusCode.INVALID_BODY_ARGUMENT_ACCOUNT_CREATION_ACCOUNT_TYPE.ordinal());
+                })
+                .verify();
     }
 
     @Test
     void givenExistingMailWhenValidateRequestThenError() {
         //given
         final AccountCreationRequest request = AccountDataGenerator.accountCreationRequest(1);
-        when(accountPersistenceService.findByMail(request.getMail())).thenReturn(Optional.of(Account.builder().build()));
+        when(accountPersistenceService.findByMail(request.getMail())).thenReturn(Mono.just(Account.builder().build()));
 
         //when
-        final Throwable throwable = catchThrowable(() -> accountValidationService.validateRequest(request));
+        final Mono<AccountCreationRequest> result = accountValidationService.validateRequest(request);
 
         //then
-        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
-        assertThat(((RestIllegalRequestValueException) (throwable)).getCode()).isEqualTo(RestExceptionStatusCode.INVALID_BODY_ARGUMENT_ACCOUNT_CREATION_MAIL_EXISTS.ordinal());
+        StepVerifier.create(result)
+                .consumeErrorWith(throwable -> {
+                    assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+                    assertThat(((RestIllegalRequestValueException) (throwable)).getCode()).isEqualTo(RestExceptionStatusCode.INVALID_BODY_ARGUMENT_ACCOUNT_CREATION_MAIL_EXISTS.ordinal());
+                })
+                .verify();
     }
 
 }

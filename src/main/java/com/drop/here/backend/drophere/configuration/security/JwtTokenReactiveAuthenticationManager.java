@@ -13,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,7 +27,7 @@ public class JwtTokenReactiveAuthenticationManager implements ReactiveAuthentica
         final String mail = preAuthentication.getMail();
         log.info("Received valid token for account {}", mail);
 
-        return accountService.findActiveAccountByMailWithRoles(mail)
+        return accountService.findActiveAccountByMail(mail)
                 .switchIfEmpty(Mono.error(() -> new UnauthorizedRestException(String.format(
                         "During token authentication didn't find active account %s", mail),
                         RestExceptionStatusCode.JWT_AUTHENTICATION_NOT_FOUND_ACTIVE_ACCOUNT)))

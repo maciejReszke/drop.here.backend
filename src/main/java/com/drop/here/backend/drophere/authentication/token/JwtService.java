@@ -17,8 +17,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
-// TODO: 23/09/2020
-// TODO MONO:
 @Service
 public class JwtService {
 

@@ -5,21 +5,15 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 // TODO MONO:
 @Repository
-public interface CustomerRepository extends JpaRepository<Customer, Long> {
-    Optional<Customer> findByAccount(Account principal);
-
-    @Query("select c from Customer c " +
-            "join fetch c.image i where " +
-            "c.id =:customerId")
-    Optional<Customer> findByIdWithImage(Long customerId);
+public interface CustomerRepository extends ReactiveMongoRepository<Customer, String> {
+    Mono<Customer> findByAccount(Account principal);
 
     @Query("select distinct c from Customer c " +
             "left join CompanyCustomerRelationship ccr on (ccr.customer =c and ccr.company =:company) where " +

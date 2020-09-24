@@ -39,7 +39,7 @@ public class CompanyController {
         return companyService.findImage(companyUid)
                 .map(image -> ResponseEntity
                         .status(HttpStatus.OK)
-                        .eTag(companyUid + image.getId())
+                        .eTag(companyUid + image.getId() + image.getVersion())
                         .contentType(MediaType.IMAGE_JPEG)
                         .body(image.getBytes()));
     }

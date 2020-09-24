@@ -19,7 +19,7 @@ public class AuthenticationPrivilegesService {
     }
 
     public boolean isCompanyVisibleForCustomer(AccountAuthentication accountAuthentication, String companyUid) {
-        return companyService.isVisible(companyUid) &&
+        return companyService.getVisible(companyUid) &&
                 accountAuthentication.getCustomer() != null &&
                 !companyService.isBlocked(companyUid, accountAuthentication.getCustomer());
     }

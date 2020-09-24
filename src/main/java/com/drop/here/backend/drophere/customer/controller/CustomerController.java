@@ -35,11 +35,11 @@ public class CustomerController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public Mono<ResponseEntity<byte[]>> findImage(@ApiIgnore @PathVariable Long customerId) {
+    public Mono<ResponseEntity<byte[]>> findImage(@ApiIgnore @PathVariable String customerId) {
         return customerService.findImage(customerId)
                 .map(image -> ResponseEntity
                         .status(HttpStatus.OK)
-                        .eTag(customerId + "" + image.getId())
+                        .eTag(customerId + "" + image.getId() + image.getVersion())
                         .contentType(MediaType.IMAGE_JPEG)
                         .body(image.getBytes()));
     }

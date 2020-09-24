@@ -27,6 +27,7 @@ class AccountProfileMappingServiceTest {
         //given
         final AccountProfileCreationRequest accountProfileCreationRequest = AccountProfileDataGenerator.accountProfileRequest(1);
         final Account account = AccountDataGenerator.companyAccount(1);
+        account.setId("kaka");
         final String encodedPassword = "encoded";
         final AccountProfileType accountProfileType = AccountProfileType.MAIN;
 
@@ -35,6 +36,7 @@ class AccountProfileMappingServiceTest {
 
         //then
         assertThat(result.getProfileUid()).isNotEmpty();
+        assertThat(result.getProfileUid()).startsWith(account.getId());
         assertThat(result.getFirstName()).isEqualTo(accountProfileCreationRequest.getFirstName());
         assertThat(result.getLastName()).isEqualTo(accountProfileCreationRequest.getLastName());
         assertThat(result.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
@@ -42,7 +44,8 @@ class AccountProfileMappingServiceTest {
         assertThat(result.getStatus()).isEqualTo(AccountProfileStatus.ACTIVE);
         assertThat(result.getProfileType()).isEqualTo(accountProfileType);
         assertThat(result.getPassword()).isEqualTo(encodedPassword);
-        assertThat(result.getAccount()).isEqualTo(account);
+        assertThat(result.getPrivileges()).isEmpty();
+        assertThat(result.getPrivileges()).isNotNull();
         assertThat(result.getVersion()).isNull();
     }
 

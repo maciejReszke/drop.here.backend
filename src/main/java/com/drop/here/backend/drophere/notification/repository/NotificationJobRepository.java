@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -15,11 +16,11 @@ import java.util.List;
 public interface NotificationJobRepository extends JpaRepository<NotificationJob, Long> {
 
     @Query("select n from NotificationJob n")
-    List<NotificationJob> findAllByNotificationIsNotNull(PageRequest pageable);
+    Flux<NotificationJob> findAllByNotificationIsNotNull(PageRequest pageable);
 
     @Modifying
     // todo bylo transactional
     @Query("delete from NotificationJob n where " +
             "n in (:notifications)")
-    void deleteByNotificationJobIn(List<NotificationJob> notifications);
+    Mono<Void> deleteByNotificationJobIn(List<NotificationJob> notifications);
 }

@@ -9,23 +9,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Version;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -34,41 +25,34 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// TODO: 23/09/2020 customizacje rezaem
+// TODO: 23/09/2020 ogarnac dbrefy
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity
 @ToString(exclude = {"unit", "company", "image"})
 @EqualsAndHashCode(exclude = {"unit", "company", "image"})
-@Table(indexes = @Index(columnList = "category"))
+@Document
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @NotBlank
     private String name;
 
     @NotBlank
+    @Indexed
     private String category;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "unit_id")
     private ProductUnit unit;
-
-    @NotBlank
-    private String unitName;
 
     @NotNull
     @PositiveOrZero
     private BigDecimal unitFraction;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     private ProductAvailabilityStatus availabilityStatus;
 
     @NotNull
@@ -89,14 +73,13 @@ public class Product {
     private LocalDateTime lastUpdatedAt;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
+    @DBRef
     private Company company;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
-    private List<ProductCustomizationWrapper> customizationWrappers;
+    @NotNull
+    @Valid
+    private List<@Valid ProductCustomizationWrapper> customizationWrappers;
 
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "image_id")
+    @DBRef
     private Image image;
 }

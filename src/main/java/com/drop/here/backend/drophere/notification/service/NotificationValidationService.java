@@ -7,7 +7,6 @@ import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import io.vavr.control.Try;
 import org.springframework.stereotype.Service;
 
-// TODO MONO:
 @Service
 public class NotificationValidationService {
 

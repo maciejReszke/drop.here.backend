@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +22,7 @@ public class CompanyCustomerRelationshipService {
     private final CompanyCustomerRelationshipRepository companyCustomerRelationshipRepository;
     private final CompanyMappingService companyMappingService;
 
-    public void handleCustomerBlocking(boolean toBlock, Customer customer, Company company) {
+    public Mono<Void> handleCustomerBlocking(boolean toBlock, Customer customer, Company company) {
         final boolean isBlocked = isBlocked(company, customer);
 
         if (toBlock && !isBlocked) {
@@ -71,7 +72,7 @@ public class CompanyCustomerRelationshipService {
         companyCustomerRelationshipRepository.save(relationship);
     }
 
-    public boolean isBlocked(Company company, Customer customer) {
+    public Mono<Boolean> isBlocked(Company company, Customer customer) {
         return companyCustomerRelationshipRepository.existsByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED);
     }
 

@@ -5,20 +5,15 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.authentication.account.entity.Privilege;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
-import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class PrivilegeService {
-    private final PrivilegeRepository privilegeRepository;
-
     public static final String NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE = "CREATE_CUSTOMER";
     public static final String OWN_PROFILE_MANAGEMENT_PRIVILEGE = "OWN_PROFILE_MANAGEMENT";
     public static final String COMPANY_FULL_MANAGEMENT_PRIVILEGE = "COMPANY_FULL_MANAGEMENT";
@@ -27,11 +22,7 @@ public class PrivilegeService {
     public static final String CUSTOMER_CREATED_PRIVILEGE = "CUSTOMER_FULL_MANAGEMENT";
 
     public void addNewAccountPrivileges(Account account) {
-        final Privilege privilege = privilegeRepository.save(Privilege.builder()
-                .name(getPrivilegeName(account.getAccountType()))
-                .account(account)
-                .build());
-        account.setPrivileges(List.of(privilege));
+        addPrivilege(account, getPrivilegeName(account.getAccountType()));
     }
 
     private String getPrivilegeName(AccountType accountType) {
@@ -41,11 +32,9 @@ public class PrivilegeService {
     }
 
     public void addNewAccountProfilePrivileges(AccountProfile accountProfile) {
-        final Privilege privilege = privilegeRepository.save(Privilege.builder()
+        accountProfile.setPrivileges(ListUtils.union(accountProfile.getPrivileges(), List.of(Privilege.builder()
                 .name(getPrivilegeName(accountProfile.getProfileType()))
-                .accountProfile(accountProfile)
-                .build());
-        accountProfile.setPrivileges(List.of(privilege));
+                .build())));
     }
 
     private String getPrivilegeName(AccountProfileType profileType) {
@@ -54,19 +43,15 @@ public class PrivilegeService {
                 : COMPANY_BASIC_MANAGEMENT_PRIVILEGE;
     }
 
-    // todo bylo transactional
     public void addCustomerCreatedPrivilege(Account account) {
         addPrivilege(account, CUSTOMER_CREATED_PRIVILEGE);
     }
 
-    private void addPrivilege(Account account, String customerCreatedPrivilege) {
-        final Privilege privilege = privilegeRepository.save(Privilege.builder()
-                .name(customerCreatedPrivilege)
-                .account(account)
-                .build());
-        account.setPrivileges(account.getPrivileges() == null
-                ? List.of(privilege) :
-                ListUtils.union(account.getPrivileges(), List.of(privilege)));
+    private void addPrivilege(Account account, String privilegeName) {
+        final Privilege privilege = Privilege.builder()
+                .name(privilegeName)
+                .build();
+        account.setPrivileges(ListUtils.union(account.getPrivileges(), List.of(privilege)));
     }
 
     public void addCompanyCreatedPrivilege(Account account) {
