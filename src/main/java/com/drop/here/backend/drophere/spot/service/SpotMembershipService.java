@@ -91,7 +91,7 @@ public class SpotMembershipService {
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, spotMembership.getId());
     }
 
-    public boolean existsMembership(Company company, Long customerId) {
+    public Mono<Boolean> existsMembership(Company company, String customerId) {
         return spotMembershipRepository.existsBySpotCompanyAndCustomerId(company, customerId);
     }
 

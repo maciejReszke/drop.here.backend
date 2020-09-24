@@ -13,16 +13,16 @@ import reactor.core.publisher.Mono;
 public class ImageService {
     private final ImageRepository imageRepository;
 
-    public Mono<Image> createImage(byte[] bytes, ImageType imageType, String entityId) {
+    public Mono<Image> updateImage(byte[] bytes, ImageType imageType, String entityId) {
         return findImage(entityId, imageType)
                 .switchIfEmpty(Mono.just(Image.builder().entityId(entityId).type(imageType).build()))
                 .doOnNext(image -> image.setBytes(bytes))
                 .flatMap(imageRepository::save);
     }
 
-    public Mono<Image> createImage(FilePart filePart, ImageType imageType, String entityId) {
+    public Mono<Image> updateImage(FilePart filePart, ImageType imageType, String entityId) {
         return readBytes(filePart)
-                .flatMap(bytes -> createImage(bytes, imageType, entityId));
+                .flatMap(bytes -> updateImage(bytes, imageType, entityId));
     }
 
     private Mono<byte[]> readBytes(FilePart image) {

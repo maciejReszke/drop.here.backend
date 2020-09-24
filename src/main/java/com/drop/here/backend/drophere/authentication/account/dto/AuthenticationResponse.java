@@ -13,8 +13,8 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class AuthenticationResponse {
 
-    @ApiModelProperty(value = "Account id", example = "1")
-    private Long accountId;
+    @ApiModelProperty(value = "Account id", example = "1Abc123")
+    private String accountId;
 
     @ApiModelProperty(value = "Account type", example = "COMPANY")
     private AccountType accountType;

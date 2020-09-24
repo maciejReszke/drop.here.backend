@@ -181,7 +181,7 @@ class CompanyServiceTest {
                 .build();
 
         final Image imageEntity = Image.builder().build();
-        when(imageService.createImage(image.getBytes(), ImageType.COMPANY_IMAGE))
+        when(imageService.updateImage(image.getBytes(), ImageType.COMPANY_IMAGE))
                 .thenReturn(imageEntity);
         when(companyRepository.save(company)).thenReturn(company);
 

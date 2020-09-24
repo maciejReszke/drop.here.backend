@@ -56,7 +56,7 @@ class CustomerServiceTest {
 
         when(customerMappingService.toCustomer(account, externalAuthenticationResult)).thenReturn(customer);
         doNothing().when(customerStoreService).save(customer);
-        when(imageService.createImage(externalAuthenticationResult.getImage(), ImageType.CUSTOMER_IMAGE))
+        when(imageService.updateImage(externalAuthenticationResult.getImage(), ImageType.CUSTOMER_IMAGE))
                 .thenReturn(image);
         doNothing().when(privilegeService).addCustomerCreatedPrivilege(account);
 
@@ -102,7 +102,7 @@ class CustomerServiceTest {
                 .build();
 
         final Image imageEntity = Image.builder().build();
-        when(imageService.createImage(image.getBytes(), ImageType.CUSTOMER_IMAGE))
+        when(imageService.updateImage(image.getBytes(), ImageType.CUSTOMER_IMAGE))
                 .thenReturn(imageEntity);
         doNothing().when(customerStoreService).save(customer);
 

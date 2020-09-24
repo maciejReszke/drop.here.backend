@@ -1,6 +1,5 @@
 package com.drop.here.backend.drophere.company.service;
 
-import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.service.AccountPersistenceService;
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
@@ -74,26 +73,25 @@ public class CompanyService {
     }
 
     private Mono<ResourceOperationResponse> updateCompany(CompanyManagementRequest companyManagementRequest, Company company) {
-        companyMappingService.updateCompany(companyManagementRequest, company);
-        log.info("Updating company with uid {}", company.getUid());
-        return companyRepository.save(company)
+        return companyMappingService.updateCompany(companyManagementRequest, company)
+                .doOnNext(updated -> log.info("Updating company with uid {}", company.getUid()))
+                .flatMap(updated -> companyRepository.save(company))
                 .map(savedCompany -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, company.getId()));
     }
 
     // TODO: 24/09/2020 transakcja!
     private Mono<ResourceOperationResponse> createCompany(CompanyManagementRequest companyManagementRequest, AccountAuthentication authentication) {
-        final Company company = companyMappingService.createCompany(companyManagementRequest, authentication.getPrincipal());
-        log.info("Creating new company with uid {} for account with id {}", company.getUid(), authentication.getPrincipal().getId());
-        final Account account = authentication.getPrincipal();
-        privilegeService.addCompanyCreatedPrivilege(account);
-        return accountPersistenceService.updateAccount(account)
-                .flatMap(saved -> companyRepository.save(company))
-                .map(saved -> new ResourceOperationResponse(ResourceOperationStatus.CREATED, company.getId()));
+        return companyMappingService.createCompany(companyManagementRequest, authentication.getPrincipal())
+                .doOnNext(company -> log.info("Creating new company with uid {} for account with id {}", company.getUid(), authentication.getPrincipal().getId()))
+                .doOnNext(company -> privilegeService.addCompanyCreatedPrivilege(authentication.getPrincipal()))
+                .flatMap(company -> accountPersistenceService.updateAccount(authentication.getPrincipal())
+                        .flatMap(account -> companyRepository.save(company)))
+                .map(company -> new ResourceOperationResponse(ResourceOperationStatus.CREATED, company.getId()));
     }
 
     public Mono<ResourceOperationResponse> updateImage(FilePart imagePart, AccountAuthentication authentication) {
         final Company company = authentication.getCompany();
-        return imageService.createImage(imagePart, ImageType.COMPANY_IMAGE, company.getId())
+        return imageService.updateImage(imagePart, ImageType.COMPANY_IMAGE, company.getId())
                 .doOnNext(image -> log.info("Updating image for company {}", company.getUid()))
                 .map(image -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, company.getId()));
     }
@@ -103,9 +101,13 @@ public class CompanyService {
                 .flatMap(company -> imageService.findImage(company.getId(), ImageType.COMPANY_IMAGE));
     }
 
-    public boolean hasRelation(Company company, Long customerId) {
-        return spotMembershipService.existsMembership(company, customerId) ||
-                companyCustomerRelationshipService.hasRelationship(company, customerId);
+    public Mono<Boolean> hasRelation(Company company, String customerId) {
+        return spotMembershipService.existsMembership(company, customerId)
+                .filter(result -> result)
+                .switchIfEmpty(Mono.defer(() -> companyCustomerRelationshipService.hasRelationship(company, customerId)))
+                .filter(result -> result)
+                .map(result -> true)
+                .switchIfEmpty(Mono.just(false));
     }
 
     public Flux<CompanyCustomerResponse> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, AccountAuthentication authentication, Pageable pageable) {

@@ -1,6 +1,10 @@
 package com.drop.here.backend.drophere.configuration;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
+import com.drop.here.backend.drophere.country.Country;
+import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import org.bson.Document;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +19,10 @@ public class EntityDeclarationConfiguration {
     @Bean(name = "declaredCollections")
     public MongoCollection<Document> declareCollections(ReactiveMongoTemplate reactiveMongoTemplate) {
         return createCollection(reactiveMongoTemplate, Account.class)
+                .then(createCollection(reactiveMongoTemplate, Country.class))
+                .then(createCollection(reactiveMongoTemplate, ProductUnit.class))
+                .then(createCollection(reactiveMongoTemplate, Product.class))
+                .then(createCollection(reactiveMongoTemplate, CompanyCustomerRelationship.class))
                 .block();
 
     }

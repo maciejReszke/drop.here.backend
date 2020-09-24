@@ -8,12 +8,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
-
-import java.util.List;
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,16 +27,20 @@ class CountryServiceTest {
     @Test
     void whenFindAllActiveThenMapAndGet() {
         //given
-        when(countryRepository.findAllByCountryStatus(CountryStatus.ACTIVE, Sort.by("name"))).thenReturn(List.of(Country
+        when(countryRepository.findAllByCountryStatus(CountryStatus.ACTIVE, Sort.by("name"))).thenReturn(Flux.just(Country
                 .builder().name("poland").mobilePrefix("+48").build()));
 
         //when
-        final List<CountryResponse> response = countryService.findAllActive();
+        final Flux<CountryResponse> result = countryService.findAllActive();
 
         //then
-        assertThat(response).hasSize(1);
-        assertThat(response.get(0).getName()).isEqualTo("poland");
-        assertThat(response.get(0).getMobilePrefix()).isEqualTo("+48");
+        StepVerifier.create(result)
+                .assertNext(response -> {
+                    assertThat(response.getName()).isEqualTo("poland");
+                    assertThat(response.getMobilePrefix()).isEqualTo("+48");
+                })
+                .verifyComplete();
+
     }
 
     @Test
@@ -47,13 +50,15 @@ class CountryServiceTest {
         final Country country = CountryDataGenerator.poland();
 
         when(countryRepository.findByNameAndCountryStatus(countryName, CountryStatus.ACTIVE))
-                .thenReturn(Optional.of(country));
+                .thenReturn(Mono.just(country));
 
         //when
-        final Country active = countryService.findActive(countryName);
+        final Mono<Country> response = countryService.findActive(countryName);
 
         //then
-        assertThat(active).isEqualTo(country);
+        StepVerifier.create(response)
+                .expectNext(country)
+                .verifyComplete();
     }
 
     @Test
@@ -62,13 +67,15 @@ class CountryServiceTest {
         final String countryName = "countryName";
 
         when(countryRepository.findByNameAndCountryStatus(countryName, CountryStatus.ACTIVE))
-                .thenReturn(Optional.empty());
+                .thenReturn(Mono.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> countryService.findActive(countryName));
+        final Mono<Country> result = countryService.findActive(countryName);
 
         //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+        StepVerifier.create(result)
+                .expectError(RestEntityNotFoundException.class)
+                .verify();
     }
 
 }

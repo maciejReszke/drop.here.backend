@@ -4,21 +4,23 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-// TODO MONO:
 @Service
 @Slf4j
 public class MockedFirebaseExecutorService implements FirebaseExecutorService {
 
     @Override
-    public void sendAll(List<Message> messages) {
+    public Mono<Void> sendAll(List<Message> messages) {
         log.info("Mocked firebase executor service: sendAll(List<Message> messages)");
+        return Mono.empty();
     }
 
     @Override
-    public void initializeApp(FirebaseOptions options) {
+    public Mono<Void> initializeApp(FirebaseOptions options) {
         log.info("Mocked firebase executor service: initializeApp(FirebaseOptions options)");
+        return Mono.empty();
     }
 }

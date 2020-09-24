@@ -1,16 +1,14 @@
 package com.drop.here.backend.drophere.country;
 
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Optional;
-
-// TODO MONO:
 @Repository
-public interface CountryRepository extends JpaRepository<Country, Long> {
-    List<Country> findAllByCountryStatus(CountryStatus countryStatus, Sort sort);
+public interface CountryRepository extends ReactiveMongoRepository<Country, String> {
+    Flux<Country> findAllByCountryStatus(CountryStatus countryStatus, Sort sort);
 
-    Optional<Country> findByNameAndCountryStatus(String country, CountryStatus status);
+    Mono<Country> findByNameAndCountryStatus(String country, CountryStatus status);
 }

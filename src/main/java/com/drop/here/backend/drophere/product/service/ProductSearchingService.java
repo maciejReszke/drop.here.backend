@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.product.service;
 
 import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationPrivilegesService;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.product.dto.response.ProductCustomizationResponse;
 import com.drop.here.backend.drophere.product.dto.response.ProductCustomizationWrapperResponse;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
@@ -9,13 +10,13 @@ import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
-import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -31,7 +32,7 @@ public class ProductSearchingService {
     private final AuthenticationPrivilegesService authenticationPrivilegesService;
     private final ProductCustomizationService productCustomizationService;
 
-    public Page<ProductResponse> findAll(Pageable pageable,
+    public Flux<ProductResponse> findAll(Pageable pageable,
                                          String companyUid,
                                          String[] desiredCategories,
                                          String desiredNameSubstring,

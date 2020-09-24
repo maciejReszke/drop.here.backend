@@ -8,12 +8,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -27,15 +27,15 @@ public class FirebaseInitializationService {
     @Value("${googlecredentials.database_url}")
     private String databaseUrl;
 
-    public void initialize() throws IOException {
+    public Mono<Void> initialize() throws IOException {
         if (INITIALIZED.get()) {
-            return;
+            return Mono.empty();
         }
         log.info("Initializing firebase app on database url {}", databaseUrl);
         final FirebaseOptions options = prepareFirebaseOptions();
-        firebaseExecutorService.initializeApp(options);
-        log.info("Successfully initialized firebase app on database url {}", databaseUrl);
-        INITIALIZED.set(true);
+        return firebaseExecutorService.initializeApp(options)
+                .doOnSuccess(any -> log.info("Successfully initialized firebase app on database url {}", databaseUrl))
+                .doOnSuccess(any -> INITIALIZED.set(true));
     }
 
     private FirebaseOptions prepareFirebaseOptions() throws IOException {

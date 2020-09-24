@@ -176,7 +176,7 @@ class AccountProfileServiceTest {
                 .build();
 
         final Image imageEntity = Image.builder().build();
-        when(imageService.createImage(image.getBytes(), ImageType.ACCOUNT_PROFILE_IMAGE))
+        when(imageService.updateImage(image.getBytes(), ImageType.ACCOUNT_PROFILE_IMAGE))
                 .thenReturn(imageEntity);
         doNothing().when(accountProfilePersistenceService).updateProfile(accountProfile);
 

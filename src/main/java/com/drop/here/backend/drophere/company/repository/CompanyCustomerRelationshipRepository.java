@@ -4,20 +4,17 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
 import com.drop.here.backend.drophere.company.enums.CompanyCustomerRelationshipStatus;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 
-// TODO MONO:
 @Repository
-public interface CompanyCustomerRelationshipRepository extends JpaRepository<CompanyCustomerRelationship, Long> {
-    boolean existsByCompanyAndCustomerAndRelationshipStatus(Company company, Customer customer, CompanyCustomerRelationshipStatus blocked);
+public interface CompanyCustomerRelationshipRepository extends ReactiveMongoRepository<CompanyCustomerRelationship, String> {
+    Mono<CompanyCustomerRelationship> findByCompanyAndCustomerAndRelationshipStatus(Company company, Customer customer, CompanyCustomerRelationshipStatus blocked);
 
-    Optional<CompanyCustomerRelationship> findByCompanyAndCustomer(Company company, Customer customer);
+    Mono<CompanyCustomerRelationship> findByCompanyAndCustomerId(Company company, String customerId);
 
-    boolean existsByCompanyAndCustomerId(Company company, Long customerId);
-
-    List<CompanyCustomerRelationship> findByCompanyAndCustomerIdIn(Company company, List<Long> customersIds);
+    List<CompanyCustomerRelationship> findByCompanyAndCustomerIdIn(Company company, List<String> customersIds);
 }

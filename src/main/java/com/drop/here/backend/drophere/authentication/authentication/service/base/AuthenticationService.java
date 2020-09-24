@@ -68,7 +68,7 @@ public class AuthenticationService {
                 RestExceptionStatusCode.LOGIN_INVALID_PROFILE_PASSWORD));
     }
 
-    // TODO: 23/09/2020 bylo transactional
+    // TODO: 23/09/2020 transactional
     public Mono<LoginResponse> loginWithAuthenticationProvider(ExternalAuthenticationProviderLoginRequest request) {
         return externalAuthenticationDelegationService.authenticate(request)
                 .flatMap(result -> getOrCreateAccount(request, result)

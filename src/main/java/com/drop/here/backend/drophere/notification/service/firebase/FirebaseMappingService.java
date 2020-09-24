@@ -9,7 +9,6 @@ import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class FirebaseMappingService {

@@ -42,7 +42,7 @@ class ImageServiceTest {
         when(imageRepository.save(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         //when
-        final Mono<Image> result = imageService.createImage(bytes, type, entityId);
+        final Mono<Image> result = imageService.updateImage(bytes, type, entityId);
 
         //then
         StepVerifier.create(result)
@@ -65,7 +65,7 @@ class ImageServiceTest {
         when(imageRepository.save(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         //when
-        final Mono<Image> result = imageService.createImage(bytes, type, entityId);
+        final Mono<Image> result = imageService.updateImage(bytes, type, entityId);
 
         //then
         StepVerifier.create(result)
@@ -93,7 +93,7 @@ class ImageServiceTest {
         doNothing().when(dataBuffer).read(any());
 
         //when
-        final Mono<Image> result = imageService.createImage(filePart, type, entityId);
+        final Mono<Image> result = imageService.updateImage(filePart, type, entityId);
 
         //then
         StepVerifier.create(result)
@@ -120,7 +120,7 @@ class ImageServiceTest {
         doNothing().when(dataBuffer).read(any());
 
         //when
-        final Mono<Image> result = imageService.createImage(filePart, type, entityId);
+        final Mono<Image> result = imageService.updateImage(filePart, type, entityId);
 
         //then
         StepVerifier.create(result)

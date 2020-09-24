@@ -36,7 +36,7 @@ class CompanyCustomerRelationshipServiceTest {
         final Company company = Company.builder().build();
         final Customer customer = Customer.builder().build();
 
-        when(companyCustomerRelationshipRepository.existsByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
                 .thenReturn(true);
 
         //when
@@ -52,7 +52,7 @@ class CompanyCustomerRelationshipServiceTest {
         final Company company = Company.builder().build();
         final Customer customer = Customer.builder().build();
 
-        when(companyCustomerRelationshipRepository.existsByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
                 .thenReturn(false);
 
         //when
@@ -69,7 +69,7 @@ class CompanyCustomerRelationshipServiceTest {
         final Customer customer = Customer.builder().build();
         final Company company = Company.builder().build();
 
-        when(companyCustomerRelationshipRepository.existsByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
                 .thenReturn(true);
 
         //when
@@ -86,11 +86,11 @@ class CompanyCustomerRelationshipServiceTest {
         final Customer customer = Customer.builder().build();
         final Company company = Company.builder().build();
 
-        when(companyCustomerRelationshipRepository.existsByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
                 .thenReturn(false);
         final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(company, customer);
         relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.ACTIVE);
-        when(companyCustomerRelationshipRepository.findByCompanyAndCustomer(company, customer))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerId(company, customer))
                 .thenReturn(Optional.of(relationship));
         when(companyCustomerRelationshipRepository.save(relationship)).thenReturn(relationship);
 
@@ -109,11 +109,11 @@ class CompanyCustomerRelationshipServiceTest {
         final Customer customer = Customer.builder().build();
         final Company company = Company.builder().build();
 
-        when(companyCustomerRelationshipRepository.existsByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
                 .thenReturn(false);
         final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(company, customer);
         relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.ACTIVE);
-        when(companyCustomerRelationshipRepository.findByCompanyAndCustomer(company, customer))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerId(company, customer))
                 .thenReturn(Optional.empty());
         when(companyMappingService.createActiveRelationship(customer, company)).thenReturn(relationship);
         when(companyCustomerRelationshipRepository.save(relationship)).thenReturn(relationship);
@@ -133,7 +133,7 @@ class CompanyCustomerRelationshipServiceTest {
         final Customer customer = Customer.builder().build();
         final Company company = Company.builder().build();
 
-        when(companyCustomerRelationshipRepository.existsByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
                 .thenReturn(false);
 
         //when
@@ -150,11 +150,11 @@ class CompanyCustomerRelationshipServiceTest {
         final Customer customer = Customer.builder().build();
         final Company company = Company.builder().build();
 
-        when(companyCustomerRelationshipRepository.existsByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED))
                 .thenReturn(true);
         final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(company, customer);
         relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
-        when(companyCustomerRelationshipRepository.findByCompanyAndCustomer(company, customer))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerId(company, customer))
                 .thenReturn(Optional.of(relationship));
         when(companyCustomerRelationshipRepository.save(relationship)).thenReturn(relationship);
         //when
@@ -171,7 +171,7 @@ class CompanyCustomerRelationshipServiceTest {
         final Company company = Company.builder().build();
         final Long customerId = 5L;
 
-        when(companyCustomerRelationshipRepository.existsByCompanyAndCustomerId(company, customerId))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerId(company, customerId))
                 .thenReturn(true);
 
         //when
@@ -187,7 +187,7 @@ class CompanyCustomerRelationshipServiceTest {
         final Company company = Company.builder().build();
         final Long customerId = 5L;
 
-        when(companyCustomerRelationshipRepository.existsByCompanyAndCustomerId(company, customerId))
+        when(companyCustomerRelationshipRepository.findByCompanyAndCustomerId(company, customerId))
                 .thenReturn(false);
 
         //when

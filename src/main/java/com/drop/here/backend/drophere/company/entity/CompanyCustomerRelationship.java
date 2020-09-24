@@ -5,23 +5,13 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -29,18 +19,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity
-@ToString(exclude = {"customer", "company"})
-@EqualsAndHashCode(exclude = {"customer", "company"})
-@Table(uniqueConstraints = @UniqueConstraint(name = "unique-company-customer-relationship", columnNames = {"customer_id", "company_id"}))
+@Document
 public class CompanyCustomerRelationship {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     private CompanyCustomerRelationshipStatus relationshipStatus;
 
     @NotNull
@@ -48,13 +33,11 @@ public class CompanyCustomerRelationship {
     private LocalDateTime createdAt;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id")
+    @DBRef
     private Customer customer;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
+    @DBRef
     private Company company;
 
     @NotNull

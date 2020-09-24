@@ -315,7 +315,7 @@ class ProductServiceTest {
         final String companyId = "companyId";
         final Image imageEntity = Image.builder().build();
         when(productRepository.findByIdAndCompanyUid(productId, companyId)).thenReturn(Optional.of(product));
-        when(imageService.createImage(image.getBytes(), ImageType.PRODUCT_IMAGE))
+        when(imageService.updateImage(image.getBytes(), ImageType.PRODUCT_IMAGE))
                 .thenReturn(imageEntity);
         when(productRepository.save(product)).thenReturn(product);
 

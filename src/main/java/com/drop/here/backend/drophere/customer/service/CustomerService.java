@@ -44,7 +44,7 @@ public class CustomerService {
 
     private Mono<Customer> createImageIfNotEmpty(byte[] image, Customer customer) {
         return ArrayUtils.isNotEmpty(image)
-                ? imageService.createImage(image, ImageType.CUSTOMER_IMAGE, customer.getId())
+                ? imageService.updateImage(image, ImageType.CUSTOMER_IMAGE, customer.getId())
                 .map(ignore -> customer)
                 : Mono.just(customer);
     }
@@ -81,7 +81,7 @@ public class CustomerService {
 
     public Mono<ResourceOperationResponse> updateImage(FilePart imagePart, AccountAuthentication authentication) {
         final Customer customer = authentication.getCustomer();
-        return imageService.createImage(imagePart, ImageType.CUSTOMER_IMAGE, customer.getId())
+        return imageService.updateImage(imagePart, ImageType.CUSTOMER_IMAGE, customer.getId())
                 .map(image -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId()));
     }
 

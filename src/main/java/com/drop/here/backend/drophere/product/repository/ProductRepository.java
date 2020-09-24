@@ -4,18 +4,18 @@ import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 
 // TODO MONO:
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends ReactiveMongoRepository<Product, Long> {
 
-    Optional<Product> findByIdAndCompanyUid(Long productId, String companyUid);
+    Mono<Product> findByIdAndCompanyUid(String productId, String companyUid);
 
     @Query("select p from Product p where " +
             "p.company.uid = :companyUid and " +
@@ -33,11 +33,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "order by p.category")
     List<String> findCategories(String companyUid);
 
-    List<Product> findByIdIn(List<Long> productsIds);
-
-    @Query("select p from Product p " +
-            "join fetch p.image where " +
-            "p.id = :productId and " +
-            "p.company.uid = :companyUid")
-    Optional<Product> findByIdAndCompanyUidWithImage(Long productId, String companyUid);
+    List<Product> findByIdIn(List<String> productsIds);
 }

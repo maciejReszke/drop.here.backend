@@ -12,39 +12,38 @@ import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
-// TODO: 23/09/2020 na reaktywne!
 @Slf4j
 @ControllerAdvice
 public class ExceptionHandlers {
     @ExceptionHandler(RestException.class)
-    public ResponseEntity<ExceptionMessage> handleRestException(RestException exception) {
+    public Mono<ResponseEntity<ExceptionMessage>> handleRestException(RestException exception) {
         exception.logMessage();
-        return ResponseEntity
+        return Mono.just(ResponseEntity
                 .status(exception.getHttpStatus())
                 .body(ExceptionMessage.builder()
                         .message(exception.getMessage())
                         .status(exception.getHttpStatus())
                         .timestamp(LocalDateTime.now())
                         .code(exception.getCode())
-                        .build());
+                        .build()));
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
-    public ResponseEntity<ExceptionMessage> handleException(WebExchangeBindException exception) {
+    public Mono<ResponseEntity<ExceptionMessage>> handleException(WebExchangeBindException exception) {
         final String message = exception.getBindingResult().getFieldErrors()
                 .stream()
                 .map(fieldError -> String.format("Field %s has error: %s", fieldError.getField(), fieldError.getDefaultMessage()))
                 .collect(Collectors.joining("\n"));
         log.info("Invalid request caused by invalid arguments {}", message);
         final HttpStatus status = HttpStatus.BAD_REQUEST;
-        return ResponseEntity
+        return Mono.just(ResponseEntity
                 .status(status)
                 .body(ExceptionMessage.builder()
                         .message(message)
                         .status(status)
                         .timestamp(LocalDateTime.now())
                         .code(RestExceptionStatusCode.INVALID_ARGUMENTS_CONSTRAINTS_EXCEPTION.ordinal())
-                        .build());
+                        .build()));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

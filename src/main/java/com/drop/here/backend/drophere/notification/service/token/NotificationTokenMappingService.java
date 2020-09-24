@@ -4,15 +4,14 @@ package com.drop.here.backend.drophere.notification.service.token;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.notification.dto.NotificationTokenManagementRequest;
 import com.drop.here.backend.drophere.notification.entity.NotificationToken;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingServiceType;
 import com.drop.here.backend.drophere.notification.enums.NotificationTokenType;
-import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import io.vavr.control.Try;
 import org.springframework.stereotype.Service;
 
-// TODO MONO:
 @Service
 public class NotificationTokenMappingService {
 

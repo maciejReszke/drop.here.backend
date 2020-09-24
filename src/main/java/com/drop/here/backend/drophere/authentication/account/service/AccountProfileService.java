@@ -80,7 +80,7 @@ public class AccountProfileService {
     public Mono<ResourceOperationResponse> updateImage(FilePart filePart, AccountAuthentication authentication) {
         final AccountProfile accountProfile = authentication.getProfile();
         log.info("Updating image for account profile {}", accountProfile.getProfileUid());
-        return imageService.createImage(filePart, ImageType.ACCOUNT_PROFILE_IMAGE, accountProfile.getProfileUid())
+        return imageService.updateImage(filePart, ImageType.ACCOUNT_PROFILE_IMAGE, accountProfile.getProfileUid())
                 .map(image -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, accountProfile.getProfileUid()));
     }
 

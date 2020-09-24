@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.schedule_template.repository.ScheduleTempl
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,7 @@ public class ScheduleTemplateStoreService {
     private final ScheduleTemplateRepository scheduleTemplateRepository;
 
     // todo bylo transactional(rollbackFor = Exception.class)
-    public void deleteScheduleTemplateProductByProduct(Product product) {
+    public Mono<Void> deleteScheduleTemplateProductByProduct(Product product) {
         scheduleTemplateRepository.deleteScheduleTemplateProductByProduct(product);
     }
 

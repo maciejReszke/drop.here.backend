@@ -13,10 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class CompanyMappingService {
@@ -37,26 +37,30 @@ public class CompanyMappingService {
                 .build();
     }
 
-    public void updateCompany(CompanyManagementRequest companyManagementRequest, Company company) {
-        final String name = companyManagementRequest.getName().trim();
-        company.setLastUpdatedAt(LocalDateTime.now());
-        company.setName(name);
-        company.setUid(generateUid(name));
-        company.setCountry(countryService.findActive(companyManagementRequest.getCountry()));
-        company.setVisibilityStatus(CompanyVisibilityStatus.valueOf(companyManagementRequest.getVisibilityStatus()));
+    public Mono<Company> updateCompany(CompanyManagementRequest companyManagementRequest, Company company) {
+        return countryService.findActive(companyManagementRequest.getCountry())
+                .doOnNext(country -> {
+                    final String name = companyManagementRequest.getName().trim();
+                    company.setLastUpdatedAt(LocalDateTime.now());
+                    company.setName(name);
+                    company.setUid(generateUid(name));
+                    company.setCountry(country);
+                    company.setVisibilityStatus(CompanyVisibilityStatus.valueOf(companyManagementRequest.getVisibilityStatus()));
+                })
+                .map(ignore -> company);
+
     }
 
     private String generateUid(String name) {
         return name.replace(" ", "-").toLowerCase() + RandomStringUtils.randomAlphanumeric(randomUidPart);
     }
 
-    public Company createCompany(CompanyManagementRequest companyManagementRequest, Account account) {
+    public Mono<Company> createCompany(CompanyManagementRequest companyManagementRequest, Account account) {
         final Company company = Company.builder()
                 .account(account)
                 .createdAt(LocalDateTime.now())
                 .build();
-        updateCompany(companyManagementRequest, company);
-        return company;
+        return updateCompany(companyManagementRequest, company);
     }
 
     public CompanyCustomerRelationship createActiveRelationship(Customer customer, Company company) {

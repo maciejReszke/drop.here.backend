@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import springfox.documentation.annotations.ApiIgnore;
@@ -94,7 +94,7 @@ public class ProductController {
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public Mono<ResourceOperationResponse> updateProduct(@ApiIgnore @PathVariable String companyUid,
-                                                         @ApiIgnore @PathVariable Long productId,
+                                                         @ApiIgnore @PathVariable String productId,
                                                          @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
                                                          @RequestBody @Valid Mono<ProductManagementRequest> productManagementRequestMono) {
         return accountAuthenticationMono.zipWith(productManagementRequestMono)
@@ -112,7 +112,7 @@ public class ProductController {
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public Mono<ResourceOperationResponse> deleteProduct(@ApiIgnore @PathVariable String companyUid,
-                                                         @ApiIgnore @PathVariable Long productId,
+                                                         @ApiIgnore @PathVariable String productId,
                                                          @ApiIgnore Mono<AccountAuthentication> authentication) {
         return authentication.flatMap(ignore -> productService.deleteProduct(productId, companyUid));
     }
@@ -129,9 +129,12 @@ public class ProductController {
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public Mono<ResourceOperationResponse> updateImage(@ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
                                                        @ApiIgnore @PathVariable String companyUid,
-                                                       @ApiIgnore @PathVariable Long productId,
-                                                       @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
-        return accountAuthenticationMono.flatMap(accountAuthentication -> productService.updateImage(productId, companyUid, image, accountAuthentication));
+                                                       @ApiIgnore @PathVariable String productId,
+                                                       @RequestPart(name = IMAGE_PART_NAME) Mono<FilePart> monoPart) {
+
+        return accountAuthenticationMono
+                .zipWith(monoPart)
+                .flatMap(tuple -> productService.updateImage(productId, companyUid, tuple.getT2(), tuple.getT1()));
     }
 
     @GetMapping("/{productId}/images")
@@ -144,7 +147,7 @@ public class ProductController {
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     public Mono<ResponseEntity<byte[]>> findImage(@ApiIgnore @PathVariable String companyUid,
-                                                  @ApiIgnore @PathVariable Long productId) {
+                                                  @ApiIgnore @PathVariable String productId) {
         return productService.findImage(productId, companyUid)
                 .map(image -> ResponseEntity
                         .status(HttpStatus.OK)
@@ -164,7 +167,7 @@ public class ProductController {
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public Mono<ResourceOperationResponse> createCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
-                                                                       @ApiIgnore @PathVariable Long productId,
+                                                                       @ApiIgnore @PathVariable String productId,
                                                                        @ApiIgnore Mono<AccountAuthentication> accountAuthenticationMono,
                                                                        @RequestBody @Valid Mono<ProductCustomizationWrapperRequest> productCustomizationWrapperRequestMono) {
         return accountAuthenticationMono.zipWith(productCustomizationWrapperRequestMono)
@@ -182,7 +185,7 @@ public class ProductController {
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public Mono<ResourceOperationResponse> updateCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
-                                                                       @ApiIgnore @PathVariable Long productId,
+                                                                       @ApiIgnore @PathVariable String productId,
                                                                        @ApiIgnore @PathVariable Long customizationId,
                                                                        @ApiIgnore Mono<AccountAuthentication> authenticationMono,
                                                                        @RequestBody @Valid Mono<ProductCustomizationWrapperRequest> productCustomizationWrapperRequestMono) {
@@ -201,7 +204,7 @@ public class ProductController {
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public Mono<ResourceOperationResponse> deleteCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
-                                                                       @ApiIgnore @PathVariable Long productId,
+                                                                       @ApiIgnore @PathVariable String productId,
                                                                        @ApiIgnore @PathVariable Long customizationId,
                                                                        @ApiIgnore Mono<AccountAuthentication> authenticationMono) {
         return authenticationMono.flatMap(accountAuthentication -> productService.deleteCustomization(productId, companyUid, customizationId, accountAuthentication));

@@ -12,9 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,64 +21,74 @@ public class CompanyCustomerRelationshipService {
     private final CompanyMappingService companyMappingService;
 
     public Mono<Void> handleCustomerBlocking(boolean toBlock, Customer customer, Company company) {
-        final boolean isBlocked = isBlocked(company, customer);
+        return isBlocked(company, customer)
+                .flatMap(isBlocked -> handleCustomerBlocking(isBlocked, toBlock, customer, company));
+    }
 
+    private Mono<Void> handleCustomerBlocking(Boolean isBlocked, boolean toBlock, Customer customer, Company company) {
         if (toBlock && !isBlocked) {
-            blockCustomer(customer, company);
+            return blockCustomer(customer, company).then();
         }
 
         if (!toBlock && isBlocked) {
-            unblockCustomer(customer, company);
+            return unblockCustomer(customer, company).then();
         }
+
+        return Mono.empty();
     }
 
-    private void unblockCustomer(Customer customer, Company company) {
-        getCompanyCustomerRelationship(customer, company)
-                .ifPresent(relationship -> {
+    private Mono<CompanyCustomerRelationship> unblockCustomer(Customer customer, Company company) {
+        return getCompanyCustomerRelationship(customer, company)
+                .doOnNext(relationship -> {
                     relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.ACTIVE);
                     relationship.setLastUpdatedAt(LocalDateTime.now());
                     log.info("Unblocking customer {} for company {}", customer.getId(), company.getUid());
-                    companyCustomerRelationshipRepository.save(relationship);
-                });
+                })
+                .flatMap(companyCustomerRelationshipRepository::save);
     }
 
-    private Optional<CompanyCustomerRelationship> getCompanyCustomerRelationship(Customer customer, Company company) {
-        return companyCustomerRelationshipRepository.findByCompanyAndCustomer(company, customer);
+    private Mono<CompanyCustomerRelationship> getCompanyCustomerRelationship(Customer customer, Company company) {
+        return companyCustomerRelationshipRepository.findByCompanyAndCustomerId(company, customer.getId());
     }
 
-    private void blockCustomer(Customer customer, Company company) {
-        getCompanyCustomerRelationship(customer, company)
-                .ifPresentOrElse(relationship -> blockUsingExistingRelationship(customer, company, relationship),
-                        () -> blockUsingNewRelationship(customer, company));
+    private Mono<CompanyCustomerRelationship> blockCustomer(Customer customer, Company company) {
+        return getCompanyCustomerRelationship(customer, company)
+                .flatMap(companyCustomerRelationship -> blockUsingExistingRelationship(customer, company, companyCustomerRelationship))
+                .switchIfEmpty(Mono.defer(() -> blockUsingNewRelationship(customer, company)));
     }
 
-    private void blockUsingNewRelationship(Customer customer, Company company) {
+    private Mono<CompanyCustomerRelationship> blockUsingNewRelationship(Customer customer, Company company) {
         final CompanyCustomerRelationship relationship = companyMappingService.createActiveRelationship(customer, company);
         relationship.setLastUpdatedAt(LocalDateTime.now());
-        block(customer, company, relationship, CompanyCustomerRelationshipStatus.BLOCKED, "Blocking customer {} for company {}");
+        return block(customer, company, relationship);
     }
 
-    private void block(Customer customer, Company company, CompanyCustomerRelationship relationship, CompanyCustomerRelationshipStatus blocked, String s) {
-        relationship.setRelationshipStatus(blocked);
-        log.info(s, customer.getId(), company.getUid());
-        companyCustomerRelationshipRepository.save(relationship);
-    }
-
-    private void blockUsingExistingRelationship(Customer customer, Company company, CompanyCustomerRelationship relationship) {
+    private Mono<CompanyCustomerRelationship> block(Customer customer, Company company, CompanyCustomerRelationship relationship) {
         relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
         log.info("Blocking customer {} for company {}", customer.getId(), company.getUid());
-        companyCustomerRelationshipRepository.save(relationship);
+        return companyCustomerRelationshipRepository.save(relationship);
+    }
+
+    private Mono<CompanyCustomerRelationship> blockUsingExistingRelationship(Customer customer, Company company, CompanyCustomerRelationship relationship) {
+        relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
+        log.info("Blocking customer {} for company {}", customer.getId(), company.getUid());
+        return companyCustomerRelationshipRepository.save(relationship);
     }
 
     public Mono<Boolean> isBlocked(Company company, Customer customer) {
-        return companyCustomerRelationshipRepository.existsByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED);
+        return companyCustomerRelationshipRepository.findByCompanyAndCustomerAndRelationshipStatus(company, customer, CompanyCustomerRelationshipStatus.BLOCKED)
+                .map(ignore -> true)
+                .switchIfEmpty(Mono.just(false));
     }
 
-    public boolean hasRelationship(Company company, Long customerId) {
-        return companyCustomerRelationshipRepository.existsByCompanyAndCustomerId(company, customerId);
+    public Mono<Boolean> hasRelationship(Company company, String customerId) {
+        return companyCustomerRelationshipRepository.findByCompanyAndCustomerId(company, customerId)
+                .map(ignore -> true)
+                .switchIfEmpty(Mono.just(false));
+
     }
 
-    public List<CompanyCustomerRelationship> findRelationships(List<Long> customersIds, Company company) {
+    public List<CompanyCustomerRelationship> findRelationships(List<String> customersIds, Company company) {
         return companyCustomerRelationshipRepository.findByCompanyAndCustomerIdIn(company, customersIds);
     }
 }
