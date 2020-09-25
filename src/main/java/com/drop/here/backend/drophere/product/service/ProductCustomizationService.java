@@ -6,11 +6,9 @@ import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWr
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -24,35 +22,30 @@ public class ProductCustomizationService {
     private final ProductCustomizationWrapperRepository customizationWrapperRepository;
 
     @Transactional
-    public ProductCustomizationWrapper createCustomizations(Product product, ProductCustomizationWrapperRequest productCustomizationWrapperRequest, AccountAuthentication authentication) {
+    public void createCustomizations(Product product, ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
         validationService.validate(productCustomizationWrapperRequest);
         final ProductCustomizationWrapper customizationWrapper = mappingService.toCustomizationWrapper(product, productCustomizationWrapperRequest);
-        log.info("Saving new customization wrapper for product with id {} company {}", product.getId(), authentication.getCompany().getUid());
-        return customizationWrapperRepository.save(customizationWrapper);
+        log.info("Saving new customization wrapper for product with id {}", product.getId());
+        customizationWrapperRepository.save(customizationWrapper);
     }
 
-    public void deleteCustomization(Product product, Long customizationId, AccountAuthentication authentication) {
-        final ProductCustomizationWrapper customizationWrapper = getCustomizationWrapper(product, customizationId);
-        log.info("Deleting customization wrapper {} for product with id {} company {}", customizationWrapper.getId(), product.getId(), authentication.getCompany().getUid());
+    @Transactional
+    public void deleteCustomization(Product product) {
+        final ProductCustomizationWrapper customizationWrapper = getCustomizationWrapper(product);
+        log.info("Deleting customization wrapper {} for product with id {}", customizationWrapper.getId(), product.getId());
         customizationWrapperRepository.delete(customizationWrapper);
     }
 
-    @Transactional(propagation = Propagation.NEVER)
-    public ProductCustomizationWrapper updateCustomization(Product product, Long customizationId, ProductCustomizationWrapperRequest productCustomizationWrapperRequest, AccountAuthentication authentication) {
-        final ProductCustomizationWrapper wrapper = getCustomizationWrapper(product, customizationId);
-        validationService.validate(productCustomizationWrapperRequest);
-        final ProductCustomizationWrapper customizationWrapper = mappingService.toCustomizationWrapper(product, productCustomizationWrapperRequest);
-        customizationWrapper.setId(wrapper.getId());
-        customizationWrapper.setVersion(wrapper.getVersion());
-        log.info("Updating customization wrapper {} for product with id {} company {}", wrapper.getId(), product.getId(), authentication.getCompany().getUid());
-        return customizationWrapperRepository.save(customizationWrapper);
-
+    @Transactional
+    public void updateCustomization(Product product, ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
+        deleteCustomization(product);
+        createCustomizations(product, productCustomizationWrapperRequest);
     }
 
-    private ProductCustomizationWrapper getCustomizationWrapper(Product product, Long customizationId) {
-        return customizationWrapperRepository.findByIdAndProduct(customizationId, product)
+    private ProductCustomizationWrapper getCustomizationWrapper(Product product) {
+        return customizationWrapperRepository.findByProduct(product)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
-                        "Customization with id %s for product %s was not found", customizationId, product.getId()),
+                        "Customization for product %s was not found", product.getId()),
                         RestExceptionStatusCode.PRODUCT_CUSTOMIZATION_NOT_FOUND
                 ));
     }

@@ -8,11 +8,9 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
-import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.schedule_template.service.ScheduleTemplateStoreService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
@@ -43,20 +41,24 @@ public class ProductService {
         return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, accountAuthentication);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResourceOperationResponse createProduct(ProductManagementRequest productManagementRequest, String companyUid, AccountAuthentication accountAuthentication) {
         productValidationService.validateProductRequest(productManagementRequest);
         final Product product = productMappingService.toEntity(productManagementRequest, accountAuthentication);
         log.info("Creating product for company {} with name {}", companyUid, product.getName());
         productRepository.save(product);
+        productCustomizationService.createCustomizations(product, productManagementRequest.getProductCustomizationWrapperRequest());
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, product.getId());
     }
 
+    @Transactional
     public ResourceOperationResponse updateProduct(ProductManagementRequest productManagementRequest, Long productId, String companyUid) {
         final Product product = getProduct(productId, companyUid);
         productValidationService.validateProductRequest(productManagementRequest);
         productMappingService.update(product, productManagementRequest);
         log.info("Updating product {} for company {} with name {}", product.getId(), companyUid, product.getName());
         productRepository.save(product);
+        productCustomizationService.updateCustomization(product, productManagementRequest.getProductCustomizationWrapperRequest());
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, productId);
     }
 
@@ -70,33 +72,16 @@ public class ProductService {
         final Product product = getProduct(productId, companyUid);
         log.info("Deleting product {} for company {} with name {}", productId, companyUid, product.getName());
         scheduleTemplateStoreService.deleteScheduleTemplateProductByProduct(product);
+        productCustomizationService.deleteCustomization(product);
         productRepository.delete(product);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, productId);
-    }
-
-    public ResourceOperationResponse createCustomization(Long productId, String companyUid, ProductCustomizationWrapperRequest productCustomizationWrapperRequest, AccountAuthentication authentication) {
-        final Product product = getProduct(productId, companyUid);
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationService.createCustomizations(product, productCustomizationWrapperRequest, authentication);
-        return new ResourceOperationResponse(ResourceOperationStatus.CREATED, productCustomizationWrapper.getId());
-    }
-
-    public ResourceOperationResponse updateCustomization(Long productId, String companyUid, Long customizationId, ProductCustomizationWrapperRequest productCustomizationWrapperRequest, AccountAuthentication authentication) {
-        final Product product = getProduct(productId, companyUid);
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationService.updateCustomization(product, customizationId, productCustomizationWrapperRequest, authentication);
-        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, productCustomizationWrapper.getId());
-    }
-
-    public ResourceOperationResponse deleteCustomization(Long productId, String companyUid, Long customizationId, AccountAuthentication authentication) {
-        final Product product = getProduct(productId, companyUid);
-        productCustomizationService.deleteCustomization(product, customizationId, authentication);
-        return new ResourceOperationResponse(ResourceOperationStatus.DELETED, customizationId);
     }
 
     public List<String> findCategories(String companyUid) {
         return productRepository.findCategories(companyUid);
     }
 
-    public ResourceOperationResponse updateImage(Long productId, String companyUid, MultipartFile imagePart, AccountAuthentication authentication) {
+    public ResourceOperationResponse updateImage(Long productId, String companyUid, MultipartFile imagePart) {
         try {
             final Product product = getProduct(productId, companyUid);
             final Image image = imageService.createImage(imagePart.getBytes(), ImageType.PRODUCT_IMAGE);

@@ -98,7 +98,6 @@ public class ProductSearchingService {
     private ProductCustomizationWrapperResponse toCustomizationWrapper(ProductCustomizationWrapper wrapper) {
         return ProductCustomizationWrapperResponse.builder()
                 .type(wrapper.getType())
-                .id(wrapper.getId())
                 .heading(wrapper.getHeading())
                 .customizations(toCustomizations(wrapper.getCustomizations()))
                 .build();

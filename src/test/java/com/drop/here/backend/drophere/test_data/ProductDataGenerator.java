@@ -50,6 +50,7 @@ public class ProductDataGenerator {
                 .price(BigDecimal.valueOf(55.1 + i))
                 .description("description" + i)
                 .name("name" + i)
+                .productCustomizationWrapperRequest(productCustomizationWrapperRequest(1))
                 .build();
     }
 
