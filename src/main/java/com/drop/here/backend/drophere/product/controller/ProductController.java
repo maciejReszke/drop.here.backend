@@ -3,7 +3,6 @@ package com.drop.here.backend.drophere.product.controller;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.image.Image;
-import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.service.ProductService;
@@ -130,7 +129,7 @@ public class ProductController {
                                                  @ApiIgnore @PathVariable String companyUid,
                                                  @ApiIgnore @PathVariable Long productId,
                                                  @RequestPart(name = IMAGE_PART_NAME) MultipartFile image) {
-        return productService.updateImage(productId, companyUid, image, authentication);
+        return productService.updateImage(productId, companyUid, image);
     }
 
     @GetMapping("/{productId}/images")
@@ -150,57 +149,5 @@ public class ProductController {
                 .eTag(productId + "" + image.getId())
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(image.getBytes());
-    }
-
-    @PostMapping("/{productId}/customizations")
-    @ApiAuthorizationToken
-    @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation("Creating customizations wrapper")
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Customizations created", response = ResourceOperationResponse.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
-            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
-    })
-    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse createCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
-                                                                 @ApiIgnore @PathVariable Long productId,
-                                                                 @ApiIgnore AccountAuthentication authentication,
-                                                                 @RequestBody @Valid ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
-        return productService.createCustomization(productId, companyUid, productCustomizationWrapperRequest, authentication);
-    }
-
-    @PutMapping("/{productId}/customizations/{customizationId}")
-    @ApiAuthorizationToken
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Updating customizations wrapper")
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Customizations updated", response = ResourceOperationResponse.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
-            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
-    })
-    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse updateCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
-                                                                 @ApiIgnore @PathVariable Long productId,
-                                                                 @ApiIgnore @PathVariable Long customizationId,
-                                                                 @ApiIgnore AccountAuthentication authentication,
-                                                                 @RequestBody @Valid ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
-        return productService.updateCustomization(productId, companyUid, customizationId, productCustomizationWrapperRequest, authentication);
-    }
-
-    @DeleteMapping("/{productId}/customizations/{customizationId}")
-    @ApiAuthorizationToken
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Deleting customizations wrapper")
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Customizations deleted", response = ResourceOperationResponse.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
-            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
-    })
-    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
-    public ResourceOperationResponse deleteCustomizationsWrapper(@ApiIgnore @PathVariable String companyUid,
-                                                                 @ApiIgnore @PathVariable Long productId,
-                                                                 @ApiIgnore @PathVariable Long customizationId,
-                                                                 @ApiIgnore AccountAuthentication authentication) {
-        return productService.deleteCustomization(productId, companyUid, customizationId, authentication);
     }
 }

@@ -35,7 +35,7 @@ public class ExceptionHandlers {
                 .map(fieldError -> String.format("Field %s has error: %s", fieldError.getField(), fieldError.getDefaultMessage()))
                 .collect(Collectors.joining("\n"));
         log.info("Invalid request caused by invalid arguments {}", message);
-        final HttpStatus status = HttpStatus.BAD_REQUEST;
+        final HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
         return ResponseEntity
                 .status(status)
                 .body(ExceptionMessage.builder()
@@ -53,7 +53,7 @@ public class ExceptionHandlers {
                 .map(fieldError -> String.format("Found error: %s", fieldError.getMessage()))
                 .collect(Collectors.joining("\n"));
         log.info("Invalid request caused by invalid arguments {}", message);
-        final HttpStatus status = HttpStatus.BAD_REQUEST;
+        final HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
         return Mono.just(ResponseEntity
                 .status(status)
                 .body(ExceptionMessage.builder()

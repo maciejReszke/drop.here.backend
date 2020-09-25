@@ -12,7 +12,6 @@ import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWr
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.schedule_template.service.ScheduleTemplateStoreService;
@@ -98,6 +97,7 @@ class ProductServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         when(productMappingService.toEntity(productManagementRequest, accountAuthentication)).thenReturn(product);
         when(productRepository.save(product)).thenReturn(product);
+        doNothing().when(productCustomizationService).createCustomizations(product, productManagementRequest.getProductCustomizationWrapperRequest());
 
         //when
         final ResourceOperationResponse response = productService.createProduct(productManagementRequest, companyUid, accountAuthentication);
@@ -121,6 +121,8 @@ class ProductServiceTest {
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
         doNothing().when(productMappingService).update(product, productManagementRequest);
         when(productRepository.save(product)).thenReturn(product);
+        doNothing().when(productCustomizationService).updateCustomization(product, productManagementRequest.getProductCustomizationWrapperRequest());
+
 
         //when
         final ResourceOperationResponse response = productService.updateProduct(productManagementRequest, productId, companyUid);
@@ -159,7 +161,7 @@ class ProductServiceTest {
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(product);
         doNothing().when(scheduleTemplateStoreService).deleteScheduleTemplateProductByProduct(product);
-
+        doNothing().when(productCustomizationService).deleteCustomization(product);
         //when
         final ResourceOperationResponse response = productService.deleteProduct(productId, companyUid);
 
@@ -184,129 +186,6 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenExistingProductWhenCreateCustomizationThenCreate() {
-        //given
-        final Long productId = 1L;
-        final String companyUid = "companyUid";
-        final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
-
-        final ProductUnit unit = ProductDataGenerator.unit(1);
-
-        final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, unit, company);
-        final AccountAuthentication authentication = AccountAuthentication.builder().build();
-
-        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
-        when(productCustomizationService.createCustomizations(product, request, authentication)).thenReturn(ProductCustomizationWrapper.builder().build());
-
-        //when
-        final ResourceOperationResponse response = productService.createCustomization(productId, companyUid, request, authentication);
-
-        //then
-        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
-    }
-
-    @Test
-    void givenNotExistingProductWhenCreateCustomizationThenError() {
-        //given
-        final Long productId = 1L;
-        final String companyUid = "companyUid";
-        final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
-        final AccountAuthentication authentication = AccountAuthentication.builder().build();
-
-        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
-
-        //when
-        final Throwable throwable = catchThrowable(() -> productService.createCustomization(productId, companyUid, request, authentication));
-
-        //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
-    }
-
-
-    @Test
-    void givenExistingProductWhenUpdateCustomizationThenUpdate() {
-        //given
-        final Long productId = 1L;
-        final Long customizationId = 1L;
-        final String companyUid = "companyUid";
-        final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
-
-        final ProductUnit unit = ProductDataGenerator.unit(1);
-
-        final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, unit, company);
-        final AccountAuthentication authentication = AccountAuthentication.builder().build();
-
-        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
-        when(productCustomizationService.updateCustomization(product, customizationId, request, authentication)).thenReturn(ProductCustomizationWrapper.builder().build());
-
-        //when
-        final ResourceOperationResponse response = productService.updateCustomization(productId, companyUid, customizationId, request, authentication);
-
-        //then
-        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
-    }
-
-    @Test
-    void givenNotExistingProductWhenUpdateCustomizationThenError() {
-        //given
-        final Long productId = 1L;
-        final String companyUid = "companyUid";
-        final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
-        final Long customizationId = 1L;
-        final AccountAuthentication authentication = AccountAuthentication.builder().build();
-
-        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
-
-        //when
-        final Throwable throwable = catchThrowable(() -> productService.updateCustomization(productId, companyUid, customizationId, request, authentication));
-
-        //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
-    }
-
-    @Test
-    void givenExistingProductWhenDeleteCustomizationThenDelete() {
-        //given
-        final Long productId = 1L;
-        final Long customizationId = 1L;
-        final String companyUid = "companyUid";
-
-        final ProductUnit unit = ProductDataGenerator.unit(1);
-
-        final Company company = Company.builder().build();
-        final Product product = ProductDataGenerator.product(1, unit, company);
-        final AccountAuthentication authentication = AccountAuthentication.builder().build();
-
-        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
-        doNothing().when(productCustomizationService).deleteCustomization(product, customizationId, authentication);
-
-        //when
-        final ResourceOperationResponse response = productService.deleteCustomization(productId, companyUid, customizationId, authentication);
-
-        //then
-        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.DELETED);
-    }
-
-    @Test
-    void givenNotExistingProductWhenDeleteCustomizationThenError() {
-        //given
-        final Long productId = 1L;
-        final String companyUid = "companyUid";
-        final Long customizationId = 1L;
-        final AccountAuthentication authentication = AccountAuthentication.builder().build();
-
-        when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.empty());
-
-        //when
-        final Throwable throwable = catchThrowable(() -> productService.deleteCustomization(productId, companyUid, customizationId, authentication));
-
-        //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
-    }
-
-    @Test
     void givenImageWhenUpdateImageThenUpdate() throws IOException {
         //given
         final MockMultipartFile image = new MockMultipartFile("name", "byte".getBytes());
@@ -320,7 +199,7 @@ class ProductServiceTest {
         when(productRepository.save(product)).thenReturn(product);
 
         //when
-        final ResourceOperationResponse resourceOperationResponse = productService.updateImage(productId, companyId, image, AccountAuthentication.builder().build());
+        final ResourceOperationResponse resourceOperationResponse = productService.updateImage(productId, companyId, image);
 
         //then
         assertThat(resourceOperationResponse.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);

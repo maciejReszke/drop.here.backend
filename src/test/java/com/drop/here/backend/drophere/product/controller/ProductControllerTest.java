@@ -14,12 +14,11 @@ import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageRepository;
 import com.drop.here.backend.drophere.image.ImageType;
-import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
-import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperType;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.product.repository.ProductUnitRepository;
@@ -410,7 +409,11 @@ class ProductControllerTest extends IntegrationBaseClass {
         //then
         result.andExpect(status().isCreated());
 
-        assertThat(productRepository.findAll()).hasSize(1);
+        final List<Product> products = productRepository.findAll();
+        assertThat(products).hasSize(1);
+        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
+        assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
+                List.of(products.get(0).getId())).get(0).getCustomizations()).hasSize(2);
     }
 
     @Test
@@ -480,6 +483,8 @@ class ProductControllerTest extends IntegrationBaseClass {
     void givenValidRequestOwnCompanyOperationWhenUpdateProductThenUpdate() throws Exception {
         //given
         final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
+        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository
+                .save(ProductDataGenerator.productCustomizationWrapper(1, product));
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
@@ -498,6 +503,10 @@ class ProductControllerTest extends IntegrationBaseClass {
 
         assertThat(productRepository.findAll()).hasSize(1);
         assertThat(productRepository.findAll().get(0).getName()).isEqualTo("newName");
+        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
+        assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
+                List.of(product.getId())).get(0).getCustomizations()).hasSize(2);
+        assertThat(productCustomizationWrapperRepository.findAll().get(0).getId()).isNotEqualTo(productCustomizationWrapper.getId());
     }
 
     @Test
@@ -588,6 +597,8 @@ class ProductControllerTest extends IntegrationBaseClass {
                         .build()
         ));
         scheduleTemplateRepository.save(scheduleTemplate);
+        productCustomizationWrapperRepository.save(productCustomizationWrapperRepository.save(
+                ProductDataGenerator.productCustomizationWrapper(1, product)));
 
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
 
@@ -602,6 +613,7 @@ class ProductControllerTest extends IntegrationBaseClass {
         assertThat(scheduleTemplateRepository.findByIdAndCompanyWithScheduleTemplateProducts(scheduleTemplate.getId(), company)
                 .orElseThrow().getScheduleTemplateProducts()).isEmpty();
         assertThat(imageRepository.findAll()).isEmpty();
+        assertThat(productCustomizationWrapperRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -637,291 +649,6 @@ class ProductControllerTest extends IntegrationBaseClass {
         //then
         result.andExpect(status().isForbidden());
         assertThat(productRepository.findAll()).hasSize(1);
-    }
-
-    @Test
-    void givenValidRequestOwnCompanyOperationWhenCreateCustomizationsWrapperThenCreate() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final String url = String.format("/companies/%s/products/%s/customizations", company.getUid(), product.getId());
-        final String json = objectMapper.writeValueAsString(ProductDataGenerator.productCustomizationWrapperRequest(1));
-
-        //when
-        final ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isCreated());
-
-        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
-        assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
-                List.of(product.getId())).get(0).getCustomizations()).hasSize(2);
-    }
-
-    @Test
-    void givenValidRequestNotOwnCompanyOperationWhenCreateCustomizationsThen403() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final String url = String.format("/companies/%s/products/%s/customizations", company.getUid() + "I", product.getId());
-        final String json = objectMapper.writeValueAsString(ProductDataGenerator.productCustomizationWrapperRequest(1));
-
-
-        //when
-        final ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isForbidden());
-        assertThat(productCustomizationWrapperRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    void givenValidRequestOwnCompanyOperationInvalidPrivilegeWhenCreateCustomizationsThen403() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE))
-                .findFirst().orElseThrow();
-        privilege.setName("differentPrivilege");
-        privilegeRepository.save(privilege);
-
-        final String url = String.format("/companies/%s/products/%s/customizations", company.getUid(), product.getId());
-        final String json = objectMapper.writeValueAsString(ProductDataGenerator.productCustomizationWrapperRequest(1));
-
-
-        //when
-        final ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isForbidden());
-        assertThat(productCustomizationWrapperRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    void givenInvalidRequestOwnCompanyOperationWhenCreateCustomizationsThen422() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final String url = String.format("/companies/%s/products/%s/customizations", company.getUid(), product.getId());
-        final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
-        request.setType(ProductCustomizationWrapperType.SINGLE + "keke");
-        final String json = objectMapper.writeValueAsString(request);
-
-
-        //when
-        final ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()));
-        assertThat(productCustomizationWrapperRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    void givenValidRequestOwnCompanyOperationWhenUpdateCustomizationsWrapperThenUpdate() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
-                ProductDataGenerator.productCustomizationWrapper(1, product));
-
-        final String url = String.format("/companies/%s/products/%s/customizations/%s", company.getUid(), product.getId(), productCustomizationWrapper.getId());
-        final String json = objectMapper.writeValueAsString(ProductDataGenerator.productCustomizationWrapperRequest(1));
-
-        //when
-        final ResultActions result = mockMvc.perform(put(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isOk());
-
-        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
-        assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
-                List.of(product.getId())).get(0).getCustomizations()).hasSize(2);
-    }
-
-    @Test
-    void givenValidRequestNotOwnCompanyOperationWhenUpdateCustomizationsThen403() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
-                ProductDataGenerator.productCustomizationWrapper(1, product));
-
-        final String url = String.format("/companies/%s/products/%s/customizations/%s", company.getUid() + "i", product.getId(), productCustomizationWrapper.getId());
-        final String json = objectMapper.writeValueAsString(ProductDataGenerator.productCustomizationWrapperRequest(1));
-
-
-        //when
-        final ResultActions result = mockMvc.perform(put(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isForbidden());
-        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
-        assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
-                List.of(product.getId())).get(0).getCustomizations()).hasSize(1);
-    }
-
-    @Test
-    void givenValidRequestOwnCompanyOperationInvalidPrivilegeWhenUpdateCustomizationsThen403() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE))
-                .findFirst().orElseThrow();
-        privilege.setName("differentPrivilege");
-        privilegeRepository.save(privilege);
-
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
-                ProductDataGenerator.productCustomizationWrapper(1, product));
-
-        final String url = String.format("/companies/%s/products/%s/customizations/%s", company.getUid(), product.getId(), productCustomizationWrapper.getId());
-        final String json = objectMapper.writeValueAsString(ProductDataGenerator.productCustomizationWrapperRequest(1));
-
-
-        //when
-        final ResultActions result = mockMvc.perform(put(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isForbidden());
-        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
-        assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
-                List.of(product.getId())).get(0).getCustomizations()).hasSize(1);
-    }
-
-    @Test
-    void givenInvalidRequestOwnCompanyOperationWhenUpdateCustomizationsThen422() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
-                ProductDataGenerator.productCustomizationWrapper(1, product));
-
-        final String url = String.format("/companies/%s/products/%s/customizations/%s", company.getUid(), product.getId(), productCustomizationWrapper.getId());
-        final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
-        request.setType(ProductCustomizationWrapperType.SINGLE + "keke");
-        final String json = objectMapper.writeValueAsString(request);
-
-
-        //when
-        final ResultActions result = mockMvc.perform(put(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()));
-        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
-        assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
-                List.of(product.getId())).get(0).getCustomizations()).hasSize(1);
-    }
-
-    @Test
-    void givenValidRequestOwnCompanyOperationWhenDeleteCustomizationsWrapperThenDelete() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
-                ProductDataGenerator.productCustomizationWrapper(1, product));
-
-        final String url = String.format("/companies/%s/products/%s/customizations/%s", company.getUid(), product.getId(), productCustomizationWrapper.getId());
-
-        //when
-        final ResultActions result = mockMvc.perform(delete(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isOk());
-
-        assertThat(productCustomizationWrapperRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    void givenValidRequestNotOwnCompanyOperationWhenDeleteCustomizationsThen403() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
-                ProductDataGenerator.productCustomizationWrapper(1, product));
-
-        final String url = String.format("/companies/%s/products/%s/customizations/%s", company.getUid() + "i", product.getId(), productCustomizationWrapper.getId());
-
-        //when
-        final ResultActions result = mockMvc.perform(delete(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isForbidden());
-        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
-        assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
-                List.of(product.getId())).get(0).getCustomizations()).hasSize(1);
-    }
-
-    @Test
-    void givenValidRequestOwnCompanyOperationInvalidPrivilegeWhenDeleteCustomizationsThen403() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE))
-                .findFirst().orElseThrow();
-        privilege.setName("differentPrivilege");
-        privilegeRepository.save(privilege);
-
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository.save(
-                ProductDataGenerator.productCustomizationWrapper(1, product));
-
-        final String url = String.format("/companies/%s/products/%s/customizations/%s", company.getUid(), product.getId(), productCustomizationWrapper.getId());
-
-        //when
-        final ResultActions result = mockMvc.perform(delete(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isForbidden());
-        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
-        assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
-                List.of(product.getId())).get(0).getCustomizations()).hasSize(1);
-    }
-
-    @Test
-    void givenNotExistingCustomizationOwnCompanyOperationWhenDeleteCustomizationsThen404() throws Exception {
-        //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-
-        final String url = String.format("/companies/%s/products/%s/customizations/%s", company.getUid(), product.getId(), 1234);
-
-        //when
-        final ResultActions result = mockMvc.perform(delete(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().is(HttpStatus.NOT_FOUND.value()));
-    }
-
-    @Test
-    void givenExistingProductImageWhenGetProductImageThenGet() throws Exception {
-        //given
-        final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
-        final Product product = ProductDataGenerator.product(1, productUnit, company);
-        product.setImage(image);
-        productRepository.save(product);
-        final String url = String.format("/companies/%s/products/%s/images", company.getUid(), product.getId());
-
-
-        //when
-        final ResultActions result = mockMvc.perform(get(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isOk());
     }
 
     @Test

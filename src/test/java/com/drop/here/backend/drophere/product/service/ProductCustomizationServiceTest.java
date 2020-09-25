@@ -7,7 +7,6 @@ import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.ProductDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,18 +44,16 @@ class ProductCustomizationServiceTest {
         final Product product = ProductDataGenerator.product(1, unit, company);
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
-        final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
 
         doNothing().when(validationService).validate(request);
         when(mappingService.toCustomizationWrapper(product, request)).thenReturn(wrapper);
         when(customizationWrapperRepository.save(wrapper)).thenReturn(wrapper);
 
         //when
-
-        final ProductCustomizationWrapper result = productCustomizationService.createCustomizations(product, request, authentication);
+        productCustomizationService.createCustomizations(product, request);
 
         //then
-        assertThat(result).isEqualTo(wrapper);
+        verifyNoMoreInteractions(customizationWrapperRepository);
     }
 
     @Test
@@ -71,19 +68,18 @@ class ProductCustomizationServiceTest {
         final ProductCustomizationWrapper newWrapper = ProductCustomizationWrapper.builder().heading("h§").build();
         final Long customizationId = 1L;
         wrapper.setId(customizationId);
-        final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
 
-        when(customizationWrapperRepository.findByIdAndProduct(customizationId, product)).thenReturn(Optional.of(wrapper));
+        when(customizationWrapperRepository.findByProduct(product)).thenReturn(Optional.of(wrapper));
+        doNothing().when(customizationWrapperRepository).delete(wrapper);
         doNothing().when(validationService).validate(request);
         when(mappingService.toCustomizationWrapper(product, request)).thenReturn(newWrapper);
         when(customizationWrapperRepository.save(newWrapper)).thenReturn(newWrapper);
 
         //when
-        final ProductCustomizationWrapper result = productCustomizationService.updateCustomization(product, customizationId, request, authentication);
+        productCustomizationService.updateCustomization(product, request);
 
         //then
-        assertThat(result).isEqualTo(newWrapper);
-        assertThat(newWrapper.getId()).isEqualTo(wrapper.getId());
+        verifyNoMoreInteractions(customizationWrapperRepository);
     }
 
     @Test
@@ -96,13 +92,12 @@ class ProductCustomizationServiceTest {
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
         final Long customizationId = 1L;
-        final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
         wrapper.setId(customizationId);
 
-        when(customizationWrapperRepository.findByIdAndProduct(customizationId, product)).thenReturn(Optional.empty());
+        when(customizationWrapperRepository.findByProduct(product)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> productCustomizationService.updateCustomization(product, customizationId, request, authentication));
+        final Throwable throwable = catchThrowable(() -> productCustomizationService.updateCustomization(product, request));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
@@ -116,14 +111,12 @@ class ProductCustomizationServiceTest {
         final Company company = Company.builder().build();
         final Product product = ProductDataGenerator.product(1, unit, company);
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
-        final Long customizationId = 1L;
-        final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
 
-        when(customizationWrapperRepository.findByIdAndProduct(customizationId, product)).thenReturn(Optional.of(wrapper));
+        when(customizationWrapperRepository.findByProduct(product)).thenReturn(Optional.of(wrapper));
         doNothing().when(customizationWrapperRepository).delete(wrapper);
 
         //when
-        productCustomizationService.deleteCustomization(product, customizationId, authentication);
+        productCustomizationService.deleteCustomization(product);
 
         //then
         verifyNoMoreInteractions(customizationWrapperRepository);
@@ -139,12 +132,11 @@ class ProductCustomizationServiceTest {
         final ProductCustomizationWrapper wrapper = ProductCustomizationWrapper.builder().build();
         final Long customizationId = 1L;
         wrapper.setId(customizationId);
-        final AccountAuthentication authentication = AccountAuthentication.builder().company(company).build();
 
-        when(customizationWrapperRepository.findByIdAndProduct(customizationId, product)).thenReturn(Optional.empty());
+        when(customizationWrapperRepository.findByProduct(product)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> productCustomizationService.deleteCustomization(product, customizationId, authentication));
+        final Throwable throwable = catchThrowable(() -> productCustomizationService.deleteCustomization(product));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);

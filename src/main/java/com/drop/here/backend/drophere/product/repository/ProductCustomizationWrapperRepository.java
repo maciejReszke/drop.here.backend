@@ -11,11 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface ProductCustomizationWrapperRepository extends JpaRepository<ProductCustomizationWrapper, Long> {
-    Optional<ProductCustomizationWrapper> findByIdAndProduct(Long customizationId, Product product);
+    Optional<ProductCustomizationWrapper> findByProduct(Product product);
 
     @Query("select pcw from ProductCustomizationWrapper pcw " +
             "left join fetch pcw.customizations where " +
             "pcw.product.id in :productsIds")
     List<ProductCustomizationWrapper> findByProductsIdsWithCustomizations(List<Long> productsIds);
-
 }
