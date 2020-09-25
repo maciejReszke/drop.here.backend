@@ -1,4 +1,4 @@
-package com.drop.here.backend.drophere.schedule_template.entity;
+package com.drop.here.backend.drophere.route.entity;
 
 import com.drop.here.backend.drophere.product.entity.Product;
 import lombok.AllArgsConstructor;
@@ -25,9 +25,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString(exclude = {"product", "scheduleTemplate"})
-@EqualsAndHashCode(exclude = {"product", "scheduleTemplate"})
-public class ScheduleTemplateProduct {
+@ToString(exclude = {"product", "route"})
+@EqualsAndHashCode(exclude = {"product", "route"})
+public class RouteProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +42,7 @@ public class ScheduleTemplateProduct {
 
     @NotNull
     @PositiveOrZero
-    private Integer amount;
+    private BigDecimal amount;
 
     @NotNull
     @Positive
@@ -55,6 +55,6 @@ public class ScheduleTemplateProduct {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "schedule_template_id")
-    private ScheduleTemplate scheduleTemplate;
+    @JoinColumn(name = "route_id")
+    private Route route;
 }

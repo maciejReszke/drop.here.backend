@@ -8,13 +8,11 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
-import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
-import com.drop.here.backend.drophere.schedule_template.service.ScheduleTemplateStoreService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
@@ -48,8 +46,6 @@ class ProductServiceTest {
     @Mock
     private ProductSearchingService productSearchingService;
 
-    @Mock
-    private ScheduleTemplateStoreService scheduleTemplateStoreService;
     @Mock
     private ProductValidationService productValidationService;
 
@@ -160,7 +156,6 @@ class ProductServiceTest {
         final Long productId = 1L;
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(product);
-        doNothing().when(scheduleTemplateStoreService).deleteScheduleTemplateProductByProduct(product);
         doNothing().when(productCustomizationService).deleteCustomization(product);
         //when
         final ResourceOperationResponse response = productService.deleteProduct(productId, companyUid);
