@@ -257,4 +257,28 @@ class AccountServiceTest {
         //then
         assertThat(result).isEqualTo(account);
     }
+
+    @Test
+    void givenWithProfileAccountWhenGetProfileTypeThenGet(){
+        //given
+        final Account account = Account.builder().isAnyProfileRegistered(true).build();
+
+        //when
+        final AccountProfileType profileType = accountService.getProfileType(account);
+
+        //then
+        assertThat(profileType).isEqualTo(AccountProfileType.SUBPROFILE);
+    }
+
+    @Test
+    void givenWithoutProfileAccountWhenGetProfileTypeThenGet(){
+        //given
+        final Account account = Account.builder().isAnyProfileRegistered(false).build();
+
+        //when
+        final AccountProfileType profileType = accountService.getProfileType(account);
+
+        //then
+        assertThat(profileType).isEqualTo(AccountProfileType.MAIN);
+    }
 }

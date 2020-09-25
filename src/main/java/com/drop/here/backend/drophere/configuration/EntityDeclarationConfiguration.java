@@ -1,8 +1,10 @@
 package com.drop.here.backend.drophere.configuration;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.entity.CompanyCustomerRelationship;
 import com.drop.here.backend.drophere.country.Country;
+import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.mongodb.reactivestreams.client.MongoCollection;
@@ -23,6 +25,8 @@ public class EntityDeclarationConfiguration {
                 .then(createCollection(reactiveMongoTemplate, ProductUnit.class))
                 .then(createCollection(reactiveMongoTemplate, Product.class))
                 .then(createCollection(reactiveMongoTemplate, CompanyCustomerRelationship.class))
+                .then(createCollection(reactiveMongoTemplate, Customer.class))
+                .then(createCollection(reactiveMongoTemplate, Company.class))
                 .block();
 
     }

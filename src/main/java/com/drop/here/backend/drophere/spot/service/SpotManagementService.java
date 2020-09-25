@@ -19,9 +19,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.stream.Collectors;
-
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -33,51 +30,47 @@ public class SpotManagementService {
 
     public Flux<SpotCompanyResponse> findCompanySpots(String companyUid, String name) {
         return spotRepository.findAllByCompanyUidAndNameStartsWith(companyUid, StringUtils.defaultIfEmpty(name, ""))
-                .stream()
-                .map(spotMappingService::toSpotCompanyResponse)
-                .collect(Collectors.toList());
+                .map(spotMappingService::toSpotCompanyResponse);
     }
 
     public Mono<ResourceOperationResponse> createSpot(SpotManagementRequest spotManagementRequest, String companyUid, AccountAuthentication authentication) {
         spotManagementValidationService.validateSpotRequest(spotManagementRequest);
         final Spot spot = spotMappingService.toEntity(spotManagementRequest, authentication);
         log.info("Creating spot for company {} with uid {}", companyUid, spot.getUid());
-        spotRepository.save(spot);
-        return new ResourceOperationResponse(ResourceOperationStatus.CREATED, spot.getId());
+        return spotRepository.save(spot)
+                .map(saved -> new ResourceOperationResponse(ResourceOperationStatus.CREATED, saved.getId()));
     }
 
-    public Mono<ResourceOperationResponse> updateSpot(SpotManagementRequest spotManagementRequest, Long spotId, String companyUid) {
-        final Spot spot = getSpot(spotId, companyUid);
-        spotManagementValidationService.validateSpotRequest(spotManagementRequest);
-        spotMappingService.update(spot, spotManagementRequest);
-        log.info("Updating spot for company {} with uid {}", companyUid, spot.getUid());
-        spotRepository.save(spot);
-        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, spot.getId());
+    public Mono<ResourceOperationResponse> updateSpot(SpotManagementRequest spotManagementRequest, String spotId, String companyUid) {
+        return getSpot(spotId, companyUid)
+                .doOnNext(spot -> spotManagementValidationService.validateSpotRequest(spotManagementRequest))
+                .doOnNext(spot -> spotMappingService.update(spot, spotManagementRequest))
+                .doOnNext(spot -> log.info("Updating spot for company {} with uid {}", companyUid, spot.getUid()))
+                .flatMap(spotRepository::save)
+                .map(spot -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, spot.getId()));
     }
 
-    private Spot getSpot(Long spotId, String companyUid) {
+    private Mono<Spot> getSpot(String spotId, String companyUid) {
         return spotRepository.findByIdAndCompanyUid(spotId, companyUid)
-                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                .switchIfEmpty(Mono.error(() -> new RestEntityNotFoundException(String.format(
                         "Spot with id %s company %s was not found", spotId, companyUid),
-                        RestExceptionStatusCode.SPOT_NOT_FOUND_BY_ID));
+                        RestExceptionStatusCode.SPOT_NOT_FOUND_BY_ID)));
     }
 
-    // todo bylo transactional(rollbackFor = Exception.class)
-    public Mono<ResourceOperationResponse> deleteSpot(Long spotId, String companyUid) {
-        final Spot spot = getSpot(spotId, companyUid);
-        log.info("Deleting spot for company {} with uid {}", companyUid, spot.getUid());
-        spotMembershipService.deleteMemberships(spot);
-        spotRepository.delete(spot);
-        return new ResourceOperationResponse(ResourceOperationStatus.DELETED, spot.getId());
+    public Mono<ResourceOperationResponse> deleteSpot(String spotId, String companyUid) {
+        return getSpot(spotId, companyUid)
+                .doOnNext(spot -> log.info("Deleting spot for company {} with uid {}", companyUid, spot.getUid()))
+                .flatMap(spotMembershipService::deleteMemberships)
+                .thenReturn(new ResourceOperationResponse(ResourceOperationStatus.DELETED, spotId));
     }
 
-    public Flux<SpotCompanyMembershipResponse> findMemberships(Long spotId, String companyUid, String desiredCustomerSubstring, String membershipStatus, Pageable pageable) {
-        final Spot spot = getSpot(spotId, companyUid);
-        return spotMembershipService.findMemberships(spot, desiredCustomerSubstring, membershipStatus, pageable);
+    public Flux<SpotCompanyMembershipResponse> findMemberships(String spotId, String companyUid, String desiredCustomerSubstring, String membershipStatus, Pageable pageable) {
+        return getSpot(spotId, companyUid)
+                .flatMapMany(spot -> spotMembershipService.findMemberships(spot, desiredCustomerSubstring, membershipStatus, pageable));
     }
 
-    public Mono<ResourceOperationResponse> updateMembership(Long spotId, String companyUid, Long membershipId, SpotCompanyMembershipManagementRequest companyMembershipManagementRequest) {
-        final Spot spot = getSpot(spotId, companyUid);
-        return spotMembershipService.updateMembership(spot, membershipId, companyMembershipManagementRequest);
+    public Mono<ResourceOperationResponse> updateMembership(String spotId, String companyUid, Long membershipId, SpotCompanyMembershipManagementRequest companyMembershipManagementRequest) {
+        return getSpot(spotId, companyUid)
+                .flatMap(spot -> spotMembershipService.updateMembership(spot, membershipId, companyMembershipManagementRequest));
     }
 }

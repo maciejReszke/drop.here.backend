@@ -8,11 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,13 +30,15 @@ class SpotPersistenceServiceTest {
         final Spot spot = Spot.builder().build();
 
         when(spotRepository.findByUidAndCompanyUid(spotUid, companyUid))
-                .thenReturn(Optional.of(spot));
+                .thenReturn(Mono.just(spot));
 
         //when
-        final Spot result = spotPersistenceService.findSpot(spotUid, companyUid);
+        final Mono<Spot> result = spotPersistenceService.findSpot(spotUid, companyUid);
 
         //then
-        assertThat(result).isEqualTo(spot);
+        StepVerifier.create(result)
+                .expectNext(spot)
+                .verifyComplete();
     }
 
     @Test
@@ -48,13 +48,15 @@ class SpotPersistenceServiceTest {
         final String companyUid = "companyUid";
 
         when(spotRepository.findByUidAndCompanyUid(spotUid, companyUid))
-                .thenReturn(Optional.empty());
+                .thenReturn(Mono.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> spotPersistenceService.findSpot(spotUid, companyUid));
+        final Mono<Spot> result = spotPersistenceService.findSpot(spotUid, companyUid);
 
         //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+        StepVerifier.create(result)
+                .expectError(RestEntityNotFoundException.class)
+                .verify();
     }
 
 }

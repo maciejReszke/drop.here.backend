@@ -15,8 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -94,13 +94,14 @@ class SpotManagementValidationServiceTest {
         final Customer customer = Customer.builder().build();
         final SpotJoinRequest spotJoinRequest = SpotJoinRequest.builder().build();
 
-        when(spotMembershipRepository.findBySpotAndCustomer(spot, customer)).thenReturn(Optional.empty());
+        when(spotMembershipRepository.findBySpotAndCustomer(spot, customer)).thenReturn(Mono.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> spotManagementValidationService.validateJoinSpotRequest(spot, spotJoinRequest, customer));
+        final Mono<Void> result = spotManagementValidationService.validateJoinSpotRequest(spot, spotJoinRequest, customer);
 
         //then
-        assertThat(throwable).isNull();
+        StepVerifier.create(result)
+                .verifyComplete();
     }
 
     @Test
@@ -116,13 +117,15 @@ class SpotManagementValidationServiceTest {
                 .password("pass123")
                 .build();
 
-        when(spotMembershipRepository.findBySpotAndCustomer(spot, customer)).thenReturn(Optional.empty());
+        when(spotMembershipRepository.findBySpotAndCustomer(spot, customer)).thenReturn(Mono.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> spotManagementValidationService.validateJoinSpotRequest(spot, spotJoinRequest, customer));
+        final Mono<Void> result = spotManagementValidationService.validateJoinSpotRequest(spot, spotJoinRequest, customer);
 
         //then
-        assertThat(throwable).isNull();
+        StepVerifier.create(result)
+                .verifyComplete();
+
     }
 
     @Test
@@ -139,10 +142,12 @@ class SpotManagementValidationServiceTest {
                 .build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> spotManagementValidationService.validateJoinSpotRequest(spot, spotJoinRequest, customer));
+        final Mono<Void> result = spotManagementValidationService.validateJoinSpotRequest(spot, spotJoinRequest, customer);
 
         //then
-        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+        StepVerifier.create(result)
+                .expectError(RestIllegalRequestValueException.class)
+                .verify();
     }
 
 
@@ -158,13 +163,15 @@ class SpotManagementValidationServiceTest {
                 .build();
 
         when(spotMembershipRepository.findBySpotAndCustomer(spot, customer))
-                .thenReturn(Optional.of(SpotMembership.builder().build()));
+                .thenReturn(Mono.just(SpotMembership.builder().build()));
 
         //when
-        final Throwable throwable = catchThrowable(() -> spotManagementValidationService.validateJoinSpotRequest(spot, spotJoinRequest, customer));
+        final Mono<Void> result = spotManagementValidationService.validateJoinSpotRequest(spot, spotJoinRequest, customer);
 
         //then
-        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+        StepVerifier.create(result)
+                .expectError(RestIllegalRequestValueException.class)
+                .verify();
     }
 
     @Test

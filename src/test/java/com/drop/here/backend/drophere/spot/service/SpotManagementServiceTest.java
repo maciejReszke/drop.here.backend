@@ -5,13 +5,13 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyMembershipResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.repository.SpotRepository;
-import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import com.drop.here.backend.drophere.test_data.SpotDataGenerator;
@@ -20,14 +20,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -61,13 +59,15 @@ class SpotManagementServiceTest {
         final Account account = AccountDataGenerator.companyAccount(1);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         when(spotMappingService.toEntity(spotManagementRequest, accountAuthentication)).thenReturn(spot);
-        when(spotRepository.save(spot)).thenReturn(spot);
+        when(spotRepository.save(spot)).thenReturn(Mono.just(spot));
 
         //when
-        final ResourceOperationResponse response = spotManagementService.createSpot(spotManagementRequest, companyUid, accountAuthentication);
+        final Mono<ResourceOperationResponse> result = spotManagementService.createSpot(spotManagementRequest, companyUid, accountAuthentication);
 
         //then
-        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED);
+        StepVerifier.create(result)
+                .assertNext(response -> assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.CREATED))
+                .verifyComplete();
     }
 
     @Test
@@ -79,16 +79,18 @@ class SpotManagementServiceTest {
         doNothing().when(spotManagementValidationService).validateSpotRequest(spotManagementRequest);
         final Company company = Company.builder().build();
         final Spot spot = SpotDataGenerator.spot(1, company);
-        final Long spotId = 1L;
-        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Optional.of(spot));
+        final String spotId = "1L";
+        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Mono.just(spot));
         doNothing().when(spotMappingService).update(spot, spotManagementRequest);
-        when(spotRepository.save(spot)).thenReturn(spot);
+        when(spotRepository.save(spot)).thenReturn(Mono.just(spot));
 
         //when
-        final ResourceOperationResponse response = spotManagementService.updateSpot(spotManagementRequest, spotId, companyUid);
+        final Mono<ResourceOperationResponse> result = spotManagementService.updateSpot(spotManagementRequest, spotId, companyUid);
 
         //then
-        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        StepVerifier.create(result)
+                .assertNext(response -> assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED))
+                .verifyComplete();
     }
 
 
@@ -98,14 +100,16 @@ class SpotManagementServiceTest {
         final SpotManagementRequest spotManagementRequest = SpotManagementRequest.builder().build();
         final String companyUid = "companyUid";
 
-        final Long spotId = 1L;
-        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Optional.empty());
+        final String spotId = "1L";
+        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Mono.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> spotManagementService.updateSpot(spotManagementRequest, spotId, companyUid));
+        final Mono<ResourceOperationResponse> result = spotManagementService.updateSpot(spotManagementRequest, spotId, companyUid);
 
         //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+        StepVerifier.create(result)
+                .expectError(RestEntityNotFoundException.class)
+                .verify();
     }
 
     @Test
@@ -115,16 +119,18 @@ class SpotManagementServiceTest {
 
         final Company company = Company.builder().build();
         final Spot spot = SpotDataGenerator.spot(1, company);
-        final Long spotId = 1L;
-        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Optional.of(spot));
-        doNothing().when(spotRepository).delete(spot);
-        doNothing().when(spotMembershipService).deleteMemberships(spot);
+        final String spotId = "1L";
+        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Mono.just(spot));
+        when(spotRepository.delete(spot)).thenReturn(Mono.empty());
+        when(spotMembershipService.deleteMemberships(spot)).thenReturn(Mono.empty());
 
         //when
-        final ResourceOperationResponse response = spotManagementService.deleteSpot(spotId, companyUid);
+        final Mono<ResourceOperationResponse> result = spotManagementService.deleteSpot(spotId, companyUid);
 
         //then
-        assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.DELETED);
+        StepVerifier.create(result)
+                .assertNext(response -> assertThat(response.getOperationStatus()).isEqualTo(ResourceOperationStatus.DELETED))
+                .verifyComplete();
     }
 
 
@@ -133,14 +139,16 @@ class SpotManagementServiceTest {
         //given
         final String companyUid = "companyUid";
 
-        final Long spotId = 1L;
-        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Optional.empty());
+        final String spotId = "1L";
+        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Mono.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> spotManagementService.deleteSpot(spotId, companyUid));
+        final Mono<ResourceOperationResponse> result = spotManagementService.deleteSpot(spotId, companyUid);
 
         //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+        StepVerifier.create(result)
+                .expectError(RestEntityNotFoundException.class)
+                .verify();
     }
 
     @Test
@@ -151,89 +159,97 @@ class SpotManagementServiceTest {
 
         final Spot spot = Spot.builder().build();
         final SpotCompanyResponse response = SpotCompanyResponse.builder().build();
-        when(spotRepository.findAllByCompanyUidAndNameStartsWith(companyUid, name)).thenReturn(List.of(spot));
+        when(spotRepository.findAllByCompanyUidAndNameStartsWith(companyUid, name)).thenReturn(Flux.just(spot));
         when(spotMappingService.toSpotCompanyResponse(spot)).thenReturn(response);
         //when
-        final List<SpotCompanyResponse> result = spotManagementService.findCompanySpots(companyUid, name);
+        final Flux<SpotCompanyResponse> result = spotManagementService.findCompanySpots(companyUid, name);
 
         //then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(response);
+        StepVerifier.create(result)
+                .expectNext(response)
+                .verifyComplete();
     }
 
     @Test
     void givenExistingSpotWhenFindMembershipsThenFind() {
         //given
-        final Long spotId = 1L;
+        final String spotId = "1L";
         final String companyUid = "companyUid";
         final String desiredCustomerSubstring = "desiredCustomerSubstring";
         final String membershipStatus = "membershipStatus";
         final Pageable pageable = Pageable.unpaged();
 
         final Spot spot = SpotDataGenerator.spot(1, null);
-        final Page<SpotCompanyMembershipResponse> page = Page.empty();
-        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Optional.of(spot));
+        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Mono.just(spot));
         when(spotMembershipService.findMemberships(spot, desiredCustomerSubstring, membershipStatus, pageable))
-                .thenReturn(page);
+                .thenReturn(Flux.empty());
 
         //when
-        final Page<SpotCompanyMembershipResponse> response = spotManagementService.findMemberships(spotId, companyUid, desiredCustomerSubstring, membershipStatus, pageable);
+        final Flux<SpotCompanyMembershipResponse> result = spotManagementService.findMemberships(spotId, companyUid, desiredCustomerSubstring, membershipStatus, pageable);
 
         //then
-        assertThat(response).isEqualTo(page);
+        StepVerifier.create(result)
+                .verifyComplete();
     }
 
     @Test
     void givenNotExistingSpotWhenFindMembershipsThenError() {
         //given
-        final Long spotId = 1L;
+        final String spotId = "1L";
         final String companyUid = "companyUid";
         final String desiredCustomerSubstring = "desiredCustomerSubstring";
         final String membershipStatus = "membershipStatus";
         final Pageable pageable = Pageable.unpaged();
 
-        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Optional.empty());
+        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Mono.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> spotManagementService.findMemberships(spotId, companyUid, desiredCustomerSubstring, membershipStatus, pageable));
+        final Flux<SpotCompanyMembershipResponse> result = spotManagementService.findMemberships(spotId, companyUid, desiredCustomerSubstring, membershipStatus, pageable);
 
         //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+        StepVerifier.create(result)
+                .expectError(RestEntityNotFoundException.class)
+                .verify();
     }
 
     @Test
     void givenExistingSpotWhenUpdateMembershipsThenAccept() {
         //given
-        final Long spotId = 1L;
+        final String spotId = "1L";
         final String companyUid = "companyUid";
         final Long membershipId = 2L;
-        final ResourceOperationResponse resourceOperationResponse = new ResourceOperationResponse(ResourceOperationStatus.UPDATED, 1L);
+        final ResourceOperationResponse resourceOperationResponse = new ResourceOperationResponse(ResourceOperationStatus.UPDATED, "1L");
         final SpotCompanyMembershipManagementRequest spotCompanyMembershipManagementRequest = SpotCompanyMembershipManagementRequest.builder().build();
 
         final Spot spot = SpotDataGenerator.spot(1, null);
-        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Optional.of(spot));
-        when(spotMembershipService.updateMembership(spot, membershipId, spotCompanyMembershipManagementRequest)).thenReturn(resourceOperationResponse);
+        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Mono.just(spot));
+        when(spotMembershipService.updateMembership(spot, membershipId, spotCompanyMembershipManagementRequest))
+                .thenReturn(Mono.just(resourceOperationResponse));
 
         //when
-        final ResourceOperationResponse response = spotManagementService.updateMembership(spotId, companyUid, membershipId, spotCompanyMembershipManagementRequest);
+        final Mono<ResourceOperationResponse> result = spotManagementService.updateMembership(spotId, companyUid, membershipId, spotCompanyMembershipManagementRequest);
 
         //then
-        assertThat(response).isEqualTo(resourceOperationResponse);
+        StepVerifier.create(result)
+                .expectNext(resourceOperationResponse)
+                .verifyComplete();
     }
 
     @Test
     void givenNotExistingSpotWhenUpdateMembershipsThenError() {
         //given
-        final Long spotId = 1L;
+        final String spotId = "1L";
         final String companyUid = "companyUid";
         final Long membershipId = 2L;
-        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Optional.empty());
+        when(spotRepository.findByIdAndCompanyUid(spotId, companyUid)).thenReturn(Mono.empty());
         final SpotCompanyMembershipManagementRequest spotCompanyMembershipManagementRequest = SpotCompanyMembershipManagementRequest.builder().build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> spotManagementService.updateMembership(spotId, companyUid, membershipId, spotCompanyMembershipManagementRequest));
+        final Mono<ResourceOperationResponse> result = spotManagementService.updateMembership(spotId, companyUid, membershipId, spotCompanyMembershipManagementRequest);
 
         //then
-        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+        StepVerifier.create(result)
+                .expectError(RestEntityNotFoundException.class)
+                .verify();
     }
 }

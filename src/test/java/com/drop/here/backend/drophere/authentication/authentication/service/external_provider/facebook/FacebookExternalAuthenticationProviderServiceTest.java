@@ -9,8 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,14 +30,16 @@ class FacebookExternalAuthenticationProviderServiceTest {
         final ExternalAuthenticationResult externalAuthenticationResult = ExternalAuthenticationDataGenerator.externalAuthenticationResult(1);
 
         final FacebookAccessToken token = new FacebookAccessToken("token");
-        when(facebookExecutingService.exchangeToken(request)).thenReturn(token);
-        when(facebookExecutingService.fetchAuthenticationData(token)).thenReturn(externalAuthenticationResult);
+        when(facebookExecutingService.exchangeToken(request)).thenReturn(Mono.just(token));
+        when(facebookExecutingService.fetchAuthenticationData(token)).thenReturn(Mono.just(externalAuthenticationResult));
 
         //when
-        final ExternalAuthenticationResult result = authenticationProviderService.authenticate(request);
+        final Mono<ExternalAuthenticationResult> result = authenticationProviderService.authenticate(request);
 
         //then
-        assertThat(result).isEqualTo(externalAuthenticationResult);
+        StepVerifier.create(result)
+                .expectNext(externalAuthenticationResult)
+                .verifyComplete();
     }
 
 }

@@ -14,8 +14,6 @@
     <name>drop-here</name>
     <description>DropHere</description>
 
-    <!--TODO-->
-
     <properties>
         <java.version>11</java.version>
         <io-vavr.version>0.10.2</io-vavr.version>
@@ -26,6 +24,7 @@
         <org.apache.commons.commons-collections4.version>4.4</org.apache.commons.commons-collections4.version>
         <com.google.firebase-firebase-admin.version>7.0.0</com.google.firebase-firebase-admin.version>
         <shedlock.version>4.12.0</shedlock.version>
+        <mongo-java-driver.version>3.12.7</mongo-java-driver.version>
     </properties>
 
     <dependencies>
@@ -47,10 +46,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
@@ -58,7 +53,7 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <version>3.12.7</version>
+            <version>${mongo-java-driver.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

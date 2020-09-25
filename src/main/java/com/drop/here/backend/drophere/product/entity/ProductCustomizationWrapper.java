@@ -28,6 +28,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+//todo
 @Entity
 @ToString(exclude = {"product", "customizations"})
 @EqualsAndHashCode(exclude = {"product", "customizations"})

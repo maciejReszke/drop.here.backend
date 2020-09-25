@@ -36,7 +36,7 @@ public class CustomerService {
         final Customer customer = customerMappingService.toCustomer(account, result);
         privilegeService.addCustomerCreatedPrivilege(account);
         return accountPersistenceService.updateAccount(account)
-                .flatMap(saved -> customerStoreService.save(customer))
+                .flatMap(saved -> customerStoreService.update(customer))
                 .flatMap(saved -> createImageIfNotEmpty(result.getImage(), saved))
                 .doOnNext(saved -> log.info("Creating customer for account via external authentication with id {}", account.getId()))
                 .thenReturn(customer);
@@ -50,7 +50,7 @@ public class CustomerService {
     }
 
     public Mono<CustomerManagementResponse> findOwnCustomer(AccountAuthentication authentication) {
-        return customerStoreService.findOwnCustomer(authentication)
+        return Mono.fromSupplier(authentication::getCustomer)
                 .map(customerMappingService::toManagementResponse)
                 .switchIfEmpty(Mono.defer(() -> Mono.just(customerMappingService.toManagementResponse(null))));
     }
@@ -68,14 +68,13 @@ public class CustomerService {
         log.info("Creating new customer for account with id {}", account.getId());
         privilegeService.addCustomerCreatedPrivilege(account);
         return accountPersistenceService.updateAccount(account)
-                .flatMap(saved -> customerStoreService.save(customer))
+                .flatMap(saved -> customerStoreService.update(customer))
                 .map(createdCustomer -> new ResourceOperationResponse(ResourceOperationStatus.CREATED, createdCustomer.getId()));
     }
 
     private Mono<ResourceOperationResponse> updateCustomer(CustomerManagementRequest customerManagementRequest, Customer customer) {
         customerMappingService.updateCustomer(customerManagementRequest, customer);
-        log.info("Updating customer with id {}", customer.getId());
-        return customerStoreService.save(customer)
+        return customerStoreService.update(customer)
                 .map(saved -> new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId()));
     }
 

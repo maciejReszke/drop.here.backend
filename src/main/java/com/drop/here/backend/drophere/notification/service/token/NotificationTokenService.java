@@ -29,7 +29,7 @@ public class NotificationTokenService {
     private final NotificationTokenRepository notificationTokenRepository;
     private final NotificationTokenMappingService notificationTokenMappingService;
 
-    private Optional<NotificationToken> findNotification(NotificationBroadcastingServiceType notificationBroadcastingServiceType, AccountProfile accountProfile, Customer customer, NotificationTokenType tokenType) {
+    private Optional<NotificationToken> findNotificationToken(NotificationBroadcastingServiceType notificationBroadcastingServiceType, AccountProfile accountProfile, Customer customer, NotificationTokenType tokenType) {
         return API.Match(tokenType).of(
                 Case($(NotificationTokenType.PROFILE), () -> notificationTokenRepository.findByOwnerAccountProfileAndBroadcastingServiceType(accountProfile, notificationBroadcastingServiceType)),
                 Case($(NotificationTokenType.CUSTOMER), () -> notificationTokenRepository.findByOwnerCustomerAndBroadcastingServiceType(customer, notificationBroadcastingServiceType))
@@ -38,7 +38,7 @@ public class NotificationTokenService {
 
     public Mono<ResourceOperationResponse> updateNotificationToken(AccountAuthentication accountAuthentication, NotificationTokenManagementRequest notificationTokenManagementRequest) {
         final NotificationToken notificationToken = notificationTokenMappingService.toNotificationToken(accountAuthentication, notificationTokenManagementRequest);
-        final NotificationToken toBeSavedNotificationToken = findNotification(notificationToken.getBroadcastingServiceType(), notificationToken.getOwnerAccountProfile(), notificationToken.getOwnerCustomer(), notificationToken.getTokenType())
+        final NotificationToken toBeSavedNotificationToken = findNotificationToken(notificationToken.getBroadcastingServiceType(), notificationToken.getOwnerAccountProfile(), notificationToken.getOwnerCustomer(), notificationToken.getTokenType())
                 .orElse(notificationToken);
         toBeSavedNotificationToken.setToken(notificationToken.getToken());
 

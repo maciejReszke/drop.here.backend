@@ -20,6 +20,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 
+//todo
 @Entity
 @Data
 @AllArgsConstructor

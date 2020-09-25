@@ -14,8 +14,8 @@ import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
-// TODO MONO:
 @Service
 @RequiredArgsConstructor
 public class SpotManagementValidationService {
@@ -33,18 +33,17 @@ public class SpotManagementValidationService {
         }
     }
 
-    public void validateJoinSpotRequest(Spot spot, SpotJoinRequest spotJoinRequest, Customer customer) {
+    public Mono<Void> validateJoinSpotRequest(Spot spot, SpotJoinRequest spotJoinRequest, Customer customer) {
         validateSpotPassword(spot, spotJoinRequest);
-        validateUniqueness(spot, customer);
+        return validateUniqueness(spot, customer);
     }
 
-    private void validateUniqueness(Spot spot, Customer customer) {
-        if (spotMembershipRepository.findBySpotAndCustomer(spot, customer).isPresent()) {
-            throw new RestIllegalRequestValueException(String.format(
-                    "Customer %s already joined spot %s", customer.getId(), spot.getId()),
-                    RestExceptionStatusCode.SPOT_MEMBERSHIP_CUSTOMER_ALREADY_JOINED_SPOT
-            );
-        }
+    private Mono<Void> validateUniqueness(Spot spot, Customer customer) {
+        return spotMembershipRepository.findBySpotAndCustomer(spot, customer)
+                .flatMap(spotMembership -> Mono.error(() -> new RestIllegalRequestValueException(String.format(
+                        "Customer %s already joined spot %s", customer.getId(), spot.getId()),
+                        RestExceptionStatusCode.SPOT_MEMBERSHIP_CUSTOMER_ALREADY_JOINED_SPOT)))
+                .then();
     }
 
     private void validateSpotPassword(Spot spot, SpotJoinRequest spotJoinRequest) {

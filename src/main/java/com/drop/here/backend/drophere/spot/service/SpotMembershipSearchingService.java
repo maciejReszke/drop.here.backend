@@ -9,9 +9,9 @@ import com.drop.here.backend.drophere.spot.repository.SpotMembershipRepository;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ import java.util.List;
 public class SpotMembershipSearchingService {
     private final SpotMembershipRepository spotMembershipRepository;
 
-    public Page<SpotCompanyMembershipResponse> findMemberships(Spot spot, String desiredCustomerSubstring, String membershipStatus, Pageable pageable) {
+    public Flux<SpotCompanyMembershipResponse> findMemberships(Spot spot, String desiredCustomerSubstring, String membershipStatus, Pageable pageable) {
         return spotMembershipRepository.findMembershipsWithCustomers(
                 spot,
                 prepareDesiredCustomerSubstring(desiredCustomerSubstring),
@@ -52,7 +52,7 @@ public class SpotMembershipSearchingService {
                 : desiredCustomerSubstring.toLowerCase() + '%';
     }
 
-    public List<SpotMembership> findMemberships(List<Spot> spots, Customer customer) {
+    public Flux<SpotMembership> findMemberships(List<Spot> spots, Customer customer) {
         return spotMembershipRepository.findByCustomerAndSpotIn(customer, spots);
     }
 }

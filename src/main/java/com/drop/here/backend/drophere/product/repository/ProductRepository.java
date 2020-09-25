@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Long
     @Query("select distinct p.category from Product p where " +
             "p.company.uid = :companyUid " +
             "order by p.category")
-    List<String> findCategories(String companyUid);
+    Flux<String> findCategories(String companyUid);
 
     List<Product> findByIdIn(List<String> productsIds);
 }

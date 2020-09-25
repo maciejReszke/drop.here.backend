@@ -100,7 +100,7 @@ public class ProductService {
         return Mono.empty();
     }
 
-    public List<String> findCategories(String companyUid) {
+    public Flux<String> findCategories(String companyUid) {
         return productRepository.findCategories(companyUid);
     }
 

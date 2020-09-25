@@ -55,7 +55,6 @@ public class AccountService {
         return passwordEncoder.matches(rawPassword, account.getPassword());
     }
 
-    // TODO: 23/09/2020 test
     public AccountProfileType getProfileType(Account account) {
         return account.isAnyProfileRegistered()
                 ? AccountProfileType.SUBPROFILE

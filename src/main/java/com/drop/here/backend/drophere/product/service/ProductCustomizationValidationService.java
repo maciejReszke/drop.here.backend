@@ -7,7 +7,6 @@ import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperT
 import io.vavr.control.Try;
 import org.springframework.stereotype.Service;
 
-// TODO MONO:
 @Service
 public class ProductCustomizationValidationService {
 

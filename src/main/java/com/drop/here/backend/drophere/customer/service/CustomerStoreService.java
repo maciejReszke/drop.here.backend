@@ -2,19 +2,21 @@ package com.drop.here.backend.drophere.customer.service;
 
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
-import com.drop.here.backend.drophere.configuration.security.AccountAuthentication;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerStoreService {
     private final CustomerRepository customerRepository;
 
-    public Mono<Customer> save(Customer customer) {
+    public Mono<Customer> update(Customer customer) {
+        log.info("Updating customer with id {}", customer.getId());
         return customerRepository.save(customer);
     }
 
@@ -23,9 +25,5 @@ public class CustomerStoreService {
                 .switchIfEmpty(Mono.error(() -> new RestEntityNotFoundException(String.format(
                         "Customer with id %s was not found", customerId),
                         RestExceptionStatusCode.CUSTOMER_BY_ID_NOT_FOUND)));
-    }
-
-    public Mono<Customer> findOwnCustomer(AccountAuthentication authentication) {
-        return customerRepository.findByAccount(authentication.getPrincipal());
     }
 }

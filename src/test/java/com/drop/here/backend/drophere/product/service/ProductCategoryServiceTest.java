@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -26,13 +26,14 @@ class ProductCategoryServiceTest {
         //given
         final String companyUid = "companyUid";
 
-        when(productService.findCategories(companyUid)).thenReturn(List.of("category"));
+        when(productService.findCategories(companyUid)).thenReturn(Flux.just("category"));
 
         //when
-        final List<ProductCategoryResponse> response = productCategoryService.findAll(companyUid);
+        final Flux<ProductCategoryResponse> result = productCategoryService.findAll(companyUid);
 
         //then
-        assertThat(response).hasSize(1);
-        assertThat(response.get(0).getName()).isEqualTo("category");
+        StepVerifier.create(result)
+                .assertNext(response -> assertThat(response.getName()).isEqualTo("category"))
+                .verifyComplete();
     }
 }

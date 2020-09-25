@@ -18,6 +18,6 @@ public class SpotCompanyMembershipResponse {
     @ApiModelProperty(value = "Customer last name", example = "Paździoch")
     String lastName;
 
-    @ApiModelProperty(value = "Customer id", example = "5")
-    Long customerId;
+    @ApiModelProperty(value = "Customer id", example = "abc15")
+    String customerId;
 }

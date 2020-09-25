@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
@@ -34,7 +35,7 @@ public class FacebookExecutingService {
     private static final String FIELDS_PARAM = "fields";
     private static final String FIELD_DELIMITER = ",";
 
-    public FacebookAccessToken exchangeToken(ExternalAuthenticationProviderLoginRequest request) {
+    public Mono<FacebookAccessToken> exchangeToken(ExternalAuthenticationProviderLoginRequest request) {
         final String url = buildExchangeTokenUrl(request);
         try {
             final ResponseEntity<FacebookAccessTokenResponse> response = restTemplate.getForEntity(url, FacebookAccessTokenResponse.class);
@@ -62,7 +63,7 @@ public class FacebookExecutingService {
                 RestExceptionStatusCode.LOGIN_FACEBOOK_EXCHANGE_TOKEN_FAILURE);
     }
 
-    public ExternalAuthenticationResult fetchAuthenticationData(FacebookAccessToken accessToken) {
+    public Mono<ExternalAuthenticationResult> fetchAuthenticationData(FacebookAccessToken accessToken) {
         final String url = buildFetchAuthenticationDataUrl(accessToken);
         try {
             final ResponseEntity<FacebookAuthenticationDataResponse> response = restTemplate.getForEntity(url, FacebookAuthenticationDataResponse.class);

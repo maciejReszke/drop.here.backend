@@ -3,21 +3,22 @@ package com.drop.here.backend.drophere.spot.repository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 
 // TODO MONO:
 @Repository
-public interface SpotRepository extends JpaRepository<Spot, Long> {
-    Optional<Spot> findByIdAndCompanyUid(Long spotId, String companyUid);
+public interface SpotRepository extends ReactiveMongoRepository<Spot, Long> {
+    Mono<Spot> findByIdAndCompanyUid(String spotId, String companyUid);
 
-    Optional<Spot> findByUidAndCompanyUid(String spotUid, String companyUid);
+    Mono<Spot> findByUidAndCompanyUid(String spotUid, String companyUid);
 
-    List<Spot> findAllByCompanyUidAndNameStartsWith(String companyUid, String name);
+    Flux<Spot> findAllByCompanyUidAndNameStartsWith(String companyUid, String name);
 
     // 0.000009009 = 1 meter to 1 deg ratio
     @Query("select d from Spot d " +
