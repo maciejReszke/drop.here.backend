@@ -37,7 +37,6 @@ import javax.validation.Valid;
 public class RouteController {
     private final RouteService routeService;
 
-    // TODO: 25/09/2020 test
     @ApiOperation("Find routes")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -49,12 +48,11 @@ public class RouteController {
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public Page<RouteShortResponse> findRoutes(@ApiIgnore @PathVariable String companyUid,
                                                @ApiIgnore AccountAuthentication accountAuthentication,
-                                               @ApiParam(value = "Customer name (starting with name or starting with surname)") @RequestParam(required = false) String routeStatus,
+                                               @ApiParam(value = "Route status") @RequestParam(required = false) String routeStatus,
                                                Pageable pageable) {
         return routeService.findRoutes(accountAuthentication, routeStatus, pageable);
     }
 
-    // TODO: 25/09/2020 test
     @GetMapping("/{routeId}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")

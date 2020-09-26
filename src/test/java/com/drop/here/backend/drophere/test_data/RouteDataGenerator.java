@@ -1,10 +1,12 @@
 package com.drop.here.backend.drophere.test_data;
 
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
 import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
+import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import lombok.experimental.UtilityClass;
 
@@ -60,6 +62,17 @@ public class RouteDataGenerator {
                 .routeDate(LocalDate.now())
                 .name("routeName" + i)
                 .withSeller(false)
+                .build();
+    }
+
+    public RouteProduct product(int i, Route preSavedRoute, Product product) {
+        return RouteProduct.builder()
+                .route(preSavedRoute)
+                .product(product)
+                .price(BigDecimal.valueOf(123.3d))
+                .limitedAmount(true)
+                .amount(BigDecimal.valueOf(51))
+                .orderNum(i)
                 .build();
     }
 }

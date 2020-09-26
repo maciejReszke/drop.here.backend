@@ -17,8 +17,9 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     Optional<Route> findByIdAndCompany(Long routeId, Company company);
 
     @Query("select new com.drop.here.backend.drophere.route.dto.RouteShortResponse(" +
-            "r.id, r.name, size(r.products), size(r.drops), r.profile.profileUid, r.profile.firstName, r.profile.lastName) " +
-            "from Route r where " +
+            "r.id, r.name, size(r.products), size(r.drops), p.profileUid, p.firstName, p.lastName) " +
+            "from Route r " +
+            "left join r.profile p where " +
             "r.company =:company and " +
             ":routeStatus is null or r.status = :routeStatus")
     Page<RouteShortResponse> findByCompany(Company company, RouteStatus routeStatus, Pageable pageable);

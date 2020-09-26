@@ -21,6 +21,7 @@ import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
 import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
+import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
 import com.drop.here.backend.drophere.route.repository.RouteRepository;
 import com.drop.here.backend.drophere.spot.entity.Spot;
@@ -35,6 +36,7 @@ import com.drop.here.backend.drophere.test_data.ProductDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductUnitDataGenerator;
 import com.drop.here.backend.drophere.test_data.RouteDataGenerator;
 import com.drop.here.backend.drophere.test_data.SpotDataGenerator;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,8 +51,10 @@ import java.util.List;
 import static com.drop.here.backend.drophere.authentication.account.service.PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class RouteControllerTest extends IntegrationBaseClass {
@@ -430,4 +434,167 @@ class RouteControllerTest extends IntegrationBaseClass {
         assertThat(routeRepository.findAll()).isNotEmpty();
     }
 
+    @Test
+    void givenValidRequestOwnCompanyOperationWhenFindRouteThenFind() throws Exception {
+        //given
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
+        preSavedRoute.setProfile(accountProfile);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        final Route route = routeRepository.save(preSavedRoute);
+        final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.notNullValue()));
+    }
+
+    @Test
+    void givenNotOwnCompanyOperationWhenFindRouteThenForbidden() throws Exception {
+        //given
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
+        preSavedRoute.setProfile(accountProfile);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        final Route route = routeRepository.save(preSavedRoute);
+        final String url = String.format("/companies/%s/routes/%s", company.getUid() + "kek", route.getId());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+    }
+
+    @Test
+    void givenInvalidPrivilegesWhenFindRouteThenForbidden() throws Exception {
+        //given
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
+        preSavedRoute.setProfile(accountProfile);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        final Route route = routeRepository.save(preSavedRoute);
+        final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
+
+        final Privilege privilege = privilegeRepository.findAll().get(0);
+        privilege.setName("kaka");
+        privilegeRepository.save(privilege);
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+    }
+
+    @Test
+    void givenNotExistingRouteOwnCompanyOperationWhenFindRouteThen404() throws Exception {
+        //given
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
+        preSavedRoute.setProfile(accountProfile);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        final Route route = routeRepository.save(preSavedRoute);
+        final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId() + 15);
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationNoParamsWhenFindRoutesThenFind() throws Exception {
+        //given
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        preSavedRoute.setStatus(RouteStatus.PREPARED);
+        final Route preSavedRoute2 = RouteDataGenerator.route(2, company);
+        preSavedRoute2.setStatus(RouteStatus.STARTED);
+        preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
+        preSavedRoute.setProfile(accountProfile);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        routeRepository.save(preSavedRoute);
+        routeRepository.save(preSavedRoute2);
+        final String url = String.format("/companies/%s/routes", company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*]", Matchers.hasSize(2)));
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationByParamWhenFindRoutesThenFind() throws Exception {
+        //given
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        preSavedRoute.setStatus(RouteStatus.PREPARED);
+        final Route preSavedRoute2 = RouteDataGenerator.route(1, company);
+        preSavedRoute2.setStatus(RouteStatus.STARTED);
+        preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
+        preSavedRoute.setProfile(accountProfile);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        routeRepository.save(preSavedRoute);
+        routeRepository.save(preSavedRoute2);
+        final String url = String.format("/companies/%s/routes", company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .param("routeStatus", RouteStatus.PREPARED.name())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenNotOwnCompanyOperationWhenFindRoutesThenForbidden() throws Exception {
+        //given
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
+        preSavedRoute.setProfile(accountProfile);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        routeRepository.save(preSavedRoute);
+        final String url = String.format("/companies/%s/routes", company.getUid() + "kek");
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+    }
+
+    @Test
+    void givenInvalidPrivilegesWhenFindRoutesThenForbidden() throws Exception {
+        //given
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
+        preSavedRoute.setProfile(accountProfile);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        routeRepository.save(preSavedRoute);
+        final String url = String.format("/companies/%s/routes", company.getUid());
+
+        final Privilege privilege = privilegeRepository.findAll().get(0);
+        privilege.setName("kaka");
+        privilegeRepository.save(privilege);
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+    }
 }

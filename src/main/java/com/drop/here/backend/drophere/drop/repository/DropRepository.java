@@ -12,7 +12,7 @@ import java.util.List;
 public interface DropRepository extends JpaRepository<Drop, Long> {
 
     @Query("select d from Drop d " +
-            "join d.spot where " +
+            "join fetch d.spot where " +
             "d.route = :route")
     List<Drop> findByRouteWithSpot(Route route);
 }
