@@ -6,7 +6,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.service.UidGeneratorService;
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.drop.dto.DropResponse;
+import com.drop.here.backend.drophere.drop.dto.DropRouteResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.service.DropService;
@@ -25,7 +25,6 @@ import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
 import com.drop.here.backend.drophere.spot.service.SpotPersistenceService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,6 +35,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -66,20 +66,24 @@ public class RouteMappingService {
                 .createdAt(LocalDateTime.now())
                 .status(RouteStatus.PREPARED)
                 .company(company)
+                .drops(new ArrayList<>())
+                .products(new ArrayList<>())
                 .build();
         updateRoute(route, routeRequest, company);
         return route;
     }
 
     public void updateRoute(Route route, RouteRequest routeRequest, Company company) {
-        CollectionUtils.emptyIfNull(route.getProducts()).forEach(product -> product.setRoute(null));
-        CollectionUtils.emptyIfNull(route.getDrops()).forEach(drop -> drop.setRoute(null));
+        route.getProducts().forEach(product -> product.setRoute(null));
+        route.getProducts().clear();
+        route.getDrops().forEach(drop -> drop.setRoute(null));
+        route.getDrops().clear();
         route.setLastUpdatedAt(LocalDateTime.now());
         route.setName(routeRequest.getName().strip());
         route.setDescription(routeRequest.getDescription());
         route.setRouteDate(LocalDate.parse(routeRequest.getDate().strip(), DateTimeFormatter.ISO_LOCAL_DATE));
-        route.setProducts(buildProducts(routeRequest, route, company));
-        route.setDrops(buildDrops(routeRequest, route, company));
+        buildProducts(routeRequest, route, company).forEach(product -> route.getProducts().add(product));
+        buildDrops(routeRequest, route, company).forEach(drop -> route.getDrops().add(drop));
         route.setProfile(getProfile(company, routeRequest));
         route.setWithSeller(route.getProfile() != null);
     }
@@ -123,18 +127,25 @@ public class RouteMappingService {
     }
 
     private RouteProduct buildProduct(RouteProductRequest routeProductRequest, Route route, Company company, int orderNum) {
+        final Product product = productService.getProduct(routeProductRequest.getProductId(), company.getUid());
         return RouteProduct.builder()
                 .orderNum(orderNum)
                 .limitedAmount(routeProductRequest.isLimitedAmount())
-                .amount(routeProductRequest.isLimitedAmount() ? routeProductRequest.getAmount() : BigDecimal.ZERO)
+                .amount(getAmount(routeProductRequest))
                 .price(routeProductRequest.getPrice().setScale(2, RoundingMode.DOWN))
-                .product(productService.getProduct(routeProductRequest.getProductId(), company.getUid()))
+                .product(product)
                 .route(route)
                 .build();
     }
 
+    private BigDecimal getAmount(RouteProductRequest routeProductRequest) {
+        return routeProductRequest.isLimitedAmount()
+                ? routeProductRequest.getAmount()
+                : BigDecimal.ZERO;
+    }
+
     public RouteResponse toRouteResponse(Route route) {
-        final List<DropResponse> drops = dropService.toDropResponses(route);
+        final List<DropRouteResponse> drops = dropService.toDropResponses(route);
         final List<RouteProductResponse> products = toProductResponses(route);
         final Optional<AccountProfile> profile = getProfile(route);
         return RouteResponse.builder()

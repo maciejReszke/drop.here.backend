@@ -52,7 +52,7 @@ public class AccountProfilePersistenceService {
     }
 
     public Optional<AccountProfile> findActiveByCompanyAndProfileUid(Company company, String profileUid) {
-        return accountProfileRepository.findByAccountCompanyAndProfileUidAndStatus(company, profileUid,AccountProfileStatus.ACTIVE );
+        return accountProfileRepository.findByAccountCompanyAndProfileUidAndStatus(company, profileUid, AccountProfileStatus.ACTIVE);
     }
 
     public AccountProfile findById(Long id) {

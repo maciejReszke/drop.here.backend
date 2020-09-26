@@ -57,7 +57,7 @@ class UidGeneratorServiceTest {
         //then
         assertThat(result).hasSize(11)
                 .doesNotContain(" ")
-                .startsWith("glodny")
+                .startsWith("glodn")
                 .doesNotStartWith("glodny-niedzwiedz");
     }
 }

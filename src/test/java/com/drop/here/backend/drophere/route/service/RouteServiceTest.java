@@ -74,7 +74,7 @@ class RouteServiceTest {
         final Long routeId = 15L;
         final Route route = RouteDataGenerator.route(1, company);
 
-        doNothing().when(routeValidationService).validateCreate(routeRequest);
+        doNothing().when(routeValidationService).validateUpdate(routeRequest, route);
         when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
         doNothing().when(routeMappingService).updateRoute(route, routeRequest, company);
         doNothing().when(routeStoreService).save(route);
@@ -97,7 +97,6 @@ class RouteServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long routeId = 15L;
 
-        doNothing().when(routeValidationService).validateCreate(routeRequest);
         when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
 
         //when

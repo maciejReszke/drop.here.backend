@@ -587,7 +587,7 @@ class ProductControllerTest extends IntegrationBaseClass {
         result.andExpect(status().isOk());
 
         assertThat(productRepository.findAll()).isEmpty();
-        assertThat(imageRepository.findAll()).isEmpty();
+        assertThat(imageRepository.findAll()).hasSize(1);
         assertThat(productCustomizationWrapperRepository.findAll()).isEmpty();
     }
 
@@ -685,8 +685,7 @@ class ProductControllerTest extends IntegrationBaseClass {
 
         //then
         perform.andExpect(status().isOk());
-        assertThat(imageRepository.findAll()).hasSize(1);
-        assertThat(imageRepository.findById(image.getId())).isEmpty();
+        assertThat(imageRepository.findAll()).hasSize(2);
     }
 
     @Test

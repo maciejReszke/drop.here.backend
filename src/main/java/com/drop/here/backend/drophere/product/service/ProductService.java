@@ -66,7 +66,7 @@ public class ProductService {
     }
 
     // TODO: 25/09/2020 check typu productu i dodac ogolnie typ do reszty rzeczy (albo usuwac - czemu nie)
-    // TODO: 26/09/2020 w sumie lipa bo sie beda dane historyczne gubily
+    // TODO: 26/09/2020 w sumie lipa bo sie beda dane historyczne gubily ( i status na widoczny trzeba!)
     @Transactional(rollbackFor = Exception.class)
     public ResourceOperationResponse deleteProduct(Long productId, String companyUid) {
         final Product product = getProduct(productId, companyUid);

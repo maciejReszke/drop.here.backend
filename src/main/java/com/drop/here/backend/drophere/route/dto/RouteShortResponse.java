@@ -25,4 +25,10 @@ public class RouteShortResponse {
 
     @ApiModelProperty(value = "Seller profile uid", example = "15gang")
     private String profileUid;
+
+    @ApiModelProperty(value = "Seller first name", example = "Endriu")
+    private String profileFirstName;
+
+    @ApiModelProperty(value = "Seller last name", example = "Golota")
+    private String profileLastName;
 }

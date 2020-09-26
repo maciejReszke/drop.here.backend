@@ -16,7 +16,8 @@ import java.util.Optional;
 public interface RouteRepository extends JpaRepository<Route, Long> {
     Optional<Route> findByIdAndCompany(Long routeId, Company company);
 
-    @Query("select new com.drop.here.backend.drophere.route.dto.RouteShortResponse(r.id, r.name, size(r.routeProducts), size(r.routeDrops) ) " +
+    @Query("select new com.drop.here.backend.drophere.route.dto.RouteShortResponse(" +
+            "r.id, r.name, size(r.products), size(r.drops), r.profile.profileUid, r.profile.firstName, r.profile.lastName) " +
             "from Route r where " +
             "r.company =:company and " +
             ":routeStatus is null or r.status = :routeStatus")

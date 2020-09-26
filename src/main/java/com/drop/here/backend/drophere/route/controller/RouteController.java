@@ -70,7 +70,6 @@ public class RouteController {
         return routeService.findRoute(routeId, accountAuthentication);
     }
 
-    // TODO: 25/09/2020 test
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation("Creating new route")

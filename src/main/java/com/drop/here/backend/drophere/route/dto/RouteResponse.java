@@ -1,6 +1,6 @@
 package com.drop.here.backend.drophere.route.dto;
 
-import com.drop.here.backend.drophere.drop.dto.DropResponse;
+import com.drop.here.backend.drophere.drop.dto.DropRouteResponse;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
@@ -43,7 +43,7 @@ public class RouteResponse {
     List<RouteProductResponse> products;
 
     @ApiModelProperty(value = "Route drops")
-    List<DropResponse> drops;
+    List<DropRouteResponse> drops;
 
     @ApiModelProperty(value = "Route date", example = "2020-04-04")
     String routeDate;
