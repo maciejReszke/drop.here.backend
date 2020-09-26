@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder
 public class RouteDropRequest {
+
     @ApiModelProperty(value = "Drop name", example = "Drop the base", required = true)
     @NotBlank
     @Length(max = 50)

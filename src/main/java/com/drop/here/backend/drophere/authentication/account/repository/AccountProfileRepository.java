@@ -2,6 +2,8 @@ package com.drop.here.backend.drophere.authentication.account.repository;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileStatus;
+import com.drop.here.backend.drophere.company.entity.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -24,4 +26,6 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
             "join fetch ap.image where " +
             "ap.profileUid = :profileUid")
     Optional<AccountProfile> findByProfileUidWithImage(String profileUid);
+
+    Optional<AccountProfile> findByAccountCompanyAndProfileUidAndStatus(Company company, String profileUid, AccountProfileStatus active);
 }

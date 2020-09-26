@@ -1,20 +1,65 @@
 package com.drop.here.backend.drophere.test_data;
 
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
+import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
 import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
+import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import lombok.experimental.UtilityClass;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @UtilityClass
 public class RouteDataGenerator {
 
-    // TODO: 25/09/2020
     public RouteRequest request(int i) {
-        return null;
+        return RouteRequest.builder()
+                .date("2020-04-04")
+                .description("description" + i)
+                .drops(List.of(routeDropRequest(i)))
+                .name("routeName" + i)
+                .products(List.of(productRequest(2 * i), productRequest(2 * i + 1)))
+                .profileUid("profileUid" + i)
+                .build();
     }
 
-    // TODO: 25/09/2020
+    private RouteProductRequest productRequest(int i) {
+        return RouteProductRequest
+                .builder()
+                .amount(BigDecimal.valueOf(55.4))
+                .limitedAmount(true)
+                .productId(5L + i)
+                .price(BigDecimal.valueOf(55L))
+                .build();
+    }
+
+    private RouteDropRequest routeDropRequest(int i) {
+        return RouteDropRequest.builder()
+                .description("dropDescription" + i)
+                .endTime("17:35")
+                .name("dropName" + i)
+                .spotId(5L + i)
+                .startTime("17:15")
+                .build();
+    }
+
     public Route route(int i, Company company) {
-        return null;
+        return Route.builder()
+                .status(RouteStatus.PREPARED)
+                .company(company)
+                .createdAt(LocalDateTime.now())
+                .description("routeDescription" + i)
+                .drops(List.of())
+                .lastUpdatedAt(LocalDateTime.now())
+                .products(List.of())
+                .profile(null)
+                .routeDate(LocalDate.now())
+                .name("routeName" + i)
+                .withSeller(false)
+                .build();
     }
 }

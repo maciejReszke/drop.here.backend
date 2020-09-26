@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.route.entity;
 
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -71,6 +72,8 @@ public class Route {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id")
     private AccountProfile profile;
+
+    private boolean withSeller;
 
     @Version
     private Long version;

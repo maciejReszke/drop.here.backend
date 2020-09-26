@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -31,10 +32,12 @@ public class RouteRequest {
 
     @ApiModelProperty(value = "Drops")
     @Valid
+    @NotNull
     private List<@Valid RouteDropRequest> drops;
 
     @ApiModelProperty(value = "Products")
     @Valid
+    @NotNull
     private List<@Valid RouteProductRequest> products;
 
     @NotBlank

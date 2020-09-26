@@ -65,7 +65,8 @@ public class ProductService {
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format("Product with id %s company %s was not found", productId, companyUid), RestExceptionStatusCode.PRODUCT_NOT_FOUND));
     }
 
-    // TODO: 25/09/2020 check typu productu i dodac ogolnie typ do reszty rzeczy
+    // TODO: 25/09/2020 check typu productu i dodac ogolnie typ do reszty rzeczy (albo usuwac - czemu nie)
+    // TODO: 26/09/2020 w sumie lipa bo sie beda dane historyczne gubily
     @Transactional(rollbackFor = Exception.class)
     public ResourceOperationResponse deleteProduct(Long productId, String companyUid) {
         final Product product = getProduct(productId, companyUid);

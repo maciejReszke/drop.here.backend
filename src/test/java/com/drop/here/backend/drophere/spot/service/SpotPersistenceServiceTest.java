@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.spot.service;
 
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.repository.SpotRepository;
 import org.junit.jupiter.api.Test;
@@ -57,4 +58,37 @@ class SpotPersistenceServiceTest {
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 
+    @Test
+    void givenExistingSpotWhenFindSpotByIdAndCompanyThenFind() {
+        //given
+        final Long spotId = 1L;
+        final Company company = Company.builder().build();
+        final Spot spot = Spot.builder().build();
+
+        when(spotRepository.findByIdAndCompany(spotId, company))
+                .thenReturn(Optional.of(spot));
+
+        //when
+        final Spot result = spotPersistenceService.findSpot(spotId, company);
+
+        //then
+        assertThat(result).isEqualTo(spot);
+    }
+
+    @Test
+    void givenNotExistingSpotWhenFindSpotByIdAndCompanyThenFind() {
+        //given
+        final Long spotId = 1L;
+        final Company company = Company.builder().build();
+        final Spot spot = Spot.builder().build();
+
+        when(spotRepository.findByIdAndCompany(spotId, company))
+                .thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> spotPersistenceService.findSpot(spotId, company));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
 }

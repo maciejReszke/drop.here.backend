@@ -15,7 +15,7 @@ public class RouteProductResponse {
     boolean limitedAmount;
 
     @ApiModelProperty(value = "Given product amount for route (if limited amount = true) (must be dividable by unit fraction)", example = "15")
-    Integer amount;
+    BigDecimal amount;
 
     @ApiModelProperty(value = "Base product price for every drop in this route", example = "15.55")
     BigDecimal price;

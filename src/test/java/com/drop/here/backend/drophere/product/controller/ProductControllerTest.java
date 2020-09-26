@@ -15,23 +15,18 @@ import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageRepository;
 import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.product.repository.ProductUnitRepository;
-import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplate;
-import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplateProduct;
-import com.drop.here.backend.drophere.schedule_template.repository.ScheduleTemplateRepository;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductUnitDataGenerator;
-import com.drop.here.backend.drophere.test_data.ScheduleTemplateDataGenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,9 +39,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.io.FileInputStream;
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Set;
 
 import static com.drop.here.backend.drophere.authentication.account.service.PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,9 +66,6 @@ class ProductControllerTest extends IntegrationBaseClass {
 
     @Autowired
     private CompanyRepository companyRepository;
-
-    @Autowired
-    private ScheduleTemplateRepository scheduleTemplateRepository;
 
     @Autowired
     private PrivilegeRepository privilegeRepository;
@@ -107,7 +97,6 @@ class ProductControllerTest extends IntegrationBaseClass {
 
     @AfterEach
     void cleanUp() {
-        scheduleTemplateRepository.deleteAll();
         productCustomizationWrapperRepository.deleteAll();
         productRepository.deleteAll();
         companyRepository.deleteAll();
@@ -585,18 +574,6 @@ class ProductControllerTest extends IntegrationBaseClass {
         final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
         product.setImage(image);
         productRepository.save(product);
-        final ScheduleTemplate scheduleTemplate = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
-        scheduleTemplate.setScheduleTemplateProducts(Set.of(
-                ScheduleTemplateProduct.builder()
-                        .scheduleTemplate(scheduleTemplate)
-                        .product(product)
-                        .price(BigDecimal.valueOf(55))
-                        .orderNum(1)
-                        .limitedAmount(false)
-                        .amount(0)
-                        .build()
-        ));
-        scheduleTemplateRepository.save(scheduleTemplate);
         productCustomizationWrapperRepository.save(productCustomizationWrapperRepository.save(
                 ProductDataGenerator.productCustomizationWrapper(1, product)));
 
@@ -610,8 +587,6 @@ class ProductControllerTest extends IntegrationBaseClass {
         result.andExpect(status().isOk());
 
         assertThat(productRepository.findAll()).isEmpty();
-        assertThat(scheduleTemplateRepository.findByIdAndCompanyWithScheduleTemplateProducts(scheduleTemplate.getId(), company)
-                .orElseThrow().getScheduleTemplateProducts()).isEmpty();
         assertThat(imageRepository.findAll()).isEmpty();
         assertThat(productCustomizationWrapperRepository.findAll()).isEmpty();
     }
