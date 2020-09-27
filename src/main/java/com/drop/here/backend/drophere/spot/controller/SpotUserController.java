@@ -49,7 +49,7 @@ public class SpotUserController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public List<SpotCustomerResponse> findspots(@ApiIgnore AccountAuthentication authentication,
+    public List<SpotCustomerResponse> findSpots(@ApiIgnore AccountAuthentication authentication,
                                                 @ApiParam(value = "Searching x coordinate", required = true) @RequestParam Double xCoordinate,
                                                 @ApiParam(value = "Searching y coordinate", required = true) @RequestParam Double yCoordinate,
                                                 @ApiParam(value = "Searching radius (meters)", required = true) @RequestParam Integer radius,

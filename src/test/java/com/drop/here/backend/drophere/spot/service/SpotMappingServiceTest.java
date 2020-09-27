@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.spot.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.common.service.UidGeneratorService;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
@@ -16,17 +17,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SpotMappingServiceTest {
 
     @InjectMocks
     private SpotMappingService spotMappingService;
+
+    @Mock
+    private UidGeneratorService uidGeneratorService;
 
     @BeforeEach
     void prepare() throws IllegalAccessException {
@@ -42,6 +48,8 @@ class SpotMappingServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         spotManagementRequest.setName("nam");
 
+        when(uidGeneratorService.generateUid("nam", 4,6)).thenReturn("uid");
+
         //when
         final Spot spot = spotMappingService.toEntity(spotManagementRequest, accountAuthentication);
 
@@ -52,8 +60,7 @@ class SpotMappingServiceTest {
         assertThat(spot.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(spot.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(spot.getPassword()).isEqualTo(spotManagementRequest.getPassword());
-        assertThat(spot.getUid()).hasSize(9);
-        assertThat(spot.getUid()).startsWith("nam");
+        assertThat(spot.getUid()).isEqualTo("uid");
         assertThat(spot.getXCoordinate()).isEqualTo(spotManagementRequest.getXCoordinate());
         assertThat(spot.getYCoordinate()).isEqualTo(spotManagementRequest.getYCoordinate());
         assertThat(spot.getCompany()).isEqualTo(account.getCompany());
@@ -65,7 +72,7 @@ class SpotMappingServiceTest {
         final SpotManagementRequest spotManagementRequest = SpotDataGenerator.spotManagementRequest(1);
         spotManagementRequest.setName("nam");
         final Spot spot = Spot.builder().build();
-
+        when(uidGeneratorService.generateUid("nam", 4,6)).thenReturn("uid");
         //when
         spotMappingService.update(spot, spotManagementRequest);
 
@@ -76,8 +83,7 @@ class SpotMappingServiceTest {
         assertThat(spot.getCreatedAt()).isNull();
         assertThat(spot.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(spot.getPassword()).isEqualTo(spotManagementRequest.getPassword());
-        assertThat(spot.getUid()).hasSize(9);
-        assertThat(spot.getUid()).startsWith("nam");
+        assertThat(spot.getUid()).isEqualTo("uid");
         assertThat(spot.getXCoordinate()).isEqualTo(spotManagementRequest.getXCoordinate());
         assertThat(spot.getYCoordinate()).isEqualTo(spotManagementRequest.getYCoordinate());
         assertThat(spot.getCompany()).isNull();

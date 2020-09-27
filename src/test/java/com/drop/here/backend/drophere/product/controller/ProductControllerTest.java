@@ -15,23 +15,17 @@ import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageRepository;
 import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCustomization;
-import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
-import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.product.repository.ProductUnitRepository;
-import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplate;
-import com.drop.here.backend.drophere.schedule_template.entity.ScheduleTemplateProduct;
-import com.drop.here.backend.drophere.schedule_template.repository.ScheduleTemplateRepository;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductUnitDataGenerator;
-import com.drop.here.backend.drophere.test_data.ScheduleTemplateDataGenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,7 +40,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Set;
 
 import static com.drop.here.backend.drophere.authentication.account.service.PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,9 +66,6 @@ class ProductControllerTest extends IntegrationBaseClass {
 
     @Autowired
     private CompanyRepository companyRepository;
-
-    @Autowired
-    private ScheduleTemplateRepository scheduleTemplateRepository;
 
     @Autowired
     private PrivilegeRepository privilegeRepository;
@@ -107,8 +97,6 @@ class ProductControllerTest extends IntegrationBaseClass {
 
     @AfterEach
     void cleanUp() {
-        scheduleTemplateRepository.deleteAll();
-        productCustomizationWrapperRepository.deleteAll();
         productRepository.deleteAll();
         companyRepository.deleteAll();
         privilegeRepository.deleteAll();
@@ -133,6 +121,9 @@ class ProductControllerTest extends IntegrationBaseClass {
         preSaved3.setName("Arsenic");
         preSaved3.setCategory("poison");
         productRepository.save(preSaved3);
+        final Product hiddenProduct = ProductDataGenerator.product(4, productUnit, company);
+        hiddenProduct.setCreationType(ProductCreationType.ROUTE);
+        productRepository.save(hiddenProduct);
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
 
@@ -411,9 +402,11 @@ class ProductControllerTest extends IntegrationBaseClass {
 
         final List<Product> products = productRepository.findAll();
         assertThat(products).hasSize(1);
-        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
+        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(2);
         assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
                 List.of(products.get(0).getId())).get(0).getCustomizations()).hasSize(2);
+        assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
+                List.of(products.get(0).getId())).get(1).getCustomizations()).hasSize(2);
     }
 
     @Test
@@ -466,7 +459,7 @@ class ProductControllerTest extends IntegrationBaseClass {
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
                 .unit(productUnit.getName())
-                .availabilityStatus(ProductAvailabilityStatus.AVAILABLE + "ttt")
+                .unitFraction(BigDecimal.valueOf(1.2d))
                 .build());
 
         //when
@@ -482,9 +475,9 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenUpdateProductThenUpdate() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
-        final ProductCustomizationWrapper productCustomizationWrapper = productCustomizationWrapperRepository
-                .save(ProductDataGenerator.productCustomizationWrapper(1, product));
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
+        productRepository.save(product);
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
@@ -503,16 +496,17 @@ class ProductControllerTest extends IntegrationBaseClass {
 
         assertThat(productRepository.findAll()).hasSize(1);
         assertThat(productRepository.findAll().get(0).getName()).isEqualTo("newName");
-        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
+        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(2);
         assertThat(productCustomizationWrapperRepository.findByProductsIdsWithCustomizations(
                 List.of(product.getId())).get(0).getCustomizations()).hasSize(2);
-        assertThat(productCustomizationWrapperRepository.findAll().get(0).getId()).isNotEqualTo(productCustomizationWrapper.getId());
     }
 
     @Test
     void givenValidRequestNotOwnCompanyOperationWhenUpdateProductThen403() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
+        productRepository.save(product);
         final String url = String.format("/companies/%s/products/%s", company.getUid() + "ii", product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
@@ -538,7 +532,9 @@ class ProductControllerTest extends IntegrationBaseClass {
         privilege.setName("differentPrivilege");
         privilegeRepository.save(privilege);
 
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
+        productRepository.save(product);
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
@@ -559,13 +555,41 @@ class ProductControllerTest extends IntegrationBaseClass {
     @Test
     void givenInvalidRequestOwnCompanyOperationWhenUpdateProductThen422() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
+        productRepository.save(product);
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
         final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
                 .toBuilder()
                 .unit(productUnit.getName())
                 .name("newName")
-                .availabilityStatus(ProductAvailabilityStatus.AVAILABLE + "ttt")
+                .unitFraction(BigDecimal.valueOf(1.2d))
+                .build());
+
+        //when
+        final ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()));
+    }
+
+    @Test
+    void givenValidRequestInvalidProductCreationTypeOwnCompanyOperationWhenUpdateProductThen422() throws Exception {
+        //given
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
+        productRepository.save(product);
+        product.setCreationType(ProductCreationType.ROUTE);
+        productRepository.save(product);
+        final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
+        final String json = objectMapper.writeValueAsString(ProductDataGenerator.managementRequest(1)
+                .toBuilder()
+                .unit(productUnit.getName())
+                .name("newName")
+                .unitFraction(BigDecimal.valueOf(1.0))
                 .build());
 
         //when
@@ -582,23 +606,11 @@ class ProductControllerTest extends IntegrationBaseClass {
     void givenValidRequestOwnCompanyOperationWhenDeleteProductThenDelete() throws Exception {
         //given
         final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
         final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
         product.setImage(image);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
         productRepository.save(product);
-        final ScheduleTemplate scheduleTemplate = ScheduleTemplateDataGenerator.scheduleTemplate(1, company);
-        scheduleTemplate.setScheduleTemplateProducts(Set.of(
-                ScheduleTemplateProduct.builder()
-                        .scheduleTemplate(scheduleTemplate)
-                        .product(product)
-                        .price(BigDecimal.valueOf(55))
-                        .orderNum(1)
-                        .limitedAmount(false)
-                        .amount(0)
-                        .build()
-        ));
-        scheduleTemplateRepository.save(scheduleTemplate);
-        productCustomizationWrapperRepository.save(productCustomizationWrapperRepository.save(
-                ProductDataGenerator.productCustomizationWrapper(1, product)));
 
         final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
 
@@ -610,16 +622,16 @@ class ProductControllerTest extends IntegrationBaseClass {
         result.andExpect(status().isOk());
 
         assertThat(productRepository.findAll()).isEmpty();
-        assertThat(scheduleTemplateRepository.findByIdAndCompanyWithScheduleTemplateProducts(scheduleTemplate.getId(), company)
-                .orElseThrow().getScheduleTemplateProducts()).isEmpty();
-        assertThat(imageRepository.findAll()).isEmpty();
+        assertThat(imageRepository.findAll()).hasSize(1);
         assertThat(productCustomizationWrapperRepository.findAll()).isEmpty();
     }
 
     @Test
     void givenValidRequestNotOwnCompanyOperationWhenDeleteProductThen403() throws Exception {
         //given
-        final Product product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
+        productRepository.save(product);
         final String url = String.format("/companies/%s/products/%s", company.getUid() + "ii", product.getId());
 
         //when
@@ -652,6 +664,31 @@ class ProductControllerTest extends IntegrationBaseClass {
     }
 
     @Test
+    void givenValidRequestInvalidProductCreationTypeOwnCompanyOperationWhenDeleteProductThen422() throws Exception {
+        //given
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
+        product.setCreationType(ProductCreationType.ROUTE);
+        final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
+        product.setImage(image);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
+        productRepository.save(product);
+
+        final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
+
+        //when
+        final ResultActions result = mockMvc.perform(delete(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()));
+
+        assertThat(productRepository.findAll()).hasSize(1);
+        assertThat(imageRepository.findAll()).hasSize(1);
+        assertThat(productCustomizationWrapperRepository.findAll()).hasSize(1);
+    }
+
+    @Test
     void givenNotImageWhenGetProductImageThen404() throws Exception {
         //given
         final Product product = ProductDataGenerator.product(1, productUnit, company);
@@ -670,6 +707,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     void givenValidRequestNotExistingImageWhenUpdateImageThenUpdate() throws Exception {
         //given
         final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
         productRepository.save(product);
         final String url = String.format("/companies/%s/products/%s/images", company.getUid(), product.getId());
 
@@ -694,6 +732,7 @@ class ProductControllerTest extends IntegrationBaseClass {
         //given
         final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
         final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));
         product.setImage(image);
         productRepository.save(product);
         final String url = String.format("/companies/%s/products/%s/images", company.getUid(), product.getId());
@@ -710,8 +749,32 @@ class ProductControllerTest extends IntegrationBaseClass {
 
         //then
         perform.andExpect(status().isOk());
+        assertThat(imageRepository.findAll()).hasSize(2);
+    }
+
+    @Test
+    void givenValidRequestInvalidProductCreationTypeWhenUpdateImageThen422() throws Exception {
+        //given
+        final Image image = imageRepository.save(Image.builder().type(ImageType.CUSTOMER_IMAGE).bytes("bytes".getBytes()).build());
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setCreationType(ProductCreationType.ROUTE);
+        product.setImage(image);
+        productRepository.save(product);
+        final String url = String.format("/companies/%s/products/%s/images", company.getUid(), product.getId());
+        final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
+        final MockMultipartFile file = new MockMultipartFile("image", bytes);
+
+        privilegeRepository.deleteAll();
+        privilegeRepository.save(Privilege.builder().account(account).name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).build());
+
+        //when
+        final ResultActions perform = mockMvc.perform(multipart(url)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()));
         assertThat(imageRepository.findAll()).hasSize(1);
-        assertThat(imageRepository.findById(image.getId())).isEmpty();
     }
 
     @Test

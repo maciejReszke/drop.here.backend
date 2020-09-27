@@ -2,9 +2,11 @@ package com.drop.here.backend.drophere.authentication.account.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileStatus;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountProfileRepository;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.image.Image;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,5 +49,16 @@ public class AccountProfilePersistenceService {
                         "Image for account profile %s was not found", profileUid),
                         RestExceptionStatusCode.ACCOUNT_PROFILE_IMAGE_WAS_NOT_FOUND))
                 .getImage();
+    }
+
+    public Optional<AccountProfile> findActiveByCompanyAndProfileUid(Company company, String profileUid) {
+        return accountProfileRepository.findByAccountCompanyAndProfileUidAndStatus(company, profileUid, AccountProfileStatus.ACTIVE);
+    }
+
+    public AccountProfile findById(Long id) {
+        return accountProfileRepository.findById(id)
+                .orElseThrow(() -> new RestEntityNotFoundException(
+                        String.format("Account profile by id %s not found ", id),
+                        RestExceptionStatusCode.ACCOUNT_PROFILE_BY_ID_NOT_FOUND));
     }
 }

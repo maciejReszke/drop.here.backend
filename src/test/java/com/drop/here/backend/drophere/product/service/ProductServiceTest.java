@@ -8,13 +8,13 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
-import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
-import com.drop.here.backend.drophere.schedule_template.service.ScheduleTemplateStoreService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
@@ -29,10 +29,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -48,8 +51,6 @@ class ProductServiceTest {
     @Mock
     private ProductSearchingService productSearchingService;
 
-    @Mock
-    private ScheduleTemplateStoreService scheduleTemplateStoreService;
     @Mock
     private ProductValidationService productValidationService;
 
@@ -68,15 +69,14 @@ class ProductServiceTest {
         final Pageable pageable = Pageable.unpaged();
         final String companyUid = "companyUid";
         final Account account = AccountDataGenerator.companyAccount(1);
-        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Page<ProductResponse> paged = Page.empty();
 
         final String[] desiredCategories = new String[0];
         final String desiredName = "aa";
-        when(productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredName, accountAuthentication)).thenReturn(paged);
+        when(productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredName)).thenReturn(paged);
 
         //when
-        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, desiredCategories, desiredName, accountAuthentication);
+        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, desiredCategories, desiredName);
 
         //then
         assertThat(result).isEqualTo(paged);
@@ -97,7 +97,6 @@ class ProductServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         when(productMappingService.toEntity(productManagementRequest, accountAuthentication)).thenReturn(product);
         when(productRepository.save(product)).thenReturn(product);
-        doNothing().when(productCustomizationService).createCustomizations(product, productManagementRequest.getProductCustomizationWrapperRequest());
 
         //when
         final ResourceOperationResponse response = productService.createProduct(productManagementRequest, companyUid, accountAuthentication);
@@ -112,16 +111,15 @@ class ProductServiceTest {
         final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder().build();
         final String companyUid = "companyUid";
 
-        doNothing().when(productValidationService).validateProductRequest(productManagementRequest);
-        final ProductUnit unit = ProductDataGenerator.unit(1);
-
         final Company company = Company.builder().build();
+        final ProductUnit unit = ProductDataGenerator.unit(1);
         final Product product = ProductDataGenerator.product(1, unit, company);
+        doNothing().when(productValidationService).validateProductRequestUpdate(productManagementRequest, product);
+
         final Long productId = 1L;
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
         doNothing().when(productMappingService).update(product, productManagementRequest);
         when(productRepository.save(product)).thenReturn(product);
-        doNothing().when(productCustomizationService).updateCustomization(product, productManagementRequest.getProductCustomizationWrapperRequest());
 
 
         //when
@@ -160,8 +158,6 @@ class ProductServiceTest {
         final Long productId = 1L;
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(product);
-        doNothing().when(scheduleTemplateStoreService).deleteScheduleTemplateProductByProduct(product);
-        doNothing().when(productCustomizationService).deleteCustomization(product);
         //when
         final ResourceOperationResponse response = productService.deleteProduct(productId, companyUid);
 
@@ -232,6 +228,48 @@ class ProductServiceTest {
         when(productRepository.findByIdAndCompanyUidWithImage(productId, companyId)).thenReturn(Optional.empty());
         //when
         final Throwable throwable = catchThrowable(() -> productService.findImage(productId, companyId));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenProductIdWhenCreateReadOnlyCopyThenCreate() {
+        //given
+        final Company company = Company.builder().build();
+        final Product product = ProductDataGenerator.product(1, ProductUnit.builder().build(), company);
+        product.setCustomizationWrappers(List.of(ProductCustomizationWrapper.builder().build()));
+        product.setCreationType(ProductCreationType.PRODUCT);
+        product.setId(5L);
+
+        when(productCustomizationService.createReadOnlyCopies(eq(product), any())).thenReturn(List.of());
+        when(productRepository.findByIdAndCompanyUid(product.getId(), company.getUid())).thenReturn(Optional.of(product));
+
+        //when
+        final Product copy = productService.createReadOnlyCopy(product.getId(), company, ProductCreationType.ROUTE);
+
+        //then
+        assertThat(product.getId()).isEqualTo(5L);
+        assertThat(product.getCreationType()).isEqualTo(ProductCreationType.PRODUCT);
+        assertThat(product.getCustomizationWrappers()).hasSize(1);
+        assertThat(copy.getId()).isNull();
+        assertThat(copy.getCreationType()).isEqualTo(ProductCreationType.ROUTE);
+        assertThat(copy.getCustomizationWrappers()).isEmpty();
+    }
+
+    @Test
+    void givenNotExistingProductWhenCreateReadOnlyCopyThenThrowException() {
+        //given
+        final Company company = Company.builder().build();
+        final Product product = ProductDataGenerator.product(1, ProductUnit.builder().build(), company);
+        product.setCustomizationWrappers(List.of(ProductCustomizationWrapper.builder().build()));
+        product.setCreationType(ProductCreationType.PRODUCT);
+        product.setId(5L);
+
+        when(productRepository.findByIdAndCompanyUid(product.getId(), company.getUid())).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> productService.createReadOnlyCopy(product.getId(), company, ProductCreationType.ROUTE));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);

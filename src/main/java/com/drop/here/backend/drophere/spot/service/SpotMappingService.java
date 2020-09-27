@@ -1,13 +1,14 @@
 package com.drop.here.backend.drophere.spot.service;
 
+import com.drop.here.backend.drophere.common.service.UidGeneratorService;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.entity.SpotMembership;
 import com.drop.here.backend.drophere.spot.enums.SpotMembershipStatus;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import org.apache.commons.lang3.RandomStringUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
+@RequiredArgsConstructor
 public class SpotMappingService {
+    private final UidGeneratorService uidGeneratorService;
 
     @Value("${spots.uid_generator.name_part_length}")
     private int namePartLength;
@@ -47,8 +50,7 @@ public class SpotMappingService {
     }
 
     private String generateUid(String name) {
-        final String startUid = name.length() > namePartLength ? name.substring(0, namePartLength) : name;
-        return startUid + RandomStringUtils.randomAlphanumeric(randomPartLength);
+        return uidGeneratorService.generateUid(name, namePartLength, randomPartLength);
     }
 
     public SpotCompanyResponse toSpotCompanyResponse(Spot spot) {

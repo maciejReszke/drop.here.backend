@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.company.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.common.service.UidGeneratorService;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
 import com.drop.here.backend.drophere.company.entity.Company;
@@ -10,7 +11,6 @@ import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.country.CountryService;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,9 +21,13 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class CompanyMappingService {
     private final CountryService countryService;
+    private final UidGeneratorService uidGeneratorService;
 
     @Value("${companies.uid_generator.random_part_length}")
     private int randomUidPart;
+
+    @Value("${companies.uid_generator.name_part_length}")
+    private int namePartLength;
 
     @Transactional(readOnly = true)
     public CompanyManagementResponse toManagementResponse(Company company) {
@@ -48,7 +52,7 @@ public class CompanyMappingService {
     }
 
     private String generateUid(String name) {
-        return name.replace(" ", "-").toLowerCase() + RandomStringUtils.randomAlphanumeric(randomUidPart);
+        return uidGeneratorService.generateUid(name, namePartLength, randomUidPart);
     }
 
     public Company createCompany(CompanyManagementRequest companyManagementRequest, Account account) {

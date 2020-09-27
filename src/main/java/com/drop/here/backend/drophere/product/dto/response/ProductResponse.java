@@ -1,6 +1,5 @@
 package com.drop.here.backend.drophere.product.dto.response;
 
-import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
@@ -26,9 +25,6 @@ public class ProductResponse {
 
     @ApiModelProperty(value = "Minimal fraction", example = "0.1")
     BigDecimal unitFraction;
-
-    @ApiModelProperty(value = "Availability status", example = "AVAILABLE")
-    ProductAvailabilityStatus availabilityStatus;
 
     @ApiModelProperty(value = "Product price", example = "50.33")
     BigDecimal price;

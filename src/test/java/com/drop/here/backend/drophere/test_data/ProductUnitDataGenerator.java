@@ -11,6 +11,7 @@ public class ProductUnitDataGenerator {
         return ProductUnit.builder()
                 .name("productUnit" + i)
                 .createdAt(LocalDateTime.now())
+                .fractionable(false)
                 .build();
     }
 }

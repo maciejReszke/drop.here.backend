@@ -1,7 +1,7 @@
 package com.drop.here.backend.drophere.product.repository;
 
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,13 +18,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("select p from Product p where " +
             "p.company.uid = :companyUid and " +
+            "p.creationType =:productCreationType and " +
             "((:desiredCategories) is null or lower(p.category) in (:desiredCategories)) and " +
-            "(:name is null or lower(p.name) like :name) and " +
-            "p.availabilityStatus in (:desiredStatuses)")
+            "(:name is null or lower(p.name) like :name)")
     Page<Product> findAll(String companyUid,
                           List<String> desiredCategories,
                           String name,
-                          ProductAvailabilityStatus[] desiredStatuses,
+                          ProductCreationType productCreationType,
                           Pageable pageable);
 
     @Query("select distinct p.category from Product p where " +

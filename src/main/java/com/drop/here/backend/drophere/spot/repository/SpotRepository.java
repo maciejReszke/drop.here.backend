@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.spot.repository;
 
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import org.springframework.data.domain.Sort;
@@ -55,4 +56,6 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
             ")"
     )
     List<Spot> findSpots(Customer customer, Double xCoordinate, Double yCoordinate, Integer radius, Boolean member, String namePrefix, Sort sort);
+
+    Optional<Spot> findByIdAndCompany(Long spotId, Company company);
 }
