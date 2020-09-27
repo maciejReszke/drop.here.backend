@@ -22,19 +22,19 @@ public class ProductCustomizationService {
         return customizationWrapperRepository.findByProductsIdsWithCustomizations(productsIds);
     }
 
-    // TODO: 26/09/2020 test + test w bazie jak to wyglada!!!
-    public List<ProductCustomizationWrapper> createReadOnlyCopy(Product templateProduct) {
+    public List<ProductCustomizationWrapper> createReadOnlyCopies(Product templateProduct, Product newProduct) {
         return customizationWrapperRepository.findByProductWithCustomizations(templateProduct)
                 .stream()
-                .map(templateWrapper -> {
-                    final ProductCustomizationWrapper customizationWrapper = templateWrapper.toBuilder()
-                            .id(null)
-                            .product(templateProduct)
-                            .build();
-                    customizationWrapper.setCustomizations(createReadOnlyCopies(templateWrapper.getCustomizations(), customizationWrapper));
-                    return customizationWrapper;
-                })
+                .map(templateWrapper -> createReadOnlyCopy(newProduct, templateWrapper))
                 .collect(Collectors.toList());
+    }
+
+    private ProductCustomizationWrapper createReadOnlyCopy(Product newProduct, ProductCustomizationWrapper templateWrapper) {
+        final ProductCustomizationWrapper customizationWrapper = templateWrapper.toBuilder().build();
+        customizationWrapper.setId(null);
+        customizationWrapper.setProduct(newProduct);
+        customizationWrapper.setCustomizations(createReadOnlyCopies(templateWrapper.getCustomizations(), customizationWrapper));
+        return customizationWrapper;
     }
 
     private Set<ProductCustomization> createReadOnlyCopies(Set<ProductCustomization> customizations, ProductCustomizationWrapper customizationWrapper) {

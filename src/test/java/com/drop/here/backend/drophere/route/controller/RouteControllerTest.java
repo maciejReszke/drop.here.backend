@@ -49,7 +49,9 @@ import org.testcontainers.shaded.com.google.common.net.HttpHeaders;
 import java.util.List;
 
 import static com.drop.here.backend.drophere.authentication.account.service.PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE;
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -64,6 +66,9 @@ class RouteControllerTest extends IntegrationBaseClass {
 
     @Autowired
     private ProductUnitRepository productUnitRepository;
+
+    @Autowired
+    private ProductCustomizationWrapperRepository productCustomizationWrapperRepository;
 
     @Autowired
     private RouteRepository routeRepository;
@@ -85,9 +90,6 @@ class RouteControllerTest extends IntegrationBaseClass {
 
     @Autowired
     private JwtService jwtService;
-
-    @Autowired
-    private ProductCustomizationWrapperRepository productCustomizationWrapperRepository;
 
     @Autowired
     private SpotRepository spotRepository;
@@ -112,7 +114,9 @@ class RouteControllerTest extends IntegrationBaseClass {
         privilegeRepository.save(Privilege.builder().name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).account(account).build());
         company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         unit = productUnitRepository.save(ProductUnitDataGenerator.productUnit(1));
-        product = productRepository.save(ProductDataGenerator.product(1, unit, company));
+        final Product preSavedProduct = ProductDataGenerator.product(1, unit, company);
+        preSavedProduct.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, preSavedProduct)));
+        product = productRepository.save(preSavedProduct);
         spot = spotRepository.save(SpotDataGenerator.spot(1, company));
         accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
     }
@@ -158,6 +162,15 @@ class RouteControllerTest extends IntegrationBaseClass {
         assertThat(routeRepository.findAll()).hasSize(1);
         assertThat(dropRepository.findAll()).hasSize(1);
         assertThat(routeProductRepository.findAll()).hasSize(1);
+        assertThat(productRepository.findAll()).hasSize(2);
+        assertThat(productCustomizationWrapperRepository.findByProductWithCustomizations(product)).hasSize(1);
+        assertThat(productCustomizationWrapperRepository.findByProductWithCustomizations(product)
+                .get(0).getCustomizations()).hasSize(1);
+
+        assertThat(productCustomizationWrapperRepository.findByProductWithCustomizations(productRepository.findAll().get(1)))
+                .hasSize(1);
+        assertThat(productCustomizationWrapperRepository.findByProductWithCustomizations(productRepository.findAll().get(1))
+                .get(0).getCustomizations()).hasSize(1);
     }
 
     @Test
@@ -257,6 +270,8 @@ class RouteControllerTest extends IntegrationBaseClass {
 
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
+        final Product newProduct = ProductDataGenerator.product(1, unit, company);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, newProduct)));
         final Route route = routeRepository.save(preSavedRoute);
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
         final String json = objectMapper.writeValueAsString(routeRequest);
@@ -274,6 +289,18 @@ class RouteControllerTest extends IntegrationBaseClass {
         assertThat(dropRepository.findAll()).hasSize(1);
         assertThat(routeProductRepository.findAll()).hasSize(1);
         assertThat(routeRepository.findAll().get(0).getName()).isEqualTo("name123");
+        assertThat(productRepository.findAll()).hasSize(2);
+        assertThat(productRepository.findById(product.getId())).isNotEmpty();
+        assertThat(productRepository.findById(newProduct.getId())).isEmpty();
+        assertThat(productCustomizationWrapperRepository.findByProductWithCustomizations(product))
+                .hasSize(1);
+        assertThat(productCustomizationWrapperRepository.findByProductWithCustomizations(newProduct))
+                .isEmpty();
+
+        assertThat(productCustomizationWrapperRepository.findByProductWithCustomizations(productRepository.findAll().get(1)))
+                .hasSize(1);
+        assertThat(productCustomizationWrapperRepository.findByProductWithCustomizations(productRepository.findAll().get(1))
+                .get(0).getCustomizations()).hasSize(1);
     }
 
     @Test
@@ -371,7 +398,12 @@ class RouteControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenDeleteRouteThenDelete() throws Exception {
         //given
-        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
+        final Product newProduct = ProductDataGenerator.product(1, unit, company);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, newProduct)));
+        final Route route = routeRepository.save(preSavedRoute);
+        assumeThat(productRepository.findAll()).hasSize(2);
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
 
         //when
@@ -382,6 +414,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         result.andExpect(status().isOk());
 
         assertThat(routeRepository.findAll()).isEmpty();
+        assertThat(productRepository.findAll()).hasSize(1);
     }
 
     @Test

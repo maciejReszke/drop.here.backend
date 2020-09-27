@@ -102,13 +102,12 @@ public class ProductService {
                 .getImage();
     }
 
-    // TODO: 26/09/2020 test, implement 
     public Product createReadOnlyCopy(Long productId, Company company, ProductCreationType creationType) {
         final Product templateProduct = getProduct(productId, company.getUid());
-        return templateProduct.toBuilder()
-                .id(null)
-                .creationType(creationType)
-                .customizationWrappers(productCustomizationService.createReadOnlyCopy(templateProduct))
-                .build();
+        final Product newProduct = templateProduct.toBuilder().build();
+        newProduct.setId(null);
+        newProduct.setCreationType(creationType);
+        newProduct.setCustomizationWrappers(productCustomizationService.createReadOnlyCopies(templateProduct, newProduct));
+        return newProduct;
     }
 }
