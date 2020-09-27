@@ -5,12 +5,14 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +37,8 @@ public class ProductService {
     private final ProductCustomizationService productCustomizationService;
     private final ImageService imageService;
 
-    public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring, AccountAuthentication accountAuthentication) {
-        return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, accountAuthentication);
+    public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring) {
+        return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -45,18 +47,16 @@ public class ProductService {
         final Product product = productMappingService.toEntity(productManagementRequest, accountAuthentication);
         log.info("Creating product for company {} with name {}", companyUid, product.getName());
         productRepository.save(product);
-        productCustomizationService.createCustomizations(product, productManagementRequest.getProductCustomizationWrapperRequest());
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, product.getId());
     }
 
     @Transactional
     public ResourceOperationResponse updateProduct(ProductManagementRequest productManagementRequest, Long productId, String companyUid) {
         final Product product = getProduct(productId, companyUid);
-        productValidationService.validateProductRequest(productManagementRequest);
+        productValidationService.validateProductRequestUpdate(productManagementRequest, product);
         productMappingService.update(product, productManagementRequest);
         log.info("Updating product {} for company {} with name {}", product.getId(), companyUid, product.getName());
         productRepository.save(product);
-        productCustomizationService.updateCustomization(product, productManagementRequest.getProductCustomizationWrapperRequest());
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, productId);
     }
 
@@ -65,13 +65,11 @@ public class ProductService {
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format("Product with id %s company %s was not found", productId, companyUid), RestExceptionStatusCode.PRODUCT_NOT_FOUND));
     }
 
-    // TODO: 25/09/2020 check typu productu i dodac ogolnie typ do reszty rzeczy (albo usuwac - czemu nie)
-    // TODO: 26/09/2020 w sumie lipa bo sie beda dane historyczne gubily ( i status na widoczny trzeba!)
     @Transactional(rollbackFor = Exception.class)
     public ResourceOperationResponse deleteProduct(Long productId, String companyUid) {
         final Product product = getProduct(productId, companyUid);
+        productValidationService.validateProductModification(product);
         log.info("Deleting product {} for company {} with name {}", productId, companyUid, product.getName());
-        productCustomizationService.deleteCustomization(product);
         productRepository.delete(product);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, productId);
     }
@@ -83,6 +81,7 @@ public class ProductService {
     public ResourceOperationResponse updateImage(Long productId, String companyUid, MultipartFile imagePart) {
         try {
             final Product product = getProduct(productId, companyUid);
+            productValidationService.validateProductModification(product);
             final Image image = imageService.createImage(imagePart.getBytes(), ImageType.PRODUCT_IMAGE);
             product.setImage(image);
             log.info("Updating image for product {} company {}", productId, companyUid);
@@ -101,5 +100,15 @@ public class ProductService {
                         "Image for product %s company %s was not found", productId, companyUid),
                         RestExceptionStatusCode.PRODUCT_IMAGE_WAS_NOT_FOUND))
                 .getImage();
+    }
+
+    // TODO: 26/09/2020 test, implement 
+    public Product createReadOnlyCopy(Long productId, Company company, ProductCreationType creationType) {
+        final Product templateProduct = getProduct(productId, company.getUid());
+        return templateProduct.toBuilder()
+                .id(null)
+                .creationType(creationType)
+                .customizationWrappers(productCustomizationService.createReadOnlyCopy(templateProduct))
+                .build();
     }
 }

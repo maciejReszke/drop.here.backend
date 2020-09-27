@@ -103,6 +103,7 @@ class RouteControllerTest extends IntegrationBaseClass {
     private Product product;
     private Spot spot;
     private AccountProfile accountProfile;
+    private ProductUnit unit;
 
     @BeforeEach
     void prepare() {
@@ -110,8 +111,8 @@ class RouteControllerTest extends IntegrationBaseClass {
         account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         privilegeRepository.save(Privilege.builder().name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).account(account).build());
         company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
-        final ProductUnit productUnit = productUnitRepository.save(ProductUnitDataGenerator.productUnit(1));
-        product = productRepository.save(ProductDataGenerator.product(1, productUnit, company));
+        unit = productUnitRepository.save(ProductUnitDataGenerator.productUnit(1));
+        product = productRepository.save(ProductDataGenerator.product(1, unit, company));
         spot = spotRepository.save(SpotDataGenerator.spot(1, company));
         accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
     }
@@ -440,7 +441,8 @@ class RouteControllerTest extends IntegrationBaseClass {
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
         preSavedRoute.setProfile(accountProfile);
-        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, ProductDataGenerator
+                .product(1, unit, company))));
         final Route route = routeRepository.save(preSavedRoute);
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
 
@@ -459,7 +461,8 @@ class RouteControllerTest extends IntegrationBaseClass {
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
         preSavedRoute.setProfile(accountProfile);
-        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, ProductDataGenerator
+                .product(1, unit, company))));
         final Route route = routeRepository.save(preSavedRoute);
         final String url = String.format("/companies/%s/routes/%s", company.getUid() + "kek", route.getId());
 
@@ -477,7 +480,8 @@ class RouteControllerTest extends IntegrationBaseClass {
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
         preSavedRoute.setProfile(accountProfile);
-        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, ProductDataGenerator
+                .product(1, unit, company))));
         final Route route = routeRepository.save(preSavedRoute);
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
 
@@ -499,7 +503,8 @@ class RouteControllerTest extends IntegrationBaseClass {
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
         preSavedRoute.setProfile(accountProfile);
-        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, ProductDataGenerator
+                .product(1, unit, company))));
         final Route route = routeRepository.save(preSavedRoute);
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId() + 15);
 
@@ -520,7 +525,8 @@ class RouteControllerTest extends IntegrationBaseClass {
         preSavedRoute2.setStatus(RouteStatus.STARTED);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
         preSavedRoute.setProfile(accountProfile);
-        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, ProductDataGenerator
+                .product(1, unit, company))));
         routeRepository.save(preSavedRoute);
         routeRepository.save(preSavedRoute2);
         final String url = String.format("/companies/%s/routes", company.getUid());
@@ -543,7 +549,8 @@ class RouteControllerTest extends IntegrationBaseClass {
         preSavedRoute2.setStatus(RouteStatus.STARTED);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
         preSavedRoute.setProfile(accountProfile);
-        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, ProductDataGenerator
+                .product(1, unit, company))));
         routeRepository.save(preSavedRoute);
         routeRepository.save(preSavedRoute2);
         final String url = String.format("/companies/%s/routes", company.getUid());
@@ -564,7 +571,8 @@ class RouteControllerTest extends IntegrationBaseClass {
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
         preSavedRoute.setProfile(accountProfile);
-        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, ProductDataGenerator
+                .product(1, unit, company))));
         routeRepository.save(preSavedRoute);
         final String url = String.format("/companies/%s/routes", company.getUid() + "kek");
 
@@ -582,7 +590,8 @@ class RouteControllerTest extends IntegrationBaseClass {
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
         preSavedRoute.setProfile(accountProfile);
-        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, product)));
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, ProductDataGenerator
+                .product(1, unit, company))));
         routeRepository.save(preSavedRoute);
         final String url = String.format("/companies/%s/routes", company.getUid());
 

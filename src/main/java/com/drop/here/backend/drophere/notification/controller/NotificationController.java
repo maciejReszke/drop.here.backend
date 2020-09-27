@@ -9,6 +9,7 @@ import com.drop.here.backend.drophere.notification.service.NotificationService;
 import com.drop.here.backend.drophere.notification.service.token.NotificationTokenService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -33,6 +34,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
+@Api(tags = "Notifications API")
 public class NotificationController {
     private final NotificationService notificationService;
     private final NotificationTokenService notificationTokenService;

@@ -7,14 +7,17 @@ import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperT
 import io.vavr.control.Try;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ProductCustomizationValidationService {
 
-    public void validate(ProductCustomizationWrapperRequest productCustomizationWrapperRequest) {
-        Try.ofSupplier(() -> ProductCustomizationWrapperType.valueOf(productCustomizationWrapperRequest.getType()))
-                .getOrElseThrow(() -> new RestIllegalRequestValueException(
-                        String.format("During validating product customization found invalid customization type %s", productCustomizationWrapperRequest.getCustomizations()),
-                        RestExceptionStatusCode.PRODUCT_CUSTOMIZATION_INVALID_WRAPPER_TYPE
-                ));
+    public void validate(List<ProductCustomizationWrapperRequest> productCustomizationWrapperRequests) {
+        productCustomizationWrapperRequests.forEach(productCustomizationWrapperRequest ->
+                Try.ofSupplier(() -> ProductCustomizationWrapperType.valueOf(productCustomizationWrapperRequest.getType()))
+                        .getOrElseThrow(() -> new RestIllegalRequestValueException(
+                                String.format("During validating product customization found invalid customization type %s", productCustomizationWrapperRequest.getCustomizations()),
+                                RestExceptionStatusCode.PRODUCT_CUSTOMIZATION_INVALID_WRAPPER_TYPE
+                        )));
     }
 }

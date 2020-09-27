@@ -12,6 +12,7 @@ import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.service.ProductSearchingService;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
@@ -127,7 +128,7 @@ public class RouteMappingService {
     }
 
     private RouteProduct buildProduct(RouteProductRequest routeProductRequest, Route route, Company company, int orderNum) {
-        final Product product = productService.getProduct(routeProductRequest.getProductId(), company.getUid());
+        final Product product = productService.createReadOnlyCopy(routeProductRequest.getProductId(), company, ProductCreationType.ROUTE);
         return RouteProduct.builder()
                 .orderNum(orderNum)
                 .limitedAmount(routeProductRequest.isLimitedAmount())

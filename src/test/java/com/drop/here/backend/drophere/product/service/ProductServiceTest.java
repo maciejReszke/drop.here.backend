@@ -64,15 +64,14 @@ class ProductServiceTest {
         final Pageable pageable = Pageable.unpaged();
         final String companyUid = "companyUid";
         final Account account = AccountDataGenerator.companyAccount(1);
-        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Page<ProductResponse> paged = Page.empty();
 
         final String[] desiredCategories = new String[0];
         final String desiredName = "aa";
-        when(productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredName, accountAuthentication)).thenReturn(paged);
+        when(productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredName)).thenReturn(paged);
 
         //when
-        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, desiredCategories, desiredName, accountAuthentication);
+        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, desiredCategories, desiredName);
 
         //then
         assertThat(result).isEqualTo(paged);
@@ -93,7 +92,6 @@ class ProductServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         when(productMappingService.toEntity(productManagementRequest, accountAuthentication)).thenReturn(product);
         when(productRepository.save(product)).thenReturn(product);
-        doNothing().when(productCustomizationService).createCustomizations(product, productManagementRequest.getProductCustomizationWrapperRequest());
 
         //when
         final ResourceOperationResponse response = productService.createProduct(productManagementRequest, companyUid, accountAuthentication);
@@ -108,16 +106,15 @@ class ProductServiceTest {
         final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder().build();
         final String companyUid = "companyUid";
 
-        doNothing().when(productValidationService).validateProductRequest(productManagementRequest);
-        final ProductUnit unit = ProductDataGenerator.unit(1);
-
         final Company company = Company.builder().build();
+        final ProductUnit unit = ProductDataGenerator.unit(1);
         final Product product = ProductDataGenerator.product(1, unit, company);
+        doNothing().when(productValidationService).validateProductRequestUpdate(productManagementRequest, product);
+
         final Long productId = 1L;
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
         doNothing().when(productMappingService).update(product, productManagementRequest);
         when(productRepository.save(product)).thenReturn(product);
-        doNothing().when(productCustomizationService).updateCustomization(product, productManagementRequest.getProductCustomizationWrapperRequest());
 
 
         //when
@@ -156,7 +153,6 @@ class ProductServiceTest {
         final Long productId = 1L;
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(product);
-        doNothing().when(productCustomizationService).deleteCustomization(product);
         //when
         final ResourceOperationResponse response = productService.deleteProduct(productId, companyUid);
 

@@ -3,9 +3,9 @@ package com.drop.here.backend.drophere.product.service;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
+import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
-import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
-import io.vavr.control.Try;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,18 +13,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductValidationService {
     private final ProductUnitService productUnitService;
+    private final ProductCustomizationValidationService productCustomizationValidationService;
 
     public void validateProductRequest(ProductManagementRequest productManagementRequest) {
         validateUnit(productManagementRequest);
-        validateStatus(productManagementRequest);
-    }
-
-    private void validateStatus(ProductManagementRequest productManagementRequest) {
-        Try.ofSupplier(() -> ProductAvailabilityStatus.valueOf(productManagementRequest.getAvailabilityStatus()))
-                .getOrElseThrow(ignore -> new RestIllegalRequestValueException(
-                        String.format("Product with name %s has invalid availability status %s", productManagementRequest.getName(), productManagementRequest.getAvailabilityStatus()),
-                        RestExceptionStatusCode.PRODUCT_INVALID_AVAILABILITY_STATUS
-                ));
+        productCustomizationValidationService.validate(productManagementRequest.getProductCustomizationWrappers());
     }
 
     private void validateUnit(ProductManagementRequest productManagementRequest) {
@@ -35,6 +28,21 @@ public class ProductValidationService {
                             productManagementRequest.getName(), productManagementRequest.getUnitFraction(), productUnit.getName()),
                     RestExceptionStatusCode.PRODUCT_FRACTION_VALUE_NOT_INTEGER
             );
+        }
+    }
+
+    public void validateProductRequestUpdate(ProductManagementRequest productManagementRequest, Product product) {
+        validateProductRequest(productManagementRequest);
+        validateProductModification(product);
+        productCustomizationValidationService.validate(productManagementRequest.getProductCustomizationWrappers());
+    }
+
+    public void validateProductModification(Product product) {
+        if (product.getCreationType() != ProductCreationType.PRODUCT) {
+            throw new RestIllegalRequestValueException(
+                    String.format("Product with id %s cannot be changed because invalid creation type",
+                            product.getId()),
+                    RestExceptionStatusCode.PRODUCT_CHANGE_INVALID_CREATION_TYPE);
         }
     }
 }

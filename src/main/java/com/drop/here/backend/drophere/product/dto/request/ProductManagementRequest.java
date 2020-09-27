@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -38,10 +39,6 @@ public class ProductManagementRequest {
     @ApiModelProperty(value = "Product unit minimal fraction per order", example = "0.1 (for kg it means 100g)", required = true)
     private BigDecimal unitFraction;
 
-    @NotBlank
-    @ApiModelProperty(value = "Product availability status", example = "UNAVAILABLE", required = true)
-    private String availabilityStatus;
-
     @NotNull
     @Positive
     @ApiModelProperty(value = "Product price", example = "33.45", required = true)
@@ -53,6 +50,6 @@ public class ProductManagementRequest {
 
     @NotNull
     @Valid
-    @ApiModelProperty(value = "Product customizations wrapper", required = true)
-    private ProductCustomizationWrapperRequest productCustomizationWrapperRequest;
+    @ApiModelProperty(value = "Product customization wrappers", required = true)
+    private List<@Valid ProductCustomizationWrapperRequest> productCustomizationWrappers;
 }

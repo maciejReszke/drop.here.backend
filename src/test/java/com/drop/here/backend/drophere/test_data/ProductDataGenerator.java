@@ -8,7 +8,7 @@ import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
-import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperType;
 import lombok.experimental.UtilityClass;
 
@@ -26,8 +26,8 @@ public class ProductDataGenerator {
                 .unit(unit)
                 .unitName(unit.getName())
                 .unitFraction(BigDecimal.valueOf(15.12))
-                .availabilityStatus(ProductAvailabilityStatus.AVAILABLE)
                 .price(BigDecimal.valueOf(123 + i))
+                .creationType(ProductCreationType.PRODUCT)
                 .description("description" + i)
                 .createdAt(LocalDateTime.now())
                 .lastUpdatedAt(LocalDateTime.now())
@@ -45,12 +45,11 @@ public class ProductDataGenerator {
     public ProductManagementRequest managementRequest(int i) {
         return ProductManagementRequest.builder()
                 .unit("unit" + i)
-                .availabilityStatus(ProductAvailabilityStatus.UNAVAILABLE.name())
                 .category("category" + i)
                 .price(BigDecimal.valueOf(55.1 + i))
                 .description("description" + i)
                 .name("name" + i)
-                .productCustomizationWrapperRequest(productCustomizationWrapperRequest(1))
+                .productCustomizationWrappers(List.of(productCustomizationWrapperRequest(2 * i), productCustomizationWrapperRequest(2 * i + 1)))
                 .build();
     }
 

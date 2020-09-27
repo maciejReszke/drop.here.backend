@@ -2,7 +2,7 @@ package com.drop.here.backend.drophere.product.entity;
 
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.image.Image;
-import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -35,10 +36,10 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
-@ToString(exclude = {"unit", "company", "image"})
-@EqualsAndHashCode(exclude = {"unit", "company", "image"})
+@ToString(exclude = {"unit", "company", "image", "customizationWrappers"})
+@EqualsAndHashCode(exclude = {"unit", "company", "image", "customizationWrappers"})
 @Table(indexes = @Index(columnList = "category"))
 public class Product {
 
@@ -65,10 +66,6 @@ public class Product {
     private BigDecimal unitFraction;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
-    private ProductAvailabilityStatus availabilityStatus;
-
-    @NotNull
     @Positive
     private BigDecimal price;
 
@@ -90,10 +87,14 @@ public class Product {
     @JoinColumn(name = "company_id")
     private Company company;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductCustomizationWrapper> customizationWrappers;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id")
     private Image image;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private ProductCreationType creationType;
 }

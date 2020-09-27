@@ -1,15 +1,13 @@
 package com.drop.here.backend.drophere.product.service;
 
-import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationPrivilegesService;
 import com.drop.here.backend.drophere.product.dto.response.ProductCustomizationResponse;
 import com.drop.here.backend.drophere.product.dto.response.ProductCustomizationWrapperResponse;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
-import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,21 +25,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductSearchingService {
     private final ProductRepository productRepository;
-    private final AuthenticationPrivilegesService authenticationPrivilegesService;
     private final ProductCustomizationService productCustomizationService;
 
     public Page<ProductResponse> findAll(Pageable pageable,
                                          String companyUid,
                                          String[] desiredCategories,
-                                         String desiredNameSubstring,
-                                         AccountAuthentication accountAuthentication) {
-        final boolean isOwnCompanyOperation = authenticationPrivilegesService.isOwnCompanyOperation(accountAuthentication, companyUid);
-        final ProductAvailabilityStatus[] desiredAvailabilityStatuses = getDesiredAvailabilityStatuses(isOwnCompanyOperation);
+                                         String desiredNameSubstring) {
         final Page<Product> products = productRepository.findAll(
                 companyUid,
                 prepareCategories(desiredCategories),
                 prepareName(desiredNameSubstring),
-                desiredAvailabilityStatuses,
+                ProductCreationType.PRODUCT,
                 pageable);
         return toResponse(products);
     }
@@ -82,7 +76,6 @@ public class ProductSearchingService {
                 .category(product.getCategory())
                 .unit(product.getUnitName())
                 .unitFraction(product.getUnitFraction())
-                .availabilityStatus(product.getAvailabilityStatus())
                 .price(product.getPrice())
                 .description(product.getDescription())
                 .customizationsWrappers(toCustomizationWrappers(customizationWrappers))
@@ -115,12 +108,6 @@ public class ProductSearchingService {
                 .price(customization.getPrice())
                 .value(customization.getValue())
                 .build();
-    }
-
-    private ProductAvailabilityStatus[] getDesiredAvailabilityStatuses(boolean isOwnCompanyOperation) {
-        return isOwnCompanyOperation
-                ? ProductAvailabilityStatus.values()
-                : new ProductAvailabilityStatus[]{ProductAvailabilityStatus.AVAILABLE};
     }
 
     public List<ProductResponse> findProducts(List<Long> productsIds) {

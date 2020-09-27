@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.service.ProductSearchingService;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
@@ -32,13 +33,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -82,13 +83,13 @@ class RouteMappingServiceTest {
 
         final Product product = Product.builder().build();
         final AccountProfile accountProfile = AccountProfile.builder().build();
-        when(productService.getProduct(any(), any())).thenReturn(product);
         when(accountProfilePersistenceService.findActiveByCompanyAndProfileUid(company, routeRequest.getProfileUid()))
                 .thenReturn(Optional.of(accountProfile));
         final Spot spot = Spot.builder().build();
         when(spotPersistenceService.findSpot(any(), any(Company.class))).thenReturn(spot);
         when(uidGeneratorService.generateUid(routeRequest.getDrops().get(0).getName(), 4, 6)).thenReturn("uid");
-
+        when(productService.createReadOnlyCopy(any(), any(), eq(ProductCreationType.ROUTE)))
+                .thenReturn(product);
         //when
         final Route response = routeMappingService.toRoute(routeRequest, company);
 
@@ -136,7 +137,6 @@ class RouteMappingServiceTest {
 
         final Product product = Product.builder().build();
         final AccountProfile accountProfile = AccountProfile.builder().build();
-        when(productService.getProduct(any(), any())).thenReturn(product);
         when(accountProfilePersistenceService.findActiveByCompanyAndProfileUid(company, routeRequest.getProfileUid()))
                 .thenReturn(Optional.of(accountProfile));
         final Spot spot = Spot.builder().build();
@@ -147,6 +147,8 @@ class RouteMappingServiceTest {
         route.setDrops(new LinkedList<>(List.of(prevDrop)));
         route.setProducts(new LinkedList<>(List.of(prevProduct)));
         when(uidGeneratorService.generateUid(routeRequest.getDrops().get(0).getName(), 4, 6)).thenReturn("uid");
+        when(productService.createReadOnlyCopy(any(), any(), eq(ProductCreationType.ROUTE)))
+                .thenReturn(product);
 
         //when
         routeMappingService.updateRoute(route, routeRequest, company);
