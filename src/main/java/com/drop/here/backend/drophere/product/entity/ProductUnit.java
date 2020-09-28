@@ -29,6 +29,9 @@ public class ProductUnit {
     private String name;
 
     @NotNull
+    private boolean fractionable;
+
+    @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime createdAt;
 }

@@ -7,15 +7,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ProductCustomizationWrapperRepository extends JpaRepository<ProductCustomizationWrapper, Long> {
-    Optional<ProductCustomizationWrapper> findByIdAndProduct(Long customizationId, Product product);
+    @Query("select pcw from ProductCustomizationWrapper pcw " +
+            "left join fetch pcw.customizations " +
+            "where pcw.product = :product")
+    List<ProductCustomizationWrapper> findByProductWithCustomizations(Product product);
 
     @Query("select pcw from ProductCustomizationWrapper pcw " +
             "left join fetch pcw.customizations where " +
             "pcw.product.id in :productsIds")
     List<ProductCustomizationWrapper> findByProductsIdsWithCustomizations(List<Long> productsIds);
-
 }

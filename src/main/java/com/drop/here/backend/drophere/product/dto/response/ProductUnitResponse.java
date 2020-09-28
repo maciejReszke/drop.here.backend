@@ -9,7 +9,10 @@ public class ProductUnitResponse {
     @ApiModelProperty(value = "Unit name", example = "kg")
     String name;
 
+    @ApiModelProperty(value = "Is fractionable", example = "true")
+    boolean fractionable;
+
     public static ProductUnitResponse from(ProductUnit productUnit) {
-        return new ProductUnitResponse(productUnit.getName());
+        return new ProductUnitResponse(productUnit.getName(), productUnit.isFractionable());
     }
 }

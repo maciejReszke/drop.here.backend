@@ -17,7 +17,7 @@ import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.company.service.CompanyValidationService;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.service.CustomerStoreService;
-import com.drop.here.backend.drophere.drop.service.DropMembershipService;
+import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
@@ -60,7 +60,7 @@ class CompanyServiceTest {
     private ImageService imageService;
 
     @Mock
-    private DropMembershipService dropMembershipService;
+    private SpotMembershipService spotMembershipService;
 
     @Mock
     private CompanyCustomerRelationshipService companyCustomerRelationshipService;
@@ -224,12 +224,12 @@ class CompanyServiceTest {
     }
 
     @Test
-    void givenExistingDropMembershipWhenHasRelationThenTrue() {
+    void givenExistingSpotMembershipWhenHasRelationThenTrue() {
         //given
         final Company company = Company.builder().build();
         final Long customerId = 5L;
 
-        when(dropMembershipService.existsMembership(company, customerId)).thenReturn(true);
+        when(spotMembershipService.existsMembership(company, customerId)).thenReturn(true);
 
         //when
         final boolean result = companyService.hasRelation(company, customerId);
@@ -244,7 +244,7 @@ class CompanyServiceTest {
         final Company company = Company.builder().build();
         final Long customerId = 5L;
 
-        when(dropMembershipService.existsMembership(company, customerId)).thenReturn(false);
+        when(spotMembershipService.existsMembership(company, customerId)).thenReturn(false);
         when(companyCustomerRelationshipService.hasRelationship(company, customerId)).thenReturn(true);
 
         //when
@@ -260,7 +260,7 @@ class CompanyServiceTest {
         final Company company = Company.builder().build();
         final Long customerId = 5L;
 
-        when(dropMembershipService.existsMembership(company, customerId)).thenReturn(false);
+        when(spotMembershipService.existsMembership(company, customerId)).thenReturn(false);
         when(companyCustomerRelationshipService.hasRelationship(company, customerId)).thenReturn(false);
 
         //when

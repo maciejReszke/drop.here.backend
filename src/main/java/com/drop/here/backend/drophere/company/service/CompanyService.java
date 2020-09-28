@@ -15,7 +15,7 @@ import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.service.CustomerStoreService;
-import com.drop.here.backend.drophere.drop.service.DropMembershipService;
+import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
@@ -40,7 +40,7 @@ public class CompanyService {
     private final CompanyMappingService companyMappingService;
     private final PrivilegeService privilegeService;
     private final ImageService imageService;
-    private final DropMembershipService dropMembershipService;
+    private final SpotMembershipService spotMembershipService;
     private final CompanyCustomerRelationshipService companyCustomerRelationshipService;
     private final CustomerStoreService customerStoreService;
     private final CompanyCustomerSearchingService companyCustomerSearchingService;
@@ -111,12 +111,12 @@ public class CompanyService {
         return companyRepository.findByUidWithImage(companyUid)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Image for company %s was not found", companyUid),
-                        RestExceptionStatusCode.COMPANY_IMAGE_WAS_NOT_FOUND))
+                        RestExceptionStatusCode.ACCOUNT_PROFILE_IMAGE_WAS_NOT_FOUND))
                 .getImage();
     }
 
     public boolean hasRelation(Company company, Long customerId) {
-        return dropMembershipService.existsMembership(company, customerId) ||
+        return spotMembershipService.existsMembership(company, customerId) ||
                 companyCustomerRelationshipService.hasRelationship(company, customerId);
     }
 

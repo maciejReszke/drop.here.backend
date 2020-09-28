@@ -5,11 +5,10 @@ import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationRe
 import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
-import com.drop.here.backend.drophere.product.entity.ProductCategory;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
-import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperType;
 import lombok.experimental.UtilityClass;
 
@@ -20,20 +19,18 @@ import java.util.Set;
 
 @UtilityClass
 public class ProductDataGenerator {
-    public Product product(int i, ProductCategory category, ProductUnit unit, Company company) {
+    public Product product(int i, ProductUnit unit, Company company) {
         return Product.builder()
                 .name("productName" + i)
-                .category(category)
-                .categoryName(category.getName())
+                .category("category" + i)
                 .unit(unit)
                 .unitName(unit.getName())
-                .unitValue(BigDecimal.valueOf(15.12))
-                .availabilityStatus(ProductAvailabilityStatus.AVAILABLE)
+                .unitFraction(BigDecimal.valueOf(15.12))
                 .price(BigDecimal.valueOf(123 + i))
+                .creationType(ProductCreationType.PRODUCT)
                 .description("description" + i)
                 .createdAt(LocalDateTime.now())
                 .lastUpdatedAt(LocalDateTime.now())
-                .deletable(true)
                 .company(company)
                 .build();
     }
@@ -45,20 +42,14 @@ public class ProductDataGenerator {
                 .build();
     }
 
-    public ProductCategory category(int i) {
-        return ProductCategory.builder()
-                .name("category" + i)
-                .build();
-    }
-
     public ProductManagementRequest managementRequest(int i) {
         return ProductManagementRequest.builder()
                 .unit("unit" + i)
-                .availabilityStatus(ProductAvailabilityStatus.UNAVAILABLE.name())
                 .category("category" + i)
                 .price(BigDecimal.valueOf(55.1 + i))
                 .description("description" + i)
                 .name("name" + i)
+                .productCustomizationWrappers(List.of(productCustomizationWrapperRequest(2 * i), productCustomizationWrapperRequest(2 * i + 1)))
                 .build();
     }
 

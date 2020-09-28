@@ -25,7 +25,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity

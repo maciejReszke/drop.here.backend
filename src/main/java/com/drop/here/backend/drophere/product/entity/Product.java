@@ -1,7 +1,8 @@
 package com.drop.here.backend.drophere.product.entity;
 
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
+import com.drop.here.backend.drophere.image.Image;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -34,11 +36,11 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
-@ToString(exclude = {"category", "unit", "company"})
-@EqualsAndHashCode(exclude = {"category", "unit", "company"})
-@Table(indexes = @Index(columnList = "categoryName"))
+@ToString(exclude = {"unit", "company", "image", "customizationWrappers"})
+@EqualsAndHashCode(exclude = {"unit", "company", "image", "customizationWrappers"})
+@Table(indexes = @Index(columnList = "category"))
 public class Product {
 
     @Id
@@ -48,13 +50,8 @@ public class Product {
     @NotBlank
     private String name;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private ProductCategory category;
-
     @NotBlank
-    private String categoryName;
+    private String category;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -66,11 +63,7 @@ public class Product {
 
     @NotNull
     @PositiveOrZero
-    private BigDecimal unitValue;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private ProductAvailabilityStatus availabilityStatus;
+    private BigDecimal unitFraction;
 
     @NotNull
     @Positive
@@ -90,13 +83,18 @@ public class Product {
     private LocalDateTime lastUpdatedAt;
 
     @NotNull
-    boolean deletable;
-
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private Company company;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductCustomizationWrapper> customizationWrappers;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id")
+    private Image image;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private ProductCreationType creationType;
 }

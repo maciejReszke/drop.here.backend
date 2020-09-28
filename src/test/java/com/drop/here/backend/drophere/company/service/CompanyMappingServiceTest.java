@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.company.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.common.service.UidGeneratorService;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
 import com.drop.here.backend.drophere.company.entity.Company;
@@ -35,9 +36,13 @@ class CompanyMappingServiceTest {
     @Mock
     private CountryService countryService;
 
+    @Mock
+    private UidGeneratorService uidGeneratorService;
+
     @BeforeEach
     void prepare() throws IllegalAccessException {
         FieldUtils.writeDeclaredField(companyMappingService, "randomUidPart", 4, true);
+        FieldUtils.writeDeclaredField(companyMappingService, "namePartLength", 6, true);
     }
 
     @Test
@@ -81,12 +86,13 @@ class CompanyMappingServiceTest {
 
         when(countryService.findActive(companyManagementRequest.getCountry()))
                 .thenReturn(country);
+        when(uidGeneratorService.generateUid(companyManagementRequest.getName(), 6, 4))
+                .thenReturn("uid");
         //when
         final Company company = companyMappingService.createCompany(companyManagementRequest, account);
 
         //then
-        assertThat(company.getUid()).startsWith("glodny-maciek");
-        assertThat(company.getUid()).hasSize("glodny-maciek".length() + 4);
+        assertThat(company.getUid()).isEqualTo("uid");
         assertThat(company.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(company.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(company.getVisibilityStatus()).isEqualTo(CompanyVisibilityStatus.VISIBLE);
@@ -105,12 +111,13 @@ class CompanyMappingServiceTest {
 
         when(countryService.findActive(companyManagementRequest.getCountry()))
                 .thenReturn(country);
+        when(uidGeneratorService.generateUid(companyManagementRequest.getName(), 6, 4))
+                .thenReturn("uid");
         //when
         companyMappingService.updateCompany(companyManagementRequest, company);
 
         //then
-        assertThat(company.getUid()).startsWith("glodny-maciek");
-        assertThat(company.getUid()).hasSize("glodny-maciek".length() + 4);
+        assertThat(company.getUid()).isEqualTo("uid");
         assertThat(company.getCreatedAt()).isNull();
         assertThat(company.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(company.getVisibilityStatus()).isEqualTo(CompanyVisibilityStatus.VISIBLE);

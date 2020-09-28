@@ -1,6 +1,8 @@
 package com.drop.here.backend.drophere.drop.entity;
 
-import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.drop.enums.DropStatus;
+import com.drop.here.backend.drophere.route.entity.Route;
+import com.drop.here.backend.drophere.spot.entity.Spot;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +12,8 @@ import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,21 +22,21 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
-@Entity
-@ToString(exclude = "company")
-@EqualsAndHashCode(exclude = "company")
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"company_id", "uid"}),
-        indexes = @Index(columnList = "name"))
+@Builder
+@Table(indexes = {
+        @Index(columnList = "uid", unique = true),
+        @Index(columnList = "name")
+})
+@ToString(exclude = {"spot", "route"})
+@EqualsAndHashCode(exclude = {"spot", "route"})
 public class Drop {
 
     @Id
@@ -40,46 +44,36 @@ public class Drop {
     private Long id;
 
     @NotBlank
+    private String uid;
+
+    @NotBlank
     private String name;
 
     private String description;
 
-    @NotBlank
-    private String uid;
-
-    @NotNull
-    private boolean hidden;
-
-    @NotNull
-    private boolean requiresPassword;
-
-    private String password;
-
-    @NotNull
-    private boolean requiresAccept;
-
-    @NotNull
-    private Double xCoordinate;
-
-    @NotNull
-    private Double yCoordinate;
-
-    @NotNull
-    private Integer estimatedRadiusMeters;
-
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
+    @JoinColumn(name = "spot_id")
+    private Spot spot;
+
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime startTime;
+
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime endTime;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime createdAt;
 
     @NotNull
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private LocalDateTime lastUpdatedAt;
+    @Enumerated(EnumType.STRING)
+    private DropStatus status;
 
-    @Version
-    private Long version;
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "route_id")
+    private Route route;
 }
