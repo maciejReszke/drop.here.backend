@@ -17,10 +17,10 @@ import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
-import com.drop.here.backend.drophere.drop.entity.Drop;
-import com.drop.here.backend.drophere.drop.entity.DropMembership;
-import com.drop.here.backend.drophere.drop.repository.DropMembershipRepository;
-import com.drop.here.backend.drophere.drop.repository.DropRepository;
+import com.drop.here.backend.drophere.spot.entity.Spot;
+import com.drop.here.backend.drophere.spot.entity.SpotMembership;
+import com.drop.here.backend.drophere.spot.repository.SpotMembershipRepository;
+import com.drop.here.backend.drophere.spot.repository.SpotRepository;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageRepository;
 import com.drop.here.backend.drophere.image.ImageType;
@@ -29,7 +29,7 @@ import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
 import com.drop.here.backend.drophere.test_data.CustomerDataGenerator;
-import com.drop.here.backend.drophere.test_data.DropDataGenerator;
+import com.drop.here.backend.drophere.test_data.SpotDataGenerator;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,10 +76,10 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
     private CustomerRepository customerRepository;
 
     @Autowired
-    private DropRepository dropRepository;
+    private SpotRepository spotRepository;
 
     @Autowired
-    private DropMembershipRepository dropMembershipRepository;
+    private SpotMembershipRepository spotMembershipRepository;
 
     @Autowired
     private CompanyCustomerRelationshipRepository companyCustomerRelationshipRepository;
@@ -101,8 +101,8 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
     @AfterEach
     void cleanUp() {
         companyCustomerRelationshipRepository.deleteAll();
-        dropMembershipRepository.deleteAll();
-        dropRepository.deleteAll();
+        spotMembershipRepository.deleteAll();
+        spotRepository.deleteAll();
         privilegeRepository.deleteAll();
         customerRepository.deleteAll();
         companyRepository.deleteAll();
@@ -357,11 +357,11 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidRequestCompaniesCustomerByDropMembershipWhenUpdateCustomerRelationshipThenUpdate() throws Exception {
+    void givenValidRequestCompaniesCustomerBySpotMembershipWhenUpdateCustomerRelationshipThenUpdate() throws Exception {
         //given
         final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
-        final Drop drop = dropRepository.save(DropDataGenerator.drop(1, company));
-        dropMembershipRepository.save(DropDataGenerator.membership(drop, customer));
+        final Spot spot = spotRepository.save(SpotDataGenerator.spot(1, company));
+        spotMembershipRepository.save(SpotDataGenerator.membership(spot, customer));
         privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                 .account(account).build());
 
@@ -597,17 +597,17 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
         customer4.setFirstName("Krzysztof");
         customer4.setLastName("Tlusty");
         customerRepository.save(customer4);
-        final Drop drop = dropRepository.save(DropDataGenerator.drop(1, company));
-        dropMembershipRepository.save(DropDataGenerator.membership(drop, customer4));
+        final Spot spot = spotRepository.save(SpotDataGenerator.spot(1, company));
+        spotMembershipRepository.save(SpotDataGenerator.membership(spot, customer4));
 
         final Account customerAccount5 = accountRepository.save(AccountDataGenerator.customerAccount(7));
         final Customer customer5 = CustomerDataGenerator.customer(5, customerAccount5);
         customer5.setFirstName("Cham");
         customer5.setLastName("Zwykly");
         customerRepository.save(customer5);
-        final Drop drop2 = dropRepository.save(DropDataGenerator.drop(2, company));
-        final DropMembership membership = DropDataGenerator.membership(drop2, customer5);
-        dropMembershipRepository.save(membership);
+        final Spot spot2 = spotRepository.save(SpotDataGenerator.spot(2, company));
+        final SpotMembership membership = SpotDataGenerator.membership(spot2, customer5);
+        spotMembershipRepository.save(membership);
         final CompanyCustomerRelationship relationship2 = CompanyDataGenerator.companyCustomerRelationship(company, customer5);
         relationship2.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
         companyCustomerRelationshipRepository.save(relationship2);

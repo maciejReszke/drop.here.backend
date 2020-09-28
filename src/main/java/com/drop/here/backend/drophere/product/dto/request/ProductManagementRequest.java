@@ -7,11 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -34,12 +36,8 @@ public class ProductManagementRequest {
     private String unit;
 
     @PositiveOrZero
-    @ApiModelProperty(value = "Product unit value per order", example = "10", required = true)
-    private BigDecimal unitValue;
-
-    @NotBlank
-    @ApiModelProperty(value = "Product availability status", example = "UNAVAILABLE", required = true)
-    private String availabilityStatus;
+    @ApiModelProperty(value = "Product unit minimal fraction per order", example = "0.1 (for kg it means 100g)", required = true)
+    private BigDecimal unitFraction;
 
     @NotNull
     @Positive
@@ -49,4 +47,9 @@ public class ProductManagementRequest {
     @Length(max = 512)
     @ApiModelProperty(value = "Product description", example = "Hot dog is a roll with a dog inside", required = true)
     private String description;
+
+    @NotNull
+    @Valid
+    @ApiModelProperty(value = "Product customization wrappers", required = true)
+    private List<@Valid ProductCustomizationWrapperRequest> productCustomizationWrappers;
 }

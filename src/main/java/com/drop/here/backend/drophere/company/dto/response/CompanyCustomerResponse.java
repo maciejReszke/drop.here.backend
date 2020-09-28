@@ -24,5 +24,5 @@ public class CompanyCustomerResponse {
     CompanyCustomerRelationshipStatus relationshipStatus;
 
     @ApiModelProperty(value = "Company customer memberships")
-    List<CompanyCustomerDropMembershipResponse> companyCustomerDropMemberships;
+    List<CompanyCustomerSpotMembershipResponse> companyCustomerSpotMemberships;
 }

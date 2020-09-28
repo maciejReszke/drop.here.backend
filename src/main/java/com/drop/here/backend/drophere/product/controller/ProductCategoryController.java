@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/categories")
+@RequestMapping("/companies/{companyUid}/categories")
 @Api(tags = "Product category API")
 public class ProductCategoryController {
     private final ProductCategoryService productCategoryService;
@@ -33,8 +34,8 @@ public class ProductCategoryController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @ApiOperation("Get all categories")
-    public List<ProductCategoryResponse> findAll() {
-        return productCategoryService.findAll();
+    @ApiOperation("Get all categories for given company")
+    public List<ProductCategoryResponse> findAll(@PathVariable String companyUid) {
+        return productCategoryService.findAll(companyUid);
     }
 }

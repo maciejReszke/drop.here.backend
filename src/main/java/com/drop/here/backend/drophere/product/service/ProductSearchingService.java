@@ -1,15 +1,13 @@
 package com.drop.here.backend.drophere.product.service;
 
-import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationPrivilegesService;
 import com.drop.here.backend.drophere.product.dto.response.ProductCustomizationResponse;
 import com.drop.here.backend.drophere.product.dto.response.ProductCustomizationWrapperResponse;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
-import com.drop.here.backend.drophere.product.enums.ProductAvailabilityStatus;
+import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,23 +25,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductSearchingService {
     private final ProductRepository productRepository;
-    private final AuthenticationPrivilegesService authenticationPrivilegesService;
     private final ProductCustomizationService productCustomizationService;
 
     public Page<ProductResponse> findAll(Pageable pageable,
                                          String companyUid,
                                          String[] desiredCategories,
-                                         String desiredNameSubstring,
-                                         AccountAuthentication accountAuthentication) {
-        final boolean isOwnCompanyOperation = authenticationPrivilegesService.isOwnCompanyOperation(accountAuthentication, companyUid);
-        final ProductAvailabilityStatus[] desiredAvailabilityStatuses = getDesiredAvailabilityStatuses(isOwnCompanyOperation);
+                                         String desiredNameSubstring) {
         final Page<Product> products = productRepository.findAll(
                 companyUid,
                 prepareCategories(desiredCategories),
                 prepareName(desiredNameSubstring),
-                desiredAvailabilityStatuses,
+                ProductCreationType.PRODUCT,
                 pageable);
-        return toResponse(products, isOwnCompanyOperation);
+        return toResponse(products);
     }
 
     private String prepareName(String desiredNameSubstring) {
@@ -58,15 +52,14 @@ public class ProductSearchingService {
                 : Arrays.stream(desiredCategories).map(String::toLowerCase).collect(Collectors.toList());
     }
 
-    private Page<ProductResponse> toResponse(Page<Product> products, boolean isOwnCompanyOperation) {
+    private Page<ProductResponse> toResponse(Page<Product> products) {
         final List<Long> productsIds = products.stream()
                 .map(Product::getId)
                 .collect(Collectors.toList());
 
         final List<ProductCustomizationWrapper> customizations = productCustomizationService.findCustomizations(productsIds);
 
-        return products
-                .map(product -> toProductResponse(product, isOwnCompanyOperation, findCustomizationWrappersForProduct(product, customizations)));
+        return products.map(product -> toProductResponse(product, findCustomizationWrappersForProduct(product, customizations)));
     }
 
     private List<ProductCustomizationWrapper> findCustomizationWrappersForProduct(Product product, List<ProductCustomizationWrapper> customizations) {
@@ -76,16 +69,15 @@ public class ProductSearchingService {
                 .collect(Collectors.toList());
     }
 
-    private ProductResponse toProductResponse(Product product, boolean isOwnCompanyOperation, List<ProductCustomizationWrapper> customizationWrappers) {
+    private ProductResponse toProductResponse(Product product, List<ProductCustomizationWrapper> customizationWrappers) {
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
-                .category(product.getCategoryName())
+                .category(product.getCategory())
                 .unit(product.getUnitName())
-                .availabilityStatus(product.getAvailabilityStatus())
+                .unitFraction(product.getUnitFraction())
                 .price(product.getPrice())
                 .description(product.getDescription())
-                .deletable(isOwnCompanyOperation ? product.isDeletable() : null)
                 .customizationsWrappers(toCustomizationWrappers(customizationWrappers))
                 .build();
     }
@@ -99,7 +91,6 @@ public class ProductSearchingService {
     private ProductCustomizationWrapperResponse toCustomizationWrapper(ProductCustomizationWrapper wrapper) {
         return ProductCustomizationWrapperResponse.builder()
                 .type(wrapper.getType())
-                .id(wrapper.getId())
                 .heading(wrapper.getHeading())
                 .customizations(toCustomizations(wrapper.getCustomizations()))
                 .build();
@@ -119,9 +110,11 @@ public class ProductSearchingService {
                 .build();
     }
 
-    private ProductAvailabilityStatus[] getDesiredAvailabilityStatuses(boolean isOwnCompanyOperation) {
-        return isOwnCompanyOperation
-                ? ProductAvailabilityStatus.values()
-                : new ProductAvailabilityStatus[]{ProductAvailabilityStatus.AVAILABLE};
+    public List<ProductResponse> findProducts(List<Long> productsIds) {
+        final List<Product> products = productRepository.findByIdIn(productsIds);
+        final List<ProductCustomizationWrapper> customizations = productCustomizationService.findCustomizations(productsIds);
+        return products.stream()
+                .map(product -> toProductResponse(product, findCustomizationWrappersForProduct(product, customizations)))
+                .collect(Collectors.toList());
     }
 }

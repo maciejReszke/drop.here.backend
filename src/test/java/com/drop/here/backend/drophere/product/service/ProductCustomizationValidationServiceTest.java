@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -23,7 +25,7 @@ class ProductCustomizationValidationServiceTest {
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
 
         //when
-        final Throwable throwable = catchThrowable(() -> validationService.validate(request));
+        final Throwable throwable = catchThrowable(() -> validationService.validate(List.of(request)));
 
         //then
         assertThat(throwable).isNull();
@@ -36,7 +38,7 @@ class ProductCustomizationValidationServiceTest {
         request.setType("okurwa");
 
         //when
-        final Throwable throwable = catchThrowable(() -> validationService.validate(request));
+        final Throwable throwable = catchThrowable(() -> validationService.validate(List.of(request)));
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);

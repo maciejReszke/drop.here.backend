@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @ToString(exclude = "wrapper")
 @EqualsAndHashCode(exclude = "wrapper")
 public class ProductCustomization {

@@ -11,9 +11,6 @@ import java.util.List;
 @Builder
 public class ProductCustomizationWrapperResponse {
 
-    @ApiModelProperty(value = "Wrapper id", example = "1L")
-    Long id;
-
     @ApiModelProperty(value = "Customization heading", example = "Roll")
     String heading;
 
