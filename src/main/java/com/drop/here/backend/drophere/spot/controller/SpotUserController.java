@@ -61,7 +61,6 @@ public class SpotUserController {
     }
 
     // TODO: 28/09/2020 dodac wyszukiwanie dropow (inny endpoint)
-    // TODO: 28/09/2020 dodac get na spoty do ktorych sie dolaczylo (chyba???) (get na membershipy de facto)
     // TODO: 29/09/2020 dodac get na dropy w ktorych sie jest??
     // TODO: 29/09/2020 get na konkretny drop (i z przedmiotami)
     @ApiOperation("Spot details")
@@ -94,6 +93,19 @@ public class SpotUserController {
                                                           @ApiIgnore @PathVariable String companyUid,
                                                           @RequestBody @Valid SpotJoinRequest spotJoinRequest) {
         return spotMembershipService.createSpotMembership(spotJoinRequest, spotUid, companyUid, authentication);
+    }
+
+    @ApiOperation("Get spot by memberships info")
+    @GetMapping("/memberships")
+    @ApiAuthorizationToken
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "List of spots that is member or is pending"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    public List<SpotBaseCustomerResponse> findSpotsByMemberships(@ApiIgnore AccountAuthentication authentication) {
+        return spotMembershipService.findSpotsByMemberships(authentication);
     }
 
     @ApiOperation("Updating spot membership")

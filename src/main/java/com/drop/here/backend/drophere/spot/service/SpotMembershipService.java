@@ -114,4 +114,8 @@ public class SpotMembershipService {
     public SpotDetailedCustomerResponse findSpot(String spotUid, String companyUid, AccountAuthentication authentication) {
         return spotSearchingService.findSpot(spotUid, companyUid, authentication);
     }
+
+    public List<SpotBaseCustomerResponse> findSpotsByMemberships(AccountAuthentication authentication) {
+        return spotSearchingService.findSpots(authentication);
+    }
 }

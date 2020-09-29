@@ -94,10 +94,11 @@ class SpotUserControllerTest extends IntegrationBaseClass {
     private Account account;
     private Spot spot;
     private Customer customer;
+    private Country country;
 
     @BeforeEach
     void prepare() {
-        final Country country = countryRepository.save(CountryDataGenerator.poland());
+        country = countryRepository.save(CountryDataGenerator.poland());
         account = accountRepository.save(AccountDataGenerator.customerAccount(1));
         privilegeRepository.save(Privilege.builder().name(CUSTOMER_CREATED_PRIVILEGE).account(account).build());
         company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
@@ -1040,7 +1041,8 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.spot.uid", Matchers.equalTo(spot.getUid())))
                 .andExpect(jsonPath("$.drops", Matchers.hasSize(2)))
-                .andExpect(jsonPath("$.spot.name", Matchers.equalTo("Spot nr 1")));    }
+                .andExpect(jsonPath("$.spot.name", Matchers.equalTo("Spot nr 1")));
+    }
 
     @Test
     void givenExistingSpotVisibleCompanyNotHiddenMembershipBlockedWhenFindSpotThenNotFound() throws Exception {
@@ -1263,5 +1265,44 @@ class SpotUserControllerTest extends IntegrationBaseClass {
                 .andExpect(jsonPath("$.spot.uid", Matchers.equalTo(spot.getUid())))
                 .andExpect(jsonPath("$.drops", Matchers.hasSize(2)))
                 .andExpect(jsonPath("$.spot.name", Matchers.equalTo("Spot nr 1")));
+    }
+
+    @Test
+    void givenValidRequestWhenFindSpotsByMembershipsThenFindNotBlocked() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        spotRepository.save(spot);
+        final SpotMembership membership1 = SpotDataGenerator.membership(spot, customer);
+        membership1.setMembershipStatus(SpotMembershipStatus.ACTIVE);
+        spotMembershipRepository.save(membership1);
+        final Spot spot2 = spotRepository.save(SpotDataGenerator.spot(2, company));
+        final SpotMembership membership2 = SpotDataGenerator.membership(spot2, customer);
+        membership2.setMembershipStatus(SpotMembershipStatus.PENDING);
+        spotMembershipRepository.save(membership2);
+        final Spot spot3 = spotRepository.save(SpotDataGenerator.spot(3, company));
+        final SpotMembership membership3 = SpotDataGenerator.membership(spot3, customer);
+        membership3.setMembershipStatus(SpotMembershipStatus.BLOCKED);
+        spotMembershipRepository.save(membership3);
+        spotRepository.save(SpotDataGenerator.spot(4, company));
+
+        final Account account2 = accountRepository.save(AccountDataGenerator.companyAccount(2));
+        final Company company2 = companyRepository.save(CompanyDataGenerator.company(2, account2, country));
+        final Spot spot4 = spotRepository.save(SpotDataGenerator.spot(4, company2));
+        final SpotMembership membership4 = SpotDataGenerator.membership(spot4, customer);
+        membership4.setMembershipStatus(SpotMembershipStatus.ACTIVE);
+        spotMembershipRepository.save(membership4);
+        final CompanyCustomerRelationship companyCustomerRelationship = CompanyDataGenerator.companyCustomerRelationship(company2, customer);
+        companyCustomerRelationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
+        companyCustomerRelationshipRepository.save(companyCustomerRelationship);
+
+        final String url = "/spots/memberships";
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(this.account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.[*]", Matchers.hasSize(2)));
     }
 }

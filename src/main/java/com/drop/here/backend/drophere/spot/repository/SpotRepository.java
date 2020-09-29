@@ -84,4 +84,23 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
             "                       dm.membershipStatus = 'BLOCKED')" +
             ")")
     Optional<Spot> findAvailableSpot(String spotUid, String companyUid, Customer customer);
+
+    @Query("select d from Spot d " +
+            "join fetch d.company c where " +
+            "(" +
+            "   c.visibilityStatus = 'VISIBLE'" +
+            ") and " +
+            "(" +
+            "  d in (select dm.spot from SpotMembership dm " +
+            "                           where dm.spot = d " +
+            "                           and dm.customer = :customer " +
+            "                           and dm.membershipStatus != 'BLOCKED')" +
+            ") and " +
+            "(" +
+            "   :customer not in (select ccr.customer from CompanyCustomerRelationship ccr" +
+            "                       where ccr.customer = :customer and " +
+            "                             ccr.company = c and " +
+            "                             ccr.relationshipStatus = 'BLOCKED')" +
+            ")")
+    List<Spot> findSpots(Customer customer);
 }

@@ -82,4 +82,10 @@ public class SpotSearchingService {
         final LocalDateTime nowAtStartOfDay = LocalDate.now().atStartOfDay();
         return new SpotDetailedCustomerResponse(dropService.findDrops(spot, nowAtStartOfDay, nowAtStartOfDay.plusDays(spotResponseDropsForDays)), baseCustomerResponse);
     }
+
+    public List<SpotBaseCustomerResponse> findSpots(AccountAuthentication authentication) {
+        final Customer customer = authentication.getCustomer();
+        final List<Spot> spots = spotRepository.findSpots(customer);
+        return toSpotCustomerResponse(spots, customer);
+    }
 }

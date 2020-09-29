@@ -126,6 +126,7 @@ class SpotSearchingServiceTest {
         final String companyUid = "companyUid";
         final Account account = AccountDataGenerator.customerAccount(1);
         final Customer customer = CustomerDataGenerator.customer(1, account);
+        account.setCustomer(customer);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
         when(spotRepository.findAvailableSpot(spotUid, companyUid, customer)).thenReturn(Optional.empty());
