@@ -1,17 +1,17 @@
 package com.drop.here.backend.drophere.drop.dto;
 
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
-import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
+import com.drop.here.backend.drophere.route.dto.RouteProductResponse;
+import com.drop.here.backend.drophere.spot.dto.response.SpotBaseCustomerResponse;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
 
-@Builder
-@Value
-public class DropRouteResponse {
+import java.util.List;
 
-    @ApiModelProperty(value = "Drop id", example = "5")
-    Long id;
+@Value
+@Builder
+public class DropDetailedCustomerResponse {
 
     @ApiModelProperty(value = "Drop uid", example = "dropuid123")
     String uid;
@@ -32,5 +32,17 @@ public class DropRouteResponse {
     DropStatus status;
 
     @ApiModelProperty(value = "Spot response")
-    SpotCompanyResponse spot;
+    SpotBaseCustomerResponse spot;
+
+    @ApiModelProperty(value = "Route products")
+    List<RouteProductResponse> products;
+
+    @ApiModelProperty(value = "Seller profile uid or null", example = "15gang")
+    String profileUid;
+
+    @ApiModelProperty(value = "Seller profile first name or null", example = "Edmund")
+    String profileFirstName;
+
+    @ApiModelProperty(value = "Seller profile last name or null", example = "Panifoster")
+    String profileLastName;
 }

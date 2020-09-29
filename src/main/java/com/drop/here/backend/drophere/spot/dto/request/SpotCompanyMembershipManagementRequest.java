@@ -1,4 +1,4 @@
-package com.drop.here.backend.drophere.spot.dto;
+package com.drop.here.backend.drophere.spot.dto.request;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

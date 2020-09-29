@@ -33,7 +33,9 @@ import java.time.LocalDateTime;
 @Builder
 @Table(indexes = {
         @Index(columnList = "uid", unique = true),
-        @Index(columnList = "name")
+        @Index(columnList = "name"),
+        @Index(columnList = "startTime"),
+        @Index(columnList = "endTime")
 })
 @ToString(exclude = {"spot", "route"})
 @EqualsAndHashCode(exclude = {"spot", "route"})

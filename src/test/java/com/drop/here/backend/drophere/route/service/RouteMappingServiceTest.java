@@ -61,13 +61,10 @@ class RouteMappingServiceTest {
     private UidGeneratorService uidGeneratorService;
 
     @Mock
+    private RouteProductMappingService routeProductMappingService;
+
+    @Mock
     private DropService dropService;
-
-    @Mock
-    private RouteProductRepository routeProductRepository;
-
-    @Mock
-    private ProductSearchingService productSearchingService;
 
     @BeforeEach
     void prepare() throws IllegalAccessException {
@@ -197,10 +194,8 @@ class RouteMappingServiceTest {
         final Company company = Company.builder().build();
         final Route route = RouteDataGenerator.route(1, company);
 
-        when(dropService.toDropResponses(route)).thenReturn(List.of());
-        when(routeProductRepository.findByRoute(route)).thenReturn(List.of());
-        when(productSearchingService.findProducts(any())).thenReturn(List.of());
-
+        when(dropService.toDropRouteResponses(route)).thenReturn(List.of());
+        when(routeProductMappingService.toProductResponses(route)).thenReturn(List.of());
         //when
         final RouteResponse response = routeMappingService.toRouteResponse(route);
 

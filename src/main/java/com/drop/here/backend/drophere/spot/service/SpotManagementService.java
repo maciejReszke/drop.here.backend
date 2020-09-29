@@ -5,7 +5,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.spot.dto.SpotCompanyMembershipManagementRequest;
+import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyMembershipResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;

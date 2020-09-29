@@ -6,7 +6,7 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.spot.dto.SpotCompanyMembershipManagementRequest;
+import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.entity.Spot;

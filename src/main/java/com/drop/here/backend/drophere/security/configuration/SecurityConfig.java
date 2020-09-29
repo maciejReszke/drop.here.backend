@@ -60,6 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.POST, "/management/customers/images").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                         .mvcMatchers(HttpMethod.GET, "/customers/{customerId}/images").permitAll()
                         .mvcMatchers("/spots/**").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
+                        .mvcMatchers("/drops/**").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                         .mvcMatchers("/actuator/**").permitAll()
                         .mvcMatchers("/notifications/**").hasAnyAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE, PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers("/companies/{companyUid}/routes/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
