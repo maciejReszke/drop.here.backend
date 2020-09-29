@@ -26,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -82,7 +83,7 @@ class DropServiceTest {
     }
 
     @Test
-    void givenExistingPrivilegedDropAndAccountProfileWhenFindDropThenFind(){
+    void givenExistingPrivilegedDropAndAccountProfileWhenFindDropThenFind() {
         //given
         final String dropUid = "dropUid";
         final Customer customer = Customer.builder().build();
@@ -91,7 +92,7 @@ class DropServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
         final Spot spot = Spot.builder().id(5L).build();
-        final Drop drop = Drop.builder().spot(spot).build();
+        final Drop drop = Drop.builder().startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).spot(spot).build();
         final AccountProfile accountProfile = AccountProfile.builder().firstName("f").lastName("l").profileUid("u").build();
         final SpotBaseCustomerResponse spotBaseCustomerResponse = SpotBaseCustomerResponse.builder().build();
         final List<RouteProductResponse> routeProductResponses = List.of();
@@ -121,7 +122,7 @@ class DropServiceTest {
     }
 
     @Test
-    void givenExistingPrivilegedDropWithoutAccountProfileWhenFindDropThenFind(){
+    void givenExistingPrivilegedDropWithoutAccountProfileWhenFindDropThenFind() {
         //given
         final String dropUid = "dropUid";
         final Customer customer = Customer.builder().build();
@@ -130,7 +131,7 @@ class DropServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
         final Spot spot = Spot.builder().id(5L).build();
-        final Drop drop = Drop.builder().spot(spot).build();
+        final Drop drop = Drop.builder().startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).spot(spot).build();
         final SpotBaseCustomerResponse spotBaseCustomerResponse = SpotBaseCustomerResponse.builder().build();
         final List<RouteProductResponse> routeProductResponses = List.of();
 

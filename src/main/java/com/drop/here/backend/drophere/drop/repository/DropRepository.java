@@ -30,9 +30,9 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "   c.visibilityStatus = 'VISIBLE'" +
             ") and " +
             "(" +
-            "   s.hidden = false or s in (select dm.spot from SpotMembership dm " +
-            "                                   where dm.spot = s and dm.customer = :customer " +
-            "                                   and dm.membershipStatus = 'ACTIVE')" +
+            "   s.hidden = false or s in (select sm.spot from SpotMembership sm " +
+            "                                   where sm.spot = s and sm.customer = :customer " +
+            "                                   and sm.membershipStatus = 'ACTIVE')" +
             ") and " +
             "(" +
             "   :customer not in (select ccr.customer from CompanyCustomerRelationship ccr" +
@@ -42,7 +42,7 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             ") and " +
             "(" +
             "   :customer not in (select dm.customer from SpotMembership dm " +
-            "                      where dm.spot = d and dm.customer =:customer and " +
+            "                      where dm.spot = s and dm.customer =:customer and " +
             "                       dm.membershipStatus = 'BLOCKED')" +
             ")")
     Optional<Drop> findPrivilegedDrop(String dropUid, Customer customer);

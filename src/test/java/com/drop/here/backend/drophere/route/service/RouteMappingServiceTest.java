@@ -66,12 +66,6 @@ class RouteMappingServiceTest {
     @Mock
     private DropService dropService;
 
-    @Mock
-    private RouteProductRepository routeProductRepository;
-
-    @Mock
-    private ProductSearchingService productSearchingService;
-
     @BeforeEach
     void prepare() throws IllegalAccessException {
         FieldUtils.writeDeclaredField(routeMappingService, "namePartLength", 4, true);
@@ -201,8 +195,6 @@ class RouteMappingServiceTest {
         final Route route = RouteDataGenerator.route(1, company);
 
         when(dropService.toDropRouteResponses(route)).thenReturn(List.of());
-        when(routeProductRepository.findByRoute(route)).thenReturn(List.of());
-        when(productSearchingService.findProducts(any())).thenReturn(List.of());
         when(routeProductMappingService.toProductResponses(route)).thenReturn(List.of());
         //when
         final RouteResponse response = routeMappingService.toRouteResponse(route);
