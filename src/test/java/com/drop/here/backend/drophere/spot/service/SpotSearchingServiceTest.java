@@ -4,7 +4,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.drop.dto.DropCustomerShortResponse;
+import com.drop.here.backend.drophere.drop.dto.DropCustomerSpotResponse;
 import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.response.SpotDetailedCustomerResponse;
@@ -54,7 +54,6 @@ class SpotSearchingServiceTest {
     void givenExistingSpotAndMembershipWhenFindSpotThenFind() {
         //given
         final String spotUid = "spotUid";
-        final String companyUid = "companyUid";
         final Account account = AccountDataGenerator.customerAccount(1);
         final Customer customer = CustomerDataGenerator.customer(1, account);
         final Company company = Company.builder().build();
@@ -62,15 +61,15 @@ class SpotSearchingServiceTest {
         account.setCustomer(customer);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final SpotMembership membership = SpotDataGenerator.membership(spot, customer);
-        final List<DropCustomerShortResponse> drops = List.of();
+        final List<DropCustomerSpotResponse> drops = List.of();
 
-        when(spotRepository.findAvailableSpot(spotUid, companyUid, customer))
+        when(spotRepository.findPrivilegedSpot(spotUid, customer))
                 .thenReturn(Optional.of(spot));
         when(spotMembershipSearchingService.findMembership(spot, customer)).thenReturn(Optional.of(membership));
         when(dropService.findDrops(spot, LocalDate.now().atStartOfDay(), LocalDate.now().atStartOfDay().plusDays(7))).thenReturn(drops);
 
         //when
-        final SpotDetailedCustomerResponse result = spotSearchingService.findSpot(spotUid, companyUid, accountAuthentication);
+        final SpotDetailedCustomerResponse result = spotSearchingService.findSpot(spotUid, accountAuthentication);
 
         //then
         assertThat(result.getDrops()).isEqualTo(drops);
@@ -89,22 +88,21 @@ class SpotSearchingServiceTest {
     void givenExistingSpotNotMembershipWhenFindSpotThenFind() {
         //given
         final String spotUid = "spotUid";
-        final String companyUid = "companyUid";
         final Account account = AccountDataGenerator.customerAccount(1);
         final Customer customer = CustomerDataGenerator.customer(1, account);
         final Company company = Company.builder().build();
         final Spot spot = SpotDataGenerator.spot(1, company);
         account.setCustomer(customer);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
-        final List<DropCustomerShortResponse> drops = List.of();
+        final List<DropCustomerSpotResponse> drops = List.of();
 
-        when(spotRepository.findAvailableSpot(spotUid, companyUid, customer))
+        when(spotRepository.findPrivilegedSpot(spotUid, customer))
                 .thenReturn(Optional.of(spot));
         when(spotMembershipSearchingService.findMembership(spot, customer)).thenReturn(Optional.empty());
         when(dropService.findDrops(spot, LocalDate.now().atStartOfDay(), LocalDate.now().atStartOfDay().plusDays(7))).thenReturn(drops);
 
         //when
-        final SpotDetailedCustomerResponse result = spotSearchingService.findSpot(spotUid, companyUid, accountAuthentication);
+        final SpotDetailedCustomerResponse result = spotSearchingService.findSpot(spotUid, accountAuthentication);
 
         //then
         assertThat(result.getDrops()).isEqualTo(drops);
@@ -123,16 +121,15 @@ class SpotSearchingServiceTest {
     void givenNotExistingSpotWhenFindSpotThenThrowException() {
         //given
         final String spotUid = "spotUid";
-        final String companyUid = "companyUid";
         final Account account = AccountDataGenerator.customerAccount(1);
         final Customer customer = CustomerDataGenerator.customer(1, account);
         account.setCustomer(customer);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
 
-        when(spotRepository.findAvailableSpot(spotUid, companyUid, customer)).thenReturn(Optional.empty());
+        when(spotRepository.findPrivilegedSpot(spotUid, customer)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> spotSearchingService.findSpot(spotUid, companyUid, accountAuthentication));
+        final Throwable throwable = catchThrowable(() -> spotSearchingService.findSpot(spotUid, accountAuthentication));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);

@@ -926,7 +926,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid());
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -962,7 +962,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid());
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -998,7 +998,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid());
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -1031,7 +1031,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid());
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -1067,7 +1067,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid());
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -1100,7 +1100,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid());
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -1129,7 +1129,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid() + "kaka", company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid() + "Keepo");
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -1160,7 +1160,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid());
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -1190,7 +1190,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid());
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -1222,7 +1222,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid());
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
@@ -1254,7 +1254,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
         dropRepository.save(drop4);
 
-        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+        final String url = String.format("/spots/%s", spot.getUid());
 
         //when
         final ResultActions result = mockMvc.perform(get(url)

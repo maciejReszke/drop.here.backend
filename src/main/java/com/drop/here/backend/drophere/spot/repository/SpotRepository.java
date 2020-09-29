@@ -2,6 +2,7 @@ package com.drop.here.backend.drophere.spot.repository;
 
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -62,7 +63,6 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
 
     @Query("select d from Spot d " +
             "join fetch d.company c where " +
-            "d.company.uid = :companyUid and " +
             "d.uid = :spotUid and " +
             "(" +
             "   c.visibilityStatus = 'VISIBLE'" +
@@ -83,7 +83,7 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
             "                      where dm.spot = d and dm.customer =:customer and " +
             "                       dm.membershipStatus = 'BLOCKED')" +
             ")")
-    Optional<Spot> findAvailableSpot(String spotUid, String companyUid, Customer customer);
+    Optional<Spot> findPrivilegedSpot(String spotUid, Customer customer);
 
     @Query("select d from Spot d " +
             "join fetch d.company c where " +
@@ -103,4 +103,9 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
             "                             ccr.relationshipStatus = 'BLOCKED')" +
             ")")
     List<Spot> findSpots(Customer customer);
+
+    @Query("select s from Spot s " +
+            "join fetch s.company where " +
+            "s.id = :id ")
+    Optional<Spot> findByIdWithCompany(Long id);
 }

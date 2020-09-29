@@ -30,12 +30,6 @@ public class SpotSearchingService {
     @Value("${spots.spot_response.spot_drops_for_days}")
     private Integer spotResponseDropsForDays;
 
-    public List<SpotBaseCustomerResponse> findSpots(AccountAuthentication authentication, Double xCoordinate, Double yCoordinate, Integer radius, Boolean member, String namePrefix, Pageable pageable) {
-        final Customer customer = authentication.getCustomer();
-        final List<Spot> spots = spotRepository.findSpots(customer, xCoordinate, yCoordinate, radius, member, namePrefix, pageable.getSort());
-        return toSpotCustomerResponse(spots, customer);
-    }
-
     private List<SpotBaseCustomerResponse> toSpotCustomerResponse(List<Spot> spots, Customer customer) {
         final List<SpotMembership> memberships = spotMembershipSearchingService.findMemberships(spots, customer);
         return spots.stream()
@@ -66,21 +60,27 @@ public class SpotSearchingService {
                 .orElse(SpotMembership.builder().build());
     }
 
-    private Spot findAvailableSpot(String spotUid, String companyUid, Customer customer) {
-        return spotRepository.findAvailableSpot(spotUid, companyUid, customer)
+    private Spot findPrivilegedSpot(String spotUid, Customer customer) {
+        return spotRepository.findPrivilegedSpot(spotUid, customer)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
-                        "Spot with uid %s company %s was not found or is not available", spotUid, companyUid),
-                        RestExceptionStatusCode.AVAILABLE_FOR_CUSTOMER_SPOT_NOT_FOUND));
+                        "Spot with uid %s was not found or is not privileged", spotUid),
+                        RestExceptionStatusCode.PRIVILEGED_FOR_CUSTOMER_SPOT_NOT_FOUND));
     }
 
-    public SpotDetailedCustomerResponse findSpot(String spotUid, String companyUid, AccountAuthentication authentication) {
+    public SpotDetailedCustomerResponse findSpot(String spotUid, AccountAuthentication authentication) {
         final Customer customer = authentication.getCustomer();
-        final Spot spot = findAvailableSpot(spotUid, companyUid, customer);
+        final Spot spot = findPrivilegedSpot(spotUid, customer);
         final SpotMembership spotMembership = spotMembershipSearchingService.findMembership(spot, customer)
                 .orElse(SpotMembership.builder().build());
         final SpotBaseCustomerResponse baseCustomerResponse = toSpotCustomerResponse(spot, spotMembership);
         final LocalDateTime nowAtStartOfDay = LocalDate.now().atStartOfDay();
         return new SpotDetailedCustomerResponse(dropService.findDrops(spot, nowAtStartOfDay, nowAtStartOfDay.plusDays(spotResponseDropsForDays)), baseCustomerResponse);
+    }
+
+    public List<SpotBaseCustomerResponse> findSpots(AccountAuthentication authentication, Double xCoordinate, Double yCoordinate, Integer radius, Boolean member, String namePrefix, Pageable pageable) {
+        final Customer customer = authentication.getCustomer();
+        final List<Spot> spots = spotRepository.findSpots(customer, xCoordinate, yCoordinate, radius, member, namePrefix, pageable.getSort());
+        return toSpotCustomerResponse(spots, customer);
     }
 
     public List<SpotBaseCustomerResponse> findSpots(AccountAuthentication authentication) {

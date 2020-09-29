@@ -10,10 +10,8 @@ import com.drop.here.backend.drophere.drop.dto.DropRouteResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.service.DropService;
-import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.enums.ProductCreationType;
-import com.drop.here.backend.drophere.product.service.ProductSearchingService;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
@@ -23,7 +21,6 @@ import com.drop.here.backend.drophere.route.dto.RouteResponse;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
-import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
 import com.drop.here.backend.drophere.spot.service.SpotPersistenceService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +34,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,9 +46,8 @@ public class RouteMappingService {
     private final SpotPersistenceService spotPersistenceService;
     private final ProductService productService;
     private final UidGeneratorService uidGeneratorService;
-    private final ProductSearchingService productSearchingService;
+    private final RouteProductMappingService routeProductMappingService;
     private final DropService dropService;
-    private final RouteProductRepository routeProductRepository;
 
     private static final String TIME_PATTERN = "HH:mm";
 
@@ -146,8 +141,8 @@ public class RouteMappingService {
     }
 
     public RouteResponse toRouteResponse(Route route) {
-        final List<DropRouteResponse> drops = dropService.toDropResponses(route);
-        final List<RouteProductResponse> products = toProductResponses(route);
+        final List<DropRouteResponse> drops = dropService.toDropRouteResponses(route);
+        final List<RouteProductResponse> products = routeProductMappingService.toProductResponses(route);
         final Optional<AccountProfile> profile = getProfile(route);
         return RouteResponse.builder()
                 .id(route.getId())
@@ -172,39 +167,8 @@ public class RouteMappingService {
                 : Optional.empty();
     }
 
-    private List<RouteProductResponse> toProductResponses(Route route) {
-        final List<RouteProduct> routeProducts = routeProductRepository.findByRoute(route);
-
-        final List<Long> productsIds = routeProducts.stream()
-                .map(RouteProduct::getProduct)
-                .map(Product::getId)
-                .collect(Collectors.toList());
-
-        final List<ProductResponse> products = productSearchingService.findProducts(productsIds);
-
-        return routeProducts.stream()
-                .sorted(Comparator.comparing(RouteProduct::getOrderNum, Integer::compareTo))
-                .map(routeProduct -> toRouteProductResponse(routeProduct, findProductForRouteProduct(products, routeProduct)))
-                .collect(Collectors.toList());
-    }
 
     private String generateUid(String name) {
         return uidGeneratorService.generateUid(name, namePartLength, randomPartLength);
-    }
-
-    private ProductResponse findProductForRouteProduct(List<ProductResponse> products, RouteProduct routeProduct) {
-        return products.stream()
-                .filter(productResponse -> productResponse.getId().equals(routeProduct.getProduct().getId()))
-                .findFirst()
-                .orElseThrow();
-    }
-
-    private RouteProductResponse toRouteProductResponse(RouteProduct routeProduct, ProductResponse productResponse) {
-        return RouteProductResponse.builder()
-                .amount(routeProduct.getAmount())
-                .limitedAmount(routeProduct.isLimitedAmount())
-                .price(routeProduct.getPrice())
-                .productResponse(productResponse)
-                .build();
     }
 }

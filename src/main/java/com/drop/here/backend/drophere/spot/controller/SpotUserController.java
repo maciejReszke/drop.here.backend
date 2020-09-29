@@ -62,9 +62,8 @@ public class SpotUserController {
 
     // TODO: 28/09/2020 dodac wyszukiwanie dropow (inny endpoint)
     // TODO: 29/09/2020 dodac get na dropy w ktorych sie jest??
-    // TODO: 29/09/2020 get na konkretny drop (i z przedmiotami)
     @ApiOperation("Spot details")
-    @GetMapping("/{spotUid}/companies/{companyUid}")
+    @GetMapping("/{spotUid}")
     @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
@@ -73,9 +72,8 @@ public class SpotUserController {
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     public SpotDetailedCustomerResponse findSpot(@ApiIgnore AccountAuthentication authentication,
-                                                 @ApiIgnore @PathVariable String spotUid,
-                                                 @ApiIgnore @PathVariable String companyUid) {
-        return spotMembershipService.findSpot(spotUid, companyUid, authentication);
+                                                 @ApiIgnore @PathVariable String spotUid) {
+        return spotMembershipService.findSpot(spotUid, authentication);
     }
 
     @ApiOperation("Joining to spot")
