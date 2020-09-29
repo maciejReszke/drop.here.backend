@@ -7,17 +7,17 @@ import lombok.Value;
 
 @Value
 @Builder
-public class SpotCustomerResponse {
+public class SpotBaseCustomerResponse {
     @ApiModelProperty(value = "Spot name", example = "Ryneczek lidla")
-    String spotName;
+    String name;
 
     @ApiModelProperty(value = "Spot description", example = "Nie ma opisu bo brak dlugopis")
-    String dropDescription;
+    String description;
 
     @ApiModelProperty(value = "Spot uid - required to join via hidden link", example = "name123xz")
-    String spotUid;
+    String uid;
 
-    @ApiModelProperty(value = "Is password needed to join given drop", example = "true")
+    @ApiModelProperty(value = "Is password needed to join given spot", example = "true")
     boolean requiresPassword;
 
     @ApiModelProperty(value = "Does company owner must accept user to join region", example = "true")

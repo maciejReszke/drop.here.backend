@@ -52,4 +52,6 @@ public interface SpotMembershipRepository extends JpaRepository<SpotMembership, 
     List<SpotMembership> findBySpotCompanyAndCustomerIdInJoinFetchSpots(Company company, List<Long> customersIds);
 
     List<SpotMembership> findByCustomerAndSpotIn(Customer customer, List<Spot> spots);
+
+    Optional<SpotMembership> findByCustomerAndSpot(Customer customer, Spot spot);
 }

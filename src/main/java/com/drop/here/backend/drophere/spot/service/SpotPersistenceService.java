@@ -27,4 +27,10 @@ public class SpotPersistenceService {
                         RestExceptionStatusCode.SPOT_NOT_FOUND_BY_ID));
     }
 
+    public Spot findByIdWithCompany(Long id) {
+        return spotRepository.findByIdWithCompany(id)
+                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                        "Spot with id %s was not found ", id),
+                        RestExceptionStatusCode.SPOT_BY_ID_NOT_FOUND));
+    }
 }
