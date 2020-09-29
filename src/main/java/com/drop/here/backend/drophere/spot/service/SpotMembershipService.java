@@ -6,11 +6,12 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.spot.dto.SpotCompanyMembershipManagementRequest;
+import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
+import com.drop.here.backend.drophere.spot.dto.response.SpotBaseCustomerResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyMembershipResponse;
-import com.drop.here.backend.drophere.spot.dto.response.SpotCustomerResponse;
+import com.drop.here.backend.drophere.spot.dto.response.SpotDetailedCustomerResponse;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.entity.SpotMembership;
 import com.drop.here.backend.drophere.spot.enums.SpotMembershipStatus;
@@ -106,7 +107,11 @@ public class SpotMembershipService {
         return spotMembershipRepository.findBySpotCompanyAndCustomerIdInJoinFetchSpots(company, customersIds);
     }
 
-    public List<SpotCustomerResponse> findSpots(AccountAuthentication authentication, Double xCoordinate, Double yCoordinate, Integer radius, Boolean member, String namePrefix, Pageable pageable) {
+    public List<SpotBaseCustomerResponse> findSpots(AccountAuthentication authentication, Double xCoordinate, Double yCoordinate, Integer radius, Boolean member, String namePrefix, Pageable pageable) {
         return spotSearchingService.findSpots(authentication, xCoordinate, yCoordinate, radius, member, namePrefix, pageable);
+    }
+
+    public SpotDetailedCustomerResponse findSpot(String spotUid, String companyUid, AccountAuthentication authentication) {
+        return spotSearchingService.findSpot(spotUid, companyUid, authentication);
     }
 }

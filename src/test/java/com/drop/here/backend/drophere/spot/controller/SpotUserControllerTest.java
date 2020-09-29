@@ -15,6 +15,10 @@ import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
+import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.repository.DropRepository;
+import com.drop.here.backend.drophere.route.entity.Route;
+import com.drop.here.backend.drophere.route.repository.RouteRepository;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.entity.Spot;
@@ -27,6 +31,8 @@ import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
 import com.drop.here.backend.drophere.test_data.CustomerDataGenerator;
+import com.drop.here.backend.drophere.test_data.DropDataGenerator;
+import com.drop.here.backend.drophere.test_data.RouteDataGenerator;
 import com.drop.here.backend.drophere.test_data.SpotDataGenerator;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -37,6 +43,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
+
+import java.time.LocalDate;
 
 import static com.drop.here.backend.drophere.authentication.account.service.PrivilegeService.CUSTOMER_CREATED_PRIVILEGE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,6 +84,12 @@ class SpotUserControllerTest extends IntegrationBaseClass {
     @Autowired
     private CompanyCustomerRelationshipRepository companyCustomerRelationshipRepository;
 
+    @Autowired
+    private DropRepository dropRepository;
+
+    @Autowired
+    private RouteRepository routeRepository;
+
     private Company company;
     private Account account;
     private Spot spot;
@@ -93,6 +107,8 @@ class SpotUserControllerTest extends IntegrationBaseClass {
 
     @AfterEach
     void cleanUp() {
+        dropRepository.deleteAll();
+        routeRepository.deleteAll();
         companyCustomerRelationshipRepository.deleteAll();
         spotMembershipRepository.deleteAll();
         spotRepository.deleteAll();
@@ -888,5 +904,364 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         //then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.[*]", Matchers.empty()));
+    }
+
+    @Test
+    void givenExistingSpotVisibleCompanyNotHiddenNotMembershipNotBlockedWhenFindSpotThenFind() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.spot.uid", Matchers.equalTo(spot.getUid())))
+                .andExpect(jsonPath("$.drops", Matchers.hasSize(2)))
+                .andExpect(jsonPath("$.spot.name", Matchers.equalTo("Spot nr 1")));
+    }
+
+    @Test
+    void givenExistingSpotVisibleCompanyHiddenMembershipActiveWhenFindSpotThenFind() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        spot.setHidden(true);
+        final SpotMembership membership = SpotDataGenerator.membership(spot, customer);
+        membership.setMembershipStatus(SpotMembershipStatus.ACTIVE);
+        spotMembershipRepository.save(membership);
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.spot.uid", Matchers.equalTo(spot.getUid())))
+                .andExpect(jsonPath("$.drops", Matchers.hasSize(2)))
+                .andExpect(jsonPath("$.spot.name", Matchers.equalTo("Spot nr 1")));
+    }
+
+    @Test
+    void givenExistingSpotVisibleCompanyHiddenMembershipPendingWhenFindSpotThenNotFound() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        spot.setHidden(true);
+        final SpotMembership membership = SpotDataGenerator.membership(spot, customer);
+        membership.setMembershipStatus(SpotMembershipStatus.PENDING);
+        spotMembershipRepository.save(membership);
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void givenExistingSpotVisibleCompanyNotHiddenMembershipPendingWhenFindSpotThenFind() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        spot.setHidden(false);
+        final SpotMembership membership = SpotDataGenerator.membership(spot, customer);
+        membership.setMembershipStatus(SpotMembershipStatus.PENDING);
+        spotMembershipRepository.save(membership);
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.spot.uid", Matchers.equalTo(spot.getUid())))
+                .andExpect(jsonPath("$.drops", Matchers.hasSize(2)))
+                .andExpect(jsonPath("$.spot.name", Matchers.equalTo("Spot nr 1")));    }
+
+    @Test
+    void givenExistingSpotVisibleCompanyNotHiddenMembershipBlockedWhenFindSpotThenNotFound() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        spot.setHidden(false);
+        final SpotMembership membership = SpotDataGenerator.membership(spot, customer);
+        membership.setMembershipStatus(SpotMembershipStatus.BLOCKED);
+        spotMembershipRepository.save(membership);
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void givenExistingSpotVisibleCompanyHiddenMembershipBlockedWhenFindSpotThenNotFound() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        spot.setHidden(true);
+        final SpotMembership membership = SpotDataGenerator.membership(spot, customer);
+        membership.setMembershipStatus(SpotMembershipStatus.BLOCKED);
+        spotMembershipRepository.save(membership);
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void givenNotExistingSpotVisibleCompanyNotHiddenNotMembershipWhenFindSpotThen404() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid() + "kaka", company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void givenExistingSpotNotVisibleCompanyNotHiddenNotMembershipWhenFindSpotThen404() throws Exception {
+        //given
+        company.setVisibilityStatus(CompanyVisibilityStatus.HIDDEN);
+        companyRepository.save(company);
+        spot.setName("Spot nr 1");
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void givenExistingSpotVisibleCompanyHiddenNotMembershipWhenFindSpotThen404() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        spot.setHidden(true);
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void givenExistingSpotVisibleCompanyNotHiddenNotMembershipBlockedWhenFindSpotThen404() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(company, customer);
+        relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.BLOCKED);
+        companyCustomerRelationshipRepository.save(relationship);
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void givenExistingSpotVisibleCompanyNotHiddenNotMembershipActiveRelationShipWhenFindSpotThenFind() throws Exception {
+        //given
+        spot.setName("Spot nr 1");
+        final CompanyCustomerRelationship relationship = CompanyDataGenerator.companyCustomerRelationship(company, customer);
+        relationship.setRelationshipStatus(CompanyCustomerRelationshipStatus.ACTIVE);
+        companyCustomerRelationshipRepository.save(relationship);
+        spotRepository.save(spot);
+        final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
+        final Drop drop1 = DropDataGenerator.drop(1, route, spot);
+        drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        dropRepository.save(drop1);
+        final Drop drop2 = DropDataGenerator.drop(2, route, spot);
+        drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        dropRepository.save(drop2);
+        final Drop drop3 = DropDataGenerator.drop(3, route, spot);
+        drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        dropRepository.save(drop3);
+        final Drop drop4 = DropDataGenerator.drop(4, route, spot);
+        drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        dropRepository.save(drop4);
+
+        final String url = String.format("/spots/%s/companies/%s", spot.getUid(), company.getUid());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.spot.uid", Matchers.equalTo(spot.getUid())))
+                .andExpect(jsonPath("$.drops", Matchers.hasSize(2)))
+                .andExpect(jsonPath("$.spot.name", Matchers.equalTo("Spot nr 1")));
     }
 }

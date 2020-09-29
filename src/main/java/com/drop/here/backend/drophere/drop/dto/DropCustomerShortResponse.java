@@ -1,17 +1,13 @@
 package com.drop.here.backend.drophere.drop.dto;
 
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
-import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
 
 @Builder
 @Value
-public class DropRouteResponse {
-
-    @ApiModelProperty(value = "Drop id", example = "5")
-    Long id;
+public class DropCustomerShortResponse {
 
     @ApiModelProperty(value = "Drop uid", example = "dropuid123")
     String uid;
@@ -30,7 +26,4 @@ public class DropRouteResponse {
 
     @ApiModelProperty(value = "Drop status", example = "PREPARED")
     DropStatus status;
-
-    @ApiModelProperty(value = "Spot response")
-    SpotCompanyResponse spotCompanyResponse;
 }

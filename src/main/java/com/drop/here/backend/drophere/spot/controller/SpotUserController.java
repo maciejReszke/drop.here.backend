@@ -2,11 +2,12 @@ package com.drop.here.backend.drophere.spot.controller;
 
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
-import com.drop.here.backend.drophere.spot.dto.response.SpotCustomerResponse;
+import com.drop.here.backend.drophere.spot.dto.response.SpotBaseCustomerResponse;
+import com.drop.here.backend.drophere.spot.dto.response.SpotDetailedCustomerResponse;
 import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,14 +50,33 @@ public class SpotUserController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public List<SpotCustomerResponse> findSpots(@ApiIgnore AccountAuthentication authentication,
-                                                @ApiParam(value = "Searching x coordinate", required = true) @RequestParam Double xCoordinate,
-                                                @ApiParam(value = "Searching y coordinate", required = true) @RequestParam Double yCoordinate,
-                                                @ApiParam(value = "Searching radius (meters)", required = true) @RequestParam Integer radius,
-                                                @ApiParam(value = "Is/is not a member") @RequestParam(required = false) Boolean member,
-                                                @ApiParam(value = "Name of drop/company (prefix)", required = true) @RequestParam String namePrefix,
-                                                Pageable pageable) {
+    public List<SpotBaseCustomerResponse> findSpots(@ApiIgnore AccountAuthentication authentication,
+                                                    @ApiParam(value = "Searching x coordinate", required = true) @RequestParam Double xCoordinate,
+                                                    @ApiParam(value = "Searching y coordinate", required = true) @RequestParam Double yCoordinate,
+                                                    @ApiParam(value = "Searching radius (meters)", required = true) @RequestParam Integer radius,
+                                                    @ApiParam(value = "Is/is not a member") @RequestParam(required = false) Boolean member,
+                                                    @ApiParam(value = "Name of spot/company (prefix)", required = true) @RequestParam String namePrefix,
+                                                    Pageable pageable) {
         return spotMembershipService.findSpots(authentication, xCoordinate, yCoordinate, radius, member, namePrefix, pageable);
+    }
+
+    // TODO: 28/09/2020 dodac wyszukiwanie dropow (inny endpoint)
+    // TODO: 28/09/2020 dodac get na spoty do ktorych sie dolaczylo (chyba???) (get na membershipy de facto)
+    // TODO: 29/09/2020 dodac get na dropy w ktorych sie jest??
+    // TODO: 29/09/2020 get na konkretny drop (i z przedmiotami)
+    @ApiOperation("Spot details")
+    @GetMapping("/{spotUid}/companies/{companyUid}")
+    @ApiAuthorizationToken
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Spot details"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    public SpotDetailedCustomerResponse findSpot(@ApiIgnore AccountAuthentication authentication,
+                                                 @ApiIgnore @PathVariable String spotUid,
+                                                 @ApiIgnore @PathVariable String companyUid) {
+        return spotMembershipService.findSpot(spotUid, companyUid, authentication);
     }
 
     @ApiOperation("Joining to spot")
@@ -102,9 +122,9 @@ public class SpotUserController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public ResourceOperationResponse deleteSpot(@ApiIgnore AccountAuthentication authentication,
-                                                @ApiIgnore @PathVariable String spotUid,
-                                                @ApiIgnore @PathVariable String companyUid) {
+    public ResourceOperationResponse deleteSpotMembership(@ApiIgnore AccountAuthentication authentication,
+                                                          @ApiIgnore @PathVariable String spotUid,
+                                                          @ApiIgnore @PathVariable String companyUid) {
         return spotMembershipService.deleteSpotMembership(spotUid, companyUid, authentication);
     }
 }

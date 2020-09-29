@@ -56,6 +56,6 @@ class DropServiceTest {
         assertThat(dropResponse.getSpotCompanyResponse()).isEqualTo(spotResponse);
         assertThat(dropResponse.getStatus()).isEqualTo(drop.getStatus());
         assertThat(dropResponse.getUid()).isEqualTo(drop.getUid());
+        assertThat(dropResponse.getId()).isEqualTo(drop.getId());
     }
-
 }
