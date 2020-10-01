@@ -60,8 +60,6 @@ public class SpotUserController {
         return spotMembershipService.findSpots(authentication, xCoordinate, yCoordinate, radius, member, namePrefix, pageable);
     }
 
-    // TODO: 28/09/2020 dodac wyszukiwanie dropow (inny endpoint)
-    // TODO: 29/09/2020 dodac get na dropy w ktorych sie jest??
     @ApiOperation("Spot details")
     @GetMapping("/{spotUid}")
     @ApiAuthorizationToken
