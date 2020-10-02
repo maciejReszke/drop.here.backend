@@ -36,7 +36,7 @@ class LocationWebSocketControllerUnitTest {
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthenticationWithProfile(account, accountProfile);
 
-        doNothing().when(simpMessagingTemplate).convertAndSend("/location/" + accountProfile.getProfileUid(), currentLocation);
+        doNothing().when(simpMessagingTemplate).convertAndSend("/locations/" + accountProfile.getProfileUid(), currentLocation);
         //when
         locationWebSocketController.publishLocation(currentLocation, accountAuthentication);
 
