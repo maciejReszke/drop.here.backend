@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.authentication.account.service.AccountProfilePersistenceService;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
+import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.dto.DropCustomerSpotResponse;
 import com.drop.here.backend.drophere.drop.dto.DropDetailedCustomerResponse;
 import com.drop.here.backend.drophere.drop.dto.DropRouteResponse;
@@ -97,5 +98,9 @@ public class DropService {
                 .status(drop.getStatus())
                 .uid(drop.getUid())
                 .build();
+    }
+
+    public boolean isSellerLocationAvailableForCustomer(String profileUid, Customer customer) {
+        return dropRepository.isSellerLocationAvailableForCustomer(profileUid, customer);
     }
 }

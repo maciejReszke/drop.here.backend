@@ -38,4 +38,6 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 
     @Query("select d.route.profile from Drop d where d =:drop")
     Optional<AccountProfile> findByDrop(Drop drop);
+
+    boolean existsByAccountAndProfileUid(Account account, String profileUid);
 }

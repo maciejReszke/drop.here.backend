@@ -12,7 +12,7 @@ import org.springframework.stereotype.Controller;
 public class LocationWebSocketController {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public static final String ENDPOINT = "/location";
+    public static final String ENDPOINT = "/locations";
 
     @MessageMapping(ENDPOINT)
     public void publishLocation(CurrentLocation currentLocation, AccountAuthentication accountAuthentication) {
