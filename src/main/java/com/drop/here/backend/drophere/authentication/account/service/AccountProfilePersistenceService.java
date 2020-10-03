@@ -66,4 +66,8 @@ public class AccountProfilePersistenceService {
                         String.format("Account profile by id %s not found ", id),
                         RestExceptionStatusCode.ACCOUNT_PROFILE_BY_ID_NOT_FOUND));
     }
+
+    public boolean existsByAccountAndProfileUid(Account account, String profileUid) {
+        return accountProfileRepository.existsByAccountAndProfileUid(account, profileUid);
+    }
 }

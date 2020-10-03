@@ -88,4 +88,8 @@ public class AccountProfileService {
     public Image findImage(String profileUid) {
         return accountProfilePersistenceService.findImage(profileUid);
     }
+
+    public boolean existsByAccountAndProfileUid(Account account, String profileUid) {
+        return accountProfilePersistenceService.existsByAccountAndProfileUid(account, profileUid);
+    }
 }
