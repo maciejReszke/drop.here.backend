@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,6 +55,17 @@ public class AuthenticationController {
     public LoginResponse loginOnProfile(@Valid @RequestBody ProfileLoginRequest loginRequest,
                                         @ApiIgnore AccountAuthentication accountAuthentication) {
         return authenticationService.loginOnProfile(loginRequest, accountAuthentication);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Logout from profile to account", authorizations = @Authorization(value = "AUTHORIZATION"))
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Logged out from profile, logged on account", response = LoginResponse.class),
+            @ApiResponse(code = HttpServletResponse.SC_UNAUTHORIZED, message = "Unauthorized", response = ExceptionMessage.class)
+    })
+    @DeleteMapping("/profile")
+    public LoginResponse logoutFromProfileToAccount(@ApiIgnore AccountAuthentication accountAuthentication) {
+        return authenticationService.logoutFromProfileToAccount(accountAuthentication);
     }
 
     @GetMapping

@@ -93,7 +93,8 @@ public class CompanyManagementController {
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     public Page<CompanyCustomerResponse> findCustomers(@ApiIgnore AccountAuthentication authentication,
-                                                       @ApiParam(value = "Customer name (starting with name or starting with surname)")
+                                                       @ApiParam(value = "Customer name (starting with name or starting with surname)",
+                                                               required = true)
                                                        @RequestParam(value = "customerName") String desiredCustomerStartingSubstring,
                                                        @ApiParam(value = "Is customer blocked (globally)")
                                                        @RequestParam(value = "blocked", required = false) Boolean blocked,
