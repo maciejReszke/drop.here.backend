@@ -183,7 +183,7 @@ class NotificationControllerTest extends IntegrationBaseClass {
     void givenCompanyAccountInvalidPrivilegeWhenFindNotificationsThenForbidden() throws Exception {
         //given
         final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
-        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE).account(account).build());
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY).account(account).build());
         final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         notificationRepository.save(NotificationDataGenerator.companyNotification(1, company));
 

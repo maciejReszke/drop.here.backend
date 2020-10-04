@@ -630,34 +630,13 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidMainProfileTokenWhenLogoutFromProfileToAccountThenGenerateToken() throws Exception {
+    void givenLoggedOnProfileTokenWhenLogoutFromProfileToAccountThenGenerateToken() throws Exception {
         //given
         final String url = "/authentication/profile";
         final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         privilegeRepository.save(Privilege.builder().name("OWN_PROFILE_MANAGEMENT").account(account).build());
         final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
-        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE).accountProfile(accountProfile).build());
-        final String token = jwtService.createToken(account, accountProfile).getToken();
-
-        //when
-        final ResultActions perform = mockMvc.perform(delete(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token));
-
-        //then
-        perform
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("token").isNotEmpty())
-                .andExpect(jsonPath("tokenValidUntil").isNotEmpty());
-    }
-
-    @Test
-    void givenValidSubprofileProfileTokenWhenLogoutFromProfileToAccountThenGenerateToken() throws Exception {
-        //given
-        final String url = "/authentication/profile";
-        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
-        privilegeRepository.save(Privilege.builder().name("OWN_PROFILE_MANAGEMENT").account(account).build());
-        final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
-        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE).accountProfile(accountProfile).build());
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY).accountProfile(accountProfile).build());
         final String token = jwtService.createToken(account, accountProfile).getToken();
 
         //when

@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.drop.repository;
 
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.route.entity.Route;
@@ -72,4 +73,6 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "                       dm.membershipStatus = 'BLOCKED')" +
             ")")
     boolean isSellerLocationAvailableForCustomer(String profileUid, Customer customer);
+
+    Optional<Drop> findByUidAndRouteCompany(String dropUid, Company company);
 }

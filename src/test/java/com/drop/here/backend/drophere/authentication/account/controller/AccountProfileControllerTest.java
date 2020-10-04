@@ -18,7 +18,6 @@ import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
-import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +65,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidRequestAndCorrectAccountWithPrivilegesWhenCreateAccountProfileThenCreate() throws Exception {
+    void givenEmptyProfilesValidRequestAndCorrectAccountWithPrivilegesWhenCreateAccountProfileThenCreate() throws Exception {
         //given
         final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         account.setAccountType(AccountType.COMPANY);
@@ -89,7 +88,40 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
                 .andExpect(jsonPath("$.token", Matchers.not(Matchers.emptyOrNullString())));
 
         assertThat(accountProfileRepository.findAll()).hasSize(1);
+        assertThat(privilegeRepository.findAll()).hasSize(3);
+        assertThat(privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase("COMPANY_FULL_MANAGEMENT"))).isNotEmpty();
+        assertThat(accountRepository.findAll().get(0).isAnyProfileRegistered()).isTrue();
+    }
+
+    @Test
+    void givenSecondProfileValidRequestAndCorrectAccountWithPrivilegesWhenCreateAccountProfileThenCreate() throws Exception {
+        //given
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        account.setAccountType(AccountType.COMPANY);
+        account.setAnyProfileRegistered(true);
+        final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account)
+                .name(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE).build());
+        account.setPrivileges(List.of(privilege));
+        accountRepository.save(account);
+        accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
+
+        final TokenResponse token = jwtService.createToken(account);
+        final String url = "/accounts/profiles";
+        final AccountProfileCreationRequest accountProfileCreationRequest = AccountProfileDataGenerator.accountProfileRequest(1);
+
+        //when
+        final ResultActions perform = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(accountProfileCreationRequest))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token.getToken()));
+
+        //then
+        perform.andExpect(status().isCreated())
+                .andExpect(jsonPath("$.token", Matchers.not(Matchers.emptyOrNullString())));
+
+        assertThat(accountProfileRepository.findAll()).hasSize(2);
         assertThat(privilegeRepository.findAll()).hasSize(2);
+        assertThat(privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase("COMPANY_FULL_MANAGEMENT"))).isEmpty();
         assertThat(accountRepository.findAll().get(0).isAnyProfileRegistered()).isTrue();
     }
 
@@ -124,7 +156,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
         final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         account.setAccountType(AccountType.COMPANY);
         account.setAnyProfileRegistered(false);
-        final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE).build());
+        final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY).build());
         account.setPrivileges(List.of(privilege));
         final AccountProfile profile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
         privilegeRepository.save(Privilege.builder().accountProfile(profile).name("aa").build());
@@ -223,7 +255,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
         final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         account.setAccountType(AccountType.COMPANY);
         account.setAnyProfileRegistered(false);
-        final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE).build());
+        final Privilege privilege = privilegeRepository.save(Privilege.builder().account(account).name(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY).build());
         account.setPrivileges(List.of(privilege));
         final AccountProfile profile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
         privilegeRepository.save(Privilege.builder().accountProfile(profile).name("aa").build());
@@ -254,7 +286,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
         final Image image = imageRepository.save(Image.builder().bytes("aa".getBytes()).type(ImageType.CUSTOMER_IMAGE).build());
         profile.setImage(image);
         accountProfileRepository.save(profile);
-        privilegeRepository.save(Privilege.builder().accountProfile(profile).name("aa").build());
+        privilegeRepository.save(Privilege.builder().accountProfile(profile).name(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY).build());
         final String url = "/accounts/profiles/images";
         final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
         final MockMultipartFile file = new MockMultipartFile("image", bytes);
@@ -290,7 +322,7 @@ class AccountProfileControllerTest extends IntegrationBaseClass {
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account, profile).getToken()));
 
         //then
-         perform.andExpect(status().isForbidden());
+        perform.andExpect(status().isForbidden());
         assertThat(imageRepository.findAll()).isEmpty();
     }
 }

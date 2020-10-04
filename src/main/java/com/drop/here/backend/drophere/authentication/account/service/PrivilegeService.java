@@ -11,6 +11,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -21,9 +22,9 @@ public class PrivilegeService {
     public static final String NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE = "CREATE_CUSTOMER";
     public static final String OWN_PROFILE_MANAGEMENT_PRIVILEGE = "OWN_PROFILE_MANAGEMENT";
     public static final String COMPANY_FULL_MANAGEMENT_PRIVILEGE = "COMPANY_FULL_MANAGEMENT";
-    public static final String COMPANY_BASIC_MANAGEMENT_PRIVILEGE = "COMPANY_BASIC_MANAGEMENT";
     public static final String COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE = "COMPANY_RESOURCES_MANAGEMENT";
     public static final String CUSTOMER_CREATED_PRIVILEGE = "CUSTOMER_FULL_MANAGEMENT";
+    public static final String LOGGED_ON_ANY_PROFILE_COMPANY = "COMPANY_LOGGED_ON_ANY_PROFILE";
 
     public void addNewAccountPrivileges(Account account) {
         final Privilege privilege = privilegeRepository.save(Privilege.builder()
@@ -40,17 +41,21 @@ public class PrivilegeService {
     }
 
     public void addNewAccountProfilePrivileges(AccountProfile accountProfile) {
-        final Privilege privilege = privilegeRepository.save(Privilege.builder()
-                .name(getPrivilegeName(accountProfile.getProfileType()))
-                .accountProfile(accountProfile)
-                .build());
-        accountProfile.setPrivileges(List.of(privilege));
-    }
+        final LinkedList<Privilege> privileges = new LinkedList<>();
 
-    private String getPrivilegeName(AccountProfileType profileType) {
-        return profileType == AccountProfileType.MAIN
-                ? COMPANY_FULL_MANAGEMENT_PRIVILEGE
-                : COMPANY_BASIC_MANAGEMENT_PRIVILEGE;
+        if (accountProfile.getProfileType() == AccountProfileType.MAIN) {
+            privileges.add(privilegeRepository.save(Privilege.builder()
+                    .name(COMPANY_FULL_MANAGEMENT_PRIVILEGE)
+                    .accountProfile(accountProfile)
+                    .build()));
+        }
+
+        privileges.add(privilegeRepository.save(Privilege.builder()
+                .name(LOGGED_ON_ANY_PROFILE_COMPANY)
+                .accountProfile(accountProfile)
+                .build()));
+
+        accountProfile.setPrivileges(privileges);
     }
 
     @Transactional

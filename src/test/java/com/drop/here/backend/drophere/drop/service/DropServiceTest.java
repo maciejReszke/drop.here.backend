@@ -3,11 +3,17 @@ package com.drop.here.backend.drophere.drop.service;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.service.AccountProfilePersistenceService;
+import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
+import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
+import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.dto.DropDetailedCustomerResponse;
+import com.drop.here.backend.drophere.drop.dto.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.DropRouteResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
+import com.drop.here.backend.drophere.drop.service.update.DropUpdateServiceFactory;
 import com.drop.here.backend.drophere.route.dto.RouteProductResponse;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.service.RouteProductMappingService;
@@ -32,6 +38,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,6 +63,12 @@ class DropServiceTest {
     @Mock
     private RouteProductMappingService routeProductMappingService;
 
+    @Mock
+    private DropValidationService dropValidationService;
+
+    @Mock
+    private DropUpdateServiceFactory dropUpdateServiceFactory;
+
     @Test
     void givenRouteWhenToDropResponsesThenMap() {
         //given
@@ -73,17 +87,15 @@ class DropServiceTest {
         final DropRouteResponse dropResponse = response.get(0);
         assertThat(dropResponse.getDescription()).isEqualTo(drop.getDescription());
         assertThat(dropResponse.getEndTime()).isEqualTo(drop.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        assertThat(dropResponse.getId()).isEqualTo(drop.getId());
         assertThat(dropResponse.getName()).isEqualTo(drop.getName());
         assertThat(dropResponse.getStartTime()).isEqualTo(drop.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         assertThat(dropResponse.getSpot()).isEqualTo(spotResponse);
         assertThat(dropResponse.getStatus()).isEqualTo(drop.getStatus());
         assertThat(dropResponse.getUid()).isEqualTo(drop.getUid());
-        assertThat(dropResponse.getId()).isEqualTo(drop.getId());
     }
 
     @Test
-    void givenExistingPrivilegedDropAndAccountProfileWhenFindDropThenFind() {
+    void givenExistingPrivilegedDropAndAccountProfileWhenFindDropForCustomerThenFind() {
         //given
         final String dropUid = "dropUid";
         final Customer customer = Customer.builder().build();
@@ -105,7 +117,7 @@ class DropServiceTest {
 
 
         //when
-        final DropDetailedCustomerResponse dropResponse = dropService.findDrop(dropUid, accountAuthentication);
+        final DropDetailedCustomerResponse dropResponse = dropService.findDropForCustomer(dropUid, accountAuthentication);
 
         //then
         assertThat(dropResponse.getDescription()).isEqualTo(drop.getDescription());
@@ -122,7 +134,7 @@ class DropServiceTest {
     }
 
     @Test
-    void givenExistingPrivilegedDropWithoutAccountProfileWhenFindDropThenFind() {
+    void givenExistingPrivilegedDropWithoutAccountProfileWhenFindDropForCustomerThenFind() {
         //given
         final String dropUid = "dropUid";
         final Customer customer = Customer.builder().build();
@@ -143,7 +155,7 @@ class DropServiceTest {
 
 
         //when
-        final DropDetailedCustomerResponse dropResponse = dropService.findDrop(dropUid, accountAuthentication);
+        final DropDetailedCustomerResponse dropResponse = dropService.findDropForCustomer(dropUid, accountAuthentication);
 
         //then
         assertThat(dropResponse.getDescription()).isEqualTo(drop.getDescription());
@@ -157,5 +169,49 @@ class DropServiceTest {
         assertThat(dropResponse.getProfileFirstName()).isNull();
         assertThat(dropResponse.getProfileLastName()).isNull();
         assertThat(dropResponse.getProfileUid()).isNull();
+    }
+
+    @Test
+    void givenExistingDropWhenUpdateDropThenUpdate() {
+        //given
+        final DropManagementRequest dropManagementRequest = DropManagementRequest.builder().build();
+        final String dropUid = "dropUid";
+        final Company company = Company.builder().build();
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .company(company)
+                .profile(accountProfile)
+                .build();
+        final Drop drop = Drop.builder().build();
+
+        when(dropRepository.findByUidAndRouteCompany(dropUid, company)).thenReturn(Optional.of(drop));
+        doNothing().when(dropValidationService).validateUpdate(drop, accountProfile);
+        when(dropUpdateServiceFactory.update(drop, dropManagementRequest)).thenReturn(drop);
+        when(dropRepository.save(drop)).thenReturn(drop);
+        //when
+        final ResourceOperationResponse result = dropService.updateDrop(dropManagementRequest, dropUid, accountAuthentication);
+
+        //then
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+    }
+
+    @Test
+    void givenNotExistingDropWhenUpdateDropThenThrowException() {
+        //given
+        final DropManagementRequest dropManagementRequest = DropManagementRequest.builder().build();
+        final String dropUid = "dropUid";
+        final Company company = Company.builder().build();
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder()
+                .company(company)
+                .profile(accountProfile)
+                .build();
+        when(dropRepository.findByUidAndRouteCompany(dropUid, company)).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropService.updateDrop(dropManagementRequest, dropUid, accountAuthentication));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 }

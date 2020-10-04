@@ -10,9 +10,6 @@ import lombok.Value;
 @Value
 public class DropRouteResponse {
 
-    @ApiModelProperty(value = "Drop id", example = "5")
-    Long id;
-
     @ApiModelProperty(value = "Drop uid", example = "dropuid123")
     String uid;
 

@@ -1,6 +1,8 @@
 package com.drop.here.backend.drophere.route.repository;
 
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.route.dto.RouteShortResponse;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
@@ -23,4 +25,9 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
             "r.company =:company and " +
             ":routeStatus is null or r.status = :routeStatus")
     Page<RouteShortResponse> findByCompany(Company company, RouteStatus routeStatus, Pageable pageable);
+
+    @Query("select case when (count(r) > 0) then true else false end from Route r where " +
+            "r.profile =:profile and " +
+            ":drop in (r.drops)")
+    boolean existsByProfileAndContainsDrop(AccountProfile profile, Drop drop);
 }
