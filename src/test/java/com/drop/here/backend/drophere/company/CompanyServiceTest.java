@@ -114,10 +114,10 @@ class CompanyServiceTest {
     @Test
     void givenAccountAuthenticationWhenFindOwnCompanyThenFind() {
         //given
-        final AccountAuthentication accountAuthentication = AccountAuthentication.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder().account(Account.builder().build()).build();
         final CompanyManagementResponse companyManagementResponse = CompanyManagementResponse.builder().build();
 
-        when(companyMappingService.toManagementResponse(accountAuthentication.getCompany()))
+        when(companyMappingService.toManagementResponse(accountAuthentication.getCompany(), accountAuthentication.getPrincipal()))
                 .thenReturn(companyManagementResponse);
 
         //when

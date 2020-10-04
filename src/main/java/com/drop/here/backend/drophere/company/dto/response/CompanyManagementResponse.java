@@ -23,4 +23,7 @@ public class CompanyManagementResponse {
 
     @ApiModelProperty(value = "Visibility status", example = "VISIBLE")
     CompanyVisibilityStatus visibilityStatus;
+
+    @ApiModelProperty(value = "Profiles count", example = "5")
+    Long profilesCount;
 }

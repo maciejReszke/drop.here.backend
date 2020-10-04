@@ -66,7 +66,7 @@ public class CompanyService {
     public CompanyManagementResponse findOwnCompany(AccountAuthentication authentication) {
         final Company company = companyRepository.findByAccount(authentication.getPrincipal())
                 .orElse(null);
-        return companyMappingService.toManagementResponse(company);
+        return companyMappingService.toManagementResponse(company, authentication.getPrincipal());
     }
 
     public ResourceOperationResponse updateCompany(CompanyManagementRequest companyManagementRequest, AccountAuthentication authentication) {
