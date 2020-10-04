@@ -490,6 +490,46 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
     }
 
     @Test
+    void givenWithNameParamRequestLastNameFirstNameConcatWhenFindCustomersThenFindCustomers() throws Exception {
+        //given
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
+        prepareFindingCompaniesCustomerData();
+
+
+        final String url = "/management/companies/customers";
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .param("customerName", "Krzywousty Mich")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenWithNameParamRequestFirstNameLastNameConcatWhenFindCustomersThenFindCustomers() throws Exception {
+        //given
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
+        prepareFindingCompaniesCustomerData();
+
+
+        final String url = "/management/companies/customers";
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .param("customerName", "Michal Krzy")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
     void givenWithBlockedTrueParamRequestWhenFindCustomersThenFindCustomers() throws Exception {
         //given
         privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)

@@ -30,7 +30,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             ") and " +
             "(" +
             "   lower(c.firstName) like concat(lower(:desiredCustomerStartingSubstring), '%') or " +
-            "   lower(c.lastName) like concat(lower(:desiredCustomerStartingSubstring), '%')" +
+            "   lower(c.lastName) like concat(lower(:desiredCustomerStartingSubstring), '%') or " +
+            "   concat(lower(c.firstName), ' ', lower(c.lastName)) like concat(lower(:desiredCustomerStartingSubstring), '%') or" +
+            "   concat(lower(c.lastName), ' ', lower(c.firstName)) like concat(lower(:desiredCustomerStartingSubstring), '%') " +
             ")")
     Page<Customer> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, Company company, Pageable pageable);
 }

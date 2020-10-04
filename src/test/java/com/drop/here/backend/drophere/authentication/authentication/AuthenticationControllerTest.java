@@ -691,14 +691,14 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidDataInvalidTokenWhenLogoutFromProfileToAccountThen401() throws Exception {
+    void givenInvalidTokenWhenLogoutFromProfileToAccountThen401() throws Exception {
         //given
         final String url = "/authentication/profile";
         final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
         final String token = jwtService.createToken(account).getToken();
 
         //when
-        final ResultActions perform = mockMvc.perform(post(url)
+        final ResultActions perform = mockMvc.perform(delete(url)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer a" + token));
 
         //then

@@ -7,10 +7,12 @@ import com.drop.here.backend.drophere.route.dto.RouteResponse;
 import com.drop.here.backend.drophere.route.dto.RouteShortResponse;
 import com.drop.here.backend.drophere.route.service.RouteService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,10 +36,11 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/companies/{companyUid}/routes")
+@Api(tags = "Route API")
 public class RouteController {
     private final RouteService routeService;
 
-    @ApiOperation("Find routes")
+    @ApiOperation(value = "Find routes", authorizations = @Authorization(value = "AUTHORIZATION"))
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
@@ -61,7 +64,7 @@ public class RouteController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @ApiOperation("Find route")
+    @ApiOperation(value = "Find route", authorizations = @Authorization(value = "AUTHORIZATION"))
     public RouteResponse findRoute(@ApiIgnore @PathVariable String companyUid,
                                    @ApiIgnore @PathVariable Long routeId,
                                    @ApiIgnore AccountAuthentication accountAuthentication) {
@@ -70,7 +73,7 @@ public class RouteController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation("Creating new route")
+    @ApiOperation(value = "Creating new route", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Route created"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
@@ -91,7 +94,7 @@ public class RouteController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @ApiOperation("Updating route")
+    @ApiOperation(value = "Updating route", authorizations = @Authorization(value = "AUTHORIZATION"))
     public ResourceOperationResponse updateRoute(@ApiIgnore @PathVariable String companyUid,
                                                  @ApiIgnore @PathVariable Long routeId,
                                                  @RequestBody @Valid RouteRequest routeRequest,
@@ -107,7 +110,7 @@ public class RouteController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @ApiOperation("Deleting route")
+    @ApiOperation(value = "Deleting route", authorizations = @Authorization(value = "AUTHORIZATION"))
     public ResourceOperationResponse deleteRoute(@ApiIgnore @PathVariable String companyUid,
                                                  @ApiIgnore @PathVariable Long routeId,
                                                  @ApiIgnore AccountAuthentication accountAuthentication) {
