@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingType;
+import com.drop.here.backend.drophere.notification.enums.NotificationCategory;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationRecipientType;
 import com.drop.here.backend.drophere.notification.enums.NotificationReferencedSubjectType;
@@ -48,6 +49,10 @@ public class Notification {
     @NotNull
     @Enumerated(EnumType.STRING)
     private NotificationType type;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private NotificationCategory category;
 
     @NotNull
     @Enumerated(EnumType.STRING)

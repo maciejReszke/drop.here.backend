@@ -54,7 +54,7 @@ class NotificationMappingServiceTest {
         assertThat(response.getId()).isEqualTo(notification.getId());
         assertThat(response.getTitle()).isEqualTo(notification.getTitle());
         assertThat(response.getMessage()).isEqualTo(notification.getMessage());
-        assertThat(response.getType()).isEqualTo(notification.getType());
+        assertThat(response.getCategory()).isEqualTo(notification.getCategory());
         assertThat(response.getReadStatus()).isEqualTo(notification.getReadStatus());
         assertThat(response.getReferencedSubjectType()).isEqualTo(notification.getReferencedSubjectType());
         assertThat(response.getReferencedSubjectId()).isEqualTo("SYSTEM");
@@ -80,7 +80,7 @@ class NotificationMappingServiceTest {
         assertThat(response.getId()).isEqualTo(notification.getId());
         assertThat(response.getTitle()).isEqualTo(notification.getTitle());
         assertThat(response.getMessage()).isEqualTo(notification.getMessage());
-        assertThat(response.getType()).isEqualTo(notification.getType());
+        assertThat(response.getCategory()).isEqualTo(notification.getCategory());
         assertThat(response.getReadStatus()).isEqualTo(notification.getReadStatus());
         assertThat(response.getReferencedSubjectType()).isEqualTo(notification.getReferencedSubjectType());
         assertThat(response.getReferencedSubjectId()).isEqualTo("SYSTEM");
@@ -104,7 +104,7 @@ class NotificationMappingServiceTest {
         assertThat(response.getId()).isEqualTo(notification.getId());
         assertThat(response.getTitle()).isEqualTo(notification.getTitle());
         assertThat(response.getMessage()).isEqualTo(notification.getMessage());
-        assertThat(response.getType()).isEqualTo(notification.getType());
+        assertThat(response.getCategory()).isEqualTo(notification.getCategory());
         assertThat(response.getReadStatus()).isEqualTo(notification.getReadStatus());
         assertThat(response.getReferencedSubjectType()).isEqualTo(notification.getReferencedSubjectType());
         assertThat(response.getReferencedSubjectId()).isEqualTo("SYSTEM");

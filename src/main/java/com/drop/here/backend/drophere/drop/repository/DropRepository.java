@@ -74,5 +74,9 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             ")")
     boolean isSellerLocationAvailableForCustomer(String profileUid, Customer customer);
 
-    Optional<Drop> findByUidAndRouteCompany(String dropUid, Company company);
+    @Query("select d from Drop d " +
+            "join fetch d.spot " +
+            "where d.uid = :dropUid and " +
+            "d.route.company = :company")
+    Optional<Drop> findByUidAndRouteCompanyWithSpot(String dropUid, Company company);
 }

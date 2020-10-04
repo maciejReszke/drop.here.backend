@@ -3,7 +3,7 @@ package com.drop.here.backend.drophere.spot.service;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.drop.service.DropService;
+import com.drop.here.backend.drophere.drop.service.DropSearchingService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.response.SpotBaseCustomerResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotDetailedCustomerResponse;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class SpotSearchingService {
     private final SpotRepository spotRepository;
     private final SpotMembershipSearchingService spotMembershipSearchingService;
-    private final DropService dropService;
+    private final DropSearchingService dropSearchingService;
 
     @Value("${spots.spot_response.spot_drops_for_days}")
     private Integer spotResponseDropsForDays;
@@ -74,7 +74,7 @@ public class SpotSearchingService {
                 .orElse(SpotMembership.builder().build());
         final SpotBaseCustomerResponse baseCustomerResponse = toSpotCustomerResponse(spot, spotMembership);
         final LocalDateTime nowAtStartOfDay = LocalDate.now().atStartOfDay();
-        return new SpotDetailedCustomerResponse(dropService.findDrops(spot, nowAtStartOfDay, nowAtStartOfDay.plusDays(spotResponseDropsForDays)), baseCustomerResponse);
+        return new SpotDetailedCustomerResponse(dropSearchingService.findDrops(spot, nowAtStartOfDay, nowAtStartOfDay.plusDays(spotResponseDropsForDays)), baseCustomerResponse);
     }
 
     public List<SpotBaseCustomerResponse> findSpots(AccountAuthentication authentication, Double xCoordinate, Double yCoordinate, Integer radius, Boolean member, String namePrefix, Pageable pageable) {

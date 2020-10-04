@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.common.service.UidGeneratorService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
+import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.response.SpotBaseCustomerResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
 import com.drop.here.backend.drophere.spot.entity.Spot;
@@ -93,9 +94,18 @@ public class SpotMappingService {
                 .createdAt(LocalDateTime.now())
                 .lastUpdatedAt(LocalDateTime.now())
                 .customer(authentication.getCustomer())
-                .receiveNotification(spotJoinRequest.isReceiveNotification())
+                .receiveCancelledNotifications(spotJoinRequest.isReceiveCancelledNotifications())
+                .receiveDelayedNotifications(spotJoinRequest.isReceiveDelayedNotifications())
+                .receiveFinishedNotifications(spotJoinRequest.isReceiveFinishedNotifications())
+                .receiveLiveNotifications(spotJoinRequest.isReceiveLiveNotifications())
+                .receivePreparedNotifications(spotJoinRequest.isReceivePreparedNotifications())
                 .spot(spot)
                 .membershipStatus(spot.isRequiresAccept() ? SpotMembershipStatus.PENDING : SpotMembershipStatus.ACTIVE)
                 .build();
+    }
+
+    // TODO: 04/10/2020  
+    public void updateSpotMembership(Spot spot, SpotMembershipManagementRequest spotMembershipManagementRequest) {
+
     }
 }

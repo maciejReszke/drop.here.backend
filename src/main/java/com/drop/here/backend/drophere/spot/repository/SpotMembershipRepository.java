@@ -54,4 +54,16 @@ public interface SpotMembershipRepository extends JpaRepository<SpotMembership, 
     List<SpotMembership> findByCustomerAndSpotIn(Customer customer, List<Spot> spots);
 
     Optional<SpotMembership> findByCustomerAndSpot(Customer customer, Spot spot);
+
+    @Query("select sm from SpotMembership sm where " +
+            "sm.spot = :spot and " +
+            "sm.customer not in (select dm.customer from SpotMembership dm " +
+            "                      where dm.spot = :spot and dm.customer = sm.customer and " +
+            "                       dm.membershipStatus = 'BLOCKED') and " +
+            "(:prepared = false or sm.receivePreparedNotifications = true) and" +
+            "(:live = false or sm.receiveLiveNotifications = true) and" +
+            "(:finished = false or sm.receiveFinishedNotifications = true) and" +
+            "(:delayed = false or sm.receiveDelayedNotifications = true) and" +
+            "(:cancelled = false or sm.receiveCancelledNotifications = true)")
+    List<SpotMembership> findToBeNotified(Spot spot, boolean prepared, boolean live, boolean finished, boolean delayed, boolean cancelled);
 }

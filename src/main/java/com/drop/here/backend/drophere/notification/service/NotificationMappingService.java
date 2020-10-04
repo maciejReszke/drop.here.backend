@@ -27,7 +27,7 @@ public class NotificationMappingService {
                 .message(notification.getMessage())
                 .title(notification.getTitle())
                 .readStatus(notification.getReadStatus())
-                .type(notification.getType())
+                .category(notification.getCategory())
                 .referencedSubjectType(notification.getReferencedSubjectType())
                 .referencedSubjectId(getReferencedSubjectId(notification))
                 .broadcastingType(notification.getBroadcastingType())

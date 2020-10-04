@@ -11,6 +11,7 @@ import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
 import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
+import com.drop.here.backend.drophere.notification.enums.NotificationType;
 import com.drop.here.backend.drophere.notification.repository.NotificationJobRepository;
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingService;
@@ -38,6 +39,7 @@ public class NotificationService {
     private final NotificationValidationService notificationValidationService;
     private final NotificationBroadcastingServiceFactory notificationBroadcastingServiceFactory;
 
+    // TODO: 04/10/2020 dodac testy integracyjne na typ notyfikacji
     public Page<NotificationResponse> findNotifications(AccountAuthentication accountAuthentication, String readStatus, Pageable pageable) {
         final List<NotificationReadStatus> desiredReadStatuses = getDesiredReadStatuses(readStatus);
         final Page<Notification> notifications = findNotifications(accountAuthentication, pageable, desiredReadStatuses);
@@ -51,7 +53,8 @@ public class NotificationService {
     }
 
     private Page<Notification> findCustomerNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
-        return notificationRepository.findByRecipientCustomerAndReadStatusIn(accountAuthentication.getCustomer(), desiredReadStatuses, pageable);
+        return notificationRepository.findByRecipientCustomerAndReadStatusInAndType(
+                accountAuthentication.getCustomer(), desiredReadStatuses, NotificationType.NOTIFICATION_PANEL, pageable);
     }
 
     private Page<Notification> findCompanyNotifications(AccountAuthentication accountAuthentication, Pageable pageable, List<NotificationReadStatus> desiredReadStatuses) {
@@ -76,13 +79,16 @@ public class NotificationService {
     private Notification findNotification(AccountAuthentication authentication, Long notificationId) {
         final Account principal = authentication.getPrincipal();
         final Optional<Notification> notification = principal.getAccountType() == AccountType.COMPANY
-                ? notificationRepository.findByIdAndRecipientCompanyOrRecipientAccountProfile(notificationId, authentication.getCompany(), authentication.getProfile())
-                : notificationRepository.findByIdAndRecipientCustomer(notificationId, authentication.getCustomer());
+                ? notificationRepository.findByIdAndRecipientCompanyOrRecipientAccountProfileAndType(
+                        notificationId, authentication.getCompany(), authentication.getProfile(), NotificationType.NOTIFICATION_PANEL)
+                : notificationRepository.findByIdAndRecipientCustomerAndType(
+                        notificationId, authentication.getCustomer(), NotificationType.NOTIFICATION_PANEL);
         return notification.orElseThrow(() -> new RestEntityNotFoundException(String.format(
                 "Notification with id %s for account %s was not found", notificationId, principal.getId()),
                 RestExceptionStatusCode.NOTIFICATION_BY_ID_FOR_PRINCIPAL_NOT_FOUND));
     }
 
+    // TODO: 04/10/2020 usuwanie gdy push onky
     public void sendNotifications() {
         final NotificationBroadcastingService notificationBroadcastingService = notificationBroadcastingServiceFactory.getNotificationBroadcastingService();
         final PageRequest pageable = PageRequest.of(0, notificationBroadcastingService.getBatchAmount());

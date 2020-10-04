@@ -58,5 +58,17 @@ public class SpotMembership {
     private Long version;
 
     @NotNull
-    private boolean receiveNotification;
+    private boolean receiveLiveNotifications;
+
+    @NotNull
+    private boolean receivePreparedNotifications;
+
+    @NotNull
+    private boolean receiveFinishedNotifications;
+
+    @NotNull
+    private boolean receiveDelayedNotifications;
+
+    @NotNull
+    private boolean receiveCancelledNotifications;
 }

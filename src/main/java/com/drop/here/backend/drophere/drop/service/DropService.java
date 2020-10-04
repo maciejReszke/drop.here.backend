@@ -8,7 +8,6 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.drop.dto.DropCustomerSpotResponse;
 import com.drop.here.backend.drophere.drop.dto.DropDetailedCustomerResponse;
 import com.drop.here.backend.drophere.drop.dto.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.DropRouteResponse;
@@ -27,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -91,42 +89,25 @@ public class DropService {
                 .build();
     }
 
-    public List<DropCustomerSpotResponse> findDrops(Spot spot, LocalDateTime from, LocalDateTime to) {
-        return dropRepository.findBySpotAndStartTimeAfterAndStartTimeBefore(spot, from, to)
-                .stream()
-                .map(this::toDropCustomerSpotResponse)
-                .collect(Collectors.toList());
-    }
-
-    private DropCustomerSpotResponse toDropCustomerSpotResponse(Drop drop) {
-        return DropCustomerSpotResponse
-                .builder()
-                .description(drop.getDescription())
-                .endTime(drop.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .startTime(drop.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .name(drop.getName())
-                .status(drop.getStatus())
-                .uid(drop.getUid())
-                .build();
-    }
-
     public boolean isSellerLocationAvailableForCustomer(String profileUid, Customer customer) {
         return dropRepository.isSellerLocationAvailableForCustomer(profileUid, customer);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public ResourceOperationResponse updateDrop(DropManagementRequest dropManagementRequest, String dropUid, AccountAuthentication authentication) {
-        final Drop drop = findDrop(dropUid, authentication.getCompany());
+        final Company company = authentication.getCompany();
+        final Drop drop = findDrop(dropUid, company);
         dropValidationService.validateUpdate(drop, authentication.getProfile());
         final DropStatus preUpdateStatus = drop.getStatus();
-        final Drop updatedDrop = dropUpdateServiceFactory.update(drop, dropManagementRequest);
-        dropRepository.save(updatedDrop);
-        log.info("Successfully updated drop {} from status {} to {}", updatedDrop.getUid(), preUpdateStatus, updatedDrop.getStatus());
-        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, updatedDrop.getId());
+        final DropStatus newStatus = dropUpdateServiceFactory.update(drop, drop.getSpot(), company, dropManagementRequest);
+        drop.setStatus(newStatus);
+        dropRepository.save(drop);
+        log.info("Successfully updated drop {} from status {} to {}", drop.getUid(), preUpdateStatus, newStatus);
+        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, drop.getId());
     }
 
     private Drop findDrop(String dropUid, Company company) {
-        return dropRepository.findByUidAndRouteCompany(dropUid, company)
+        return dropRepository.findByUidAndRouteCompanyWithSpot(dropUid, company)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Drop with uid %s for company %s was not found", dropUid, company.getUid()),
                         RestExceptionStatusCode.DROP_BY_UID_FOR_COMPANY_NOT_FOUND));

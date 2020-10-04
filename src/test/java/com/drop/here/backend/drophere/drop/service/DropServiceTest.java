@@ -12,6 +12,7 @@ import com.drop.here.backend.drophere.drop.dto.DropDetailedCustomerResponse;
 import com.drop.here.backend.drophere.drop.dto.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.DropRouteResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
 import com.drop.here.backend.drophere.drop.service.update.DropUpdateServiceFactory;
 import com.drop.here.backend.drophere.route.dto.RouteProductResponse;
@@ -184,15 +185,16 @@ class DropServiceTest {
                 .build();
         final Drop drop = Drop.builder().build();
 
-        when(dropRepository.findByUidAndRouteCompany(dropUid, company)).thenReturn(Optional.of(drop));
+        when(dropRepository.findByUidAndRouteCompanyWithSpot(dropUid, company)).thenReturn(Optional.of(drop));
         doNothing().when(dropValidationService).validateUpdate(drop, accountProfile);
-        when(dropUpdateServiceFactory.update(drop, dropManagementRequest)).thenReturn(drop);
+        when(dropUpdateServiceFactory.update(drop, drop.getSpot(), company, dropManagementRequest)).thenReturn(DropStatus.DELAYED);
         when(dropRepository.save(drop)).thenReturn(drop);
         //when
         final ResourceOperationResponse result = dropService.updateDrop(dropManagementRequest, dropUid, accountAuthentication);
 
         //then
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        assertThat(drop.getStatus()).isEqualTo(DropStatus.DELAYED);
     }
 
     @Test
@@ -206,7 +208,7 @@ class DropServiceTest {
                 .company(company)
                 .profile(accountProfile)
                 .build();
-        when(dropRepository.findByUidAndRouteCompany(dropUid, company)).thenReturn(Optional.empty());
+        when(dropRepository.findByUidAndRouteCompanyWithSpot(dropUid, company)).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> dropService.updateDrop(dropManagementRequest, dropUid, accountAuthentication));

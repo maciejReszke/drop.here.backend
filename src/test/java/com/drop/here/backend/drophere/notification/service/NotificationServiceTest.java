@@ -12,6 +12,7 @@ import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
 import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
+import com.drop.here.backend.drophere.notification.enums.NotificationType;
 import com.drop.here.backend.drophere.notification.repository.NotificationJobRepository;
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingService;
@@ -105,7 +106,8 @@ class NotificationServiceTest {
         final NotificationResponse response = NotificationResponse.builder().build();
         final Notification notification = NotificationDataGenerator.customerNotification(1, customer);
 
-        when(notificationRepository.findByRecipientCustomerAndReadStatusIn(customer, Arrays.asList(NotificationReadStatus.values()), pageable))
+        when(notificationRepository.findByRecipientCustomerAndReadStatusInAndType(
+                customer, Arrays.asList(NotificationReadStatus.values()), NotificationType.NOTIFICATION_PANEL, pageable))
                 .thenReturn(new PageImpl<>(List.of(notification)));
         when(notificationMappingService.toNotificationResponse(notification)).thenReturn(response);
 
@@ -131,7 +133,7 @@ class NotificationServiceTest {
 
         final Notification notification = NotificationDataGenerator.customerNotification(1, customer);
 
-        when(notificationRepository.findByIdAndRecipientCustomer(notificationId, customer))
+        when(notificationRepository.findByIdAndRecipientCustomerAndType(notificationId, customer, NotificationType.NOTIFICATION_PANEL))
                 .thenReturn(Optional.of(notification));
         doNothing().when(notificationValidationService).validateUpdateNotificationRequest(notificationManagementRequest);
         doNothing().when(notificationMappingService).update(notification, notificationManagementRequest);
@@ -156,7 +158,8 @@ class NotificationServiceTest {
         final Long notificationId = 5L;
         final NotificationManagementRequest notificationManagementRequest = NotificationManagementRequest.builder().build();
 
-        when(notificationRepository.findByIdAndRecipientCompanyOrRecipientAccountProfile(notificationId, company, accountProfile))
+        when(notificationRepository.findByIdAndRecipientCompanyOrRecipientAccountProfileAndType(
+                notificationId, company, accountProfile, NotificationType.NOTIFICATION_PANEL))
                 .thenReturn(Optional.empty());
 
         //when
