@@ -2,6 +2,8 @@ package com.drop.here.backend.drophere.security.configuration;
 
 import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
+import com.drop.here.backend.drophere.location.endpoint.LocationWebSocketController;
+import com.drop.here.backend.drophere.security.configuration.websocket.WebSocketConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -34,6 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers(HttpMethod.POST, "/authentication").anonymous()
                         .mvcMatchers(HttpMethod.POST, "/authentication/external").anonymous()
                         .mvcMatchers(HttpMethod.POST, "/authentication/profile").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.DELETE, "/authentication/profile").hasAnyAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE, PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.POST, "/accounts/profiles").hasAuthority(PrivilegeService.OWN_PROFILE_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.PATCH, "/accounts/profiles").hasAnyAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE, PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(HttpMethod.POST, "/accounts/profiles/images").hasAnyAuthority(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE, PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE)
@@ -64,6 +67,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers("/actuator/**").permitAll()
                         .mvcMatchers("/notifications/**").hasAnyAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE, PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers("/companies/{companyUid}/routes/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers(LocationWebSocketController.ENDPOINT + "/**").permitAll()
+                        .mvcMatchers(WebSocketConfig.WEB_SOCKET_DESTINATION_PREFIX + "/**").permitAll()
+
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(new Http401UnauthorizedEntryPoint(), new AntPathRequestMatcher("/**")));

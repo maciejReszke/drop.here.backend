@@ -3,11 +3,11 @@ package com.drop.here.backend.drophere.company.controller;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.image.Image;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,8 +29,7 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @GetMapping("/{companyUid}/images")
-    @ApiOperation("Get company image")
-    @ApiAuthorizationToken
+    @ApiOperation(value = "Get company image", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Company image"),

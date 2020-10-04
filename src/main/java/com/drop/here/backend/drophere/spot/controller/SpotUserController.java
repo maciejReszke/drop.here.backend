@@ -8,12 +8,12 @@ import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementR
 import com.drop.here.backend.drophere.spot.dto.response.SpotBaseCustomerResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotDetailedCustomerResponse;
 import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -41,9 +41,8 @@ import java.util.List;
 public class SpotUserController {
     private final SpotMembershipService spotMembershipService;
 
-    @ApiOperation("Listing all spots")
+    @ApiOperation(value = "Listing all spots", authorizations = @Authorization(value = "AUTHORIZATION"))
     @GetMapping
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "All filtered out spots"),
@@ -60,11 +59,8 @@ public class SpotUserController {
         return spotMembershipService.findSpots(authentication, xCoordinate, yCoordinate, radius, member, namePrefix, pageable);
     }
 
-    // TODO: 28/09/2020 dodac wyszukiwanie dropow (inny endpoint)
-    // TODO: 29/09/2020 dodac get na dropy w ktorych sie jest??
-    @ApiOperation("Spot details")
+    @ApiOperation(value = "Spot details", authorizations = @Authorization(value = "AUTHORIZATION"))
     @GetMapping("/{spotUid}")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Spot details"),
@@ -76,9 +72,8 @@ public class SpotUserController {
         return spotMembershipService.findSpot(spotUid, authentication);
     }
 
-    @ApiOperation("Joining to spot")
+    @ApiOperation(value = "Joining to spot", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PostMapping("/{spotUid}/companies/{companyUid}/memberships")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.CREATED)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Joined to drop", response = ResourceOperationResponse.class),
@@ -93,9 +88,8 @@ public class SpotUserController {
         return spotMembershipService.createSpotMembership(spotJoinRequest, spotUid, companyUid, authentication);
     }
 
-    @ApiOperation("Get spot by memberships info")
+    @ApiOperation(value = "Get spot by memberships info", authorizations = @Authorization(value = "AUTHORIZATION"))
     @GetMapping("/memberships")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "List of spots that is member or is pending"),
@@ -106,9 +100,8 @@ public class SpotUserController {
         return spotMembershipService.findSpotsByMemberships(authentication);
     }
 
-    @ApiOperation("Updating spot membership")
+    @ApiOperation(value = "Updating spot membership", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PutMapping("/{spotUid}/companies/{companyUid}/memberships")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Membership updated", response = ResourceOperationResponse.class),
@@ -123,9 +116,8 @@ public class SpotUserController {
     }
 
 
-    @ApiOperation("Leaving drop")
+    @ApiOperation(value = "Leaving drop", authorizations = @Authorization(value = "AUTHORIZATION"))
     @DeleteMapping("/{spotUid}/companies/{companyUid}/memberships")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Left from drop", response = ResourceOperationResponse.class),

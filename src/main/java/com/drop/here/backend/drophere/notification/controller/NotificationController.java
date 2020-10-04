@@ -8,12 +8,12 @@ import com.drop.here.backend.drophere.notification.dto.NotificationTokenManageme
 import com.drop.here.backend.drophere.notification.service.NotificationService;
 import com.drop.here.backend.drophere.notification.service.token.NotificationTokenService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,8 +40,7 @@ public class NotificationController {
     private final NotificationTokenService notificationTokenService;
 
     @GetMapping
-    @ApiOperation("Get notifications")
-    @ApiAuthorizationToken
+    @ApiOperation(value = "Get notifications", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Notifications for principal"),
@@ -55,8 +54,7 @@ public class NotificationController {
     }
 
     @PutMapping("/{notificationId}")
-    @ApiOperation("Update notification read status")
-    @ApiAuthorizationToken
+    @ApiOperation(value = "Update notification read status", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Notification updated"),
@@ -70,8 +68,7 @@ public class NotificationController {
     }
 
     @PutMapping("/tokens")
-    @ApiOperation("Update notification token")
-    @ApiAuthorizationToken
+    @ApiOperation(value = "Update notification token", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Token updated"),

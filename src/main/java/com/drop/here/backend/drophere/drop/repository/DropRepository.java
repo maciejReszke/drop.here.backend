@@ -46,4 +46,30 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "                       dm.membershipStatus = 'BLOCKED')" +
             ")")
     Optional<Drop> findPrivilegedDrop(String dropUid, Customer customer);
+
+    @Query("select case when (count(d) > 0) then true else false end from Drop d " +
+            "join d.spot s " +
+            "join s.company c where " +
+            "d.route.profile.profileUid = :profileUid and " +
+            "d.status = 'DELIVERING' and " +
+            "(" +
+            "   c.visibilityStatus = 'VISIBLE'" +
+            ") and " +
+            "(" +
+            "   s in (select sm.spot from SpotMembership sm " +
+            "         where sm.spot = s and sm.customer = :customer " +
+            "         and sm.membershipStatus = 'ACTIVE')" +
+            ") and " +
+            "(" +
+            "   :customer not in (select ccr.customer from CompanyCustomerRelationship ccr" +
+            "                       where ccr.customer = :customer and " +
+            "                             ccr.company = c and " +
+            "                             ccr.relationshipStatus = 'BLOCKED')" +
+            ") and " +
+            "(" +
+            "   :customer not in (select dm.customer from SpotMembership dm " +
+            "                      where dm.spot = s and dm.customer =:customer and " +
+            "                       dm.membershipStatus = 'BLOCKED')" +
+            ")")
+    boolean isSellerLocationAvailableForCustomer(String profileUid, Customer customer);
 }

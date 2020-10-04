@@ -9,12 +9,12 @@ import com.drop.here.backend.drophere.company.dto.response.CompanyCustomerRespon
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
 import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,8 +46,7 @@ public class CompanyManagementController {
     private static final String IMAGE_PART_NAME = "image";
 
     @GetMapping
-    @ApiOperation("Get own company info")
-    @ApiAuthorizationToken
+    @ApiOperation(value = "Get own company info", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Own company info"),
@@ -59,9 +58,8 @@ public class CompanyManagementController {
     }
 
     @PutMapping
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Update company")
+    @ApiOperation(value = "Update company", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Company updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
@@ -73,9 +71,8 @@ public class CompanyManagementController {
     }
 
     @PostMapping("/images")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Update company image")
+    @ApiOperation(value = "Update company image", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Image updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
@@ -96,7 +93,8 @@ public class CompanyManagementController {
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     public Page<CompanyCustomerResponse> findCustomers(@ApiIgnore AccountAuthentication authentication,
-                                                       @ApiParam(value = "Customer name (starting with name or starting with surname)")
+                                                       @ApiParam(value = "Customer name (starting with name or starting with surname)",
+                                                               required = true)
                                                        @RequestParam(value = "customerName") String desiredCustomerStartingSubstring,
                                                        @ApiParam(value = "Is customer blocked (globally)")
                                                        @RequestParam(value = "blocked", required = false) Boolean blocked,

@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.authentication.account.enums.AccountType;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountProfileRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
+import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.authentication.dto.request.BaseLoginRequest;
 import com.drop.here.backend.drophere.authentication.authentication.dto.request.ExternalAuthenticationProviderLoginRequest;
 import com.drop.here.backend.drophere.authentication.authentication.dto.request.ProfileLoginRequest;
@@ -38,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -625,5 +627,82 @@ class AuthenticationControllerTest extends IntegrationBaseClass {
         assertThat(privilegeRepository.findAll()).isEmpty();
         assertThat(customerRepository.findAll()).isEmpty();
         assertThat(imageRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void givenValidMainProfileTokenWhenLogoutFromProfileToAccountThenGenerateToken() throws Exception {
+        //given
+        final String url = "/authentication/profile";
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        privilegeRepository.save(Privilege.builder().name("OWN_PROFILE_MANAGEMENT").account(account).build());
+        final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE).accountProfile(accountProfile).build());
+        final String token = jwtService.createToken(account, accountProfile).getToken();
+
+        //when
+        final ResultActions perform = mockMvc.perform(delete(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token));
+
+        //then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("token").isNotEmpty())
+                .andExpect(jsonPath("tokenValidUntil").isNotEmpty());
+    }
+
+    @Test
+    void givenValidSubprofileProfileTokenWhenLogoutFromProfileToAccountThenGenerateToken() throws Exception {
+        //given
+        final String url = "/authentication/profile";
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        privilegeRepository.save(Privilege.builder().name("OWN_PROFILE_MANAGEMENT").account(account).build());
+        final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE).accountProfile(accountProfile).build());
+        final String token = jwtService.createToken(account, accountProfile).getToken();
+
+        //when
+        final ResultActions perform = mockMvc.perform(delete(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token));
+
+        //then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("token").isNotEmpty())
+                .andExpect(jsonPath("tokenValidUntil").isNotEmpty());
+    }
+
+    @Test
+    void givenValidAccountTokenWhenLogoutFromProfileToAccountThen403() throws Exception {
+        //given
+        final String url = "/authentication/profile";
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        privilegeRepository.save(Privilege.builder().name("OWN_PROFILE_MANAGEMENT").account(account).build());
+        final String token = jwtService.createToken(account).getToken();
+        final AccountProfile accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
+        privilegeRepository.save(Privilege.builder().name("priv2").accountProfile(accountProfile).build());
+
+        //when
+        final ResultActions perform = mockMvc.perform(delete(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token));
+
+        //then
+        perform
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void givenValidDataInvalidTokenWhenLogoutFromProfileToAccountThen401() throws Exception {
+        //given
+        final String url = "/authentication/profile";
+        final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
+        final String token = jwtService.createToken(account).getToken();
+
+        //when
+        final ResultActions perform = mockMvc.perform(post(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer a" + token));
+
+        //then
+        perform
+                .andExpect(status().isUnauthorized());
     }
 }
