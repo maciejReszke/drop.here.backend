@@ -4,11 +4,11 @@ import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.drop.dto.DropDetailedCustomerResponse;
 import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,9 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 public class DropUserController {
     private final DropService dropService;
 
-    @ApiOperation("Drop details")
+    @ApiOperation(value = "Drop details", authorizations = @Authorization(value = "AUTHORIZATION"))
     @GetMapping("/{dropUid}")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Drop details"),

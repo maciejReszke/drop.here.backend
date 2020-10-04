@@ -70,4 +70,8 @@ public class AccountProfilePersistenceService {
     public boolean existsByAccountAndProfileUid(Account account, String profileUid) {
         return accountProfileRepository.existsByAccountAndProfileUid(account, profileUid);
     }
+
+    public Long count(Account account) {
+        return accountProfileRepository.countByAccount(account);
+    }
 }

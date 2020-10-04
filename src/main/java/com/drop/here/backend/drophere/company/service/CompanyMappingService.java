@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.company.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.service.AccountProfilePersistenceService;
 import com.drop.here.backend.drophere.common.service.UidGeneratorService;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 public class CompanyMappingService {
     private final CountryService countryService;
     private final UidGeneratorService uidGeneratorService;
+    private final AccountProfilePersistenceService profilePersistenceService;
 
     @Value("${companies.uid_generator.random_part_length}")
     private int randomUidPart;
@@ -30,8 +32,8 @@ public class CompanyMappingService {
     private int namePartLength;
 
     @Transactional(readOnly = true)
-    public CompanyManagementResponse toManagementResponse(Company company) {
-        return company == null ?
+    public CompanyManagementResponse toManagementResponse(Company company, Account account) {
+        final CompanyManagementResponse companyManagementResponse = company == null ?
                 CompanyManagementResponse.builder().registered(false).build()
                 : CompanyManagementResponse.builder()
                 .registered(true)
@@ -39,6 +41,9 @@ public class CompanyMappingService {
                 .name(company.getName())
                 .uid(company.getUid())
                 .visibilityStatus(company.getVisibilityStatus())
+                .build();
+        return companyManagementResponse.toBuilder()
+                .profilesCount(profilePersistenceService.count(account))
                 .build();
     }
 

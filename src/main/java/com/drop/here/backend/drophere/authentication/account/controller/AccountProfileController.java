@@ -9,11 +9,11 @@ import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,34 +44,31 @@ public class AccountProfileController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation("Creating new account profile")
+    @ApiOperation(value = "Creating new account profile", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Created account profile", response = LoginResponse.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @ApiAuthorizationToken
     public LoginResponse createAccountProfile(@Valid @RequestBody AccountProfileCreationRequest accountCreationRequest,
                                               @ApiIgnore AccountAuthentication accountAuthentication) {
         return accountProfileService.createAccountProfile(accountCreationRequest, accountAuthentication);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation("Updating account profile")
+    @ApiOperation(value = "Updating account profile", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_NO_CONTENT, message = "Updated account profile"),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     @PatchMapping
-    @ApiAuthorizationToken
     public void updateAccountProfile(@Valid @RequestBody AccountProfileUpdateRequest accountCreationRequest,
                                      @ApiIgnore AccountAuthentication accountAuthentication) {
         accountProfileService.updateAccountProfile(accountCreationRequest, accountAuthentication);
     }
 
     @PostMapping("/images")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Update account profile image")
+    @ApiOperation(value = "Update account profile image", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Image updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
@@ -84,7 +81,6 @@ public class AccountProfileController {
 
     @GetMapping("/{profileUid}/images")
     @ApiOperation("Get account profile image")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Account profile image"),

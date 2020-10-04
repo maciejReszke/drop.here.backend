@@ -3,7 +3,6 @@ package com.drop.here.backend.drophere.customer.controller;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.customer.service.CustomerService;
 import com.drop.here.backend.drophere.image.Image;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -30,7 +29,6 @@ public class CustomerController {
 
     @GetMapping("/{customerId}/images")
     @ApiOperation("Get customer image")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Customer image"),

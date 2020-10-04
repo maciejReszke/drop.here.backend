@@ -94,4 +94,8 @@ public class AuthenticationService {
             customerService.createCustomer(account, result);
         }
     }
+
+    public LoginResponse logoutFromProfileToAccount(AccountAuthentication accountAuthentication) {
+        return authenticationExecutiveService.successLogin(accountAuthentication.getPrincipal());
+    }
 }

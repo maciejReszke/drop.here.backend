@@ -279,4 +279,19 @@ class AuthenticationServiceTest {
         assertThat(throwable).isInstanceOf(UnauthorizedRestException.class);
         assertThat(((UnauthorizedRestException) (throwable)).getCode()).isEqualTo(RestExceptionStatusCode.LOGIN_PROVIDER_CUSTOMER_ACCOUNT_NOT_ACTIVE.ordinal());
     }
+
+    @Test
+    void givenAuthenticationWhenLogoutFromProfileToAccountThenSuccessLogin() {
+        //given
+        final Account account = Account.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder().account(account).build();
+
+        final LoginResponse loginResponse = LoginResponse.builder().build();
+        when(authenticationExecutiveService.successLogin(account)).thenReturn(loginResponse);
+        //when
+        final LoginResponse response = authenticationService.logoutFromProfileToAccount(accountAuthentication);
+
+        //then
+        assertThat(response).isEqualTo(loginResponse);
+    }
 }

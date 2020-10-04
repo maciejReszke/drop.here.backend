@@ -6,11 +6,11 @@ import com.drop.here.backend.drophere.authentication.account.service.AccountServ
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,11 +44,10 @@ public class AccountController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Fetching account information")
+    @ApiOperation(value = "Fetching account information", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Account info", response = AccountInfoResponse.class)
     })
-    @ApiAuthorizationToken
     public AccountInfoResponse getAccountInfo(@ApiIgnore AccountAuthentication accountAuthentication) {
         return accountService.getAccountInfo(accountAuthentication);
     }

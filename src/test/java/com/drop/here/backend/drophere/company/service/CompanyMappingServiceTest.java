@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.company.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.service.AccountProfilePersistenceService;
 import com.drop.here.backend.drophere.common.service.UidGeneratorService;
 import com.drop.here.backend.drophere.company.dto.request.CompanyManagementRequest;
 import com.drop.here.backend.drophere.company.dto.response.CompanyManagementResponse;
@@ -39,6 +40,9 @@ class CompanyMappingServiceTest {
     @Mock
     private UidGeneratorService uidGeneratorService;
 
+    @Mock
+    private AccountProfilePersistenceService accountProfilePersistenceService;
+
     @BeforeEach
     void prepare() throws IllegalAccessException {
         FieldUtils.writeDeclaredField(companyMappingService, "randomUidPart", 4, true);
@@ -52,8 +56,9 @@ class CompanyMappingServiceTest {
         final Country country = CountryDataGenerator.poland();
         final Company company = CompanyDataGenerator.company(1, account, country);
 
+        when(accountProfilePersistenceService.count(account)).thenReturn(4L);
         //when
-        final CompanyManagementResponse result = companyMappingService.toManagementResponse(company);
+        final CompanyManagementResponse result = companyMappingService.toManagementResponse(company, account);
 
         //then
         assertThat(result.getCountry()).isEqualTo(country.getName());
@@ -61,12 +66,17 @@ class CompanyMappingServiceTest {
         assertThat(result.getUid()).isEqualTo(company.getUid());
         assertThat(result.getVisibilityStatus()).isEqualTo(company.getVisibilityStatus());
         assertThat(result.isRegistered()).isTrue();
+        assertThat(result.getProfilesCount()).isEqualTo(4L);
     }
 
     @Test
     void givenNullCompanyWhenToManagementResponseThenMap() {
+        //given
+        final Account account = Account.builder().build();
+        when(accountProfilePersistenceService.count(account)).thenReturn(4L);
+
         //when
-        final CompanyManagementResponse result = companyMappingService.toManagementResponse(null);
+        final CompanyManagementResponse result = companyMappingService.toManagementResponse(null, account);
 
         //then
         assertThat(result.getCountry()).isNull();
@@ -74,6 +84,7 @@ class CompanyMappingServiceTest {
         assertThat(result.getUid()).isNull();
         assertThat(result.getVisibilityStatus()).isNull();
         assertThat(result.isRegistered()).isFalse();
+        assertThat(result.getProfilesCount()).isEqualTo(4L);
     }
 
     @Test
