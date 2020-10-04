@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Value;
 
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class CompanyManagementResponse {
 
     @ApiModelProperty(value = "Is company registered", example = "true")

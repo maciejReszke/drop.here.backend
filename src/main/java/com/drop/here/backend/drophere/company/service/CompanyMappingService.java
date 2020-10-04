@@ -33,7 +33,7 @@ public class CompanyMappingService {
 
     @Transactional(readOnly = true)
     public CompanyManagementResponse toManagementResponse(Company company, Account account) {
-        return company == null ?
+        final CompanyManagementResponse companyManagementResponse = company == null ?
                 CompanyManagementResponse.builder().registered(false).build()
                 : CompanyManagementResponse.builder()
                 .registered(true)
@@ -41,6 +41,8 @@ public class CompanyMappingService {
                 .name(company.getName())
                 .uid(company.getUid())
                 .visibilityStatus(company.getVisibilityStatus())
+                .build();
+        return companyManagementResponse.toBuilder()
                 .profilesCount(profilePersistenceService.count(account))
                 .build();
     }
