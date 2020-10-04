@@ -6,11 +6,11 @@ import com.drop.here.backend.drophere.customer.dto.CustomerManagementRequest;
 import com.drop.here.backend.drophere.customer.dto.CustomerManagementResponse;
 import com.drop.here.backend.drophere.customer.service.CustomerService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,8 +37,7 @@ public class CustomerManagementController {
     private static final String IMAGE_PART_NAME = "image";
 
     @GetMapping
-    @ApiOperation("Get own customer info")
-    @ApiAuthorizationToken
+    @ApiOperation(value = "Get own customer info", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Own customer info", response = ResourceOperationResponse.class),
@@ -50,9 +49,8 @@ public class CustomerManagementController {
     }
 
     @PutMapping
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Update customer")
+    @ApiOperation(value = "Update customer", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Customer updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
@@ -64,9 +62,8 @@ public class CustomerManagementController {
     }
 
     @PostMapping("/images")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Update image")
+    @ApiOperation(value = "Update image", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Image updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
