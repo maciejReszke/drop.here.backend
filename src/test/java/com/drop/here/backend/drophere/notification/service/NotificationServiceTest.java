@@ -37,6 +37,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -172,14 +173,15 @@ class NotificationServiceTest {
     @Test
     void givenNotificationsSuccessSendWhenSendNotificationsThenSendAndUpdateBroadcastingStatus() {
         //given
-        final List<NotificationJob> notificationJobs = List.of(NotificationJob.builder().build());
+        final List<NotificationJob> notificationJobs = List.of(NotificationJob.builder()
+                .notification(Notification.builder().build()).build());
 
         when(notificationBroadcastingServiceFactory.getNotificationBroadcastingService()).thenReturn(notificationBroadcastingService);
         when(notificationBroadcastingService.getBatchAmount()).thenReturn(50);
         when(notificationJobRepository.findAllByNotificationIsNotNull(PageRequest.of(0, 50))).thenReturn(notificationJobs);
         when(notificationBroadcastingService.sendBatch(notificationJobs)).thenReturn(true);
         doNothing().when(notificationJobRepository).deleteByNotificationJobIn(notificationJobs);
-
+        doNothing().when(notificationRepository).deletePushOnlyNotifications(any());
         //when
         notificationService.sendNotifications();
 

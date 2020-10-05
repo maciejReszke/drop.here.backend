@@ -123,7 +123,7 @@ class RouteMappingServiceTest {
         assertThat(response.getDrops().get(0).getUid()).isEqualTo("uid");
         assertThat(response.getDrops().get(0).getSpot()).isEqualTo(spot);
         assertThat(response.getDrops().get(0).getRoute()).isEqualTo(response);
-        assertThat(response.getDrops().get(0).getStatus()).isEqualTo(DropStatus.PREPARED);
+        assertThat(response.getDrops().get(0).getStatus()).isEqualTo(DropStatus.UNPREPARED);
     }
 
     @Test
@@ -183,7 +183,7 @@ class RouteMappingServiceTest {
         assertThat(route.getDrops().get(0).getUid()).startsWith("uid");
         assertThat(route.getDrops().get(0).getSpot()).isEqualTo(spot);
         assertThat(route.getDrops().get(0).getRoute()).isEqualTo(route);
-        assertThat(route.getDrops().get(0).getStatus()).isEqualTo(DropStatus.PREPARED);
+        assertThat(route.getDrops().get(0).getStatus()).isEqualTo(DropStatus.UNPREPARED);
         assertThat(prevDrop.getRoute()).isNull();
         assertThat(prevProduct.getRoute()).isNull();
     }

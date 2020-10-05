@@ -25,10 +25,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +42,7 @@ public class NotificationService {
     private final NotificationValidationService notificationValidationService;
     private final NotificationBroadcastingServiceFactory notificationBroadcastingServiceFactory;
 
-    // TODO: 05/10/2020 test, implement
+    // TODO: 05/10/2020 test, implement - we wtorek to i testy nizej i testy tego + get na membership user i basta
     public void createNotifications(NotificationCreationRequest request) {
 
     }
@@ -94,7 +96,7 @@ public class NotificationService {
                 RestExceptionStatusCode.NOTIFICATION_BY_ID_FOR_PRINCIPAL_NOT_FOUND));
     }
 
-    // TODO: 04/10/2020 usuwanie gdy push onky
+    @Transactional
     public void sendNotifications() {
         final NotificationBroadcastingService notificationBroadcastingService = notificationBroadcastingServiceFactory.getNotificationBroadcastingService();
         final PageRequest pageable = PageRequest.of(0, notificationBroadcastingService.getBatchAmount());
@@ -105,6 +107,9 @@ public class NotificationService {
             if (result) {
                 log.info("Successfully send batch {} of notifications", notifications.size());
                 notificationJobRepository.deleteByNotificationJobIn(notifications);
+                notificationRepository.deletePushOnlyNotifications(notifications.stream()
+                        .map(NotificationJob::getNotification)
+                        .collect(Collectors.toList()));
             } else {
                 log.info("Failed to send batch {} of notifications", notifications.size());
             }

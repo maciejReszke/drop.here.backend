@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 
-// TODO: 04/10/2020
 @Builder
 @Data
 @AllArgsConstructor

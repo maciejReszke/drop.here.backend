@@ -42,6 +42,7 @@ public class NotificationDataGenerator {
                 .type(NotificationType.NOTIFICATION_PANEL)
                 .category(NotificationCategory.TEST)
                 .referencedSubjectType(NotificationReferencedSubjectType.EMPTY)
+                .referencedSubjectId("id")
                 .broadcastingType(NotificationBroadcastingType.SYSTEM)
                 .build();
     }
