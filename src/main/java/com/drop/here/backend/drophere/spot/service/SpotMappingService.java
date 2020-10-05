@@ -94,18 +94,21 @@ public class SpotMappingService {
                 .createdAt(LocalDateTime.now())
                 .lastUpdatedAt(LocalDateTime.now())
                 .customer(authentication.getCustomer())
+                .spot(spot)
+                .membershipStatus(spot.isRequiresAccept() ? SpotMembershipStatus.PENDING : SpotMembershipStatus.ACTIVE)
                 .receiveCancelledNotifications(spotJoinRequest.isReceiveCancelledNotifications())
                 .receiveDelayedNotifications(spotJoinRequest.isReceiveDelayedNotifications())
                 .receiveFinishedNotifications(spotJoinRequest.isReceiveFinishedNotifications())
                 .receiveLiveNotifications(spotJoinRequest.isReceiveLiveNotifications())
                 .receivePreparedNotifications(spotJoinRequest.isReceivePreparedNotifications())
-                .spot(spot)
-                .membershipStatus(spot.isRequiresAccept() ? SpotMembershipStatus.PENDING : SpotMembershipStatus.ACTIVE)
                 .build();
     }
 
-    // TODO: 04/10/2020  
-    public void updateSpotMembership(Spot spot, SpotMembershipManagementRequest spotMembershipManagementRequest) {
-
+    public void updateSpotMembership(SpotMembership spotMembership, SpotMembershipManagementRequest spotMembershipManagementRequest) {
+        spotMembership.setReceiveFinishedNotifications(spotMembershipManagementRequest.isReceiveFinishedNotifications());
+        spotMembership.setReceiveCancelledNotifications(spotMembershipManagementRequest.isReceiveCancelledNotifications());
+        spotMembership.setReceivePreparedNotifications(spotMembershipManagementRequest.isReceivePreparedNotifications());
+        spotMembership.setReceiveLiveNotifications(spotMembershipManagementRequest.isReceiveLiveNotifications());
+        spotMembership.setReceiveDelayedNotifications(spotMembershipManagementRequest.isReceiveDelayedNotifications());
     }
 }

@@ -222,7 +222,7 @@ class SpotMembershipServiceTest {
                 .thenReturn(Optional.of(membership));
         when(spotMembershipRepository.save(membership)).thenReturn(membership);
         final SpotMembershipManagementRequest spotMembershipManagementRequest = SpotMembershipManagementRequest.builder().build();
-        doNothing().when(spotMappingService).updateSpotMembership(spot, spotMembershipManagementRequest);
+        doNothing().when(spotMappingService).updateSpotMembership(membership, spotMembershipManagementRequest);
 
         //when
         final ResourceOperationResponse result = spotMembershipService.updateSpotMembership(spotMembershipManagementRequest, spotUid, companyUid, accountAuthentication);

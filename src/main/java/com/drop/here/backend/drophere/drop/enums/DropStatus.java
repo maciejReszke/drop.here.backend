@@ -5,6 +5,11 @@ public enum DropStatus {
     PREPARED,
     DELIVERING,
 
-    //todo odtad git
-    DELAYED
+
+    //todo odtad git(zrobione)
+    UNPREPARED,
+    DELAYED,
+    CANCELLED,
+    FINISHED,
+    LIVE
 }

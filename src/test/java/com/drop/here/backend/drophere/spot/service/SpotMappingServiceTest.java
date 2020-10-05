@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
+import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.entity.SpotMembership;
 import com.drop.here.backend.drophere.spot.enums.SpotMembershipStatus;
@@ -157,5 +158,33 @@ class SpotMappingServiceTest {
         assertThat(membership.isReceivePreparedNotifications()).isFalse();
         assertThat(membership.isReceiveLiveNotifications()).isTrue();
         assertThat(membership.getMembershipStatus()).isEqualTo(SpotMembershipStatus.PENDING);
+    }
+
+    @Test
+    void givenSpotMembershipWhenUpdateSpotMembershipThenUpdate() {
+        //given
+        final SpotMembershipManagementRequest spotMembershipManagementRequest = SpotMembershipManagementRequest.builder()
+                .receiveCancelledNotifications(true)
+                .receiveFinishedNotifications(false)
+                .receiveDelayedNotifications(true)
+                .receivePreparedNotifications(false)
+                .receiveLiveNotifications(true)
+                .build();
+        final SpotMembership membership = SpotMembership.builder().build();
+
+        //when
+        spotMappingService.updateSpotMembership(membership, spotMembershipManagementRequest);
+
+        //then
+        assertThat(membership.getCreatedAt()).isNull();
+        assertThat(membership.getCustomer()).isNull();
+        assertThat(membership.getSpot()).isNull();
+        assertThat(membership.isReceiveCancelledNotifications()).isTrue();
+        assertThat(membership.isReceiveDelayedNotifications()).isTrue();
+        assertThat(membership.isReceiveFinishedNotifications()).isFalse();
+        assertThat(membership.isReceivePreparedNotifications()).isFalse();
+        assertThat(membership.isReceiveLiveNotifications()).isTrue();
+        assertThat(membership.getMembershipStatus()).isNull();
+
     }
 }

@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.drop.service.update;
 
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.drop.dto.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.DropStatusChange;
@@ -41,11 +42,12 @@ class DropUpdateServiceFactoryTest {
                 .build();
         final Spot spot = Spot.builder().build();
         final Company company = Company.builder().build();
+        final AccountProfile accountProfile = AccountProfile.builder().build();
 
-        when(dropDelayedUpdateService.update(drop, spot, company, dropManagementRequest)).thenReturn(DropStatus.DELAYED);
+        when(dropDelayedUpdateService.update(drop, spot, company, accountProfile, dropManagementRequest)).thenReturn(DropStatus.DELAYED);
 
         //when
-        final DropStatus update = dropUpdateServiceFactory.update(drop, spot, company, dropManagementRequest);
+        final DropStatus update = dropUpdateServiceFactory.update(drop, spot, company, accountProfile, dropManagementRequest);
 
         //then
         assertThat(update).isEqualTo(DropStatus.DELAYED);
@@ -60,11 +62,11 @@ class DropUpdateServiceFactoryTest {
                 .build();
         final Spot spot = Spot.builder().build();
         final Company company = Company.builder().build();
-
-        when(dropLiveUpdateService.update(drop, spot, company, dropManagementRequest)).thenReturn(DropStatus.DELAYED);
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+        when(dropLiveUpdateService.update(drop, spot, company, accountProfile, dropManagementRequest)).thenReturn(DropStatus.DELAYED);
 
         //when
-        final DropStatus update = dropUpdateServiceFactory.update(drop, spot, company, dropManagementRequest);
+        final DropStatus update = dropUpdateServiceFactory.update(drop, spot, company, accountProfile, dropManagementRequest);
 
         //then
         assertThat(update).isEqualTo(DropStatus.DELAYED);
@@ -79,11 +81,12 @@ class DropUpdateServiceFactoryTest {
                 .build();
         final Spot spot = Spot.builder().build();
         final Company company = Company.builder().build();
+        final AccountProfile accountProfile = AccountProfile.builder().build();
 
-        when(dropFinishedUpdateService.update(drop, spot, company, dropManagementRequest)).thenReturn(DropStatus.DELAYED);
+        when(dropFinishedUpdateService.update(drop, spot, company, accountProfile, dropManagementRequest)).thenReturn(DropStatus.DELAYED);
 
         //when
-        final DropStatus update = dropUpdateServiceFactory.update(drop, spot, company, dropManagementRequest);
+        final DropStatus update = dropUpdateServiceFactory.update(drop, spot, company, accountProfile, dropManagementRequest);
 
         //then
         assertThat(update).isEqualTo(DropStatus.DELAYED);
@@ -98,11 +101,11 @@ class DropUpdateServiceFactoryTest {
                 .build();
         final Spot spot = Spot.builder().build();
         final Company company = Company.builder().build();
-
-        when(dropCancelledUpdateService.update(drop, spot, company, dropManagementRequest)).thenReturn(DropStatus.DELAYED);
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+        when(dropCancelledUpdateService.update(drop, spot, company, accountProfile, dropManagementRequest)).thenReturn(DropStatus.DELAYED);
 
         //when
-        final DropStatus update = dropUpdateServiceFactory.update(drop, spot, company, dropManagementRequest);
+        final DropStatus update = dropUpdateServiceFactory.update(drop, spot, company, accountProfile, dropManagementRequest);
 
         //then
         assertThat(update).isEqualTo(DropStatus.DELAYED);

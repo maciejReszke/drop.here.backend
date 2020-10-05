@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.notification.dto.NotificationCreationRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationManagementRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
@@ -38,6 +39,11 @@ public class NotificationService {
     private final NotificationMappingService notificationMappingService;
     private final NotificationValidationService notificationValidationService;
     private final NotificationBroadcastingServiceFactory notificationBroadcastingServiceFactory;
+
+    // TODO: 05/10/2020 test, implement
+    public void createNotifications(NotificationCreationRequest request) {
+
+    }
 
     // TODO: 04/10/2020 dodac testy integracyjne na typ notyfikacji
     public Page<NotificationResponse> findNotifications(AccountAuthentication accountAuthentication, String readStatus, Pageable pageable) {
@@ -80,9 +86,9 @@ public class NotificationService {
         final Account principal = authentication.getPrincipal();
         final Optional<Notification> notification = principal.getAccountType() == AccountType.COMPANY
                 ? notificationRepository.findByIdAndRecipientCompanyOrRecipientAccountProfileAndType(
-                        notificationId, authentication.getCompany(), authentication.getProfile(), NotificationType.NOTIFICATION_PANEL)
+                notificationId, authentication.getCompany(), authentication.getProfile(), NotificationType.NOTIFICATION_PANEL)
                 : notificationRepository.findByIdAndRecipientCustomerAndType(
-                        notificationId, authentication.getCustomer(), NotificationType.NOTIFICATION_PANEL);
+                notificationId, authentication.getCustomer(), NotificationType.NOTIFICATION_PANEL);
         return notification.orElseThrow(() -> new RestEntityNotFoundException(String.format(
                 "Notification with id %s for account %s was not found", notificationId, principal.getId()),
                 RestExceptionStatusCode.NOTIFICATION_BY_ID_FOR_PRINCIPAL_NOT_FOUND));

@@ -62,6 +62,9 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private NotificationReferencedSubjectType referencedSubjectType;
 
+    @NotBlank
+    private String referencedSubjectId;
+
     private String detailedMessage;
 
     @NotNull
@@ -76,6 +79,10 @@ public class Notification {
     @JoinColumn(name = "broadcasting_customer_id")
     private Customer broadcastingCustomer;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private NotificationRecipientType recipientType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_customer_id")
     private Customer recipientCustomer;
@@ -87,10 +94,6 @@ public class Notification {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_account_profile_id")
     private AccountProfile recipientAccountProfile;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private NotificationRecipientType recipientType;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)

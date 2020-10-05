@@ -99,7 +99,7 @@ public class DropService {
         final Drop drop = findDrop(dropUid, company);
         dropValidationService.validateUpdate(drop, authentication.getProfile());
         final DropStatus preUpdateStatus = drop.getStatus();
-        final DropStatus newStatus = dropUpdateServiceFactory.update(drop, drop.getSpot(), company, dropManagementRequest);
+        final DropStatus newStatus = dropUpdateServiceFactory.update(drop, drop.getSpot(), company, authentication.getProfile(), dropManagementRequest);
         drop.setStatus(newStatus);
         dropRepository.save(drop);
         log.info("Successfully updated drop {} from status {} to {}", drop.getUid(), preUpdateStatus, newStatus);

@@ -110,7 +110,7 @@ public class RouteMappingService {
                 .endTime(LocalTime.parse(dropRequest.getEndTime(), DateTimeFormatter.ofPattern(TIME_PATTERN)).atDate(route.getRouteDate()))
                 .createdAt(LocalDateTime.now())
                 .route(route)
-                .status(DropStatus.PREPARED)
+                .status(DropStatus.UNPREPARED)
                 .build();
     }
 

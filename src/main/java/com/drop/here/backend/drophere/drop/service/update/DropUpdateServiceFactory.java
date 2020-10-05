@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.drop.service.update;
 
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.drop.dto.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.DropStatusChange;
@@ -21,12 +22,12 @@ public class DropUpdateServiceFactory {
     private final DropDelayedUpdateService dropDelayedUpdateService;
     private final DropFinishedUpdateService dropFinishedUpdateService;
 
-    public DropStatus update(Drop drop, Spot spot, Company company, DropManagementRequest dropManagementRequest) {
+    public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest) {
         return API.Match(dropManagementRequest.getNewStatus()).of(
                 Case($(DropStatusChange.LIVE), () -> dropLiveUpdateService),
                 Case($(DropStatusChange.CANCELLED), () -> dropCancelledUpdateService),
                 Case($(DropStatusChange.DELAYED), () -> dropDelayedUpdateService),
                 Case($(DropStatusChange.FINISHED), () -> dropFinishedUpdateService))
-                .update(drop, spot, company, dropManagementRequest);
+                .update(drop, spot, company, profile, dropManagementRequest);
     }
 }

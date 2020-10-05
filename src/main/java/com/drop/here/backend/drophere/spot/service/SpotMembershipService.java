@@ -107,7 +107,7 @@ public class SpotMembershipService {
     public ResourceOperationResponse updateSpotMembership(SpotMembershipManagementRequest spotMembershipManagementRequest, String spotUid, String companyUid, AccountAuthentication authentication) {
         final Spot spot = spotPersistenceService.findSpot(spotUid, companyUid);
         final SpotMembership spotMembership = getSpotMembership(spot, authentication);
-        spotMappingService.updateSpotMembership(spot, spotMembershipManagementRequest);
+        spotMappingService.updateSpotMembership(spotMembership, spotMembershipManagementRequest);
         log.info("Updating spot membership for spot {} customer {}", spot.getUid(), authentication.getCustomer().getId());
         spotMembershipRepository.save(spotMembership);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, spotMembership.getId());
