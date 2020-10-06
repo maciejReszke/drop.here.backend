@@ -32,7 +32,6 @@ import javax.validation.Valid;
 public class DropManagementController {
     private final DropService dropService;
 
-    // TODO: 04/10/2020 test
     @ApiOperation(value = "Update drop", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PutMapping("/{dropUid}")
     @ResponseStatus(HttpStatus.OK)

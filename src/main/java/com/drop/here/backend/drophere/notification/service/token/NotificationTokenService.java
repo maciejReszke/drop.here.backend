@@ -56,7 +56,6 @@ public class NotificationTokenService {
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, toBeSavedNotificationToken.getId());
     }
 
-    // TODO: 06/10/2020 test
     public List<NotificationAndTokenWrapper> joinTokens(List<Notification> notifications, NotificationBroadcastingServiceType type) {
         return notifications.stream()
                 .collect(Collectors.groupingBy(Notification::getRecipientType))

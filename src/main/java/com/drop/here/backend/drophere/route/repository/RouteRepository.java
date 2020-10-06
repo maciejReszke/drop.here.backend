@@ -27,7 +27,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     Page<RouteShortResponse> findByCompany(Company company, RouteStatus routeStatus, Pageable pageable);
 
     @Query("select case when (count(r) > 0) then true else false end from Route r where " +
-            "r.profile =:profile and " +
-            ":drop in (r.drops)")
+            "r.profile = :profile and " +
+            ":drop in (select d from Drop d where d.route = r)")
     boolean existsByProfileAndContainsDrop(AccountProfile profile, Drop drop);
 }

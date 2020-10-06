@@ -63,7 +63,6 @@ public class NotificationMappingService {
         notification.setReadStatus(NotificationReadStatus.valueOf(notificationManagementRequest.getReadStatus()));
     }
 
-    // TODO: 06/10/2020 test
     public List<Notification> toNotifications(NotificationCreationRequest request) {
         final Notification baseNotification = Notification.builder()
                 .title(request.getTitle())
