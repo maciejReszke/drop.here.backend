@@ -24,6 +24,7 @@ import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.service.SpotMappingService;
 import com.drop.here.backend.drophere.spot.service.SpotPersistenceService;
+import com.drop.here.backend.drophere.spot.service.SpotSearchingService;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import com.drop.here.backend.drophere.test_data.DropDataGenerator;
@@ -70,6 +71,9 @@ class DropServiceTest {
     @Mock
     private DropUpdateServiceFactory dropUpdateServiceFactory;
 
+    @Mock
+    private SpotSearchingService spotSearchingService;
+
     @Test
     void givenRouteWhenToDropResponsesThenMap() {
         //given
@@ -113,7 +117,7 @@ class DropServiceTest {
         when(dropRepository.findPrivilegedDrop(dropUid, customer)).thenReturn(Optional.of(drop));
         when(spotPersistenceService.findByIdWithCompany(5L)).thenReturn(spot);
         when(accountProfilePersistenceService.findByDrop(drop)).thenReturn(Optional.of(accountProfile));
-        when(spotMappingService.toMembershipSpotBaseCustomerResponse(spot)).thenReturn(spotBaseCustomerResponse);
+        when(spotSearchingService.findSpot(spot, customer)).thenReturn(spotBaseCustomerResponse);
         when(routeProductMappingService.toProductResponses(drop)).thenReturn(routeProductResponses);
 
 
@@ -151,7 +155,7 @@ class DropServiceTest {
         when(dropRepository.findPrivilegedDrop(dropUid, customer)).thenReturn(Optional.of(drop));
         when(spotPersistenceService.findByIdWithCompany(5L)).thenReturn(spot);
         when(accountProfilePersistenceService.findByDrop(drop)).thenReturn(Optional.empty());
-        when(spotMappingService.toMembershipSpotBaseCustomerResponse(spot)).thenReturn(spotBaseCustomerResponse);
+        when(spotSearchingService.findSpot(spot, customer)).thenReturn(spotBaseCustomerResponse);
         when(routeProductMappingService.toProductResponses(drop)).thenReturn(routeProductResponses);
 
 

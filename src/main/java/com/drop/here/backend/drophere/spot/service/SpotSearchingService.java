@@ -37,6 +37,12 @@ public class SpotSearchingService {
                 .collect(Collectors.toList());
     }
 
+    public SpotBaseCustomerResponse findSpot(Spot spot, Customer customer) {
+        final SpotMembership membership = spotMembershipSearchingService.findMembership(spot, customer)
+                .orElse(SpotMembership.builder().build());
+        return toSpotCustomerResponse(spot, membership);
+    }
+
     private SpotBaseCustomerResponse toSpotCustomerResponse(Spot spot, SpotMembership membership) {
         return SpotBaseCustomerResponse.builder()
                 .name(spot.getName())
@@ -50,6 +56,11 @@ public class SpotSearchingService {
                 .membershipStatus(membership.getMembershipStatus())
                 .companyName(spot.getCompany().getName())
                 .companyUid(spot.getCompany().getUid())
+                .receiveFinishedNotifications(membership.isReceiveFinishedNotifications())
+                .receiveCancelledNotifications(membership.isReceiveCancelledNotifications())
+                .receiveDelayedNotifications(membership.isReceiveDelayedNotifications())
+                .receiveLiveNotifications(membership.isReceiveLiveNotifications())
+                .receivePreparedNotifications(membership.isReceivePreparedNotifications())
                 .build();
     }
 

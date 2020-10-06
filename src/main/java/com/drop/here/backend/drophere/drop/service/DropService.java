@@ -21,6 +21,7 @@ import com.drop.here.backend.drophere.security.configuration.AccountAuthenticati
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.service.SpotMappingService;
 import com.drop.here.backend.drophere.spot.service.SpotPersistenceService;
+import com.drop.here.backend.drophere.spot.service.SpotSearchingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,20 +40,22 @@ public class DropService {
     private final SpotMappingService spotMappingService;
     private final RouteProductMappingService routeProductMappingService;
     private final SpotPersistenceService spotPersistenceService;
+    private final SpotSearchingService spotSearchingService;
     private final AccountProfilePersistenceService accountProfilePersistenceService;
     private final DropValidationService dropValidationService;
     private final DropUpdateServiceFactory dropUpdateServiceFactory;
 
     public DropDetailedCustomerResponse findDropForCustomer(String dropUid, AccountAuthentication authentication) {
-        final Drop drop = dropRepository.findPrivilegedDrop(dropUid, authentication.getCustomer())
+        final Customer customer = authentication.getCustomer();
+        final Drop drop = dropRepository.findPrivilegedDrop(dropUid, customer)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Drop with uid %s was not found or is not privileged", dropUid),
                         RestExceptionStatusCode.PRIVILEGED_FOR_CUSTOMER_DROP_NOT_FOUND));
         final Spot spot = spotPersistenceService.findByIdWithCompany(drop.getSpot().getId());
-        return toDropCustomerDetailedResponse(drop, spot);
+        return toDropCustomerDetailedResponse(drop, spot, customer);
     }
 
-    private DropDetailedCustomerResponse toDropCustomerDetailedResponse(Drop drop, Spot spot) {
+    private DropDetailedCustomerResponse toDropCustomerDetailedResponse(Drop drop, Spot spot, Customer customer) {
         final Optional<AccountProfile> profile = accountProfilePersistenceService.findByDrop(drop);
         return DropDetailedCustomerResponse.builder()
                 .uid(drop.getUid())
@@ -61,7 +64,7 @@ public class DropService {
                 .startTime(drop.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                 .endTime(drop.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                 .status(drop.getStatus())
-                .spot(spotMappingService.toMembershipSpotBaseCustomerResponse(spot))
+                .spot(spotSearchingService.findSpot(spot, customer))
                 .products(routeProductMappingService.toProductResponses(drop))
                 .profileUid(profile.map(AccountProfile::getProfileUid).orElse(null))
                 .profileFirstName(profile.map(AccountProfile::getFirstName).orElse(null))

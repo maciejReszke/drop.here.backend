@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 class DropLiveUpdateServiceTest {
 
     @InjectMocks
-    private DropCancelledUpdateService dropCancelledUpdateService;
+    private DropLiveUpdateService dropLiveUpdateService;
 
     @Mock
     private DropValidationService dropValidationService;
@@ -54,7 +54,7 @@ class DropLiveUpdateServiceTest {
         when(spotMembershipService.findToBeNotified(spot, SpotMembershipNotificationStatus.live())).thenReturn(List.of());
 
         //when
-        final DropStatus result = dropCancelledUpdateService.update(drop, spot, company, accountProfile, dropManagementRequest);
+        final DropStatus result = dropLiveUpdateService.update(drop, spot, company, accountProfile, dropManagementRequest);
 
         //then
         assertThat(result).isEqualTo(DropStatus.LIVE);

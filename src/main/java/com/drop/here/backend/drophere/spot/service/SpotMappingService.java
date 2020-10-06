@@ -5,7 +5,6 @@ import com.drop.here.backend.drophere.security.configuration.AccountAuthenticati
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
-import com.drop.here.backend.drophere.spot.dto.response.SpotBaseCustomerResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.entity.SpotMembership;
@@ -53,22 +52,6 @@ public class SpotMappingService {
 
     private String generateUid(String name) {
         return uidGeneratorService.generateUid(name, namePartLength, randomPartLength);
-    }
-
-    public SpotBaseCustomerResponse toMembershipSpotBaseCustomerResponse(Spot spot) {
-        return SpotBaseCustomerResponse.builder()
-                .name(spot.getName())
-                .description(spot.getDescription())
-                .uid(spot.getUid())
-                .requiresPassword(spot.isRequiresPassword())
-                .requiresAccept(spot.isRequiresAccept())
-                .xCoordinate(spot.getXCoordinate())
-                .yCoordinate(spot.getYCoordinate())
-                .estimatedRadiusMeters(spot.getEstimatedRadiusMeters())
-                .companyName(spot.getCompany().getName())
-                .companyUid(spot.getCompany().getUid())
-                .membershipStatus(SpotMembershipStatus.ACTIVE)
-                .build();
     }
 
     public SpotCompanyResponse toSpotCompanyResponse(Spot spot) {
