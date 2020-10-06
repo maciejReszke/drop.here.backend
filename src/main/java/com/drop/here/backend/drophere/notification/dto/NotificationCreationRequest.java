@@ -24,7 +24,7 @@ public class NotificationCreationRequest {
     NotificationReferencedSubjectType referencedSubjectType;
     String referencedSubjectId;
     Company broadcastingCompany;
-    Company broadcastingCustomer;
+    Customer broadcastingCustomer;
     List<Customer> recipientCustomers;
     List<Company> recipientCompanies;
     List<AccountProfile> recipientAccountProfiles;

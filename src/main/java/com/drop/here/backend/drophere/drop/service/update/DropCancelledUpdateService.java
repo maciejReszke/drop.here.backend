@@ -34,7 +34,7 @@ public class DropCancelledUpdateService implements DropUpdateService {
         dropValidationService.validateCancelledUpdate(drop);
         final List<SpotMembership> memberships = spotMembershipService.findToBeNotified(spot, SpotMembershipNotificationStatus.cancelled());
         notificationService.createNotifications(prepareNotificationRequest(memberships, drop, company, profile));
-        return DropStatus.LIVE;
+        return DropStatus.CANCELLED;
     }
 
     private NotificationCreationRequest prepareNotificationRequest(List<SpotMembership> memberships, Drop drop, Company company, AccountProfile profile) {

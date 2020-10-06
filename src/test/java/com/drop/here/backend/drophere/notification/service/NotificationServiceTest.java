@@ -7,16 +7,21 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.notification.dto.NotificationCreationRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationManagementRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
 import com.drop.here.backend.drophere.notification.entity.NotificationJob;
+import com.drop.here.backend.drophere.notification.entity.NotificationToken;
+import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingServiceType;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationType;
 import com.drop.here.backend.drophere.notification.repository.NotificationJobRepository;
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingService;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingServiceFactory;
+import com.drop.here.backend.drophere.notification.service.token.NotificationAndTokenWrapper;
+import com.drop.here.backend.drophere.notification.service.token.NotificationTokenService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
@@ -38,6 +43,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -65,6 +71,9 @@ class NotificationServiceTest {
 
     @Mock
     private NotificationBroadcastingService notificationBroadcastingService;
+
+    @Mock
+    private NotificationTokenService notificationTokenService;
 
     @Test
     void givenReadStatusCompanyPrincipalWhenFindNotificationThenFind() {
@@ -204,5 +213,103 @@ class NotificationServiceTest {
 
         //then
         verifyNoMoreInteractions(notificationJobRepository);
+    }
+
+    @Test
+    void givenNotificationRequestTypeNotificationPanelWithoutTokenWhenCreateNotificationsThenCreate() {
+        //given
+        final NotificationCreationRequest notificationCreationRequest = NotificationCreationRequest.builder().build();
+        final Notification notification = Notification.builder().type(NotificationType.NOTIFICATION_PANEL)
+                .build();
+        final NotificationAndTokenWrapper notificationAndTokenWrapper =
+                new NotificationAndTokenWrapper(notification, Optional.empty());
+
+        when(notificationMappingService.toNotifications(notificationCreationRequest))
+                .thenReturn(List.of(notification));
+        when(notificationTokenService.joinTokens(any(), eq(NotificationBroadcastingServiceType.FIREBASE)))
+                .thenReturn(List.of(notificationAndTokenWrapper));
+        when(notificationRepository.saveAll(List.of(notification))).thenReturn(List.of(notification));
+        when(notificationJobRepository.saveAll(List.of())).thenReturn(List.of());
+
+        //when
+        notificationService.createNotifications(notificationCreationRequest);
+
+        //then
+        verifyNoMoreInteractions(notificationMappingService);
+    }
+
+    @Test
+    void givenNotificationRequestTypeNotificationPanelWithTokenWhenCreateNotificationsThenCreate() {
+        //given
+        final NotificationCreationRequest notificationCreationRequest = NotificationCreationRequest.builder().build();
+        final Notification notification = Notification.builder().type(NotificationType.NOTIFICATION_PANEL)
+                .build();
+        final NotificationToken token = NotificationToken.builder().build();
+        final NotificationAndTokenWrapper notificationAndTokenWrapper =
+                new NotificationAndTokenWrapper(notification, Optional.of(token));
+        final NotificationJob job = NotificationJob.builder().build();
+
+        when(notificationMappingService.toNotifications(notificationCreationRequest))
+                .thenReturn(List.of(notification));
+        when(notificationTokenService.joinTokens(any(), eq(NotificationBroadcastingServiceType.FIREBASE)))
+                .thenReturn(List.of(notificationAndTokenWrapper));
+        when(notificationRepository.saveAll(List.of(notification))).thenReturn(List.of(notification));
+        when(notificationJobRepository.saveAll(List.of(job))).thenReturn(List.of(job));
+        when(notificationMappingService.toNotificationJob(notification, token)).thenReturn(job);
+
+        //when
+        notificationService.createNotifications(notificationCreationRequest);
+
+        //then
+        verifyNoMoreInteractions(notificationMappingService);
+    }
+
+    @Test
+    void givenNotificationRequestTypeNotificationPushOnlyWithoutTokenWhenCreateNotificationsThenCreate() {
+        //given
+        final NotificationCreationRequest notificationCreationRequest = NotificationCreationRequest.builder().build();
+        final Notification notification = Notification.builder().type(NotificationType.PUSH_NOTIFICATION_ONLY)
+                .build();
+        final NotificationAndTokenWrapper notificationAndTokenWrapper =
+                new NotificationAndTokenWrapper(notification, Optional.empty());
+
+        when(notificationMappingService.toNotifications(notificationCreationRequest))
+                .thenReturn(List.of(notification));
+        when(notificationTokenService.joinTokens(any(), eq(NotificationBroadcastingServiceType.FIREBASE)))
+                .thenReturn(List.of(notificationAndTokenWrapper));
+        when(notificationRepository.saveAll(List.of())).thenReturn(List.of());
+        when(notificationJobRepository.saveAll(List.of())).thenReturn(List.of());
+
+        //when
+        notificationService.createNotifications(notificationCreationRequest);
+
+        //then
+        verifyNoMoreInteractions(notificationMappingService);
+    }
+
+    @Test
+    void givenNotificationRequestTypeNotificationPushOnlyWithTokenWhenCreateNotificationsThenCreate() {
+        //given
+        final NotificationCreationRequest notificationCreationRequest = NotificationCreationRequest.builder().build();
+        final Notification notification = Notification.builder().type(NotificationType.PUSH_NOTIFICATION_ONLY)
+                .build();
+        final NotificationToken token = NotificationToken.builder().build();
+        final NotificationAndTokenWrapper notificationAndTokenWrapper =
+                new NotificationAndTokenWrapper(notification, Optional.of(token));
+        final NotificationJob job = NotificationJob.builder().build();
+
+        when(notificationMappingService.toNotifications(notificationCreationRequest))
+                .thenReturn(List.of(notification));
+        when(notificationTokenService.joinTokens(any(), eq(NotificationBroadcastingServiceType.FIREBASE)))
+                .thenReturn(List.of(notificationAndTokenWrapper));
+        when(notificationRepository.saveAll(List.of(notification))).thenReturn(List.of(notification));
+        when(notificationJobRepository.saveAll(List.of(job))).thenReturn(List.of(job));
+        when(notificationMappingService.toNotificationJob(notification, token)).thenReturn(job);
+
+        //when
+        notificationService.createNotifications(notificationCreationRequest);
+
+        //then
+        verifyNoMoreInteractions(notificationMappingService);
     }
 }

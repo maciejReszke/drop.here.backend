@@ -51,7 +51,7 @@ class DropLiveUpdateServiceTest {
 
         doNothing().when(dropValidationService).validateLiveUpdate(drop);
         doNothing().when(notificationService).createNotifications(any());
-        when(spotMembershipService.findToBeNotified(spot, SpotMembershipNotificationStatus.cancelled())).thenReturn(List.of());
+        when(spotMembershipService.findToBeNotified(spot, SpotMembershipNotificationStatus.live())).thenReturn(List.of());
 
         //when
         final DropStatus result = dropCancelledUpdateService.update(drop, spot, company, accountProfile, dropManagementRequest);

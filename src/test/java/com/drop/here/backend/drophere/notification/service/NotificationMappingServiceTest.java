@@ -5,6 +5,8 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.notification.dto.NotificationManagementRequest;
 import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
+import com.drop.here.backend.drophere.notification.entity.NotificationJob;
+import com.drop.here.backend.drophere.notification.entity.NotificationToken;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingType;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import com.drop.here.backend.drophere.test_data.NotificationDataGenerator;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -113,4 +116,20 @@ class NotificationMappingServiceTest {
         assertThat(response.getDetailedMessage()).isEqualTo(notification.getDetailedMessage());
         assertThat(response.getCreatedAt()).isEqualTo(notification.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
     }
+
+    @Test
+    void givenNotificationAndTokenWhenToNotificationJobThenMap() {
+        //given
+        final Notification notification = Notification.builder().build();
+        final NotificationToken notificationToken = NotificationToken.builder().build();
+
+        //when
+        final NotificationJob result = notificationMappingService.toNotificationJob(notification, notificationToken);
+
+        //then
+        assertThat(result.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
+        assertThat(result.getNotificationToken()).isEqualTo(notificationToken);
+        assertThat(result.getNotification()).isEqualTo(notification);
+    }
+
 }

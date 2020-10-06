@@ -11,12 +11,15 @@ import com.drop.here.backend.drophere.notification.dto.NotificationManagementReq
 import com.drop.here.backend.drophere.notification.dto.NotificationResponse;
 import com.drop.here.backend.drophere.notification.entity.Notification;
 import com.drop.here.backend.drophere.notification.entity.NotificationJob;
+import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingServiceType;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationType;
 import com.drop.here.backend.drophere.notification.repository.NotificationJobRepository;
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingService;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingServiceFactory;
+import com.drop.here.backend.drophere.notification.service.token.NotificationAndTokenWrapper;
+import com.drop.here.backend.drophere.notification.service.token.NotificationTokenService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,13 +44,51 @@ public class NotificationService {
     private final NotificationMappingService notificationMappingService;
     private final NotificationValidationService notificationValidationService;
     private final NotificationBroadcastingServiceFactory notificationBroadcastingServiceFactory;
+    private final NotificationTokenService notificationTokenService;
 
-    // TODO: 05/10/2020 test, implement - we wtorek to i testy nizej i testy tego + get na membership user i basta
+    @Transactional
     public void createNotifications(NotificationCreationRequest request) {
-
+        final List<Notification> preFilteredNotifications = notificationMappingService.toNotifications(request);
+        final List<NotificationAndTokenWrapper> joinedTokens = joinTokens(preFilteredNotifications);
+        final List<NotificationAndTokenWrapper> notificationWrappersToBePersisted = filterValidNotifications(joinedTokens);
+        final List<NotificationJob> jobs = createJobs(notificationWrappersToBePersisted);
+        final List<Notification> notifications = unwrapNotifications(notificationWrappersToBePersisted);
+        notificationRepository.saveAll(notifications);
+        notificationJobRepository.saveAll(jobs);
     }
 
-    // TODO: 04/10/2020 dodac testy integracyjne na typ notyfikacji
+    private List<Notification> unwrapNotifications(List<NotificationAndTokenWrapper> notificationWrappersToBePersisted) {
+        return notificationWrappersToBePersisted.stream()
+                .map(NotificationAndTokenWrapper::getNotification)
+                .collect(Collectors.toList());
+    }
+
+    private List<NotificationJob> createJobs(List<NotificationAndTokenWrapper> notificationWrappersToBePersisted) {
+        return notificationWrappersToBePersisted.stream()
+                .filter(this::hasToken)
+                .map(wrapper -> notificationMappingService.toNotificationJob(wrapper.getNotification(), wrapper.getToken().orElseThrow()))
+                .collect(Collectors.toList());
+    }
+
+    private List<NotificationAndTokenWrapper> filterValidNotifications(List<NotificationAndTokenWrapper> joinedTokens) {
+        return joinedTokens
+                .stream()
+                .filter(wrapper -> isPushOnlyNotification(wrapper) || hasToken(wrapper))
+                .collect(Collectors.toList());
+    }
+
+    private List<NotificationAndTokenWrapper> joinTokens(List<Notification> preFilteredNotifications) {
+        return notificationTokenService.joinTokens(preFilteredNotifications, NotificationBroadcastingServiceType.FIREBASE);
+    }
+
+    private boolean isPushOnlyNotification(NotificationAndTokenWrapper wrapper) {
+        return wrapper.getNotification().getType() != NotificationType.PUSH_NOTIFICATION_ONLY;
+    }
+
+    private boolean hasToken(NotificationAndTokenWrapper wrapper) {
+        return wrapper.getToken().isPresent();
+    }
+
     public Page<NotificationResponse> findNotifications(AccountAuthentication accountAuthentication, String readStatus, Pageable pageable) {
         final List<NotificationReadStatus> desiredReadStatuses = getDesiredReadStatuses(readStatus);
         final Page<Notification> notifications = findNotifications(accountAuthentication, pageable, desiredReadStatuses);
