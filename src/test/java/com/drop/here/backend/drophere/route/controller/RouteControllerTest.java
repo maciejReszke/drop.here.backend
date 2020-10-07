@@ -148,7 +148,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         routeRequest.setProfileUid(accountProfile.getProfileUid());
 
         final String url = String.format("/companies/%s/routes", company.getUid());
-        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
+        final String json = objectMapper.writeValueAsString(routeRequest);
 
         //when
         final ResultActions result = mockMvc.perform(post(url)
@@ -183,7 +183,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         final RouteDropRequest dropRequest = routeRequest.getDrops().get(0);
         dropRequest.setSpotId(spot.getId());
         final String url = String.format("/companies/%s/routes", company.getUid() + "kek");
-        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
+        final String json = objectMapper.writeValueAsString(routeRequest);
 
         //when
         final ResultActions result = mockMvc.perform(post(url)
@@ -209,7 +209,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         final RouteDropRequest dropRequest = routeRequest.getDrops().get(0);
         dropRequest.setSpotId(spot.getId());
         final String url = String.format("/companies/%s/routes", company.getUid());
-        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
+        final String json = objectMapper.writeValueAsString(routeRequest);
         final Privilege privilege = privilegeRepository.findAll().get(0);
         privilege.setName("kaka");
         privilegeRepository.save(privilege);
@@ -240,7 +240,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         final RouteDropRequest dropRequest = routeRequest.getDrops().get(0);
         dropRequest.setSpotId(spot.getId());
         final String url = String.format("/companies/%s/routes", company.getUid());
-        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
+        final String json = objectMapper.writeValueAsString(routeRequest);
 
         //when
         final ResultActions result = mockMvc.perform(post(url)
