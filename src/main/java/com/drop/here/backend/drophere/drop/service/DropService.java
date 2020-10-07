@@ -109,6 +109,21 @@ public class DropService {
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, drop.getId());
     }
 
+    // TODO: 07/10/2020 test
+    @Transactional(rollbackFor = Exception.class)
+    public void prepareDrops(Route route) {
+        final Company company = route.getCompany();
+        final List<Drop> drops = dropRepository.findByRouteWithSpot(route);
+        drops.forEach(drop -> {
+            final DropStatus preUpdateStatus = drop.getStatus();
+            final DropStatus newStatus = dropUpdateServiceFactory.prepare(drop, drop.getSpot(), company, route.getProfile());
+            drop.setStatus(newStatus);
+            dropRepository.save(drop);
+            log.info("Successfully updated drop {} from status {} to {}", drop.getUid(), preUpdateStatus, newStatus);
+        });
+    }
+
+
     private Drop findDrop(String dropUid, Company company) {
         return dropRepository.findByUidAndRouteCompanyWithSpot(dropUid, company)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(

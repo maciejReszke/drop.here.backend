@@ -24,7 +24,7 @@ class RouteValidationServiceTest {
     @Test
     void givenValidRouteStatusWhenDeleteThenDelete() {
         //given
-        final Route route = Route.builder().status(RouteStatus.PREPARED).build();
+        final Route route = Route.builder().status(RouteStatus.UNPREPARED).build();
 
         //when
         final Throwable throwable = catchThrowable(() -> routeValidationService.validateDelete(route));
@@ -129,10 +129,10 @@ class RouteValidationServiceTest {
     void givenValidRequestWhenValidateUpdateThenDoNothing() {
         //given
         final RouteRequest route = RouteDataGenerator.request(1);
-        final Route entity = Route.builder().status(RouteStatus.PREPARED).build();
+        final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdate(route, entity));
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateUnprepared(route, entity));
 
         //then
         assertThat(throwable).isNull();
@@ -145,7 +145,7 @@ class RouteValidationServiceTest {
         final Route entity = Route.builder().status(null).build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdate(route, entity));
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateUnprepared(route, entity));
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
@@ -157,10 +157,10 @@ class RouteValidationServiceTest {
         final RouteRequest route = RouteDataGenerator.request(1);
         route.getProducts().get(0).setLimitedAmount(true);
         route.getProducts().get(0).setAmount(BigDecimal.valueOf(55));
-        final Route entity = Route.builder().status(RouteStatus.PREPARED).build();
+        final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdate(route, entity));
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateUnprepared(route, entity));
 
         //then
         assertThat(throwable).isNull();
@@ -172,10 +172,10 @@ class RouteValidationServiceTest {
         final RouteRequest route = RouteDataGenerator.request(1);
         route.getProducts().get(0).setLimitedAmount(true);
         route.getProducts().get(0).setAmount(null);
-        final Route entity = Route.builder().status(RouteStatus.PREPARED).build();
+        final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdate(route, entity));
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateUnprepared(route, entity));
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
@@ -186,10 +186,10 @@ class RouteValidationServiceTest {
         //given
         final RouteRequest route = RouteDataGenerator.request(1);
         route.getDrops().get(0).setStartTime("17:61");
-        final Route entity = Route.builder().status(RouteStatus.PREPARED).build();
+        final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdate(route, entity));
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateUnprepared(route, entity));
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
@@ -200,10 +200,10 @@ class RouteValidationServiceTest {
         //given
         final RouteRequest route = RouteDataGenerator.request(1);
         route.getDrops().get(0).setEndTime("17:61");
-        final Route entity = Route.builder().status(RouteStatus.PREPARED).build();
+        final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdate(route, entity));
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateUnprepared(route, entity));
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
@@ -215,10 +215,10 @@ class RouteValidationServiceTest {
         final RouteRequest route = RouteDataGenerator.request(1);
         route.getDrops().get(0).setStartTime("17:51");
         route.getDrops().get(0).setEndTime("17:50");
-        final Route entity = Route.builder().status(RouteStatus.PREPARED).build();
+        final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
 
         //when
-        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdate(route, entity));
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateUnprepared(route, entity));
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);

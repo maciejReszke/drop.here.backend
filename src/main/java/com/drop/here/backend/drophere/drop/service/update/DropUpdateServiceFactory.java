@@ -21,6 +21,7 @@ public class DropUpdateServiceFactory {
     private final DropCancelledUpdateService dropCancelledUpdateService;
     private final DropDelayedUpdateService dropDelayedUpdateService;
     private final DropFinishedUpdateService dropFinishedUpdateService;
+    private final DropPreparedUpdateService dropPreparedUpdateService;
 
     public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest) {
         return API.Match(dropManagementRequest.getNewStatus()).of(
@@ -29,5 +30,9 @@ public class DropUpdateServiceFactory {
                 Case($(DropStatusChange.DELAYED), () -> dropDelayedUpdateService),
                 Case($(DropStatusChange.FINISHED), () -> dropFinishedUpdateService))
                 .update(drop, spot, company, profile, dropManagementRequest);
+    }
+
+    public DropStatus prepare(Drop drop, Spot spot, Company company, AccountProfile profile) {
+        return dropPreparedUpdateService.update(drop, spot, company, profile);
     }
 }

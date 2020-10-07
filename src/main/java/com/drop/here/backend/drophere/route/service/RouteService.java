@@ -8,7 +8,11 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
 import com.drop.here.backend.drophere.route.dto.RouteShortResponse;
+import com.drop.here.backend.drophere.route.dto.RouteStateChangeRequest;
+import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
+import com.drop.here.backend.drophere.route.enums.RouteStatus;
+import com.drop.here.backend.drophere.route.service.state_update.RouteUpdateStateServiceFactory;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +28,7 @@ public class RouteService {
     private final RouteMappingService routeMappingService;
     private final RouteStoreService routeStoreService;
     private final RouteValidationService routeValidationService;
+    private final RouteUpdateStateServiceFactory routeUpdateStateServiceFactory;
 
     public Page<RouteShortResponse> findRoutes(AccountAuthentication accountAuthentication, String routeStatus, Pageable pageable) {
         return routeStoreService.findByCompany(accountAuthentication.getCompany(), routeStatus, pageable);
@@ -35,22 +40,37 @@ public class RouteService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResourceOperationResponse createRoute(String companyUid, RouteRequest routeRequest, AccountAuthentication accountAuthentication) {
-        routeValidationService.validateCreate(routeRequest);
-        final Route route = routeMappingService.toRoute(routeRequest, accountAuthentication.getCompany());
-        log.info("Saving route for company {} with name {}", companyUid, routeRequest.getName());
+    public ResourceOperationResponse createRoute(String companyUid, UnpreparedRouteRequest unpreparedRouteRequest, AccountAuthentication accountAuthentication) {
+        routeValidationService.validateCreate(unpreparedRouteRequest);
+        final Route route = routeMappingService.toRoute(unpreparedRouteRequest, accountAuthentication.getCompany());
+        log.info("Saving route for company {} with name {}", companyUid, unpreparedRouteRequest.getName());
         routeStoreService.save(route);
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, route.getId());
     }
 
+    // TODO: 07/10/2020 test
     @Transactional(rollbackFor = Exception.class)
     public ResourceOperationResponse updateRoute(String companyUid, Long routeId, RouteRequest routeRequest, AccountAuthentication accountAuthentication) {
         final Route route = findByIdAndCompany(routeId, accountAuthentication.getCompany());
-        routeValidationService.validateUpdate(routeRequest, route);
+        return routeRequest.getRouteStateChangeRequest() == null
+                ? updateRouteUnprepared(companyUid, route, routeRequest.getUnpreparedRouteRequest(), accountAuthentication)
+                : updateRouteStatus(companyUid, route, routeRequest.getRouteStateChangeRequest(), accountAuthentication);
+    }
+
+    private ResourceOperationResponse updateRouteUnprepared(String companyUid, Route route, UnpreparedRouteRequest routeRequest, AccountAuthentication accountAuthentication) {
+        routeValidationService.validateUpdateUnprepared(routeRequest, route);
         routeMappingService.updateRoute(route, routeRequest, accountAuthentication.getCompany());
-        log.info("Updating route for company {} with name {} id {}", companyUid, routeRequest.getName(), routeId);
+        log.info("Updating route for company {} with name {} id {} {}", companyUid, route.getName(), route.getId(), route.getStatus());
         routeStoreService.save(route);
-        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, routeId);
+        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, route.getId());
+    }
+
+    // TODO: 07/10/2020 - sprawdzic czy account profile moze tego dokonac
+    private ResourceOperationResponse updateRouteStatus(String companyUid, Route route, RouteStateChangeRequest routeStateChangeRequest, AccountAuthentication accountAuthentication) {
+        final RouteStatus newStatus = routeUpdateStateServiceFactory.update(route, routeStateChangeRequest);
+        log.info("Updating route for company {} with name {} id {} from {} to {}", companyUid, route.getName(), route.getId(), route.getStatus(), newStatus);
+        routeStoreService.save(route);
+        return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, route.getId());
     }
 
     @Transactional(rollbackFor = Exception.class)

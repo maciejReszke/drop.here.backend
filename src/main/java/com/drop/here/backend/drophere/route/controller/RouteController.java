@@ -5,6 +5,7 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
 import com.drop.here.backend.drophere.route.dto.RouteShortResponse;
+import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.service.RouteService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import io.swagger.annotations.Api;
@@ -81,7 +82,7 @@ public class RouteController {
     })
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public ResourceOperationResponse createRoute(@ApiIgnore @PathVariable String companyUid,
-                                                 @RequestBody @Valid RouteRequest routeRequest,
+                                                 @RequestBody @Valid UnpreparedRouteRequest routeRequest,
                                                  @ApiIgnore AccountAuthentication accountAuthentication) {
         return routeService.createRoute(companyUid, routeRequest, accountAuthentication);
     }
@@ -101,6 +102,7 @@ public class RouteController {
                                                  @ApiIgnore AccountAuthentication accountAuthentication) {
         return routeService.updateRoute(companyUid, routeId, routeRequest, accountAuthentication);
     }
+
 
     @DeleteMapping("/{routeId}")
     @ResponseStatus(HttpStatus.OK)

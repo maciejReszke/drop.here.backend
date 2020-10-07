@@ -33,6 +33,9 @@ class DropUpdateServiceFactoryTest {
     @Mock
     private DropFinishedUpdateService dropFinishedUpdateService;
 
+    @Mock
+    private DropPreparedUpdateService dropPreparedUpdateService;
+
     @Test
     void givenDelayedUpdateWhenUpdateThenUpdate() {
         //given
@@ -109,5 +112,21 @@ class DropUpdateServiceFactoryTest {
 
         //then
         assertThat(update).isEqualTo(DropStatus.DELAYED);
+    }
+
+    @Test
+    void whenPrepareThenPrepare() {
+        //given
+        final Drop drop = Drop.builder().build();
+        final Spot spot = Spot.builder().build();
+        final Company company = Company.builder().build();
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+        when(dropPreparedUpdateService.update(drop, spot, company, accountProfile)).thenReturn(DropStatus.DELAYED);
+
+        //when
+        final DropStatus result = dropUpdateServiceFactory.prepare(drop, spot, company, accountProfile);
+
+        //then
+        assertThat(result).isEqualTo(DropStatus.DELAYED);
     }
 }

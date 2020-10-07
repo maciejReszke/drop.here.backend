@@ -74,7 +74,7 @@ class RouteServiceTest {
         final Long routeId = 15L;
         final Route route = RouteDataGenerator.route(1, company);
 
-        doNothing().when(routeValidationService).validateUpdate(routeRequest, route);
+        doNothing().when(routeValidationService).validateUpdateUnprepared(routeRequest, route);
         when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
         doNothing().when(routeMappingService).updateRoute(route, routeRequest, company);
         doNothing().when(routeStoreService).save(route);

@@ -4,7 +4,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
-import com.drop.here.backend.drophere.route.dto.RouteRequest;
+import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import io.vavr.control.Try;
@@ -18,7 +18,7 @@ public class RouteValidationService {
 
     private static final DateTimeFormatter TIME_PATTERN = DateTimeFormatter.ofPattern("HH:mm");
 
-    public void validateCreate(RouteRequest routeRequest) {
+    public void validateCreate(UnpreparedRouteRequest routeRequest) {
         routeRequest.getProducts().forEach(this::validateRouteProductRequest);
         routeRequest.getDrops().forEach(this::validateDropRequest);
     }
@@ -49,20 +49,24 @@ public class RouteValidationService {
     }
 
     public void validateDelete(Route route) {
-        if (route.getStatus() != RouteStatus.PREPARED) {
+        if (route.getStatus() != RouteStatus.UNPREPARED) {
             throw new RestIllegalRequestValueException(String.format(
                     "To delete route %s status cannot be %s", route.getId(), route.getStatus()),
                     RestExceptionStatusCode.INVALID_ROUTE_STATUS_DURING_DELETE);
         }
     }
 
-    public void validateUpdate(RouteRequest routeRequest, Route route) {
+    public void validateUpdateUnprepared(UnpreparedRouteRequest routeRequest, Route route) {
         validateCreate(routeRequest);
-        if (route.getStatus() != RouteStatus.PREPARED) {
+        if (route.getStatus() != RouteStatus.UNPREPARED) {
             throw new RestIllegalRequestValueException(String.format(
                     "To update route %s status cannot be %s", route.getId(), route.getStatus()),
                     RestExceptionStatusCode.INVALID_ROUTE_STATUS_DURING_UPDATE);
         }
     }
 
+    // TODO: 07/10/2020 test, imlpement
+    public void validatePreparedUpdate(Route route) {
+
+    }
 }

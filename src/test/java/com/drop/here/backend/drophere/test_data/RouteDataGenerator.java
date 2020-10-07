@@ -51,7 +51,7 @@ public class RouteDataGenerator {
 
     public Route route(int i, Company company) {
         return Route.builder()
-                .status(RouteStatus.PREPARED)
+                .status(RouteStatus.UNPREPARED)
                 .company(company)
                 .createdAt(LocalDateTime.now())
                 .description("routeDescription" + i)

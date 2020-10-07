@@ -19,6 +19,7 @@ import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,11 +30,13 @@ public class DropLiveUpdateService implements DropUpdateService {
     private final SpotMembershipService spotMembershipService;
     private final NotificationService notificationService;
 
+    // TODO: 07/10/2020 test
     @Override
     public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest) {
         dropValidationService.validateLiveUpdate(drop);
         final List<SpotMembership> memberships = spotMembershipService.findToBeNotified(spot, SpotMembershipNotificationStatus.live());
         notificationService.createNotifications(prepareNotificationRequest(memberships, drop, company, profile));
+        drop.setLiveAt(LocalDateTime.now());
         return DropStatus.LIVE;
     }
 

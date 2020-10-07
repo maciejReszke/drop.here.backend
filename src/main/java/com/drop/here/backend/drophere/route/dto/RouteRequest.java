@@ -5,12 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -18,29 +14,11 @@ import java.util.List;
 @Builder
 public class RouteRequest {
 
-    @ApiModelProperty(value = "Route name", example = "Route 66", required = true)
-    @NotBlank
-    @Length(max = 50)
-    private String name;
-
-    @ApiModelProperty(value = "Route description", example = "Description of route 66")
-    @Length(max = 255)
-    private String description;
-
-    @ApiModelProperty(value = "Seller uid", example = "goobarich123")
-    private String profileUid;
-
-    @ApiModelProperty(value = "Drops")
+    @ApiModelProperty(value = "Unprepared route request model")
     @Valid
-    @NotNull
-    private List<@Valid RouteDropRequest> drops;
+    private UnpreparedRouteRequest unpreparedRouteRequest;
 
-    @ApiModelProperty(value = "Products")
+    @ApiModelProperty(value = "Route state change request")
     @Valid
-    @NotNull
-    private List<@Valid RouteProductRequest> products;
-
-    @NotBlank
-    @ApiModelProperty(value = "Route date", example = "2020-04-04", required = true)
-    private String date;
+    private RouteStateChangeRequest routeStateChangeRequest;
 }

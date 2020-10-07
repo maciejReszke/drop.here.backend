@@ -16,8 +16,8 @@ import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductResponse;
-import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
+import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
@@ -57,10 +57,10 @@ public class RouteMappingService {
     @Value("${drops.uid_generator.random_part_length}")
     private int randomPartLength;
 
-    public Route toRoute(RouteRequest routeRequest, Company company) {
+    public Route toRoute(UnpreparedRouteRequest routeRequest, Company company) {
         final Route route = Route.builder()
                 .createdAt(LocalDateTime.now())
-                .status(RouteStatus.PREPARED)
+                .status(RouteStatus.UNPREPARED)
                 .company(company)
                 .drops(new ArrayList<>())
                 .products(new ArrayList<>())
@@ -69,7 +69,7 @@ public class RouteMappingService {
         return route;
     }
 
-    public void updateRoute(Route route, RouteRequest routeRequest, Company company) {
+    public void updateRoute(Route route, UnpreparedRouteRequest routeRequest, Company company) {
         route.getProducts().forEach(product -> product.setRoute(null));
         route.getProducts().clear();
         route.getDrops().forEach(drop -> drop.setRoute(null));
@@ -84,7 +84,7 @@ public class RouteMappingService {
         route.setWithSeller(route.getProfile() != null);
     }
 
-    private AccountProfile getProfile(Company company, RouteRequest routeRequest) {
+    private AccountProfile getProfile(Company company, UnpreparedRouteRequest routeRequest) {
         return StringUtils.isBlank(routeRequest.getProfileUid())
                 ? null
                 : accountProfilePersistenceService.findActiveByCompanyAndProfileUid(company, routeRequest.getProfileUid())
@@ -93,7 +93,7 @@ public class RouteMappingService {
                         RestExceptionStatusCode.ACCOUNT_PROFILE_NOT_FOUND_DURING_CREATING_ROUTE));
     }
 
-    private List<Drop> buildDrops(RouteRequest routeRequest, Route route, Company company) {
+    private List<Drop> buildDrops(UnpreparedRouteRequest routeRequest, Route route, Company company) {
         return routeRequest.getDrops().stream()
                 .map(drop -> buildDrop(drop, route, company))
                 .collect(Collectors.toList());
@@ -114,7 +114,7 @@ public class RouteMappingService {
                 .build();
     }
 
-    private List<RouteProduct> buildProducts(RouteRequest routeRequest, Route route, Company company) {
+    private List<RouteProduct> buildProducts(UnpreparedRouteRequest routeRequest, Route route, Company company) {
         final AtomicInteger counter = new AtomicInteger(0);
         return routeRequest.getProducts()
                 .stream()

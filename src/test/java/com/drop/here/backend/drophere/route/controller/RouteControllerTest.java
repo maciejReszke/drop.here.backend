@@ -49,7 +49,6 @@ import org.testcontainers.shaded.com.google.common.net.HttpHeaders;
 import java.util.List;
 
 import static com.drop.here.backend.drophere.authentication.account.service.PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE;
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -553,7 +552,7 @@ class RouteControllerTest extends IntegrationBaseClass {
     void givenValidRequestOwnCompanyOperationNoParamsWhenFindRoutesThenFind() throws Exception {
         //given
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
-        preSavedRoute.setStatus(RouteStatus.PREPARED);
+        preSavedRoute.setStatus(RouteStatus.UNPREPARED);
         final Route preSavedRoute2 = RouteDataGenerator.route(2, company);
         preSavedRoute2.setStatus(RouteStatus.STARTED);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
@@ -577,7 +576,7 @@ class RouteControllerTest extends IntegrationBaseClass {
     void givenValidRequestOwnCompanyOperationByParamWhenFindRoutesThenFind() throws Exception {
         //given
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
-        preSavedRoute.setStatus(RouteStatus.PREPARED);
+        preSavedRoute.setStatus(RouteStatus.UNPREPARED);
         final Route preSavedRoute2 = RouteDataGenerator.route(1, company);
         preSavedRoute2.setStatus(RouteStatus.STARTED);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
@@ -590,7 +589,7 @@ class RouteControllerTest extends IntegrationBaseClass {
 
         //when
         final ResultActions result = mockMvc.perform(get(url)
-                .param("routeStatus", RouteStatus.PREPARED.name())
+                .param("routeStatus", RouteStatus.UNPREPARED.name())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
 
         //then

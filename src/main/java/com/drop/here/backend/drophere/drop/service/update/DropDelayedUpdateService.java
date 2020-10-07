@@ -30,6 +30,7 @@ public class DropDelayedUpdateService implements DropUpdateService {
     private final SpotMembershipService spotMembershipService;
     private final NotificationService notificationService;
 
+    // TODO: 07/10/2020
     @Override
     public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest) {
         dropValidationService.validateDelayedUpdate(drop, dropManagementRequest);
@@ -37,6 +38,7 @@ public class DropDelayedUpdateService implements DropUpdateService {
         drop.setEndTime(addDelay(dropManagementRequest, drop.getEndTime()));
         final List<SpotMembership> memberships = spotMembershipService.findToBeNotified(spot, SpotMembershipNotificationStatus.delayed());
         notificationService.createNotifications(prepareNotificationRequest(memberships, drop, company, profile));
+        drop.setDelayedAt(LocalDateTime.now());
         return DropStatus.DELAYED;
     }
 
