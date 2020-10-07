@@ -65,10 +65,11 @@ public class RouteService {
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, route.getId());
     }
 
-    // TODO: 07/10/2020 - sprawdzic czy account profile moze tego dokonac
+    // TODO: 07/10/2020 - sprawdzic czy account profile moze tego dokonac + update profilu
     private ResourceOperationResponse updateRouteStatus(String companyUid, Route route, RouteStateChangeRequest routeStateChangeRequest, AccountAuthentication accountAuthentication) {
         final RouteStatus newStatus = routeUpdateStateServiceFactory.update(route, routeStateChangeRequest);
         log.info("Updating route for company {} with name {} id {} from {} to {}", companyUid, route.getName(), route.getId(), route.getStatus(), newStatus);
+        route.setStatus(newStatus);
         routeStoreService.save(route);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, route.getId());
     }

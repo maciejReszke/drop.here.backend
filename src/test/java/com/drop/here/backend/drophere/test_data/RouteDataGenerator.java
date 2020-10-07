@@ -4,7 +4,7 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
-import com.drop.here.backend.drophere.route.dto.RouteRequest;
+import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
@@ -18,8 +18,8 @@ import java.util.List;
 @UtilityClass
 public class RouteDataGenerator {
 
-    public RouteRequest request(int i) {
-        return RouteRequest.builder()
+    public UnpreparedRouteRequest unprepared(int i) {
+        return UnpreparedRouteRequest.builder()
                 .date("2020-04-04")
                 .description("description" + i)
                 .drops(List.of(routeDropRequest(i)))

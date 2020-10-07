@@ -52,7 +52,7 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "join d.spot s " +
             "join s.company c where " +
             "d.route.profile.profileUid = :profileUid and " +
-            "d.status = 'DELIVERING' and " +
+            "d.route.status = 'LIVE' and " +
             "(" +
             "   c.visibilityStatus = 'VISIBLE'" +
             ") and " +

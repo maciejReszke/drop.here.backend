@@ -57,5 +57,6 @@ class DropCancelledUpdateServiceTest {
 
         //then
         assertThat(result).isEqualTo(DropStatus.CANCELLED);
+        assertThat(drop.getCancelledAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
     }
 }

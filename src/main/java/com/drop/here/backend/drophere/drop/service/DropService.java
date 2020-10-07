@@ -11,6 +11,7 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.dto.DropDetailedCustomerResponse;
 import com.drop.here.backend.drophere.drop.dto.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.dto.DropRouteResponse;
+import com.drop.here.backend.drophere.drop.dto.DropStatusChange;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
@@ -109,7 +110,7 @@ public class DropService {
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, drop.getId());
     }
 
-    // TODO: 07/10/2020 test
+    // TODO: 07/10/2020 test - wydzielic jakos z 3 funkcji funkcje :P
     @Transactional(rollbackFor = Exception.class)
     public void prepareDrops(Route route) {
         final Company company = route.getCompany();
@@ -129,5 +130,24 @@ public class DropService {
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Drop with uid %s for company %s was not found", dropUid, company.getUid()),
                         RestExceptionStatusCode.DROP_BY_UID_FOR_COMPANY_NOT_FOUND));
+    }
+
+    // TODO: 07/10/2020  test
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelDrops(Route route) {
+        final Company company = route.getCompany();
+        final List<Drop> drops = dropRepository.findByRouteWithSpot(route);
+        drops.stream()
+                .filter(drop -> drop.getStatus() != DropStatus.CANCELLED && drop.getStatus() != DropStatus.FINISHED)
+                .forEach(drop -> {
+                    final DropStatus preUpdateStatus = drop.getStatus();
+                    final DropManagementRequest cancelRequest = DropManagementRequest.builder()
+                            .newStatus(DropStatusChange.CANCELLED)
+                            .build();
+                    final DropStatus newStatus = dropUpdateServiceFactory.update(drop, drop.getSpot(), company, route.getProfile(), cancelRequest);
+                    drop.setStatus(newStatus);
+                    dropRepository.save(drop);
+                    log.info("Successfully updated drop {} from status {} to {}", drop.getUid(), preUpdateStatus, newStatus);
+                });
     }
 }

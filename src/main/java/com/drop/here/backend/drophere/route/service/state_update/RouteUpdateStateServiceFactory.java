@@ -14,16 +14,15 @@ import static io.vavr.API.Case;
 @Service
 @RequiredArgsConstructor
 public class RouteUpdateStateServiceFactory {
-    private final RouteLiveUpdateStateService routeLiveUpdateStateService;
+    private final RouteOngoingUpdateStateService routeOngoingUpdateStateService;
     private final RouteCancelUpdateStateService routeCancelUpdateStateService;
     private final RoutePreparedUpdateStateService routePreparedUpdateStateService;
 
-    // TODO: 07/10/2020 test, implement
     public RouteStatus update(Route route, RouteStateChangeRequest request) {
         return API.Match(request.getNewStatus()).of(
-                Case($(RouteStatusChange.LIVE), () -> routeLiveUpdateStateService),
+                Case($(RouteStatusChange.ONGOING), () -> routeOngoingUpdateStateService),
                 Case($(RouteStatusChange.PREPARED), () -> routePreparedUpdateStateService),
                 Case($(RouteStatusChange.CANCELLED), () -> routeCancelUpdateStateService))
-                .update(route, request);
+                .update(route);
     }
 }

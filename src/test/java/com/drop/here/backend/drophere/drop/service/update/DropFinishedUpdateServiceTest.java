@@ -57,6 +57,7 @@ class DropFinishedUpdateServiceTest {
 
         //then
         assertThat(result).isEqualTo(DropStatus.FINISHED);
+        assertThat(drop.getFinishedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
     }
 
 }

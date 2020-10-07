@@ -11,8 +11,8 @@ import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
-import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
+import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
@@ -73,7 +73,7 @@ class RouteMappingServiceTest {
     @Test
     void givenValidRequestWhenToRouteThenMap() {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final Company company = CompanyDataGenerator.company(1, null, null);
 
         final Product product = Product.builder().build();
@@ -127,7 +127,7 @@ class RouteMappingServiceTest {
     @Test
     void givenRequestAndRouteWhenUpdateRouteThenUpdate() {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final Company company = CompanyDataGenerator.company(1, null, null);
 
         final Product product = Product.builder().build();

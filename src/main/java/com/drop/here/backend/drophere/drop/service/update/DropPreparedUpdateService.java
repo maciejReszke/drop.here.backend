@@ -27,7 +27,6 @@ public class DropPreparedUpdateService {
     private final SpotMembershipService spotMembershipService;
     private final NotificationService notificationService;
 
-    // TODO: 07/10/2020 test, implement
     public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile) {
         final List<SpotMembership> memberships = spotMembershipService.findToBeNotified(spot, SpotMembershipNotificationStatus.prepared());
         notificationService.createNotifications(prepareNotificationRequest(memberships, drop, company, profile));

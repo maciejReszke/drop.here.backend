@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.EnumSet;
+import java.util.stream.Collectors;
 
 @Service
 public class RouteValidationService {
@@ -65,8 +67,27 @@ public class RouteValidationService {
         }
     }
 
-    // TODO: 07/10/2020 test, imlpement
     public void validatePreparedUpdate(Route route) {
-
+        validateUpdatePresentStatus(route, EnumSet.of(RouteStatus.UNPREPARED), RouteStatus.PREPARED);
     }
+
+    public void validateOngoingUpdate(Route route) {
+        validateUpdatePresentStatus(route, EnumSet.of(RouteStatus.PREPARED), RouteStatus.ONGOING);
+    }
+
+    public void validateCancelUpdate(Route route) {
+        validateUpdatePresentStatus(route, EnumSet.of(RouteStatus.PREPARED, RouteStatus.ONGOING), RouteStatus.CANCELLED);
+    }
+
+    private void validateUpdatePresentStatus(Route route, EnumSet<RouteStatus> desiredStatuses, RouteStatus updateToStatus) {
+        if (!desiredStatuses.contains(route.getStatus())) {
+            throw new RestIllegalRequestValueException(String.format(
+                    "In order to change route status to %s it must be in %s but was %s", updateToStatus, desiredStatuses
+                            .stream()
+                            .map(Enum::name)
+                            .collect(Collectors.joining(",")), route.getStatus()),
+                    RestExceptionStatusCode.ROUTE_STATE_UPDATE_INVALID_STATUS);
+        }
+    }
+
 }

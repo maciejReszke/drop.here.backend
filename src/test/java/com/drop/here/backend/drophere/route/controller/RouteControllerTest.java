@@ -20,6 +20,7 @@ import com.drop.here.backend.drophere.product.repository.ProductUnitRepository;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
 import com.drop.here.backend.drophere.route.dto.RouteRequest;
+import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
@@ -138,7 +139,7 @@ class RouteControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenCreateRouteThenCreate() throws Exception {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final RouteProductRequest routeProductRequest = routeRequest.getProducts().get(0);
         routeProductRequest.setProductId(product.getId());
         routeRequest.setProducts(List.of(routeProductRequest));
@@ -147,7 +148,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         routeRequest.setProfileUid(accountProfile.getProfileUid());
 
         final String url = String.format("/companies/%s/routes", company.getUid());
-        final String json = objectMapper.writeValueAsString(routeRequest);
+        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
 
         //when
         final ResultActions result = mockMvc.perform(post(url)
@@ -175,14 +176,14 @@ class RouteControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestNotOwnCompanyOperationWhenCreateRouteThenForbidden() throws Exception {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final RouteProductRequest routeProductRequest = routeRequest.getProducts().get(0);
         routeProductRequest.setProductId(product.getId());
         routeRequest.setProducts(List.of(routeProductRequest));
         final RouteDropRequest dropRequest = routeRequest.getDrops().get(0);
         dropRequest.setSpotId(spot.getId());
         final String url = String.format("/companies/%s/routes", company.getUid() + "kek");
-        final String json = objectMapper.writeValueAsString(routeRequest);
+        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
 
         //when
         final ResultActions result = mockMvc.perform(post(url)
@@ -201,14 +202,14 @@ class RouteControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationInvalidPrivilegesWhenCreateRouteThenForbidden() throws Exception {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final RouteProductRequest routeProductRequest = routeRequest.getProducts().get(0);
         routeProductRequest.setProductId(product.getId());
         routeRequest.setProducts(List.of(routeProductRequest));
         final RouteDropRequest dropRequest = routeRequest.getDrops().get(0);
         dropRequest.setSpotId(spot.getId());
         final String url = String.format("/companies/%s/routes", company.getUid());
-        final String json = objectMapper.writeValueAsString(routeRequest);
+        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
         final Privilege privilege = privilegeRepository.findAll().get(0);
         privilege.setName("kaka");
         privilegeRepository.save(privilege);
@@ -230,7 +231,7 @@ class RouteControllerTest extends IntegrationBaseClass {
     @Test
     void givenInvalidRequestInvalidAmountWhenLimitedOwnCompanyOperationWhenCreateRouteThen422() throws Exception {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final RouteProductRequest routeProductRequest = routeRequest.getProducts().get(0);
         routeProductRequest.setLimitedAmount(true);
         routeProductRequest.setAmount(null);
@@ -239,7 +240,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         final RouteDropRequest dropRequest = routeRequest.getDrops().get(0);
         dropRequest.setSpotId(spot.getId());
         final String url = String.format("/companies/%s/routes", company.getUid());
-        final String json = objectMapper.writeValueAsString(routeRequest);
+        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
 
         //when
         final ResultActions result = mockMvc.perform(post(url)
@@ -258,7 +259,7 @@ class RouteControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationWhenUpdateRouteThenUpdate() throws Exception {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final RouteProductRequest routeProductRequest = routeRequest.getProducts().get(0);
         routeProductRequest.setProductId(product.getId());
         routeRequest.setProducts(List.of(routeProductRequest));
@@ -273,7 +274,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, newProduct)));
         final Route route = routeRepository.save(preSavedRoute);
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
-        final String json = objectMapper.writeValueAsString(routeRequest);
+        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
 
         //when
         final ResultActions result = mockMvc.perform(put(url)
@@ -305,7 +306,7 @@ class RouteControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestNotOwnCompanyOperationWhenUpdateRouteThenForbidden() throws Exception {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final RouteProductRequest routeProductRequest = routeRequest.getProducts().get(0);
         routeProductRequest.setProductId(product.getId());
         routeRequest.setProducts(List.of(routeProductRequest));
@@ -315,7 +316,7 @@ class RouteControllerTest extends IntegrationBaseClass {
 
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final String url = String.format("/companies/%s/routes/%s", company.getUid() + "kek", route.getId());
-        final String json = objectMapper.writeValueAsString(routeRequest);
+        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
 
         //when
         final ResultActions result = mockMvc.perform(put(url)
@@ -335,7 +336,7 @@ class RouteControllerTest extends IntegrationBaseClass {
     @Test
     void givenValidRequestOwnCompanyOperationInvalidPrivilegesWhenUpdateRouteThenForbidden() throws Exception {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final RouteProductRequest routeProductRequest = routeRequest.getProducts().get(0);
         routeProductRequest.setProductId(product.getId());
         routeRequest.setProducts(List.of(routeProductRequest));
@@ -345,7 +346,7 @@ class RouteControllerTest extends IntegrationBaseClass {
 
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
-        final String json = objectMapper.writeValueAsString(routeRequest);
+        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
         final Privilege privilege = privilegeRepository.findAll().get(0);
         privilege.setName("kaka");
         privilegeRepository.save(privilege);
@@ -368,7 +369,7 @@ class RouteControllerTest extends IntegrationBaseClass {
     @Test
     void givenInvalidRequestProductNotFoundOwnCompanyOperationWhenUpdateRouteThen404() throws Exception {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final RouteProductRequest routeProductRequest = routeRequest.getProducts().get(0);
         routeProductRequest.setProductId(product.getId() + 5);
         routeRequest.setProducts(List.of(routeProductRequest));
@@ -378,7 +379,7 @@ class RouteControllerTest extends IntegrationBaseClass {
 
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
-        final String json = objectMapper.writeValueAsString(routeRequest);
+        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
 
         //when
         final ResultActions result = mockMvc.perform(put(url)
@@ -554,7 +555,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
         preSavedRoute.setStatus(RouteStatus.UNPREPARED);
         final Route preSavedRoute2 = RouteDataGenerator.route(2, company);
-        preSavedRoute2.setStatus(RouteStatus.STARTED);
+        preSavedRoute2.setStatus(RouteStatus.ONGOING);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
         preSavedRoute.setProfile(accountProfile);
         preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, ProductDataGenerator
@@ -578,7 +579,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
         preSavedRoute.setStatus(RouteStatus.UNPREPARED);
         final Route preSavedRoute2 = RouteDataGenerator.route(1, company);
-        preSavedRoute2.setStatus(RouteStatus.STARTED);
+        preSavedRoute2.setStatus(RouteStatus.ONGOING);
         preSavedRoute.setDrops(List.of(DropDataGenerator.drop(1, preSavedRoute, spot)));
         preSavedRoute.setProfile(accountProfile);
         preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, ProductDataGenerator

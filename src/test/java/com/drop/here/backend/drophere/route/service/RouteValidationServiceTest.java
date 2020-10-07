@@ -1,7 +1,7 @@
 package com.drop.here.backend.drophere.route.service;
 
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
-import com.drop.here.backend.drophere.route.dto.RouteRequest;
+import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import com.drop.here.backend.drophere.test_data.RouteDataGenerator;
@@ -48,7 +48,7 @@ class RouteValidationServiceTest {
     @Test
     void givenValidRequestWhenValidateCreateThenDoNothing() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
 
         //when
         final Throwable throwable = catchThrowable(() -> routeValidationService.validateCreate(route));
@@ -60,7 +60,7 @@ class RouteValidationServiceTest {
     @Test
     void givenLimitedAmountWithAmountWhenValidateCreateThenDoNothing() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         route.getProducts().get(0).setLimitedAmount(true);
         route.getProducts().get(0).setAmount(BigDecimal.valueOf(55));
 
@@ -74,7 +74,7 @@ class RouteValidationServiceTest {
     @Test
     void givenLimitedAmountWithoutAmountWhenValidateCreateThenThrowException() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         route.getProducts().get(0).setLimitedAmount(true);
         route.getProducts().get(0).setAmount(null);
 
@@ -88,7 +88,7 @@ class RouteValidationServiceTest {
     @Test
     void givenInvalidDropStartTimeWhenValidateCreateThenDoNothing() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         route.getDrops().get(0).setStartTime("17:61");
 
         //when
@@ -101,7 +101,7 @@ class RouteValidationServiceTest {
     @Test
     void givenInvalidDropEndTimeWhenValidateCreateThenDoNothing() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         route.getDrops().get(0).setEndTime("17:61");
 
         //when
@@ -114,7 +114,7 @@ class RouteValidationServiceTest {
     @Test
     void givenInvalidDropStartEndTimeChronologyWhenValidateCreateThenDoNothing() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         route.getDrops().get(0).setStartTime("17:51");
         route.getDrops().get(0).setEndTime("17:50");
 
@@ -128,7 +128,7 @@ class RouteValidationServiceTest {
     @Test
     void givenValidRequestWhenValidateUpdateThenDoNothing() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
 
         //when
@@ -141,7 +141,7 @@ class RouteValidationServiceTest {
     @Test
     void givenValidRequestInvalidStatusWhenValidateUpdateThenThrowException() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         final Route entity = Route.builder().status(null).build();
 
         //when
@@ -154,7 +154,7 @@ class RouteValidationServiceTest {
     @Test
     void givenLimitedAmountWithAmountWhenValidateUpdateThenDoNothing() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         route.getProducts().get(0).setLimitedAmount(true);
         route.getProducts().get(0).setAmount(BigDecimal.valueOf(55));
         final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
@@ -169,7 +169,7 @@ class RouteValidationServiceTest {
     @Test
     void givenLimitedAmountWithoutAmountWhenValidateUpdateThenThrowException() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         route.getProducts().get(0).setLimitedAmount(true);
         route.getProducts().get(0).setAmount(null);
         final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
@@ -184,7 +184,7 @@ class RouteValidationServiceTest {
     @Test
     void givenInvalidDropStartTimeWhenValidateUpdateThenDoNothing() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         route.getDrops().get(0).setStartTime("17:61");
         final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
 
@@ -198,7 +198,7 @@ class RouteValidationServiceTest {
     @Test
     void givenInvalidDropEndTimeWhenValidateUpdateThenDoNothing() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         route.getDrops().get(0).setEndTime("17:61");
         final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
 
@@ -212,13 +212,97 @@ class RouteValidationServiceTest {
     @Test
     void givenInvalidDropStartEndTimeChronologyWhenValidateUpdateThenDoNothing() {
         //given
-        final RouteRequest route = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
         route.getDrops().get(0).setStartTime("17:51");
         route.getDrops().get(0).setEndTime("17:50");
         final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
 
         //when
         final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateUnprepared(route, entity));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
+
+    @Test
+    void givenUnpreparedStatusWhenValidatePreparedUpdateThenDoNothing() {
+        //given
+        final Route route = Route.builder().status(RouteStatus.UNPREPARED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validatePreparedUpdate(route));
+
+        //then
+        assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenInvalidStatusWhenValidatePrepareedUpdateThenThrowException() {
+        //given
+        final Route route = Route.builder().status(RouteStatus.CANCELLED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validatePreparedUpdate(route));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
+
+    @Test
+    void givenPreparedStatusWhenValidateOngoingUpdateThenDoNothing() {
+        //given
+        final Route route = Route.builder().status(RouteStatus.PREPARED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateOngoingUpdate(route));
+
+        //then
+        assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenInvalidStatusWhenValidateOngoingUpdateThenThrowException() {
+        //given
+        final Route route = Route.builder().status(RouteStatus.CANCELLED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateOngoingUpdate(route));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
+
+    @Test
+    void givenPreparedStatusWhenValidateCancelUpdateThenDoNothing() {
+        //given
+        final Route route = Route.builder().status(RouteStatus.PREPARED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateCancelUpdate(route));
+
+        //then
+        assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenOngoingStatusWhenValidateCancelUpdateThenDoNothing() {
+        //given
+        final Route route = Route.builder().status(RouteStatus.ONGOING).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateCancelUpdate(route));
+
+        //then
+        assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenInvalidStatusWhenValidateCancelUpdateThenThrowException() {
+        //given
+        final Route route = Route.builder().status(RouteStatus.FINISHED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateCancelUpdate(route));
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);

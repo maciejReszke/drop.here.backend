@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
+import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
@@ -44,7 +45,7 @@ class RouteServiceTest {
     void givenRequestWhenCreateRouteThenCreate() {
         //given
         final String companyUid = "companyUid";
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final Account account = AccountDataGenerator.companyAccount(1);
         final Company company = CompanyDataGenerator.company(1, account, null);
         account.setCompany(company);
@@ -66,7 +67,7 @@ class RouteServiceTest {
     void givenExistingRouteWhenUpdateRouteThenUpdate() {
         //given
         final String companyUid = "companyUid";
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final Account account = AccountDataGenerator.companyAccount(1);
         final Company company = CompanyDataGenerator.company(1, account, null);
         account.setCompany(company);
@@ -80,7 +81,7 @@ class RouteServiceTest {
         doNothing().when(routeStoreService).save(route);
 
         //when
-        final ResourceOperationResponse result = routeService.updateRoute(companyUid, routeId, routeRequest, accountAuthentication);
+        final ResourceOperationResponse result = routeService.updateRoute(companyUid, routeId, RouteRequest.builder().unpreparedRouteRequest(routeRequest).build(), accountAuthentication);
 
         //then
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
@@ -90,7 +91,7 @@ class RouteServiceTest {
     void givenNotExistingRouteWhenUpdateRouteThenThrowException() {
         //given
         final String companyUid = "companyUid";
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final Account account = AccountDataGenerator.companyAccount(1);
         final Company company = CompanyDataGenerator.company(1, account, null);
         account.setCompany(company);
@@ -100,7 +101,7 @@ class RouteServiceTest {
         when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> routeService.updateRoute(companyUid, routeId, routeRequest, accountAuthentication));
+        final Throwable throwable = catchThrowable(() -> routeService.updateRoute(companyUid, routeId, RouteRequest.builder().unpreparedRouteRequest(routeRequest).build(), accountAuthentication));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);

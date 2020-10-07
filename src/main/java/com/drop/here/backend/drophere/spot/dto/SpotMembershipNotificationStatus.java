@@ -23,7 +23,6 @@ public class SpotMembershipNotificationStatus {
         return new SpotMembershipNotificationStatus(false, true, false, false, false);
     }
 
-    // TODO: 05/10/2020
     public static SpotMembershipNotificationStatus prepared() {
         return new SpotMembershipNotificationStatus(true, false, false, false, false);
     }

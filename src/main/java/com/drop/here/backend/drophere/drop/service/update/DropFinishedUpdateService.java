@@ -30,7 +30,6 @@ public class DropFinishedUpdateService implements DropUpdateService {
     private final SpotMembershipService spotMembershipService;
     private final NotificationService notificationService;
 
-    // TODO: 07/10/2020
     @Override
     public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest) {
         dropValidationService.validateFinishedUpdate(drop);

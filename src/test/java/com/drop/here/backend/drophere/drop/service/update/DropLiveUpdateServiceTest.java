@@ -58,6 +58,7 @@ class DropLiveUpdateServiceTest {
 
         //then
         assertThat(result).isEqualTo(DropStatus.LIVE);
+        assertThat(drop.getLiveAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
     }
 
 }
