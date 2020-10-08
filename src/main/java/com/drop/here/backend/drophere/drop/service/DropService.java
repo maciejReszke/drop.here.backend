@@ -102,25 +102,25 @@ public class DropService {
         final Company company = authentication.getCompany();
         final Drop drop = findDrop(dropUid, company);
         dropValidationService.validateUpdate(drop, authentication.getProfile());
-        final DropStatus preUpdateStatus = drop.getStatus();
         final DropStatus newStatus = dropUpdateServiceFactory.update(drop, drop.getSpot(), company, authentication.getProfile(), dropManagementRequest);
-        drop.setStatus(newStatus);
-        dropRepository.save(drop);
-        log.info("Successfully updated drop {} from status {} to {}", drop.getUid(), preUpdateStatus, newStatus);
+        updateStatus(drop, newStatus);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, drop.getId());
     }
 
-    // TODO: 07/10/2020 test - wydzielic jakos z 3 funkcji funkcje :P
+    private void updateStatus(Drop drop, DropStatus newStatus) {
+        final DropStatus preUpdateStatus = drop.getStatus();
+        drop.setStatus(newStatus);
+        dropRepository.save(drop);
+        log.info("Successfully updated drop {} from status {} to {}", drop.getUid(), preUpdateStatus, newStatus);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public void prepareDrops(Route route) {
         final Company company = route.getCompany();
         final List<Drop> drops = dropRepository.findByRouteWithSpot(route);
         drops.forEach(drop -> {
-            final DropStatus preUpdateStatus = drop.getStatus();
             final DropStatus newStatus = dropUpdateServiceFactory.prepare(drop, drop.getSpot(), company, route.getProfile());
-            drop.setStatus(newStatus);
-            dropRepository.save(drop);
-            log.info("Successfully updated drop {} from status {} to {}", drop.getUid(), preUpdateStatus, newStatus);
+            updateStatus(drop, newStatus);
         });
     }
 
@@ -132,7 +132,6 @@ public class DropService {
                         RestExceptionStatusCode.DROP_BY_UID_FOR_COMPANY_NOT_FOUND));
     }
 
-    // TODO: 07/10/2020  test
     @Transactional(rollbackFor = Exception.class)
     public void cancelDrops(Route route) {
         final Company company = route.getCompany();
@@ -140,14 +139,11 @@ public class DropService {
         drops.stream()
                 .filter(drop -> drop.getStatus() != DropStatus.CANCELLED && drop.getStatus() != DropStatus.FINISHED)
                 .forEach(drop -> {
-                    final DropStatus preUpdateStatus = drop.getStatus();
                     final DropManagementRequest cancelRequest = DropManagementRequest.builder()
                             .newStatus(DropStatusChange.CANCELLED)
                             .build();
                     final DropStatus newStatus = dropUpdateServiceFactory.update(drop, drop.getSpot(), company, route.getProfile(), cancelRequest);
-                    drop.setStatus(newStatus);
-                    dropRepository.save(drop);
-                    log.info("Successfully updated drop {} from status {} to {}", drop.getUid(), preUpdateStatus, newStatus);
+                    updateStatus(drop, newStatus);
                 });
     }
 }

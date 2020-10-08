@@ -6,12 +6,23 @@ import com.drop.here.backend.drophere.authentication.account.entity.Privilege;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountProfileRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.AccountRepository;
 import com.drop.here.backend.drophere.authentication.account.repository.PrivilegeRepository;
+import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
+import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
+import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
+import com.drop.here.backend.drophere.notification.entity.NotificationToken;
+import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingServiceType;
+import com.drop.here.backend.drophere.notification.enums.NotificationTokenType;
+import com.drop.here.backend.drophere.notification.repository.NotificationJobRepository;
+import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
+import com.drop.here.backend.drophere.notification.repository.NotificationTokenRepository;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
@@ -19,7 +30,8 @@ import com.drop.here.backend.drophere.product.repository.ProductRepository;
 import com.drop.here.backend.drophere.product.repository.ProductUnitRepository;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
-import com.drop.here.backend.drophere.route.dto.RouteRequest;
+import com.drop.here.backend.drophere.route.dto.RouteStateChangeRequest;
+import com.drop.here.backend.drophere.route.dto.RouteStatusChange;
 import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
@@ -32,6 +44,7 @@ import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
+import com.drop.here.backend.drophere.test_data.CustomerDataGenerator;
 import com.drop.here.backend.drophere.test_data.DropDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductUnitDataGenerator;
@@ -54,6 +67,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -100,12 +114,25 @@ class RouteControllerTest extends IntegrationBaseClass {
     @Autowired
     private RouteProductRepository routeProductRepository;
 
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private NotificationTokenRepository notificationTokenRepository;
+
+    @Autowired
+    private NotificationJobRepository notificationJobRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
     private Company company;
     private Account account;
     private Product product;
     private Spot spot;
     private AccountProfile accountProfile;
     private ProductUnit unit;
+    private Customer customer;
 
     @BeforeEach
     void prepare() {
@@ -119,18 +146,32 @@ class RouteControllerTest extends IntegrationBaseClass {
         product = productRepository.save(preSavedProduct);
         spot = spotRepository.save(SpotDataGenerator.spot(1, company));
         accountProfile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY).accountProfile(accountProfile).build());
+        final Account customerAccount = accountRepository.save(AccountDataGenerator.customerAccount(2));
+        customer = customerRepository.save(CustomerDataGenerator.customer(1, customerAccount));
+        notificationTokenRepository.save(NotificationToken.builder()
+                .tokenType(NotificationTokenType.CUSTOMER)
+                .broadcastingServiceType(NotificationBroadcastingServiceType.FIREBASE)
+                .ownerCustomer(customer)
+                .token("token123")
+                .build());
     }
 
 
     @AfterEach
     void cleanUp() {
+        notificationJobRepository.deleteAll();
+        notificationRepository.deleteAll();
+        notificationTokenRepository.deleteAll();
         routeRepository.deleteAll();
         spotRepository.deleteAll();
+        dropRepository.deleteAll();
         productCustomizationWrapperRepository.deleteAll();
         productRepository.deleteAll();
         companyRepository.deleteAll();
         privilegeRepository.deleteAll();
         accountProfileRepository.deleteAll();
+        customerRepository.deleteAll();
         accountRepository.deleteAll();
         productUnitRepository.deleteAll();
         countryRepository.deleteAll();
@@ -257,7 +298,7 @@ class RouteControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidRequestOwnCompanyOperationWhenUpdateRouteThenUpdate() throws Exception {
+    void givenValidRequestOwnCompanyOperationWhenUpdateUnpreparedRouteThenUpdate() throws Exception {
         //given
         final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final RouteProductRequest routeProductRequest = routeRequest.getProducts().get(0);
@@ -274,7 +315,7 @@ class RouteControllerTest extends IntegrationBaseClass {
         preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, newProduct)));
         final Route route = routeRepository.save(preSavedRoute);
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
-        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
+        final String json = objectMapper.writeValueAsString(routeRequest);
 
         //when
         final ResultActions result = mockMvc.perform(put(url)
@@ -316,7 +357,7 @@ class RouteControllerTest extends IntegrationBaseClass {
 
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final String url = String.format("/companies/%s/routes/%s", company.getUid() + "kek", route.getId());
-        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
+        final String json = objectMapper.writeValueAsString(routeRequest);
 
         //when
         final ResultActions result = mockMvc.perform(put(url)
@@ -346,7 +387,7 @@ class RouteControllerTest extends IntegrationBaseClass {
 
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
-        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
+        final String json = objectMapper.writeValueAsString(routeRequest);
         final Privilege privilege = privilegeRepository.findAll().get(0);
         privilege.setName("kaka");
         privilegeRepository.save(privilege);
@@ -379,7 +420,7 @@ class RouteControllerTest extends IntegrationBaseClass {
 
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
-        final String json = objectMapper.writeValueAsString(RouteRequest.builder().unpreparedRouteRequest(routeRequest).build());
+        final String json = objectMapper.writeValueAsString(routeRequest);
 
         //when
         final ResultActions result = mockMvc.perform(put(url)
@@ -394,6 +435,108 @@ class RouteControllerTest extends IntegrationBaseClass {
         assertThat(routeProductRepository.findAll()).isEmpty();
         assertThat(routeRepository.findAll().get(0).getName()).isNotEqualTo("name123");
     }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationWhenUpdateStateRouteThenUpdate() throws Exception {
+        //given
+        final RouteStateChangeRequest routeRequest = RouteDataGenerator.stateChangeRequest(1);
+        routeRequest.setNewStatus(RouteStatusChange.PREPARED);
+        routeRequest.setChangedProfileUid(null);
+
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        final Drop drop = DropDataGenerator.drop(1, preSavedRoute, spot);
+        preSavedRoute.setDrops(List.of(drop));
+        drop.setStatus(DropStatus.UNPREPARED);
+        final Product newProduct = ProductDataGenerator.product(1, unit, company);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, newProduct)));
+        preSavedRoute.setProfile(accountProfile);
+        preSavedRoute.setWithSeller(true);
+        preSavedRoute.setStatus(RouteStatus.UNPREPARED);
+        final Route route = routeRepository.save(preSavedRoute);
+
+        final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
+        final String json = objectMapper.writeValueAsString(routeRequest);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account, accountProfile).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(routeRepository.findAll().get(0).getStatus()).isEqualTo(RouteStatus.PREPARED);
+        assertThat(dropRepository.findAll().get(0).getStatus()).isEqualTo(DropStatus.PREPARED);
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationWithoutProfileWhenUpdateStateRouteThen403() throws Exception {
+        //given
+        final RouteStateChangeRequest routeRequest = RouteDataGenerator.stateChangeRequest(1);
+        routeRequest.setNewStatus(RouteStatusChange.PREPARED);
+        routeRequest.setChangedProfileUid(null);
+
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        final Drop drop = DropDataGenerator.drop(1, preSavedRoute, spot);
+        preSavedRoute.setDrops(List.of(drop));
+        drop.setStatus(DropStatus.UNPREPARED);
+        final Product newProduct = ProductDataGenerator.product(1, unit, company);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, newProduct)));
+        preSavedRoute.setProfile(accountProfile);
+        preSavedRoute.setWithSeller(true);
+        preSavedRoute.setStatus(RouteStatus.UNPREPARED);
+        final Route route = routeRepository.save(preSavedRoute);
+
+        final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
+        final String json = objectMapper.writeValueAsString(routeRequest);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+
+        assertThat(routeRepository.findAll().get(0).getStatus()).isEqualTo(RouteStatus.UNPREPARED);
+        assertThat(dropRepository.findAll().get(0).getStatus()).isEqualTo(DropStatus.UNPREPARED);
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationLackOfSellerWhenUpdateStateRouteThen422() throws Exception {
+        //given
+        final RouteStateChangeRequest routeRequest = RouteDataGenerator.stateChangeRequest(1);
+        routeRequest.setNewStatus(RouteStatusChange.PREPARED);
+        routeRequest.setChangedProfileUid(null);
+
+        final Route preSavedRoute = RouteDataGenerator.route(1, company);
+        final Drop drop = DropDataGenerator.drop(1, preSavedRoute, spot);
+        preSavedRoute.setDrops(List.of(drop));
+        drop.setStatus(DropStatus.UNPREPARED);
+        final Product newProduct = ProductDataGenerator.product(1, unit, company);
+        preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, newProduct)));
+        preSavedRoute.setWithSeller(false);
+        preSavedRoute.setStatus(RouteStatus.UNPREPARED);
+        final Route route = routeRepository.save(preSavedRoute);
+
+        final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
+        final String json = objectMapper.writeValueAsString(routeRequest);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account, accountProfile).getToken()));
+
+        //then
+        result.andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()));
+
+        assertThat(routeRepository.findAll().get(0).getStatus()).isEqualTo(RouteStatus.UNPREPARED);
+        assertThat(dropRepository.findAll().get(0).getStatus()).isEqualTo(DropStatus.UNPREPARED);
+    }
+
 
     @Test
     void givenValidRequestOwnCompanyOperationWhenDeleteRouteThenDelete() throws Exception {

@@ -20,8 +20,8 @@ public class RouteUpdateStateServiceFactory {
 
     public RouteStatus update(Route route, RouteStateChangeRequest request) {
         return API.Match(request.getNewStatus()).of(
-                Case($(RouteStatusChange.ONGOING), () -> routeOngoingUpdateStateService),
                 Case($(RouteStatusChange.PREPARED), () -> routePreparedUpdateStateService),
+                Case($(RouteStatusChange.ONGOING), () -> routeOngoingUpdateStateService),
                 Case($(RouteStatusChange.CANCELLED), () -> routeCancelUpdateStateService))
                 .update(route);
     }

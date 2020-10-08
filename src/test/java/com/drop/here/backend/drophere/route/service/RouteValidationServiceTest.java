@@ -1,6 +1,9 @@
 package com.drop.here.backend.drophere.route.service;
 
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
+import com.drop.here.backend.drophere.common.exceptions.RestOperationForbiddenException;
 import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
@@ -249,9 +252,9 @@ class RouteValidationServiceTest {
     }
 
     @Test
-    void givenPreparedStatusWhenValidateOngoingUpdateThenDoNothing() {
+    void givenPreparedStatusRouteWithSellerWhenValidateOngoingUpdateThenDoNothing() {
         //given
-        final Route route = Route.builder().status(RouteStatus.PREPARED).build();
+        final Route route = Route.builder().withSeller(true).status(RouteStatus.PREPARED).build();
 
         //when
         final Throwable throwable = catchThrowable(() -> routeValidationService.validateOngoingUpdate(route));
@@ -261,9 +264,21 @@ class RouteValidationServiceTest {
     }
 
     @Test
+    void givenPreparedStatusRouteWithoutSellerWhenValidateOngoingUpdateThenThrowException() {
+        //given
+        final Route route = Route.builder().withSeller(false).status(RouteStatus.PREPARED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateOngoingUpdate(route));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
+
+    @Test
     void givenInvalidStatusWhenValidateOngoingUpdateThenThrowException() {
         //given
-        final Route route = Route.builder().status(RouteStatus.CANCELLED).build();
+        final Route route = Route.builder().withSeller(true).status(RouteStatus.CANCELLED).build();
 
         //when
         final Throwable throwable = catchThrowable(() -> routeValidationService.validateOngoingUpdate(route));
@@ -306,5 +321,57 @@ class RouteValidationServiceTest {
 
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
+
+    @Test
+    void givenRouteWithoutProfileWhenValidateUpdateStateChangedThenDoNothing() {
+        //given
+        final Route route = Route.builder().withSeller(false).build();
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateStateChanged(route, accountProfile));
+
+        //then
+        assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenRouteWithProfileSameAsInvokerWhenValidateUpdateStateChangedThenDoNothing() {
+        //given
+        final Route route = Route.builder().withSeller(true).profile(AccountProfile.builder().id(5L).build()).build();
+        final AccountProfile accountProfile = AccountProfile.builder().id(5L).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateStateChanged(route, accountProfile));
+
+        //then
+        assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenRouteWithProfileDifferentThanInvokerMainProfileWhenValidateUpdateStateChangedThenDoNothing() {
+        //given
+        final Route route = Route.builder().withSeller(true).profile(AccountProfile.builder().id(5L).build()).build();
+        final AccountProfile accountProfile = AccountProfile.builder().id(6L).profileType(AccountProfileType.MAIN).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateStateChanged(route, accountProfile));
+
+        //then
+        assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenRouteWithProfileDifferentThanInvokerSubProfileWhenValidateUpdateStateChangedThenDoNothing() {
+        //given
+        final Route route = Route.builder().withSeller(true).profile(AccountProfile.builder().id(5L).build()).build();
+        final AccountProfile accountProfile = AccountProfile.builder().id(6L).profileType(AccountProfileType.SUBPROFILE).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateStateChanged(route, accountProfile));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestOperationForbiddenException.class);
     }
 }

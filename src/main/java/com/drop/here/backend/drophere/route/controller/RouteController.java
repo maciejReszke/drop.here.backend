@@ -1,10 +1,11 @@
 package com.drop.here.backend.drophere.route.controller;
 
+import com.drop.here.backend.drophere.authentication.account.service.PrivilegeService;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
-import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
 import com.drop.here.backend.drophere.route.dto.RouteShortResponse;
+import com.drop.here.backend.drophere.route.dto.RouteStateChangeRequest;
 import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.service.RouteService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -98,9 +100,26 @@ public class RouteController {
     @ApiOperation(value = "Updating route", authorizations = @Authorization(value = "AUTHORIZATION"))
     public ResourceOperationResponse updateRoute(@ApiIgnore @PathVariable String companyUid,
                                                  @ApiIgnore @PathVariable Long routeId,
-                                                 @RequestBody @Valid RouteRequest routeRequest,
+                                                 @RequestBody @Valid UnpreparedRouteRequest routeRequest,
                                                  @ApiIgnore AccountAuthentication accountAuthentication) {
-        return routeService.updateRoute(companyUid, routeId, routeRequest, accountAuthentication);
+        return routeService.updateUnpreparedRoute(companyUid, routeId, routeRequest, accountAuthentication);
+    }
+
+    @PatchMapping("/{routeId}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid) && " +
+            "hasAuthority('" + PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY + "')")
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Route updated"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    @ApiOperation(value = "Updating route", authorizations = @Authorization(value = "AUTHORIZATION"))
+    public ResourceOperationResponse updateRoute(@ApiIgnore @PathVariable String companyUid,
+                                                 @ApiIgnore @PathVariable Long routeId,
+                                                 @RequestBody @Valid RouteStateChangeRequest routeRequest,
+                                                 @ApiIgnore AccountAuthentication accountAuthentication) {
+        return routeService.updateRouteStatus(companyUid, routeId, routeRequest, accountAuthentication);
     }
 
 

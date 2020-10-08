@@ -28,14 +28,14 @@ class RouteOngoingUpdateStateServiceTest {
         //given
         final Route route = Route.builder().build();
 
-        doNothing().when(routeValidationService).validatePreparedUpdate(route);
+        doNothing().when(routeValidationService).validateOngoingUpdate(route);
 
         //when
         final RouteStatus status = routeOngoingUpdateStateService.update(route);
 
         //then
         assertThat(status).isEqualTo(RouteStatus.ONGOING);
-        assertThat(route.getPreparedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
+        assertThat(route.getOngoingAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
     }
 
 }

@@ -1,14 +1,18 @@
 package com.drop.here.backend.drophere.route.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.account.service.AccountProfilePersistenceService;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
+import com.drop.here.backend.drophere.route.dto.RouteStateChangeRequest;
 import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
+import com.drop.here.backend.drophere.route.enums.RouteStatus;
+import com.drop.here.backend.drophere.route.service.state_update.RouteUpdateStateServiceFactory;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
@@ -41,6 +45,12 @@ class RouteServiceTest {
     @Mock
     private RouteValidationService routeValidationService;
 
+    @Mock
+    private AccountProfilePersistenceService accountProfilePersistenceService;
+
+    @Mock
+    private RouteUpdateStateServiceFactory routeUpdateStateServiceFactory;
+
     @Test
     void givenRequestWhenCreateRouteThenCreate() {
         //given
@@ -64,7 +74,7 @@ class RouteServiceTest {
     }
 
     @Test
-    void givenExistingRouteWhenUpdateRouteThenUpdate() {
+    void givenExistingRouteUnpreparedRouteRequestWhenUpdateRouteThenUpdate() {
         //given
         final String companyUid = "companyUid";
         final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
@@ -81,10 +91,92 @@ class RouteServiceTest {
         doNothing().when(routeStoreService).save(route);
 
         //when
-        final ResourceOperationResponse result = routeService.updateRoute(companyUid, routeId, RouteRequest.builder().unpreparedRouteRequest(routeRequest).build(), accountAuthentication);
+        final ResourceOperationResponse result = routeService.updateUnpreparedRoute(companyUid, routeId, routeRequest, accountAuthentication);
 
         //then
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+    }
+
+    @Test
+    void givenExistingRouteStateChangedRouteRequestWithChangedSellerProfileWhenUpdateRouteThenUpdate() {
+        //given
+        final String companyUid = "companyUid";
+        final RouteStateChangeRequest routeRequest = RouteDataGenerator.stateChangeRequest(1);
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = CompanyDataGenerator.company(1, account, null);
+        account.setCompany(company);
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final Long routeId = 15L;
+        final Route route = RouteDataGenerator.route(1, company);
+        route.setWithSeller(false);
+        route.setStatus(null);
+
+        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
+        doNothing().when(routeValidationService).validateUpdateStateChanged(route, accountAuthentication.getProfile());
+        when(accountProfilePersistenceService.findActiveByCompanyAndProfileUid(company, routeRequest.getChangedProfileUid()))
+                .thenReturn(Optional.of(accountProfile));
+        doNothing().when(routeStoreService).save(route);
+        when(routeUpdateStateServiceFactory.update(route, routeRequest)).thenReturn(RouteStatus.CANCELLED);
+
+        //when
+        final ResourceOperationResponse result = routeService.updateRouteStatus(companyUid, routeId, routeRequest, accountAuthentication);
+
+        //then
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        assertThat(route.getStatus()).isEqualTo(RouteStatus.CANCELLED);
+        assertThat(route.getProfile()).isEqualTo(accountProfile);
+        assertThat(route.isWithSeller()).isTrue();
+    }
+
+    @Test
+    void givenNotExistingRouteWhenUpdateStateRouteThenThrowException() {
+        //given
+        final String companyUid = "companyUid";
+        final RouteStateChangeRequest routeRequest = RouteDataGenerator.stateChangeRequest(1);
+        routeRequest.setChangedProfileUid(null);
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = CompanyDataGenerator.company(1, account, null);
+        account.setCompany(company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final Long routeId = 15L;
+        final Route route = RouteDataGenerator.route(1, company);
+        route.setWithSeller(false);
+        route.setStatus(null);
+
+        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
+        doNothing().when(routeValidationService).validateUpdateStateChanged(route, accountAuthentication.getProfile());
+        doNothing().when(routeStoreService).save(route);
+        when(routeUpdateStateServiceFactory.update(route, routeRequest)).thenReturn(RouteStatus.CANCELLED);
+
+        //when
+        final ResourceOperationResponse result = routeService.updateRouteStatus(companyUid, routeId, routeRequest, accountAuthentication);
+
+        //then
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        assertThat(route.getStatus()).isEqualTo(RouteStatus.CANCELLED);
+        assertThat(route.getProfile()).isNull();
+        assertThat(route.isWithSeller()).isTrue();
+    }
+
+    @Test
+    void givenNotExistingRouteWhenUpdateUnpreparedRouteThenThrowException() {
+        //given
+        final String companyUid = "companyUid";
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
+        final Account account = AccountDataGenerator.companyAccount(1);
+        final Company company = CompanyDataGenerator.company(1, account, null);
+        account.setCompany(company);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final Long routeId = 15L;
+
+        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeService.updateUnpreparedRoute(companyUid, routeId, routeRequest, accountAuthentication));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 
     @Test
@@ -101,7 +193,7 @@ class RouteServiceTest {
         when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> routeService.updateRoute(companyUid, routeId, RouteRequest.builder().unpreparedRouteRequest(routeRequest).build(), accountAuthentication));
+        final Throwable throwable = catchThrowable(() -> routeService.updateUnpreparedRoute(companyUid, routeId, routeRequest, accountAuthentication));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);

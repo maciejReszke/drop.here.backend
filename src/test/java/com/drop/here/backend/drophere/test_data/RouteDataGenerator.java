@@ -4,6 +4,8 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
+import com.drop.here.backend.drophere.route.dto.RouteStateChangeRequest;
+import com.drop.here.backend.drophere.route.dto.RouteStatusChange;
 import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
@@ -26,6 +28,13 @@ public class RouteDataGenerator {
                 .name("routeName" + i)
                 .products(List.of(productRequest(2 * i), productRequest(2 * i + 1)))
                 .profileUid("profileUid" + i)
+                .build();
+    }
+
+    public RouteStateChangeRequest stateChangeRequest(int i) {
+        return RouteStateChangeRequest.builder()
+                .changedProfileUid("changedProfileUid" + i)
+                .newStatus(RouteStatusChange.CANCELLED)
                 .build();
     }
 

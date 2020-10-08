@@ -1,11 +1,12 @@
 package com.drop.here.backend.drophere.route.service;
 
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.account.service.AccountProfilePersistenceService;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
 import com.drop.here.backend.drophere.route.dto.RouteShortResponse;
 import com.drop.here.backend.drophere.route.dto.RouteStateChangeRequest;
@@ -16,6 +17,7 @@ import com.drop.here.backend.drophere.route.service.state_update.RouteUpdateStat
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class RouteService {
     private final RouteStoreService routeStoreService;
     private final RouteValidationService routeValidationService;
     private final RouteUpdateStateServiceFactory routeUpdateStateServiceFactory;
+    private final AccountProfilePersistenceService accountProfilePersistenceService;
 
     public Page<RouteShortResponse> findRoutes(AccountAuthentication accountAuthentication, String routeStatus, Pageable pageable) {
         return routeStoreService.findByCompany(accountAuthentication.getCompany(), routeStatus, pageable);
@@ -48,16 +51,9 @@ public class RouteService {
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, route.getId());
     }
 
-    // TODO: 07/10/2020 test
     @Transactional(rollbackFor = Exception.class)
-    public ResourceOperationResponse updateRoute(String companyUid, Long routeId, RouteRequest routeRequest, AccountAuthentication accountAuthentication) {
+    public ResourceOperationResponse updateUnpreparedRoute(String companyUid, Long routeId, UnpreparedRouteRequest routeRequest, AccountAuthentication accountAuthentication) {
         final Route route = findByIdAndCompany(routeId, accountAuthentication.getCompany());
-        return routeRequest.getRouteStateChangeRequest() == null
-                ? updateRouteUnprepared(companyUid, route, routeRequest.getUnpreparedRouteRequest(), accountAuthentication)
-                : updateRouteStatus(companyUid, route, routeRequest.getRouteStateChangeRequest(), accountAuthentication);
-    }
-
-    private ResourceOperationResponse updateRouteUnprepared(String companyUid, Route route, UnpreparedRouteRequest routeRequest, AccountAuthentication accountAuthentication) {
         routeValidationService.validateUpdateUnprepared(routeRequest, route);
         routeMappingService.updateRoute(route, routeRequest, accountAuthentication.getCompany());
         log.info("Updating route for company {} with name {} id {} {}", companyUid, route.getName(), route.getId(), route.getStatus());
@@ -65,13 +61,27 @@ public class RouteService {
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, route.getId());
     }
 
-    // TODO: 07/10/2020 - sprawdzic czy account profile moze tego dokonac + update profilu
-    private ResourceOperationResponse updateRouteStatus(String companyUid, Route route, RouteStateChangeRequest routeStateChangeRequest, AccountAuthentication accountAuthentication) {
+    @Transactional(rollbackFor = Exception.class)
+    public ResourceOperationResponse updateRouteStatus(String companyUid, Long routeId, RouteStateChangeRequest routeStateChangeRequest, AccountAuthentication accountAuthentication) {
+        final Route route = findByIdAndCompany(routeId, accountAuthentication.getCompany());
+        routeValidationService.validateUpdateStateChanged(route, accountAuthentication.getProfile());
+        final AccountProfile newSeller = getNewSeller(companyUid, route, routeStateChangeRequest, accountAuthentication);
+        route.setWithSeller(true);
+        route.setProfile(newSeller);
         final RouteStatus newStatus = routeUpdateStateServiceFactory.update(route, routeStateChangeRequest);
         log.info("Updating route for company {} with name {} id {} from {} to {}", companyUid, route.getName(), route.getId(), route.getStatus(), newStatus);
         route.setStatus(newStatus);
         routeStoreService.save(route);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, route.getId());
+    }
+
+    private AccountProfile getNewSeller(String companyUid, Route route, RouteStateChangeRequest routeStateChangeRequest, AccountAuthentication accountAuthentication) {
+        return StringUtils.isBlank(routeStateChangeRequest.getChangedProfileUid())
+                ? route.getProfile()
+                : accountProfilePersistenceService.findActiveByCompanyAndProfileUid(accountAuthentication.getCompany(), routeStateChangeRequest.getChangedProfileUid())
+                .orElseThrow(() -> new RestEntityNotFoundException(String.format("Profile with uid %s for company %s was not found",
+                        routeStateChangeRequest.getChangedProfileUid(), companyUid),
+                        RestExceptionStatusCode.UPDATE_ROUTE_STATUS_SELLER_NOT_FOUND));
     }
 
     @Transactional(rollbackFor = Exception.class)

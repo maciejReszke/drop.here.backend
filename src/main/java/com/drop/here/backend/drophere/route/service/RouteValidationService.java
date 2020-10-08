@@ -1,7 +1,10 @@
 package com.drop.here.backend.drophere.route.service;
 
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
+import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
+import com.drop.here.backend.drophere.common.exceptions.RestOperationForbiddenException;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
 import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
@@ -72,6 +75,11 @@ public class RouteValidationService {
     }
 
     public void validateOngoingUpdate(Route route) {
+        if (!route.isWithSeller()) {
+            throw new RestIllegalRequestValueException(String.format(
+                    "To update route with id %s to ONGOING route must contain seller", route.getId()),
+                    RestExceptionStatusCode.ROUTE_UPDATE_ONGOING_UPDATE_LACK_OF_SELLER);
+        }
         validateUpdatePresentStatus(route, EnumSet.of(RouteStatus.PREPARED), RouteStatus.ONGOING);
     }
 
@@ -82,7 +90,7 @@ public class RouteValidationService {
     private void validateUpdatePresentStatus(Route route, EnumSet<RouteStatus> desiredStatuses, RouteStatus updateToStatus) {
         if (!desiredStatuses.contains(route.getStatus())) {
             throw new RestIllegalRequestValueException(String.format(
-                    "In order to change route status to %s it must be in %s but was %s", updateToStatus, desiredStatuses
+                    "In order to change route %s status to %s it must be in %s but was %s", route.getId(), updateToStatus, desiredStatuses
                             .stream()
                             .map(Enum::name)
                             .collect(Collectors.joining(",")), route.getStatus()),
@@ -90,4 +98,12 @@ public class RouteValidationService {
         }
     }
 
+    public void validateUpdateStateChanged(Route route, AccountProfile profile) {
+        if (route.isWithSeller() && !route.getProfile().getId().equals(profile.getId()) && profile.getProfileType() != AccountProfileType.MAIN) {
+            throw new RestOperationForbiddenException(String.format(
+                    "To perform route %s state update change either route seller must not be set action must be performed by seller or company owner",
+                    route.getId()),
+                    RestExceptionStatusCode.UPDATE_ROUTE_STATE_INVALID_UPDATING_PROFILE);
+        }
+    }
 }

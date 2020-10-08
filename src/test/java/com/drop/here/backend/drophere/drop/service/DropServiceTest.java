@@ -28,6 +28,7 @@ import com.drop.here.backend.drophere.spot.service.SpotSearchingService;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import com.drop.here.backend.drophere.test_data.DropDataGenerator;
+import com.drop.here.backend.drophere.test_data.RouteDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,6 +42,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -219,5 +222,83 @@ class DropServiceTest {
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenExistingDropWhenPrepareDropsThenUpdateStatus() {
+        //given
+        final Company company = Company.builder().build();
+        final Route route = RouteDataGenerator.route(1, company);
+        final Spot spot = Spot.builder().build();
+        final Drop drop = Drop.builder().spot(spot).build();
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+        route.setProfile(accountProfile);
+
+        when(dropRepository.findByRouteWithSpot(route)).thenReturn(List.of(drop));
+        when(dropUpdateServiceFactory.prepare(drop, spot, company, accountProfile))
+                .thenReturn(DropStatus.CANCELLED);
+        when(dropRepository.save(drop)).thenReturn(drop);
+
+        //when
+        dropService.prepareDrops(route);
+
+        //then
+        assertThat(drop.getStatus()).isEqualTo(DropStatus.CANCELLED);
+    }
+
+    @Test
+    void givenNotCanceledNorFinishedDropWhenCancelDropsThenUpdateStatus() {
+        //given
+        final Company company = Company.builder().build();
+        final Route route = RouteDataGenerator.route(1, company);
+        final Spot spot = Spot.builder().build();
+        final Drop drop = Drop.builder().spot(spot).status(DropStatus.DELAYED).build();
+        final AccountProfile accountProfile = AccountProfile.builder().build();
+        route.setProfile(accountProfile);
+
+        when(dropRepository.findByRouteWithSpot(route)).thenReturn(List.of(drop));
+        when(dropUpdateServiceFactory.update(eq(drop), eq(spot), eq(company), eq(accountProfile), any()))
+                .thenReturn(DropStatus.CANCELLED);
+        when(dropRepository.save(drop)).thenReturn(drop);
+
+        //when
+        dropService.cancelDrops(route);
+
+        //then
+        assertThat(drop.getStatus()).isEqualTo(DropStatus.CANCELLED);
+    }
+
+    @Test
+    void givenCancelledDropWhenCancelDropsThenDoNothing() {
+        //given
+        final Company company = Company.builder().build();
+        final Route route = RouteDataGenerator.route(1, company);
+        final Spot spot = Spot.builder().build();
+        final Drop drop = Drop.builder().spot(spot).status(DropStatus.CANCELLED).build();
+
+        when(dropRepository.findByRouteWithSpot(route)).thenReturn(List.of(drop));
+
+        //when
+        dropService.cancelDrops(route);
+
+        //then
+        assertThat(drop.getStatus()).isEqualTo(DropStatus.CANCELLED);
+    }
+
+    @Test
+    void givenFinishedDropWhenCancelDropsThenDoNothing() {
+        //given
+        final Company company = Company.builder().build();
+        final Route route = RouteDataGenerator.route(1, company);
+        final Spot spot = Spot.builder().build();
+        final Drop drop = Drop.builder().spot(spot).status(DropStatus.FINISHED).build();
+
+        when(dropRepository.findByRouteWithSpot(route)).thenReturn(List.of(drop));
+
+        //when
+        dropService.cancelDrops(route);
+
+        //then
+        assertThat(drop.getStatus()).isEqualTo(DropStatus.FINISHED);
     }
 }
