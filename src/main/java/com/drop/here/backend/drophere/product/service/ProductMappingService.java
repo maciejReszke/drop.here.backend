@@ -39,7 +39,7 @@ public class ProductMappingService {
         product.getCustomizationWrappers().forEach(customizationWrapper -> customizationWrapper.setProduct(null));
         product.getCustomizationWrappers().clear();
         product.setName(request.getName());
-        product.setCategory(request.getCategory());
+        product.setCategory(request.getCategory().toUpperCase());
         product.setUnit(unit);
         product.setUnitName(unit.getName());
         product.setUnitFraction(request.getUnitFraction() == null ? BigDecimal.ONE : request.getUnitFraction().setScale(2, RoundingMode.DOWN));

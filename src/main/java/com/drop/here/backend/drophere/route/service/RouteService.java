@@ -66,7 +66,7 @@ public class RouteService {
         final Route route = findByIdAndCompany(routeId, accountAuthentication.getCompany());
         routeValidationService.validateUpdateStateChanged(route, accountAuthentication.getProfile());
         final AccountProfile newSeller = getNewSeller(companyUid, route, routeStateChangeRequest, accountAuthentication);
-        route.setWithSeller(true);
+        route.setWithSeller(newSeller != null);
         route.setProfile(newSeller);
         final RouteStatus newStatus = routeUpdateStateServiceFactory.update(route, routeStateChangeRequest);
         log.info("Updating route for company {} with name {} id {} from {} to {}", companyUid, route.getName(), route.getId(), route.getStatus(), newStatus);

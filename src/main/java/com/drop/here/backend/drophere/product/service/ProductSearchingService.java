@@ -69,6 +69,7 @@ public class ProductSearchingService {
                 .collect(Collectors.toList());
     }
 
+    // TODO: 08/10/2020  
     private ProductResponse toProductResponse(Product product, List<ProductCustomizationWrapper> customizationWrappers) {
         return ProductResponse.builder()
                 .id(product.getId())

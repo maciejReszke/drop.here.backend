@@ -45,7 +45,7 @@ public class DropPreparedUpdateService {
                 .referencedSubjectType(NotificationReferencedSubjectType.DROP)
                 .referencedSubjectId(drop.getUid())
                 .recipientCustomers(memberships.stream().map(SpotMembership::getCustomer).collect(Collectors.toList()))
-                .recipientAccountProfiles(List.of(profile))
+                .recipientAccountProfiles(profile != null ? List.of(profile) : List.of())
                 .build();
     }
 }

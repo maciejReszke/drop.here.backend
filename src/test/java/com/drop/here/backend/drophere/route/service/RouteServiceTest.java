@@ -156,7 +156,7 @@ class RouteServiceTest {
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
         assertThat(route.getStatus()).isEqualTo(RouteStatus.CANCELLED);
         assertThat(route.getProfile()).isNull();
-        assertThat(route.isWithSeller()).isTrue();
+        assertThat(route.isWithSeller()).isFalse();
     }
 
     @Test

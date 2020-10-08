@@ -505,20 +505,20 @@ class RouteControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidRequestOwnCompanyOperationLackOfSellerWhenUpdateStateRouteThen422() throws Exception {
+    void givenValidRequestOwnCompanyOperationOngoingLackOfSellerWhenUpdateStateRouteThen422() throws Exception {
         //given
         final RouteStateChangeRequest routeRequest = RouteDataGenerator.stateChangeRequest(1);
-        routeRequest.setNewStatus(RouteStatusChange.PREPARED);
+        routeRequest.setNewStatus(RouteStatusChange.ONGOING);
         routeRequest.setChangedProfileUid(null);
 
         final Route preSavedRoute = RouteDataGenerator.route(1, company);
         final Drop drop = DropDataGenerator.drop(1, preSavedRoute, spot);
         preSavedRoute.setDrops(List.of(drop));
-        drop.setStatus(DropStatus.UNPREPARED);
+        drop.setStatus(DropStatus.PREPARED);
         final Product newProduct = ProductDataGenerator.product(1, unit, company);
         preSavedRoute.setProducts(List.of(RouteDataGenerator.product(1, preSavedRoute, newProduct)));
         preSavedRoute.setWithSeller(false);
-        preSavedRoute.setStatus(RouteStatus.UNPREPARED);
+        preSavedRoute.setStatus(RouteStatus.PREPARED);
         final Route route = routeRepository.save(preSavedRoute);
 
         final String url = String.format("/companies/%s/routes/%s", company.getUid(), route.getId());
@@ -533,8 +533,8 @@ class RouteControllerTest extends IntegrationBaseClass {
         //then
         result.andExpect(status().is(HttpStatus.UNPROCESSABLE_ENTITY.value()));
 
-        assertThat(routeRepository.findAll().get(0).getStatus()).isEqualTo(RouteStatus.UNPREPARED);
-        assertThat(dropRepository.findAll().get(0).getStatus()).isEqualTo(DropStatus.UNPREPARED);
+        assertThat(routeRepository.findAll().get(0).getStatus()).isEqualTo(RouteStatus.PREPARED);
+        assertThat(dropRepository.findAll().get(0).getStatus()).isEqualTo(DropStatus.PREPARED);
     }
 
 
