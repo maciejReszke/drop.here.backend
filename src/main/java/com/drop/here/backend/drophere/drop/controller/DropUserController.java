@@ -37,7 +37,7 @@ public class DropUserController {
     })
     public DropDetailedCustomerResponse findDrop(@ApiIgnore AccountAuthentication authentication,
                                                  @ApiIgnore @PathVariable String dropUid) {
-        return dropService.findDrop(dropUid, authentication);
+        return dropService.findDropForCustomer(dropUid, authentication);
     }
 
 }

@@ -15,6 +15,22 @@ import javax.validation.constraints.NotNull;
 public class SpotMembershipManagementRequest {
 
     @NotNull
-    @ApiModelProperty(value = "Does user want to receive notifications", example = "true", required = true)
-    private boolean receiveNotification;
+    @ApiModelProperty(value = "Does user want to receive notifications when company goes live", example = "true")
+    private boolean receiveLiveNotifications;
+
+    @NotNull
+    @ApiModelProperty(value = "Does user want to receive notifications when company prepares drop", example = "true")
+    private boolean receivePreparedNotifications;
+
+    @NotNull
+    @ApiModelProperty(value = "Does user want to receive notifications when company finishes drop", example = "true")
+    private boolean receiveFinishedNotifications;
+
+    @NotNull
+    @ApiModelProperty(value = "Does user want to receive notifications when company delays drop", example = "true")
+    private boolean receiveDelayedNotifications;
+
+    @NotNull
+    @ApiModelProperty(value = "Does user want to receive notifications when company cancels drop", example = "true")
+    private boolean receiveCancelledNotifications;
 }

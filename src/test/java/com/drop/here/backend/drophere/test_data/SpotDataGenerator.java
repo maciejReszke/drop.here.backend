@@ -49,7 +49,11 @@ public class SpotDataGenerator {
                 .customer(customer)
                 .membershipStatus(SpotMembershipStatus.ACTIVE)
                 .spot(spot)
-                .receiveNotification(false)
+                .receiveFinishedNotifications(false)
+                .receiveLiveNotifications(false)
+                .receiveDelayedNotifications(true)
+                .receivePreparedNotifications(false)
+                .receiveCancelledNotifications(true)
                 .lastUpdatedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();

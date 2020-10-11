@@ -9,15 +9,13 @@ import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.enums.ProductCreationType;
-import com.drop.here.backend.drophere.product.service.ProductSearchingService;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
-import com.drop.here.backend.drophere.route.dto.RouteRequest;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
+import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
-import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.service.SpotPersistenceService;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
@@ -75,7 +73,7 @@ class RouteMappingServiceTest {
     @Test
     void givenValidRequestWhenToRouteThenMap() {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final Company company = CompanyDataGenerator.company(1, null, null);
 
         final Product product = Product.builder().build();
@@ -96,7 +94,7 @@ class RouteMappingServiceTest {
         assertThat(response.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(response.getName()).isEqualTo(routeRequest.getName());
         assertThat(response.getDescription()).isEqualTo(routeRequest.getDescription());
-        assertThat(response.getStatus()).isEqualTo(RouteStatus.PREPARED);
+        assertThat(response.getStatus()).isEqualTo(RouteStatus.UNPREPARED);
         assertThat(response.getProfile()).isEqualTo(accountProfile);
         assertThat(response.getRouteDate().format(DateTimeFormatter.ISO_LOCAL_DATE)).isEqualTo(routeRequest.getDate());
         assertThat(response.getProducts()).hasSize(2);
@@ -123,13 +121,13 @@ class RouteMappingServiceTest {
         assertThat(response.getDrops().get(0).getUid()).isEqualTo("uid");
         assertThat(response.getDrops().get(0).getSpot()).isEqualTo(spot);
         assertThat(response.getDrops().get(0).getRoute()).isEqualTo(response);
-        assertThat(response.getDrops().get(0).getStatus()).isEqualTo(DropStatus.PREPARED);
+        assertThat(response.getDrops().get(0).getStatus()).isEqualTo(DropStatus.UNPREPARED);
     }
 
     @Test
     void givenRequestAndRouteWhenUpdateRouteThenUpdate() {
         //given
-        final RouteRequest routeRequest = RouteDataGenerator.request(1);
+        final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final Company company = CompanyDataGenerator.company(1, null, null);
 
         final Product product = Product.builder().build();
@@ -183,7 +181,7 @@ class RouteMappingServiceTest {
         assertThat(route.getDrops().get(0).getUid()).startsWith("uid");
         assertThat(route.getDrops().get(0).getSpot()).isEqualTo(spot);
         assertThat(route.getDrops().get(0).getRoute()).isEqualTo(route);
-        assertThat(route.getDrops().get(0).getStatus()).isEqualTo(DropStatus.PREPARED);
+        assertThat(route.getDrops().get(0).getStatus()).isEqualTo(DropStatus.UNPREPARED);
         assertThat(prevDrop.getRoute()).isNull();
         assertThat(prevProduct.getRoute()).isNull();
     }

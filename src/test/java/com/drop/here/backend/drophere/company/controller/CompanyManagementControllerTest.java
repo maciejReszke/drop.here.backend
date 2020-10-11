@@ -17,13 +17,13 @@ import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
+import com.drop.here.backend.drophere.image.Image;
+import com.drop.here.backend.drophere.image.ImageRepository;
+import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.entity.SpotMembership;
 import com.drop.here.backend.drophere.spot.repository.SpotMembershipRepository;
 import com.drop.here.backend.drophere.spot.repository.SpotRepository;
-import com.drop.here.backend.drophere.image.Image;
-import com.drop.here.backend.drophere.image.ImageRepository;
-import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
@@ -163,7 +163,7 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
         //given
         final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_FULL_MANAGEMENT_PRIVILEGE))
                 .findFirst().orElseThrow();
-        privilege.setName(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE);
+        privilege.setName(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY);
         privilegeRepository.save(privilege);
 
         final String url = "/management/companies";
@@ -206,6 +206,10 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
     @Test
     void givenNotExistingCompanyWhenGetCompanyThenGet() throws Exception {
         //given
+        final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_FULL_MANAGEMENT_PRIVILEGE))
+                .findFirst().orElseThrow();
+        privilege.setName(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY);
+        privilegeRepository.save(privilege);
         final String url = "/management/companies";
 
         //when
@@ -221,25 +225,10 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
     @Test
     void givenExistingCompanyWhenGetCompanyThenGet() throws Exception {
         //given
-        companyRepository.save(CompanyDataGenerator.company(1, account, country));
-        final String url = "/management/companies";
-
-        //when
-        final ResultActions result = mockMvc.perform(get(url)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
-
-        //then
-        result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.registered", Matchers.equalTo(true)))
-                .andExpect(jsonPath("$.name", Matchers.equalTo("companyName1")));
-    }
-
-    @Test
-    void givenExistingCompanyNotOwnerWhenGetCompanyThenGet() throws Exception {
-        //given
         final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_FULL_MANAGEMENT_PRIVILEGE))
                 .findFirst().orElseThrow();
-        privilege.setName(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE);
+        privilege.setName(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY);
+        privilegeRepository.save(privilege);
         companyRepository.save(CompanyDataGenerator.company(1, account, country));
         final String url = "/management/companies";
 
@@ -252,7 +241,6 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
                 .andExpect(jsonPath("$.registered", Matchers.equalTo(true)))
                 .andExpect(jsonPath("$.name", Matchers.equalTo("companyName1")));
     }
-
 
     @Test
     void givenInvalidPrivilegeWhenGetCompanyThen403() throws Exception {
@@ -340,7 +328,7 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
         companyRepository.save(CompanyDataGenerator.company(1, account, country));
         final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_FULL_MANAGEMENT_PRIVILEGE))
                 .findFirst().orElseThrow();
-        privilege.setName(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE);
+        privilege.setName(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY);
         privilegeRepository.save(privilege);
         final String url = "/management/companies/images";
         final byte[] bytes = new FileInputStream(new ClassPathResource("imageTest/validImage").getFile()).readAllBytes();
@@ -487,6 +475,46 @@ class CompanyManagementControllerTest extends IntegrationBaseClass {
         //then
         perform.andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(2)));
+    }
+
+    @Test
+    void givenWithNameParamRequestLastNameFirstNameConcatWhenFindCustomersThenFindCustomers() throws Exception {
+        //given
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
+        prepareFindingCompaniesCustomerData();
+
+
+        final String url = "/management/companies/customers";
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .param("customerName", "Krzywousty Mich")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void givenWithNameParamRequestFirstNameLastNameConcatWhenFindCustomersThenFindCustomers() throws Exception {
+        //given
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                .account(account).build());
+        prepareFindingCompaniesCustomerData();
+
+
+        final String url = "/management/companies/customers";
+
+        //when
+        final ResultActions perform = mockMvc.perform(get(url)
+                .param("customerName", "Michal Krzy")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[*]", Matchers.hasSize(1)));
     }
 
     @Test

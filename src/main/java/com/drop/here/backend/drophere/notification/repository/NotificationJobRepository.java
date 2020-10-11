@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ public interface NotificationJobRepository extends JpaRepository<NotificationJob
     List<NotificationJob> findAllByNotificationIsNotNull(PageRequest pageable);
 
     @Modifying
-    @Transactional
     @Query("delete from NotificationJob n where " +
             "n in (:notifications)")
     void deleteByNotificationJobIn(List<NotificationJob> notifications);

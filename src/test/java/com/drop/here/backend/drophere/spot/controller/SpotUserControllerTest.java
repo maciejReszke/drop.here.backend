@@ -256,10 +256,11 @@ class SpotUserControllerTest extends IntegrationBaseClass {
     void givenValidRequestWhenUpdateSpotMembershipThenUpdate() throws Exception {
         //given
         final SpotMembership spotMembership = SpotDataGenerator.membership(spot, customer);
-        spotMembership.setReceiveNotification(false);
+        spotMembership.setReceiveFinishedNotifications(false);
         spotMembershipRepository.save(spotMembership);
         final String url = String.format("/spots/%s/companies/%s/memberships", spot.getUid(), company.getUid());
-        final String json = objectMapper.writeValueAsString(SpotMembershipManagementRequest.builder().receiveNotification(true).build());
+        final String json = objectMapper.writeValueAsString(SpotMembershipManagementRequest.builder()
+                .receiveFinishedNotifications(true).build());
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
 
@@ -272,7 +273,7 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         //then
         result.andExpect(status().isOk());
 
-        assertThat(spotMembershipRepository.findAll().get(0).isReceiveNotification()).isTrue();
+        assertThat(spotMembershipRepository.findAll().get(0).isReceiveFinishedNotifications()).isTrue();
     }
 
     @Test
@@ -284,10 +285,11 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         privilegeRepository.save(privilege);
 
         final SpotMembership spotMembership = SpotDataGenerator.membership(spot, customer);
-        spotMembership.setReceiveNotification(false);
+        spotMembership.setReceiveFinishedNotifications(false);
         spotMembershipRepository.save(spotMembership);
         final String url = String.format("/spots/%s/companies/%s/memberships", spot.getUid(), company.getUid());
-        final String json = objectMapper.writeValueAsString(SpotMembershipManagementRequest.builder().receiveNotification(true).build());
+        final String json = objectMapper.writeValueAsString(SpotMembershipManagementRequest.builder()
+                .receiveFinishedNotifications(true).build());
         company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
         companyRepository.save(company);
 
@@ -299,14 +301,15 @@ class SpotUserControllerTest extends IntegrationBaseClass {
 
         //then
         result.andExpect(status().isForbidden());
-        assertThat(spotMembershipRepository.findAll().get(0).isReceiveNotification()).isFalse();
+        assertThat(spotMembershipRepository.findAll().get(0).isReceiveFinishedNotifications()).isFalse();
     }
 
     @Test
     void givenNotFoundMembershipWhenUpdateSpotMembershipThen422() throws Exception {
         //given
         final String url = String.format("/spots/%s/companies/%s/memberships", spot.getUid(), company.getUid());
-        final String json = objectMapper.writeValueAsString(SpotMembershipManagementRequest.builder().receiveNotification(true).build());
+        final String json = objectMapper.writeValueAsString(SpotMembershipManagementRequest.builder()
+                .receiveFinishedNotifications(true).build());
         spotRepository.save(spot);
         companyRepository.save(company);
 

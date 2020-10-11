@@ -12,11 +12,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RouteRequest {
+public class UnpreparedRouteRequest {
 
     @ApiModelProperty(value = "Route name", example = "Route 66", required = true)
     @NotBlank
@@ -26,9 +27,6 @@ public class RouteRequest {
     @ApiModelProperty(value = "Route description", example = "Description of route 66")
     @Length(max = 255)
     private String description;
-
-    @ApiModelProperty(value = "Seller uid", example = "goobarich123")
-    private String profileUid;
 
     @ApiModelProperty(value = "Drops")
     @Valid
@@ -43,4 +41,7 @@ public class RouteRequest {
     @NotBlank
     @ApiModelProperty(value = "Route date", example = "2020-04-04", required = true)
     private String date;
+
+    @ApiModelProperty(value = "Seller uid", example = "goobarich123")
+    private String profileUid;
 }

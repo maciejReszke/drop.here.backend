@@ -21,6 +21,7 @@ import com.drop.here.backend.drophere.notification.entity.NotificationToken;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingServiceType;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationTokenType;
+import com.drop.here.backend.drophere.notification.enums.NotificationType;
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.repository.NotificationTokenRepository;
 import com.drop.here.backend.drophere.test_config.IntegrationBaseClass;
@@ -104,6 +105,9 @@ class NotificationControllerTest extends IntegrationBaseClass {
         final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         notificationRepository.save(NotificationDataGenerator.accountProfileNotification(1, accountProfile));
         notificationRepository.save(NotificationDataGenerator.companyNotification(2, company));
+        final Notification pushOnlyNotification = NotificationDataGenerator.accountProfileNotification(2, accountProfile);
+        pushOnlyNotification.setType(NotificationType.PUSH_NOTIFICATION_ONLY);
+        notificationRepository.save(pushOnlyNotification);
 
         final String url = "/notifications";
 
@@ -123,6 +127,9 @@ class NotificationControllerTest extends IntegrationBaseClass {
         privilegeRepository.save(Privilege.builder().name(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE).account(account).build());
         final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         notificationRepository.save(NotificationDataGenerator.companyNotification(1, company));
+        final Notification pushOnlyNotification = NotificationDataGenerator.companyNotification(2, company);
+        pushOnlyNotification.setType(NotificationType.PUSH_NOTIFICATION_ONLY);
+        notificationRepository.save(pushOnlyNotification);
 
         final String url = "/notifications";
 
@@ -183,7 +190,7 @@ class NotificationControllerTest extends IntegrationBaseClass {
     void givenCompanyAccountInvalidPrivilegeWhenFindNotificationsThenForbidden() throws Exception {
         //given
         final Account account = accountRepository.save(AccountDataGenerator.companyAccount(1));
-        privilegeRepository.save(Privilege.builder().name(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE).account(account).build());
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY).account(account).build());
         final Company company = companyRepository.save(CompanyDataGenerator.company(1, account, country));
         notificationRepository.save(NotificationDataGenerator.companyNotification(1, company));
 
@@ -206,6 +213,10 @@ class NotificationControllerTest extends IntegrationBaseClass {
         final Notification notification = NotificationDataGenerator.customerNotification(1, customer);
         notification.setReadStatus(NotificationReadStatus.UNREAD);
         notificationRepository.save(notification);
+        final Notification pushOnlyNotification = NotificationDataGenerator.customerNotification(2, customer);
+        pushOnlyNotification.setType(NotificationType.PUSH_NOTIFICATION_ONLY);
+        notificationRepository.save(pushOnlyNotification);
+
         final String url = "/notifications";
 
         //when

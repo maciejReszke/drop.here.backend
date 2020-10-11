@@ -13,7 +13,7 @@ public class WebSocketAuthorizationSecurityConfig extends AbstractSecurityWebSoc
     @Override
     protected void configureInbound(final MessageSecurityMetadataSourceRegistry messages) {
         messages
-                .matchers(new SimpDestinationMessageMatcher(WebSocketConfig.WEB_SOCKET_DESTINATION_PREFIX + LocationWebSocketController.ENDPOINT)).hasAnyAuthority(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE, PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE)
+                .matchers(new SimpDestinationMessageMatcher(WebSocketConfig.WEB_SOCKET_DESTINATION_PREFIX + LocationWebSocketController.ENDPOINT)).hasAnyAuthority(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY)
                 .matchers(new SimpDestinationMessageMatcher(LocationWebSocketController.ENDPOINT + "/**")).permitAll()
                 .matchers(new SimpDestinationMessageMatcher("/**")).denyAll();
     }

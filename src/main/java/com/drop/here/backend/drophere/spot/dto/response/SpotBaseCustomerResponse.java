@@ -41,4 +41,19 @@ public class SpotBaseCustomerResponse {
     @ApiModelProperty(value = "Company uid", example = "uid123")
     String companyUid;
 
+    @ApiModelProperty(value = "Does user want to receive notifications when company makes drop live", example = "true")
+    boolean receiveLiveNotifications;
+
+    @ApiModelProperty(value = "Does user want to receive notifications when company makes drop prepared", example = "true")
+    boolean receivePreparedNotifications;
+
+    @ApiModelProperty(value = "Does user want to receive notifications when company finishes drop", example = "true")
+    boolean receiveFinishedNotifications;
+
+    @ApiModelProperty(value = "Does user want to receive notifications when company delays drop", example = "true")
+    boolean receiveDelayedNotifications;
+
+    @ApiModelProperty(value = "Does user want to receive notifications when company cancels drop", example = "true")
+    boolean receiveCancelledNotifications;
+
 }

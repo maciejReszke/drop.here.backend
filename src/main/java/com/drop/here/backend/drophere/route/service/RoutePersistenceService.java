@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.route.service;
 
+import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.route.dto.RouteShortResponse;
 import com.drop.here.backend.drophere.route.entity.Route;
@@ -11,11 +12,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class RouteStoreService {
+public class RoutePersistenceService {
     private final RouteRepository routeRepository;
 
     public void save(Route route) {
@@ -34,8 +36,16 @@ public class RouteStoreService {
         return routeRepository.findByCompany(company, parseOrNull(routeStatus), pageable);
     }
 
-    private RouteStatus parseOrNull(String status){
+    private RouteStatus parseOrNull(String status) {
         return Try.ofSupplier(() -> RouteStatus.valueOf(status))
                 .getOrElse(() -> null);
+    }
+
+    public boolean existsByStatusAndProfile(RouteStatus status, AccountProfile profile) {
+        return routeRepository.existsByStatusAndProfile(status, profile);
+    }
+
+    public List<Route> finishToBeFinished() {
+        return routeRepository.finishToBeFinished();
     }
 }

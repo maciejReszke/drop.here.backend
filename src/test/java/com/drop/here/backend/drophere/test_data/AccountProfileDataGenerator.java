@@ -22,7 +22,7 @@ public class AccountProfileDataGenerator {
                 .account(account)
                 .status(AccountProfileStatus.ACTIVE)
                 .profileType(AccountProfileType.MAIN)
-                .profileUid("uid")
+                .profileUid("uid" + i)
                 .build();
     }
 

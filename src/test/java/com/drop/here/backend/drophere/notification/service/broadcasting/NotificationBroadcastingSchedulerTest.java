@@ -9,6 +9,7 @@ import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import com.drop.here.backend.drophere.notification.entity.NotificationToken;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingServiceType;
 import com.drop.here.backend.drophere.notification.enums.NotificationTokenType;
+import com.drop.here.backend.drophere.notification.enums.NotificationType;
 import com.drop.here.backend.drophere.notification.repository.NotificationJobRepository;
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.repository.NotificationTokenRepository;
@@ -66,15 +67,24 @@ class NotificationBroadcastingSchedulerTest extends IntegrationBaseClass {
 
     @Test
     void givenNotSentNotificationsWhenSendThenSend() {
-        final Notification notification = NotificationDataGenerator.customerNotification(1, customer);
-        notificationRepository.save(notification);
-        notificationJobRepository.save(NotificationJob.builder().createdAt(LocalDateTime.now()).notification(notification).notificationToken(notificationToken).build());
+        final Notification notification1 = NotificationDataGenerator.customerNotification(1, customer);
+        notification1.setType(NotificationType.NOTIFICATION_PANEL);
+        final Notification notification2 = NotificationDataGenerator.customerNotification(1, customer);
+        notification2.setType(NotificationType.PUSH_NOTIFICATION_ONLY);
+        notificationRepository.save(notification1);
+        notificationRepository.save(notification2);
+        notificationJobRepository.save(NotificationJob.builder().createdAt(LocalDateTime.now()).notification(notification1)
+                .notificationToken(notificationToken).build());
+        notificationJobRepository.save(NotificationJob.builder().createdAt(LocalDateTime.now()).notification(notification2)
+                .notificationToken(notificationToken).build());
 
         //when
         notificationBroadcastingScheduler.broadcastNotifications();
 
         //then
         assertThat(notificationJobRepository.findAll()).isEmpty();
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll().get(0).getId()).isEqualTo(notification1.getId());
     }
 
 }
