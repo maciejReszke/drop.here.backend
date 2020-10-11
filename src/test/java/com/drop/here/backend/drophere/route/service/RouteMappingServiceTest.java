@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.service.DropService;
+import com.drop.here.backend.drophere.product.dto.ProductCopy;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.service.ProductService;
@@ -76,7 +77,8 @@ class RouteMappingServiceTest {
         final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final Company company = CompanyDataGenerator.company(1, null, null);
 
-        final Product product = Product.builder().build();
+        final Product productOriginal = Product.builder().id(6L).build();
+        final Product productCopy = Product.builder().id(5L).build();
         final AccountProfile accountProfile = AccountProfile.builder().build();
         when(accountProfilePersistenceService.findActiveByCompanyAndProfileUid(company, routeRequest.getProfileUid()))
                 .thenReturn(Optional.of(accountProfile));
@@ -84,7 +86,7 @@ class RouteMappingServiceTest {
         when(spotPersistenceService.findSpot(any(), any(Company.class))).thenReturn(spot);
         when(uidGeneratorService.generateUid(routeRequest.getDrops().get(0).getName(), 4, 6)).thenReturn("uid");
         when(productService.createReadOnlyCopy(any(), any(), eq(ProductCreationType.ROUTE)))
-                .thenReturn(product);
+                .thenReturn(new ProductCopy(productOriginal, productCopy));
         //when
         final Route response = routeMappingService.toRoute(routeRequest, company);
 
@@ -102,14 +104,16 @@ class RouteMappingServiceTest {
         final RouteProductRequest requestProduct1 = routeRequest.getProducts().get(0);
         assertThat(product1.getAmount()).isEqualTo(requestProduct1.getAmount());
         assertThat(product1.getPrice()).isEqualTo(requestProduct1.getPrice().setScale(2, RoundingMode.DOWN));
-        assertThat(product1.getProduct()).isEqualTo(product);
+        assertThat(product1.getProduct()).isEqualTo(productCopy);
+        assertThat(product1.getOriginalProduct()).isEqualTo(productOriginal);
         assertThat(product1.isLimitedAmount()).isTrue();
         assertThat(product1.getRoute()).isEqualTo(response);
         final RouteProduct product2 = response.getProducts().stream().filter(t -> t.getOrderNum() == 2).findFirst().orElseThrow();
         final RouteProductRequest requestProduct2 = routeRequest.getProducts().get(1);
         assertThat(product2.getAmount()).isEqualTo(requestProduct2.getAmount());
         assertThat(product2.getPrice()).isEqualTo(requestProduct2.getPrice().setScale(2, RoundingMode.DOWN));
-        assertThat(product2.getProduct()).isEqualTo(product);
+        assertThat(product2.getProduct()).isEqualTo(productCopy);
+        assertThat(product2.getOriginalProduct()).isEqualTo(productOriginal);
         assertThat(product2.getRoute()).isEqualTo(response);
         assertThat(product2.isLimitedAmount()).isTrue();
         assertThat(response.getDrops()).hasSize(1);
@@ -130,7 +134,8 @@ class RouteMappingServiceTest {
         final UnpreparedRouteRequest routeRequest = RouteDataGenerator.unprepared(1);
         final Company company = CompanyDataGenerator.company(1, null, null);
 
-        final Product product = Product.builder().build();
+        final Product productOriginal = Product.builder().id(6L).build();
+        final Product productCopy = Product.builder().id(5L).build();
         final AccountProfile accountProfile = AccountProfile.builder().build();
         when(accountProfilePersistenceService.findActiveByCompanyAndProfileUid(company, routeRequest.getProfileUid()))
                 .thenReturn(Optional.of(accountProfile));
@@ -143,7 +148,7 @@ class RouteMappingServiceTest {
         route.setProducts(new LinkedList<>(List.of(prevProduct)));
         when(uidGeneratorService.generateUid(routeRequest.getDrops().get(0).getName(), 4, 6)).thenReturn("uid");
         when(productService.createReadOnlyCopy(any(), any(), eq(ProductCreationType.ROUTE)))
-                .thenReturn(product);
+                .thenReturn(new ProductCopy(productOriginal, productCopy));
 
         //when
         routeMappingService.updateRoute(route, routeRequest, company);
@@ -162,14 +167,16 @@ class RouteMappingServiceTest {
         final RouteProductRequest requestProduct1 = routeRequest.getProducts().get(0);
         assertThat(product1.getAmount()).isEqualTo(requestProduct1.getAmount());
         assertThat(product1.getPrice()).isEqualTo(requestProduct1.getPrice().setScale(2, RoundingMode.DOWN));
-        assertThat(product1.getProduct()).isEqualTo(product);
+        assertThat(product1.getProduct()).isEqualTo(productCopy);
+        assertThat(product1.getOriginalProduct()).isEqualTo(productOriginal);
         assertThat(product1.isLimitedAmount()).isTrue();
         assertThat(product1.getRoute()).isEqualTo(route);
         final RouteProduct product2 = route.getProducts().stream().filter(t -> t.getOrderNum() == 2).findFirst().orElseThrow();
         final RouteProductRequest requestProduct2 = routeRequest.getProducts().get(1);
         assertThat(product2.getAmount()).isEqualTo(requestProduct2.getAmount());
         assertThat(product2.getPrice()).isEqualTo(requestProduct2.getPrice().setScale(2, RoundingMode.DOWN));
-        assertThat(product2.getProduct()).isEqualTo(product);
+        assertThat(product2.getProduct()).isEqualTo(productCopy);
+        assertThat(product2.getOriginalProduct()).isEqualTo(productOriginal);
         assertThat(product2.getRoute()).isEqualTo(route);
         assertThat(product2.isLimitedAmount()).isTrue();
         assertThat(route.getDrops()).hasSize(1);

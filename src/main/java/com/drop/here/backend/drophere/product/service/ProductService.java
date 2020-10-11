@@ -9,6 +9,7 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
+import com.drop.here.backend.drophere.product.dto.ProductCopy;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
@@ -37,8 +38,8 @@ public class ProductService {
     private final ProductCustomizationService productCustomizationService;
     private final ImageService imageService;
 
-    public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring) {
-        return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring);
+    public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring, AccountAuthentication authentication) {
+        return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, authentication);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -102,12 +103,12 @@ public class ProductService {
                 .getImage();
     }
 
-    public Product createReadOnlyCopy(Long productId, Company company, ProductCreationType creationType) {
+    public ProductCopy createReadOnlyCopy(Long productId, Company company, ProductCreationType creationType) {
         final Product templateProduct = getProduct(productId, company.getUid());
         final Product newProduct = templateProduct.toBuilder().build();
         newProduct.setId(null);
         newProduct.setCreationType(creationType);
         newProduct.setCustomizationWrappers(productCustomizationService.createReadOnlyCopies(templateProduct, newProduct));
-        return newProduct;
+        return new ProductCopy(templateProduct, newProduct);
     }
 }

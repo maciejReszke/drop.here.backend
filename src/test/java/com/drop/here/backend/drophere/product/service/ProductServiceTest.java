@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
+import com.drop.here.backend.drophere.product.dto.ProductCopy;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
@@ -73,10 +74,11 @@ class ProductServiceTest {
 
         final String[] desiredCategories = new String[0];
         final String desiredName = "aa";
-        when(productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredName)).thenReturn(paged);
+        final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
+        when(productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredName, accountAuthentication)).thenReturn(paged);
 
         //when
-        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, desiredCategories, desiredName);
+        final Page<ProductResponse> result = productService.findAll(pageable, companyUid, desiredCategories, desiredName, accountAuthentication);
 
         //then
         assertThat(result).isEqualTo(paged);
@@ -246,15 +248,18 @@ class ProductServiceTest {
         when(productRepository.findByIdAndCompanyUid(product.getId(), company.getUid())).thenReturn(Optional.of(product));
 
         //when
-        final Product copy = productService.createReadOnlyCopy(product.getId(), company, ProductCreationType.ROUTE);
+        final ProductCopy copy = productService.createReadOnlyCopy(product.getId(), company, ProductCreationType.ROUTE);
 
         //then
         assertThat(product.getId()).isEqualTo(5L);
         assertThat(product.getCreationType()).isEqualTo(ProductCreationType.PRODUCT);
         assertThat(product.getCustomizationWrappers()).hasSize(1);
-        assertThat(copy.getId()).isNull();
-        assertThat(copy.getCreationType()).isEqualTo(ProductCreationType.ROUTE);
-        assertThat(copy.getCustomizationWrappers()).isEmpty();
+        assertThat(copy.getCopy().getId()).isNull();
+        assertThat(copy.getCopy().getCreationType()).isEqualTo(ProductCreationType.ROUTE);
+        assertThat(copy.getCopy().getCustomizationWrappers()).isEmpty();
+        assertThat(copy.getOriginal().getId()).isEqualByComparingTo(5L);
+        assertThat(copy.getOriginal().getCreationType()).isEqualTo(ProductCreationType.PRODUCT);
+        assertThat(copy.getOriginal().getCustomizationWrappers()).hasSize(1);
     }
 
     @Test

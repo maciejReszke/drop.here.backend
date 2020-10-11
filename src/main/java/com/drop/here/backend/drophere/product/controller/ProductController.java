@@ -47,6 +47,7 @@ public class ProductController {
 
     private static final String IMAGE_PART_NAME = "image";
 
+    // TODO: 11/10/2020 test dla firmy i customera
     @GetMapping
     @ApiOperation(value = "Fetching products", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
@@ -62,7 +63,7 @@ public class ProductController {
                                          @ApiParam(value = "Desired category (1... n)") @RequestParam(value = "category", required = false) String[] desiredCategories,
                                          @ApiParam(value = "Product name (substring)") @RequestParam(value = "name", required = false) String desiredNameSubstring,
                                          @NotNull Pageable pageable) {
-        return productService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring);
+        return productService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, authentication);
     }
 
     @PostMapping

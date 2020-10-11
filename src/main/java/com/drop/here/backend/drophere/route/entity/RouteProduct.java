@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString(exclude = {"product", "route"})
+@ToString(exclude = {"product", "route", "originalProduct"})
 @EqualsAndHashCode(exclude = {"product", "route"})
 public class RouteProduct {
 
@@ -53,6 +53,11 @@ public class RouteProduct {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
     private Product product;
+
+    //todo  ( i usuwac trzeba gdy produkt jest usuniety ostatecznie)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "original_product_id")
+    private Product originalProduct;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

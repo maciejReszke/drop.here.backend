@@ -30,12 +30,12 @@ public class CustomerService {
     private final ImageService imageService;
     private final CustomerMappingService customerMappingService;
     private final PrivilegeService privilegeService;
-    private final CustomerStoreService customerStoreService;
+    private final CustomerPersistenceService customerPersistenceService;
 
     @Transactional
     public void createCustomer(Account account, ExternalAuthenticationResult result) {
         final Customer customer = customerMappingService.toCustomer(account, result);
-        customerStoreService.save(customer);
+        customerPersistenceService.save(customer);
         account.setCustomer(customer);
         privilegeService.addCustomerCreatedPrivilege(account);
         if (ArrayUtils.isNotEmpty(result.getImage())) {
@@ -47,7 +47,7 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public CustomerManagementResponse findOwnCustomer(AccountAuthentication authentication) {
-        final Customer customer = customerStoreService.findOwnCustomer(authentication);
+        final Customer customer = customerPersistenceService.findOwnCustomer(authentication);
         return customerMappingService.toManagementResponse(customer);
     }
 
@@ -60,7 +60,7 @@ public class CustomerService {
     private ResourceOperationResponse createCustomer(CustomerManagementRequest customerManagementRequest, AccountAuthentication authentication) {
         final Customer customer = customerMappingService.createCustomer(customerManagementRequest, authentication.getPrincipal());
         log.info("Creating new customer for account with id {}", authentication.getPrincipal().getId());
-        customerStoreService.save(customer);
+        customerPersistenceService.save(customer);
         privilegeService.addCustomerCreatedPrivilege(authentication.getPrincipal());
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, customer.getId());
     }
@@ -68,7 +68,7 @@ public class CustomerService {
     private ResourceOperationResponse updateCustomer(CustomerManagementRequest customerManagementRequest, Customer customer) {
         customerMappingService.updateCustomer(customerManagementRequest, customer);
         log.info("Updating customer with id {}", customer.getId());
-        customerStoreService.save(customer);
+        customerPersistenceService.save(customer);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId());
     }
 
@@ -79,7 +79,7 @@ public class CustomerService {
             final Customer customer = authentication.getCustomer();
             customer.setImage(image);
             log.info("Updating image for customer {}", customer.getId());
-            customerStoreService.save(customer);
+            customerPersistenceService.save(customer);
             return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customer.getId());
         } catch (IOException exception) {
             throw new RestIllegalRequestValueException("Invalid image " + exception.getMessage(),
@@ -89,6 +89,6 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public Image findImage(Long customerId) {
-        return customerStoreService.findByIdWithImage(customerId).getImage();
+        return customerPersistenceService.findByIdWithImage(customerId).getImage();
     }
 }

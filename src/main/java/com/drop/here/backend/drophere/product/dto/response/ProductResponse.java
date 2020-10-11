@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.product.dto.response;
 
+import com.drop.here.backend.drophere.drop.dto.DropProductResponse;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
@@ -34,4 +35,7 @@ public class ProductResponse {
 
     @ApiModelProperty(value = "Product customizations")
     List<ProductCustomizationWrapperResponse> customizationsWrappers;
+
+    @ApiModelProperty(value = "Drops")
+    List<DropProductResponse> drops;
 }

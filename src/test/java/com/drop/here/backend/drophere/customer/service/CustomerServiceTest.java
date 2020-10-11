@@ -35,7 +35,7 @@ class CustomerServiceTest {
     private CustomerService customerService;
 
     @Mock
-    private CustomerStoreService customerStoreService;
+    private CustomerPersistenceService customerPersistenceService;
 
     @Mock
     private ImageService imageService;
@@ -55,7 +55,7 @@ class CustomerServiceTest {
         final Customer customer = CustomerDataGenerator.customer(1, account);
 
         when(customerMappingService.toCustomer(account, externalAuthenticationResult)).thenReturn(customer);
-        doNothing().when(customerStoreService).save(customer);
+        doNothing().when(customerPersistenceService).save(customer);
         when(imageService.createImage(externalAuthenticationResult.getImage(), ImageType.CUSTOMER_IMAGE))
                 .thenReturn(image);
         doNothing().when(privilegeService).addCustomerCreatedPrivilege(account);
@@ -79,7 +79,7 @@ class CustomerServiceTest {
         final Customer customer = CustomerDataGenerator.customer(1, account);
 
         when(customerMappingService.toCustomer(account, externalAuthenticationResult)).thenReturn(customer);
-        doNothing().when(customerStoreService).save(customer);
+        doNothing().when(customerPersistenceService).save(customer);
         doNothing().when(privilegeService).addCustomerCreatedPrivilege(account);
 
         //when
@@ -104,7 +104,7 @@ class CustomerServiceTest {
         final Image imageEntity = Image.builder().build();
         when(imageService.createImage(image.getBytes(), ImageType.CUSTOMER_IMAGE))
                 .thenReturn(imageEntity);
-        doNothing().when(customerStoreService).save(customer);
+        doNothing().when(customerPersistenceService).save(customer);
 
         //when
         final ResourceOperationResponse resourceOperationResponse = customerService.updateImage(image, accountAuthentication);
@@ -125,7 +125,7 @@ class CustomerServiceTest {
                 .build();
 
         doNothing().when(customerMappingService).updateCustomer(request, customer);
-        doNothing().when(customerStoreService).save(customer);
+        doNothing().when(customerPersistenceService).save(customer);
         //when
         final ResourceOperationResponse result = customerService.updateCustomer(request, accountAuthentication);
 
@@ -145,7 +145,7 @@ class CustomerServiceTest {
                 .build();
 
         when(customerMappingService.createCustomer(request, account)).thenReturn(customer);
-        doNothing().when(customerStoreService).save(customer);
+        doNothing().when(customerPersistenceService).save(customer);
         doNothing().when(privilegeService).addCustomerCreatedPrivilege(account);
 
         //when
@@ -180,7 +180,7 @@ class CustomerServiceTest {
                 .image(image)
                 .build();
 
-        when(customerStoreService.findByIdWithImage(customerId)).thenReturn(customer);
+        when(customerPersistenceService.findByIdWithImage(customerId)).thenReturn(customer);
         //when
         final Image result = customerService.findImage(customerId);
 
