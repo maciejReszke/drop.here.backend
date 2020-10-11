@@ -41,7 +41,9 @@ import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static com.drop.here.backend.drophere.authentication.account.service.PrivilegeService.COMPANY_FULL_MANAGEMENT_PRIVILEGE;
 import static com.drop.here.backend.drophere.authentication.account.service.PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE;
+import static com.drop.here.backend.drophere.authentication.account.service.PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -704,7 +706,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidRequestNotExistingImageWhenUpdateImageThenUpdate() throws Exception {
+    void givenValidRequestCompanyOwnerNotExistingImageWhenUpdateImageThenUpdate() throws Exception {
         //given
         final Product product = ProductDataGenerator.product(1, productUnit, company);
         product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));

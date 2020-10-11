@@ -54,4 +54,7 @@ public class AuthenticationResponse {
 
     @ApiModelProperty(value = "Profile type - MAIN or SUBPROFILE", example = "MAIN")
     private AccountProfileType profileType;
+
+    @ApiModelProperty(value = "Should seller be streaming position", example = "true")
+    boolean streamingPosition;
 }

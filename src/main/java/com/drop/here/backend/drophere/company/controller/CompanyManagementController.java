@@ -85,7 +85,7 @@ public class CompanyManagementController {
     }
 
     @GetMapping("/customers")
-    @ApiOperation("Get company customers")
+    @ApiOperation(value = "Get company customers", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Company customers"),
@@ -103,7 +103,7 @@ public class CompanyManagementController {
     }
 
     @PutMapping("/customers/{customerId}")
-    @ApiOperation("Update companies customer relationship")
+    @ApiOperation(value = "Update companies customer relationship", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Customer updated"),

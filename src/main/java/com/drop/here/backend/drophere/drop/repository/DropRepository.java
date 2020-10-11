@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.drop.repository;
 
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.route.entity.Route;
@@ -50,8 +51,10 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
     @Query("select case when (count(d) > 0) then true else false end from Drop d " +
             "join d.spot s " +
             "join s.company c where " +
+            "d.status <> 'CANCELLED' and " +
+            "d.status <> 'FINISHED' and " +
             "d.route.profile.profileUid = :profileUid and " +
-            "d.status = 'DELIVERING' and " +
+            "d.route.status = 'ONGOING' and " +
             "(" +
             "   c.visibilityStatus = 'VISIBLE'" +
             ") and " +
@@ -72,4 +75,10 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "                       dm.membershipStatus = 'BLOCKED')" +
             ")")
     boolean isSellerLocationAvailableForCustomer(String profileUid, Customer customer);
+
+    @Query("select d from Drop d " +
+            "join fetch d.spot " +
+            "where d.uid = :dropUid and " +
+            "d.route.company = :company")
+    Optional<Drop> findByUidAndRouteCompanyWithSpot(String dropUid, Company company);
 }

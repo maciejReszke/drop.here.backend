@@ -5,7 +5,9 @@ import com.drop.here.backend.drophere.spot.enums.SpotMembershipStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
@@ -24,8 +26,10 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
+@ToString(exclude = {"spot", "customer"})
+@EqualsAndHashCode(exclude = {"spot", "customer"})
 public class SpotMembership {
 
     @Id
@@ -58,5 +62,17 @@ public class SpotMembership {
     private Long version;
 
     @NotNull
-    private boolean receiveNotification;
+    private boolean receiveLiveNotifications;
+
+    @NotNull
+    private boolean receivePreparedNotifications;
+
+    @NotNull
+    private boolean receiveFinishedNotifications;
+
+    @NotNull
+    private boolean receiveDelayedNotifications;
+
+    @NotNull
+    private boolean receiveCancelledNotifications;
 }

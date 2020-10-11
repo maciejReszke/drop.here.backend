@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.spot.dto.SpotMembershipNotificationStatus;
 import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
@@ -20,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -219,16 +221,14 @@ class SpotMembershipServiceTest {
         when(spotMembershipRepository.findBySpotAndCustomer(spot, customer))
                 .thenReturn(Optional.of(membership));
         when(spotMembershipRepository.save(membership)).thenReturn(membership);
-        final SpotMembershipManagementRequest spotMembershipManagementRequest = SpotMembershipManagementRequest.builder()
-                .receiveNotification(true)
-                .build();
+        final SpotMembershipManagementRequest spotMembershipManagementRequest = SpotMembershipManagementRequest.builder().build();
+        doNothing().when(spotMappingService).updateSpotMembership(membership, spotMembershipManagementRequest);
 
         //when
         final ResourceOperationResponse result = spotMembershipService.updateSpotMembership(spotMembershipManagementRequest, spotUid, companyUid, accountAuthentication);
 
         //then
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
-        assertThat(membership.isReceiveNotification()).isTrue();
     }
 
     @Test
@@ -246,12 +246,29 @@ class SpotMembershipServiceTest {
         when(spotMembershipRepository.findBySpotAndCustomer(spot, customer))
                 .thenReturn(Optional.empty());
         final SpotMembershipManagementRequest spotMembershipManagementRequest = SpotMembershipManagementRequest.builder()
-                .receiveNotification(true)
                 .build();
         //when
         final Throwable throwable = catchThrowable(() -> spotMembershipService.updateSpotMembership(spotMembershipManagementRequest, spotUid, companyUid, accountAuthentication));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenSpotAndDelayedNotificationStatusWhenFindToBeNotifiedThenFind() {
+        //given
+        final Spot spot = Spot.builder().build();
+        final SpotMembershipNotificationStatus spotMembershipNotificationStatus =
+                SpotMembershipNotificationStatus.delayed();
+
+        final List<SpotMembership> spotMemberships = List.of(SpotMembership.builder().build());
+
+        when(spotMembershipRepository.findToBeNotified(spot, false, false, false, true, false)).thenReturn(spotMemberships);
+
+        //when
+        final List<SpotMembership> result = spotMembershipService.findToBeNotified(spot, spotMembershipNotificationStatus);
+
+        //then
+        assertThat(result).isEqualTo(spotMemberships);
     }
 }

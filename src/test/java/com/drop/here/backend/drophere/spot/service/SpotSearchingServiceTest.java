@@ -5,7 +5,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.dto.DropCustomerSpotResponse;
-import com.drop.here.backend.drophere.drop.service.DropService;
+import com.drop.here.backend.drophere.drop.service.DropSearchingService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.response.SpotDetailedCustomerResponse;
 import com.drop.here.backend.drophere.spot.entity.Spot;
@@ -43,7 +43,7 @@ class SpotSearchingServiceTest {
     private SpotRepository spotRepository;
 
     @Mock
-    private DropService dropService;
+    private DropSearchingService dropSearchingService;
 
     @BeforeEach
     void prepare() throws IllegalAccessException {
@@ -66,7 +66,7 @@ class SpotSearchingServiceTest {
         when(spotRepository.findPrivilegedSpot(spotUid, customer))
                 .thenReturn(Optional.of(spot));
         when(spotMembershipSearchingService.findMembership(spot, customer)).thenReturn(Optional.of(membership));
-        when(dropService.findDrops(spot, LocalDate.now().atStartOfDay(), LocalDate.now().atStartOfDay().plusDays(7))).thenReturn(drops);
+        when(dropSearchingService.findDrops(spot, LocalDate.now().atStartOfDay(), LocalDate.now().atStartOfDay().plusDays(7))).thenReturn(drops);
 
         //when
         final SpotDetailedCustomerResponse result = spotSearchingService.findSpot(spotUid, accountAuthentication);
@@ -99,7 +99,7 @@ class SpotSearchingServiceTest {
         when(spotRepository.findPrivilegedSpot(spotUid, customer))
                 .thenReturn(Optional.of(spot));
         when(spotMembershipSearchingService.findMembership(spot, customer)).thenReturn(Optional.empty());
-        when(dropService.findDrops(spot, LocalDate.now().atStartOfDay(), LocalDate.now().atStartOfDay().plusDays(7))).thenReturn(drops);
+        when(dropSearchingService.findDrops(spot, LocalDate.now().atStartOfDay(), LocalDate.now().atStartOfDay().plusDays(7))).thenReturn(drops);
 
         //when
         final SpotDetailedCustomerResponse result = spotSearchingService.findSpot(spotUid, accountAuthentication);

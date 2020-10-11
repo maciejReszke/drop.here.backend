@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingType;
+import com.drop.here.backend.drophere.notification.enums.NotificationCategory;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationRecipientType;
 import com.drop.here.backend.drophere.notification.enums.NotificationReferencedSubjectType;
@@ -21,8 +22,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -33,6 +36,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @Entity
+@Table(indexes = @Index(columnList = "type"))
 public class Notification {
 
     @Id
@@ -51,11 +55,18 @@ public class Notification {
 
     @NotNull
     @Enumerated(EnumType.STRING)
+    private NotificationCategory category;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
     private NotificationReadStatus readStatus;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     private NotificationReferencedSubjectType referencedSubjectType;
+
+    @NotBlank
+    private String referencedSubjectId;
 
     private String detailedMessage;
 
@@ -71,6 +82,10 @@ public class Notification {
     @JoinColumn(name = "broadcasting_customer_id")
     private Customer broadcastingCustomer;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private NotificationRecipientType recipientType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_customer_id")
     private Customer recipientCustomer;
@@ -82,10 +97,6 @@ public class Notification {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_account_profile_id")
     private AccountProfile recipientAccountProfile;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private NotificationRecipientType recipientType;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)

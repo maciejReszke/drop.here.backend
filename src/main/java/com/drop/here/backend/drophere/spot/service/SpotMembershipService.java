@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.spot.dto.SpotMembershipNotificationStatus;
 import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
@@ -36,6 +37,15 @@ public class SpotMembershipService {
     private final SpotManagementValidationService spotManagementValidationService;
     private final SpotMembershipSearchingService spotMembershipSearchingService;
     private final SpotSearchingService spotSearchingService;
+
+    public List<SpotMembership> findToBeNotified(Spot spot, SpotMembershipNotificationStatus notificationStatus) {
+        return spotMembershipRepository.findToBeNotified(
+                spot, notificationStatus.isPrepared(),
+                notificationStatus.isLive(),
+                notificationStatus.isFinished(),
+                notificationStatus.isDelayed(),
+                notificationStatus.isCanceled());
+    }
 
     public Page<SpotCompanyMembershipResponse> findMemberships(Spot spot, String desiredCustomerSubstring, String membershipStatus, Pageable pageable) {
         return spotMembershipSearchingService.findMemberships(spot, desiredCustomerSubstring, membershipStatus, pageable);
@@ -97,7 +107,7 @@ public class SpotMembershipService {
     public ResourceOperationResponse updateSpotMembership(SpotMembershipManagementRequest spotMembershipManagementRequest, String spotUid, String companyUid, AccountAuthentication authentication) {
         final Spot spot = spotPersistenceService.findSpot(spotUid, companyUid);
         final SpotMembership spotMembership = getSpotMembership(spot, authentication);
-        spotMembership.setReceiveNotification(spotMembershipManagementRequest.isReceiveNotification());
+        spotMappingService.updateSpotMembership(spotMembership, spotMembershipManagementRequest);
         log.info("Updating spot membership for spot {} customer {}", spot.getUid(), authentication.getCustomer().getId());
         spotMembershipRepository.save(spotMembership);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, spotMembership.getId());
