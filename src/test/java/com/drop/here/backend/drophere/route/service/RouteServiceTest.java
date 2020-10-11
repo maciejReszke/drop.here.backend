@@ -40,7 +40,7 @@ class RouteServiceTest {
     private RouteMappingService routeMappingService;
 
     @Mock
-    private RouteStoreService routeStoreService;
+    private RoutePersistenceService routePersistenceService;
 
     @Mock
     private RouteValidationService routeValidationService;
@@ -64,7 +64,7 @@ class RouteServiceTest {
 
         doNothing().when(routeValidationService).validateCreate(routeRequest);
         when(routeMappingService.toRoute(routeRequest, company)).thenReturn(route);
-        doNothing().when(routeStoreService).save(route);
+        doNothing().when(routePersistenceService).save(route);
 
         //when
         final ResourceOperationResponse result = routeService.createRoute(companyUid, routeRequest, accountAuthentication);
@@ -86,9 +86,9 @@ class RouteServiceTest {
         final Route route = RouteDataGenerator.route(1, company);
 
         doNothing().when(routeValidationService).validateUpdateUnprepared(routeRequest, route);
-        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
+        when(routePersistenceService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
         doNothing().when(routeMappingService).updateRoute(route, routeRequest, company);
-        doNothing().when(routeStoreService).save(route);
+        doNothing().when(routePersistenceService).save(route);
 
         //when
         final ResourceOperationResponse result = routeService.updateUnpreparedRoute(companyUid, routeId, routeRequest, accountAuthentication);
@@ -112,19 +112,19 @@ class RouteServiceTest {
         route.setWithSeller(false);
         route.setStatus(null);
 
-        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
+        when(routePersistenceService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
         doNothing().when(routeValidationService).validateUpdateStateChanged(route, accountAuthentication.getProfile());
         when(accountProfilePersistenceService.findActiveByCompanyAndProfileUid(company, routeRequest.getChangedProfileUid()))
                 .thenReturn(Optional.of(accountProfile));
-        doNothing().when(routeStoreService).save(route);
-        when(routeUpdateStateServiceFactory.update(route, routeRequest)).thenReturn(RouteStatus.CANCELLED);
+        doNothing().when(routePersistenceService).save(route);
+        when(routeUpdateStateServiceFactory.update(route, routeRequest)).thenReturn(RouteStatus.FINISHED);
 
         //when
         final ResourceOperationResponse result = routeService.updateRouteStatus(companyUid, routeId, routeRequest, accountAuthentication);
 
         //then
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
-        assertThat(route.getStatus()).isEqualTo(RouteStatus.CANCELLED);
+        assertThat(route.getStatus()).isEqualTo(RouteStatus.FINISHED);
         assertThat(route.getProfile()).isEqualTo(accountProfile);
         assertThat(route.isWithSeller()).isTrue();
     }
@@ -144,17 +144,17 @@ class RouteServiceTest {
         route.setWithSeller(false);
         route.setStatus(null);
 
-        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
+        when(routePersistenceService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
         doNothing().when(routeValidationService).validateUpdateStateChanged(route, accountAuthentication.getProfile());
-        doNothing().when(routeStoreService).save(route);
-        when(routeUpdateStateServiceFactory.update(route, routeRequest)).thenReturn(RouteStatus.CANCELLED);
+        doNothing().when(routePersistenceService).save(route);
+        when(routeUpdateStateServiceFactory.update(route, routeRequest)).thenReturn(RouteStatus.FINISHED);
 
         //when
         final ResourceOperationResponse result = routeService.updateRouteStatus(companyUid, routeId, routeRequest, accountAuthentication);
 
         //then
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
-        assertThat(route.getStatus()).isEqualTo(RouteStatus.CANCELLED);
+        assertThat(route.getStatus()).isEqualTo(RouteStatus.FINISHED);
         assertThat(route.getProfile()).isNull();
         assertThat(route.isWithSeller()).isFalse();
     }
@@ -170,7 +170,7 @@ class RouteServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long routeId = 15L;
 
-        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
+        when(routePersistenceService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> routeService.updateUnpreparedRoute(companyUid, routeId, routeRequest, accountAuthentication));
@@ -190,7 +190,7 @@ class RouteServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long routeId = 15L;
 
-        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
+        when(routePersistenceService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> routeService.updateUnpreparedRoute(companyUid, routeId, routeRequest, accountAuthentication));
@@ -211,8 +211,8 @@ class RouteServiceTest {
         final Route route = RouteDataGenerator.route(1, company);
 
         doNothing().when(routeValidationService).validateDelete(route);
-        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
-        doNothing().when(routeStoreService).delete(route);
+        when(routePersistenceService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
+        doNothing().when(routePersistenceService).delete(route);
 
         //when
         final ResourceOperationResponse result = routeService.deleteRoute(companyUid, routeId, accountAuthentication);
@@ -231,7 +231,7 @@ class RouteServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long routeId = 15L;
 
-        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
+        when(routePersistenceService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> routeService.deleteRoute(companyUid, routeId, accountAuthentication));
@@ -251,7 +251,7 @@ class RouteServiceTest {
         final RouteResponse routeResponse = RouteResponse.builder().build();
         final Route route = RouteDataGenerator.route(1, company);
 
-        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
+        when(routePersistenceService.findByIdAndCompany(routeId, company)).thenReturn(Optional.of(route));
         when(routeMappingService.toRouteResponse(route)).thenReturn(routeResponse);
 
         //when
@@ -270,7 +270,7 @@ class RouteServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         final Long routeId = 15L;
 
-        when(routeStoreService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
+        when(routePersistenceService.findByIdAndCompany(routeId, company)).thenReturn(Optional.empty());
 
         //when
         final Throwable throwable = catchThrowable(() -> routeService.findRoute(routeId, accountAuthentication));

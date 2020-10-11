@@ -30,4 +30,6 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
             "r.profile = :profile and " +
             ":drop in (select d from Drop d where d.route = r)")
     boolean existsByProfileAndContainsDrop(AccountProfile profile, Drop drop);
+
+    boolean existsByStatusAndProfile(RouteStatus status, AccountProfile profile);
 }

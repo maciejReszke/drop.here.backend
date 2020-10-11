@@ -20,6 +20,6 @@ public class RouteCancelUpdateStateService implements RouteUpdateStateService {
         routeValidationService.validateCancelUpdate(route);
         dropService.cancelDrops(route);
         route.setCanceledAt(LocalDateTime.now());
-        return RouteStatus.CANCELLED;
+        return RouteStatus.FINISHED;
     }
 }

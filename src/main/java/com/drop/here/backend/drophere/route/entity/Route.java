@@ -20,9 +20,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -37,6 +39,7 @@ import java.util.List;
 @Entity
 @ToString(exclude = {"company", "products", "profile", "drops"})
 @EqualsAndHashCode(exclude = {"company", "products", "profile", "drops"})
+@Table(indexes = @Index(columnList = "status"))
 public class Route {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

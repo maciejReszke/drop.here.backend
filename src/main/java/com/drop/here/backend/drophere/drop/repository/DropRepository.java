@@ -51,8 +51,10 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
     @Query("select case when (count(d) > 0) then true else false end from Drop d " +
             "join d.spot s " +
             "join s.company c where " +
+            "d.status <> 'CANCELLED' and " +
+            "d.status <> 'FINISHED' and " +
             "d.route.profile.profileUid = :profileUid and " +
-            "d.route.status = 'LIVE' and " +
+            "d.route.status = 'ONGOING' and " +
             "(" +
             "   c.visibilityStatus = 'VISIBLE'" +
             ") and " +

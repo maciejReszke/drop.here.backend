@@ -240,9 +240,9 @@ class RouteValidationServiceTest {
     }
 
     @Test
-    void givenInvalidStatusWhenValidatePrepareedUpdateThenThrowException() {
+    void givenInvalidStatusWhenValidatePreparedUpdateThenThrowException() {
         //given
-        final Route route = Route.builder().status(RouteStatus.CANCELLED).build();
+        final Route route = Route.builder().status(RouteStatus.FINISHED).build();
 
         //when
         final Throwable throwable = catchThrowable(() -> routeValidationService.validatePreparedUpdate(route));
@@ -278,7 +278,7 @@ class RouteValidationServiceTest {
     @Test
     void givenInvalidStatusWhenValidateOngoingUpdateThenThrowException() {
         //given
-        final Route route = Route.builder().withSeller(true).status(RouteStatus.CANCELLED).build();
+        final Route route = Route.builder().withSeller(true).status(RouteStatus.FINISHED).build();
 
         //when
         final Throwable throwable = catchThrowable(() -> routeValidationService.validateOngoingUpdate(route));

@@ -70,6 +70,9 @@ public class DropService {
                 .profileUid(profile.map(AccountProfile::getProfileUid).orElse(null))
                 .profileFirstName(profile.map(AccountProfile::getFirstName).orElse(null))
                 .profileLastName(profile.map(AccountProfile::getLastName).orElse(null))
+                .streamingPosition(profile.map(AccountProfile::getProfileUid)
+                        .map(uid -> isSellerLocationAvailableForCustomer(uid, customer))
+                        .orElse(false))
                 .build();
     }
 

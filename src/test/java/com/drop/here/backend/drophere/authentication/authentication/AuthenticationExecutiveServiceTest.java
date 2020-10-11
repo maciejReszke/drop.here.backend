@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.authentication.authentication.dto.response
 import com.drop.here.backend.drophere.authentication.authentication.service.base.AuthenticationExecutiveService;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.authentication.token.TokenResponse;
+import com.drop.here.backend.drophere.route.service.RouteService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AccountProfileDataGenerator;
@@ -31,6 +32,9 @@ class AuthenticationExecutiveServiceTest {
 
     @Mock
     private JwtService jwtService;
+
+    @Mock
+    private RouteService routeService;
 
     @Test
     void givenAccountWhenSuccessLoginThenLogin() {
@@ -77,6 +81,7 @@ class AuthenticationExecutiveServiceTest {
         final AccountProfile accountProfile = AccountProfileDataGenerator.accountProfile(1, account);
         final AccountAuthentication authentication = AuthenticationDataGenerator.accountAuthenticationWithProfile(account, accountProfile);
 
+        when(routeService.shouldBeStreamingPosition(accountProfile)).thenReturn(true);
         //when
         final AuthenticationResponse response = authenticationExecutiveService.getAuthenticationInfo(authentication);
 
@@ -94,6 +99,7 @@ class AuthenticationExecutiveServiceTest {
         assertThat(response.getProfileFirstName()).isEqualTo(accountProfile.getFirstName());
         assertThat(response.getProfileLastName()).isEqualTo(accountProfile.getLastName());
         assertThat(response.getProfileType()).isEqualTo(accountProfile.getProfileType());
+        assertThat(response.isStreamingPosition()).isEqualTo(true);
     }
 
 }

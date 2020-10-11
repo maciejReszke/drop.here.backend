@@ -84,7 +84,7 @@ public class RouteValidationService {
     }
 
     public void validateCancelUpdate(Route route) {
-        validateUpdatePresentStatus(route, EnumSet.of(RouteStatus.PREPARED, RouteStatus.ONGOING), RouteStatus.CANCELLED);
+        validateUpdatePresentStatus(route, EnumSet.of(RouteStatus.PREPARED, RouteStatus.ONGOING), RouteStatus.FINISHED);
     }
 
     private void validateUpdatePresentStatus(Route route, EnumSet<RouteStatus> desiredStatuses, RouteStatus updateToStatus) {

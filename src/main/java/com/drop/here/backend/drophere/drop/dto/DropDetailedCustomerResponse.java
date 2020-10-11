@@ -45,4 +45,7 @@ public class DropDetailedCustomerResponse {
 
     @ApiModelProperty(value = "Seller profile last name or null", example = "Panifoster")
     String profileLastName;
+
+    @ApiModelProperty(value = "Should seller be streaming position", example = "true")
+    boolean streamingPosition;
 }

@@ -122,7 +122,8 @@ class DropServiceTest {
         when(accountProfilePersistenceService.findByDrop(drop)).thenReturn(Optional.of(accountProfile));
         when(spotSearchingService.findSpot(spot, customer)).thenReturn(spotBaseCustomerResponse);
         when(routeProductMappingService.toProductResponses(drop)).thenReturn(routeProductResponses);
-
+        when(dropRepository.isSellerLocationAvailableForCustomer(accountProfile.getProfileUid(), customer))
+                .thenReturn(true);
 
         //when
         final DropDetailedCustomerResponse dropResponse = dropService.findDropForCustomer(dropUid, accountAuthentication);
@@ -139,6 +140,7 @@ class DropServiceTest {
         assertThat(dropResponse.getProfileFirstName()).isEqualTo(accountProfile.getFirstName());
         assertThat(dropResponse.getProfileLastName()).isEqualTo(accountProfile.getLastName());
         assertThat(dropResponse.getProfileUid()).isEqualTo(accountProfile.getProfileUid());
+        assertThat(dropResponse.isStreamingPosition()).isTrue();
     }
 
     @Test
@@ -161,7 +163,6 @@ class DropServiceTest {
         when(spotSearchingService.findSpot(spot, customer)).thenReturn(spotBaseCustomerResponse);
         when(routeProductMappingService.toProductResponses(drop)).thenReturn(routeProductResponses);
 
-
         //when
         final DropDetailedCustomerResponse dropResponse = dropService.findDropForCustomer(dropUid, accountAuthentication);
 
@@ -177,6 +178,7 @@ class DropServiceTest {
         assertThat(dropResponse.getProfileFirstName()).isNull();
         assertThat(dropResponse.getProfileLastName()).isNull();
         assertThat(dropResponse.getProfileUid()).isNull();
+        assertThat(dropResponse.isStreamingPosition()).isFalse();
     }
 
     @Test

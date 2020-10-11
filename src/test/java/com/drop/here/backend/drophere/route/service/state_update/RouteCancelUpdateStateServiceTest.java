@@ -39,7 +39,7 @@ class RouteCancelUpdateStateServiceTest {
         final RouteStatus status = routeCancelUpdateStateService.update(route);
 
         //then
-        assertThat(status).isEqualTo(RouteStatus.CANCELLED);
+        assertThat(status).isEqualTo(RouteStatus.FINISHED);
         assertThat(route.getCanceledAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
     }
 }

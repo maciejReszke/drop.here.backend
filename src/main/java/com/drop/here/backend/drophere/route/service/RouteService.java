@@ -28,13 +28,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class RouteService {
     private final RouteMappingService routeMappingService;
-    private final RouteStoreService routeStoreService;
+    private final RoutePersistenceService routePersistenceService;
     private final RouteValidationService routeValidationService;
     private final RouteUpdateStateServiceFactory routeUpdateStateServiceFactory;
     private final AccountProfilePersistenceService accountProfilePersistenceService;
 
     public Page<RouteShortResponse> findRoutes(AccountAuthentication accountAuthentication, String routeStatus, Pageable pageable) {
-        return routeStoreService.findByCompany(accountAuthentication.getCompany(), routeStatus, pageable);
+        return routePersistenceService.findByCompany(accountAuthentication.getCompany(), routeStatus, pageable);
     }
 
     public RouteResponse findRoute(Long routeId, AccountAuthentication accountAuthentication) {
@@ -47,7 +47,7 @@ public class RouteService {
         routeValidationService.validateCreate(unpreparedRouteRequest);
         final Route route = routeMappingService.toRoute(unpreparedRouteRequest, accountAuthentication.getCompany());
         log.info("Saving route for company {} with name {}", companyUid, unpreparedRouteRequest.getName());
-        routeStoreService.save(route);
+        routePersistenceService.save(route);
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, route.getId());
     }
 
@@ -57,7 +57,7 @@ public class RouteService {
         routeValidationService.validateUpdateUnprepared(routeRequest, route);
         routeMappingService.updateRoute(route, routeRequest, accountAuthentication.getCompany());
         log.info("Updating route for company {} with name {} id {} {}", companyUid, route.getName(), route.getId(), route.getStatus());
-        routeStoreService.save(route);
+        routePersistenceService.save(route);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, route.getId());
     }
 
@@ -71,7 +71,7 @@ public class RouteService {
         final RouteStatus newStatus = routeUpdateStateServiceFactory.update(route, routeStateChangeRequest);
         log.info("Updating route for company {} with name {} id {} from {} to {}", companyUid, route.getName(), route.getId(), route.getStatus(), newStatus);
         route.setStatus(newStatus);
-        routeStoreService.save(route);
+        routePersistenceService.save(route);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, route.getId());
     }
 
@@ -89,16 +89,19 @@ public class RouteService {
         final Route route = findByIdAndCompany(routeId, accountAuthentication.getCompany());
         routeValidationService.validateDelete(route);
         log.info("Deleting route for company {} with name {} id {}", companyUid, route.getName(), routeId);
-        routeStoreService.delete(route);
+        routePersistenceService.delete(route);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, routeId);
     }
 
     private Route findByIdAndCompany(Long routeId, Company company) {
-        return routeStoreService.findByIdAndCompany(routeId, company)
+        return routePersistenceService.findByIdAndCompany(routeId, company)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Route for company %s with id %s was not found", company.getUid(), routeId),
                         RestExceptionStatusCode.ROUTE_BY_ID_AND_COMPANY_NOT_FOUND
                 ));
     }
 
+    public boolean shouldBeStreamingPosition(AccountProfile profile) {
+        return routePersistenceService.existsByStatusAndProfile(RouteStatus.ONGOING, profile);
+    }
 }

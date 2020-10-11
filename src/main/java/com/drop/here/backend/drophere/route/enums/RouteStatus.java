@@ -4,6 +4,5 @@ public enum RouteStatus {
     UNPREPARED,
     PREPARED,
     ONGOING,
-    CANCELLED,
     FINISHED
 }
