@@ -24,6 +24,9 @@ public class RouteValidationService {
     private static final DateTimeFormatter TIME_PATTERN = DateTimeFormatter.ofPattern("HH:mm");
 
     public void validateCreate(UnpreparedRouteRequest routeRequest) {
+        if (routeRequest.getProducts().stream().map(RouteProductRequest::getProductId).distinct().count() != routeRequest.getProducts().size()) {
+            throw new RestIllegalRequestValueException("Route must contains unique products", RestExceptionStatusCode.ROUTE_MODIFICATION_NOT_UNIQUE_PRODUCTS);
+        }
         routeRequest.getProducts().forEach(this::validateRouteProductRequest);
         routeRequest.getDrops().forEach(this::validateDropRequest);
     }

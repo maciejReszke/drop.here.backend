@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface DropRepository extends JpaRepository<Drop, Long> {
@@ -81,4 +82,39 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "where d.uid = :dropUid and " +
             "d.route.company = :company")
     Optional<Drop> findByUidAndRouteCompanyWithSpot(String dropUid, Company company);
+
+
+    @Query("select distinct d from Drop d " +
+            "join fetch d.spot s where " +
+            "d.route.id in (:routesIds) and " +
+            "d.status <> 'FINISHED' and " +
+            "d.status <> 'CANCELLED' ")
+    List<Drop> findUpcomingByRouteIdInWithSpotForCompany(Set<Long> routesIds);
+
+    @Query("select distinct d from Drop d " +
+            "join fetch d.spot s where " +
+            "d.route.id in (:routesIds) and " +
+            "d.status <> 'FINISHED' and " +
+            "d.status <> 'CANCELLED' and " +
+            "d.status <> 'UNPREPARED' and " +
+            "(" +
+            "   s.company.visibilityStatus = 'VISIBLE'" +
+            ") and " +
+            "(" +
+            "   s.hidden = false or d in (select dm.spot from SpotMembership dm " +
+            "                                   where dm.spot = s and dm.customer = :customer " +
+            "                                   and dm.membershipStatus = 'ACTIVE')" +
+            ") and " +
+            "(" +
+            "   :customer not in (select ccr.customer from CompanyCustomerRelationship ccr" +
+            "                       where ccr.customer = :customer and " +
+            "                             ccr.company = s.company and " +
+            "                             ccr.relationshipStatus = 'BLOCKED')" +
+            ") and " +
+            "(" +
+            "   :customer not in (select dm.customer from SpotMembership dm " +
+            "                      where dm.spot = s and dm.customer =:customer and " +
+            "                       dm.membershipStatus = 'BLOCKED')" +
+            ")")
+    List<Drop> findUpcomingByRouteIdInWithSpotForCustomer(Set<Long> routesIds, Customer customer);
 }

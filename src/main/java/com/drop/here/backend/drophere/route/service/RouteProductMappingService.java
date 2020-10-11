@@ -4,7 +4,7 @@ import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.service.ProductSearchingService;
-import com.drop.here.backend.drophere.route.dto.RouteProductResponse;
+import com.drop.here.backend.drophere.route.dto.RouteProductRouteResponse;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
@@ -21,17 +21,17 @@ public class RouteProductMappingService {
     private final ProductSearchingService productSearchingService;
     private final RouteProductRepository routeProductRepository;
 
-    public List<RouteProductResponse> toProductResponses(Drop drop) {
+    public List<RouteProductRouteResponse> toProductResponses(Drop drop) {
         final List<RouteProduct> routeProducts = routeProductRepository.findByRouteDropContains(drop);
         return toResponses(routeProducts);
     }
 
-    public List<RouteProductResponse> toProductResponses(Route route) {
+    public List<RouteProductRouteResponse> toProductResponses(Route route) {
         final List<RouteProduct> routeProducts = routeProductRepository.findByRoute(route);
         return toResponses(routeProducts);
     }
 
-    private List<RouteProductResponse> toResponses(List<RouteProduct> routeProducts) {
+    private List<RouteProductRouteResponse> toResponses(List<RouteProduct> routeProducts) {
         final List<Long> productsIds = routeProducts.stream()
                 .map(RouteProduct::getProduct)
                 .map(Product::getId)
@@ -52,8 +52,8 @@ public class RouteProductMappingService {
                 .orElseThrow();
     }
 
-    private RouteProductResponse toRouteProductResponse(RouteProduct routeProduct, ProductResponse productResponse) {
-        return RouteProductResponse.builder()
+    private RouteProductRouteResponse toRouteProductResponse(RouteProduct routeProduct, ProductResponse productResponse) {
+        return RouteProductRouteResponse.builder()
                 .amount(routeProduct.getAmount())
                 .id(routeProduct.getId())
                 .limitedAmount(routeProduct.isLimitedAmount())

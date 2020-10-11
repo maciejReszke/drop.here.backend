@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileType;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
 import com.drop.here.backend.drophere.common.exceptions.RestOperationForbiddenException;
+import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
 import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -58,6 +60,22 @@ class RouteValidationServiceTest {
 
         //then
         assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenNotUniqueProductsWhenValidateCreateThenThrowException() {
+        //given
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
+        route.setProducts(List.of(
+                RouteProductRequest.builder().productId(5L).build(),
+                RouteProductRequest.builder().productId(5L).build()
+        ));
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateCreate(route));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
     }
 
     @Test
@@ -139,6 +157,23 @@ class RouteValidationServiceTest {
 
         //then
         assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenNotUniqueProductsWhenValidateUpdateThenThrowException() {
+        //given
+        final UnpreparedRouteRequest route = RouteDataGenerator.unprepared(1);
+        route.setProducts(List.of(
+                RouteProductRequest.builder().productId(5L).build(),
+                RouteProductRequest.builder().productId(5L).build()
+        ));
+        final Route entity = Route.builder().status(RouteStatus.UNPREPARED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> routeValidationService.validateUpdateUnprepared(route, entity));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
     }
 
     @Test

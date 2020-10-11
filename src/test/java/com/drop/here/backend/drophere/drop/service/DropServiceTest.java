@@ -15,7 +15,7 @@ import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.repository.DropRepository;
 import com.drop.here.backend.drophere.drop.service.update.DropUpdateServiceFactory;
-import com.drop.here.backend.drophere.route.dto.RouteProductResponse;
+import com.drop.here.backend.drophere.route.dto.RouteProductRouteResponse;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.service.RouteProductMappingService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
@@ -115,13 +115,13 @@ class DropServiceTest {
         final Drop drop = Drop.builder().startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).spot(spot).build();
         final AccountProfile accountProfile = AccountProfile.builder().firstName("f").lastName("l").profileUid("u").build();
         final SpotBaseCustomerResponse spotBaseCustomerResponse = SpotBaseCustomerResponse.builder().build();
-        final List<RouteProductResponse> routeProductResponses = List.of();
+        final List<RouteProductRouteResponse> routeProductRouteRespons = List.of();
 
         when(dropRepository.findPrivilegedDrop(dropUid, customer)).thenReturn(Optional.of(drop));
         when(spotPersistenceService.findByIdWithCompany(5L)).thenReturn(spot);
         when(accountProfilePersistenceService.findByDrop(drop)).thenReturn(Optional.of(accountProfile));
         when(spotSearchingService.findSpot(spot, customer)).thenReturn(spotBaseCustomerResponse);
-        when(routeProductMappingService.toProductResponses(drop)).thenReturn(routeProductResponses);
+        when(routeProductMappingService.toProductResponses(drop)).thenReturn(routeProductRouteRespons);
         when(dropRepository.isSellerLocationAvailableForCustomer(accountProfile.getProfileUid(), customer))
                 .thenReturn(true);
 
@@ -134,7 +134,7 @@ class DropServiceTest {
         assertThat(dropResponse.getName()).isEqualTo(drop.getName());
         assertThat(dropResponse.getStartTime()).isEqualTo(drop.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         assertThat(dropResponse.getSpot()).isEqualTo(spotBaseCustomerResponse);
-        assertThat(dropResponse.getProducts()).isEqualTo(routeProductResponses);
+        assertThat(dropResponse.getProducts()).isEqualTo(routeProductRouteRespons);
         assertThat(dropResponse.getStatus()).isEqualTo(drop.getStatus());
         assertThat(dropResponse.getUid()).isEqualTo(drop.getUid());
         assertThat(dropResponse.getProfileFirstName()).isEqualTo(accountProfile.getFirstName());
@@ -155,13 +155,13 @@ class DropServiceTest {
         final Spot spot = Spot.builder().id(5L).build();
         final Drop drop = Drop.builder().startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).spot(spot).build();
         final SpotBaseCustomerResponse spotBaseCustomerResponse = SpotBaseCustomerResponse.builder().build();
-        final List<RouteProductResponse> routeProductResponses = List.of();
+        final List<RouteProductRouteResponse> routeProductRouteRespons = List.of();
 
         when(dropRepository.findPrivilegedDrop(dropUid, customer)).thenReturn(Optional.of(drop));
         when(spotPersistenceService.findByIdWithCompany(5L)).thenReturn(spot);
         when(accountProfilePersistenceService.findByDrop(drop)).thenReturn(Optional.empty());
         when(spotSearchingService.findSpot(spot, customer)).thenReturn(spotBaseCustomerResponse);
-        when(routeProductMappingService.toProductResponses(drop)).thenReturn(routeProductResponses);
+        when(routeProductMappingService.toProductResponses(drop)).thenReturn(routeProductRouteRespons);
 
         //when
         final DropDetailedCustomerResponse dropResponse = dropService.findDropForCustomer(dropUid, accountAuthentication);
@@ -172,7 +172,7 @@ class DropServiceTest {
         assertThat(dropResponse.getName()).isEqualTo(drop.getName());
         assertThat(dropResponse.getStartTime()).isEqualTo(drop.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         assertThat(dropResponse.getSpot()).isEqualTo(spotBaseCustomerResponse);
-        assertThat(dropResponse.getProducts()).isEqualTo(routeProductResponses);
+        assertThat(dropResponse.getProducts()).isEqualTo(routeProductRouteRespons);
         assertThat(dropResponse.getStatus()).isEqualTo(drop.getStatus());
         assertThat(dropResponse.getUid()).isEqualTo(drop.getUid());
         assertThat(dropResponse.getProfileFirstName()).isNull();

@@ -17,10 +17,10 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CustomerStoreServiceTest {
+class CustomerPersistenceServiceTest {
 
     @InjectMocks
-    private CustomerStoreService customerStoreService;
+    private CustomerPersistenceService customerPersistenceService;
 
     @Mock
     private CustomerRepository customerRepository;
@@ -34,7 +34,7 @@ class CustomerStoreServiceTest {
         when(customerRepository.findById(customerId)).thenReturn(Optional.of(customer));
 
         //when
-        final Customer result = customerStoreService.findById(customerId);
+        final Customer result = customerPersistenceService.findById(customerId);
 
         //then
         assertThat(result).isEqualTo(customer);
@@ -48,7 +48,7 @@ class CustomerStoreServiceTest {
         when(customerRepository.findById(customerId)).thenReturn(Optional.empty());
 
         //when
-        final Throwable throwable = catchThrowable(() -> customerStoreService.findById(customerId));
+        final Throwable throwable = catchThrowable(() -> customerPersistenceService.findById(customerId));
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);

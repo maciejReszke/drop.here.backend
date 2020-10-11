@@ -1,5 +1,7 @@
 package com.drop.here.backend.drophere.product.service;
 
+import com.drop.here.backend.drophere.drop.dto.DropProductResponse;
+import com.drop.here.backend.drophere.drop.service.DropSearchingService;
 import com.drop.here.backend.drophere.product.dto.response.ProductCustomizationResponse;
 import com.drop.here.backend.drophere.product.dto.response.ProductCustomizationWrapperResponse;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
@@ -8,6 +10,7 @@ import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,18 +29,20 @@ import java.util.stream.Collectors;
 public class ProductSearchingService {
     private final ProductRepository productRepository;
     private final ProductCustomizationService productCustomizationService;
+    private final DropSearchingService dropSearchingService;
 
     public Page<ProductResponse> findAll(Pageable pageable,
                                          String companyUid,
                                          String[] desiredCategories,
-                                         String desiredNameSubstring) {
+                                         String desiredNameSubstring,
+                                         AccountAuthentication authentication) {
         final Page<Product> products = productRepository.findAll(
                 companyUid,
                 prepareCategories(desiredCategories),
                 prepareName(desiredNameSubstring),
                 ProductCreationType.PRODUCT,
                 pageable);
-        return toResponse(products);
+        return toResponse(products, authentication);
     }
 
     private String prepareName(String desiredNameSubstring) {
@@ -52,14 +57,23 @@ public class ProductSearchingService {
                 : Arrays.stream(desiredCategories).map(String::toLowerCase).collect(Collectors.toList());
     }
 
-    private Page<ProductResponse> toResponse(Page<Product> products) {
+    private Page<ProductResponse> toResponse(Page<Product> products, AccountAuthentication authentication) {
         final List<Long> productsIds = products.stream()
                 .map(Product::getId)
                 .collect(Collectors.toList());
 
         final List<ProductCustomizationWrapper> customizations = productCustomizationService.findCustomizations(productsIds);
+        final List<DropProductResponse> drops = dropSearchingService.findProductDrops(productsIds, authentication);
 
-        return products.map(product -> toProductResponse(product, findCustomizationWrappersForProduct(product, customizations)));
+        return products.map(product -> toProductResponse(product,
+                findCustomizationWrappersForProduct(product, customizations),
+                findDropsForProduct(product, drops)));
+    }
+
+    private List<DropProductResponse> findDropsForProduct(Product product, List<DropProductResponse> drops) {
+        return drops.stream()
+                .filter(drop -> product.getId().equals(drop.getRouteProduct().getOriginalProductId()))
+                .collect(Collectors.toList());
     }
 
     private List<ProductCustomizationWrapper> findCustomizationWrappersForProduct(Product product, List<ProductCustomizationWrapper> customizations) {
@@ -69,7 +83,7 @@ public class ProductSearchingService {
                 .collect(Collectors.toList());
     }
 
-    private ProductResponse toProductResponse(Product product, List<ProductCustomizationWrapper> customizationWrappers) {
+    private ProductResponse toProductResponse(Product product, List<ProductCustomizationWrapper> customizationWrappers, List<DropProductResponse> dropProducts) {
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -79,6 +93,7 @@ public class ProductSearchingService {
                 .price(product.getPrice())
                 .description(product.getDescription())
                 .customizationsWrappers(toCustomizationWrappers(customizationWrappers))
+                .drops(dropProducts)
                 .build();
     }
 
@@ -114,7 +129,7 @@ public class ProductSearchingService {
         final List<Product> products = productRepository.findByIdIn(productsIds);
         final List<ProductCustomizationWrapper> customizations = productCustomizationService.findCustomizations(productsIds);
         return products.stream()
-                .map(product -> toProductResponse(product, findCustomizationWrappersForProduct(product, customizations)))
+                .map(product -> toProductResponse(product, findCustomizationWrappersForProduct(product, customizations), List.of()))
                 .collect(Collectors.toList());
     }
 }

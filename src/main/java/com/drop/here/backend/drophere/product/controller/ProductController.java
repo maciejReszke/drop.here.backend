@@ -62,7 +62,7 @@ public class ProductController {
                                          @ApiParam(value = "Desired category (1... n)") @RequestParam(value = "category", required = false) String[] desiredCategories,
                                          @ApiParam(value = "Product name (substring)") @RequestParam(value = "name", required = false) String desiredNameSubstring,
                                          @NotNull Pageable pageable) {
-        return productService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring);
+        return productService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, authentication);
     }
 
     @PostMapping

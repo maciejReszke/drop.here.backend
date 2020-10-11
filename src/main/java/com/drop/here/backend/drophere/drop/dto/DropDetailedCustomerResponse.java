@@ -1,7 +1,7 @@
 package com.drop.here.backend.drophere.drop.dto;
 
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
-import com.drop.here.backend.drophere.route.dto.RouteProductResponse;
+import com.drop.here.backend.drophere.route.dto.RouteProductRouteResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotBaseCustomerResponse;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
@@ -35,7 +35,7 @@ public class DropDetailedCustomerResponse {
     SpotBaseCustomerResponse spot;
 
     @ApiModelProperty(value = "Route products")
-    List<RouteProductResponse> products;
+    List<RouteProductRouteResponse> products;
 
     @ApiModelProperty(value = "Seller profile uid or null", example = "15gang")
     String profileUid;

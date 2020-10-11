@@ -14,7 +14,7 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.customer.service.CustomerStoreService;
+import com.drop.here.backend.drophere.customer.service.CustomerPersistenceService;
 import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
@@ -42,7 +42,7 @@ public class CompanyService {
     private final ImageService imageService;
     private final SpotMembershipService spotMembershipService;
     private final CompanyCustomerRelationshipService companyCustomerRelationshipService;
-    private final CustomerStoreService customerStoreService;
+    private final CustomerPersistenceService customerPersistenceService;
     private final CompanyCustomerSearchingService companyCustomerSearchingService;
 
     public boolean isVisible(String companyUid) {
@@ -125,7 +125,7 @@ public class CompanyService {
     }
 
     public ResourceOperationResponse updateCustomerRelationship(Long customerId, CompanyCustomerRelationshipManagementRequest companyCustomerManagementRequest, AccountAuthentication accountAuthentication) {
-        final Customer customer = customerStoreService.findById(customerId);
+        final Customer customer = customerPersistenceService.findById(customerId);
         companyCustomerRelationshipService.handleCustomerBlocking(companyCustomerManagementRequest.isBlock(), customer, accountAuthentication.getCompany());
         log.info("Updated customer {} with company relation {}", customer, accountAuthentication.getCompany().getUid());
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customerId);
