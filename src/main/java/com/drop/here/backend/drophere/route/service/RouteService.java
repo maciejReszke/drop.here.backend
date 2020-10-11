@@ -23,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -103,5 +105,15 @@ public class RouteService {
 
     public boolean shouldBeStreamingPosition(AccountProfile profile) {
         return routePersistenceService.existsByStatusAndProfile(RouteStatus.ONGOING, profile);
+    }
+
+    public void finishToBeFinished() {
+        routePersistenceService.finishToBeFinished()
+                .forEach(route -> {
+                    route.setFinishedAt(LocalDateTime.now());
+                    route.setStatus(RouteStatus.FINISHED);
+                    log.info("Finishing route with id {}", route.getId());
+                    routePersistenceService.save(route);
+                });
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,4 +33,11 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     boolean existsByProfileAndContainsDrop(AccountProfile profile, Drop drop);
 
     boolean existsByStatusAndProfile(RouteStatus status, AccountProfile profile);
+
+    @Query("select r from Route r where " +
+            "r.status <> 'FINISHED' and " +
+            "not exists (select d from Drop d where " +
+            "                   d.route = r  and " +
+            "                   d.status <> 'FINISHED' and d.status <> 'CANCELLED')")
+    List<Route> finishToBeFinished();
 }

@@ -24,6 +24,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -279,4 +281,19 @@ class RouteServiceTest {
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
     }
 
+    @Test
+    void givenNotFinishedRouteWhenFinishToBeFinishedThenUpdateStatus() {
+        //given
+        final Route route = Route.builder().build();
+
+        when(routePersistenceService.finishToBeFinished()).thenReturn(List.of(route));
+        doNothing().when(routePersistenceService).save(route);
+
+        //when
+        routeService.finishToBeFinished();
+
+        //then
+        assertThat(route.getStatus()).isEqualTo(RouteStatus.FINISHED);
+        assertThat(route.getFinishedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
+    }
 }
