@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -19,4 +20,10 @@ public interface RouteProductRepository extends JpaRepository<RouteProduct, Long
     List<RouteProduct> findByRouteDropContains(Drop drop);
 
     List<RouteProduct> findByOriginalProductIdIn(List<Long> productsIds);
+
+    @Modifying
+    @Query("update RouteProduct rp " +
+            "set rp.originalProduct = null where " +
+            "rp.originalProduct.id = :productId")
+    void nullOriginalProductId(Long productId);
 }

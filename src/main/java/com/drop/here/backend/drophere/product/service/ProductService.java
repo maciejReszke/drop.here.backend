@@ -15,6 +15,7 @@ import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
+import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class ProductService {
     private final ProductMappingService productMappingService;
     private final ProductCustomizationService productCustomizationService;
     private final ImageService imageService;
+    private final RouteProductRepository routeProductRepository;
 
     public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring, AccountAuthentication authentication) {
         return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, authentication);
@@ -71,6 +73,7 @@ public class ProductService {
         final Product product = getProduct(productId, companyUid);
         productValidationService.validateProductModification(product);
         log.info("Deleting product {} for company {} with name {}", productId, companyUid, product.getName());
+        routeProductRepository.nullOriginalProductId(productId);
         productRepository.delete(product);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, productId);
     }

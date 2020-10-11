@@ -47,7 +47,6 @@ public class ProductController {
 
     private static final String IMAGE_PART_NAME = "image";
 
-    // TODO: 11/10/2020 test dla firmy i customera
     @GetMapping
     @ApiOperation(value = "Fetching products", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)

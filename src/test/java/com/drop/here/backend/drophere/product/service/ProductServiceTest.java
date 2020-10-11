@@ -16,6 +16,7 @@ import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
+import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
@@ -63,6 +64,9 @@ class ProductServiceTest {
 
     @Mock
     private ImageService imageService;
+
+    @Mock
+    private RouteProductRepository routeProductRepository;
 
     @Test
     void givenRequestWhenFindAllThenFindAll() {
@@ -160,6 +164,7 @@ class ProductServiceTest {
         final Long productId = 1L;
         when(productRepository.findByIdAndCompanyUid(productId, companyUid)).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(product);
+        doNothing().when(routeProductRepository).nullOriginalProductId(productId);
         //when
         final ResourceOperationResponse response = productService.deleteProduct(productId, companyUid);
 

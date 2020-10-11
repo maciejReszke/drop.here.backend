@@ -54,7 +54,6 @@ public class RouteProduct {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    //todo  ( i usuwac trzeba gdy produkt jest usuniety ostatecznie)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "original_product_id")
     private Product originalProduct;
