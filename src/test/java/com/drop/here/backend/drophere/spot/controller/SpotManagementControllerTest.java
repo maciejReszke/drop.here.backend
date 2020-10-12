@@ -11,6 +11,7 @@ import com.drop.here.backend.drophere.country.Country;
 import com.drop.here.backend.drophere.country.CountryRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.repository.CustomerRepository;
+import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
 import com.drop.here.backend.drophere.spot.entity.Spot;
@@ -69,6 +70,9 @@ class SpotManagementControllerTest extends IntegrationBaseClass {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     private Company company;
     private Account account;
@@ -448,6 +452,7 @@ class SpotManagementControllerTest extends IntegrationBaseClass {
 
         assertThat(spotMembershipRepository.findById(membership.getId()).orElseThrow().getMembershipStatus())
                 .isEqualTo(SpotMembershipStatus.BLOCKED);
+        assertThat(notificationRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -475,6 +480,7 @@ class SpotManagementControllerTest extends IntegrationBaseClass {
 
         assertThat(spotMembershipRepository.findById(membership.getId()).orElseThrow().getMembershipStatus())
                 .isEqualTo(SpotMembershipStatus.ACTIVE);
+        assertThat(notificationRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -508,6 +514,7 @@ class SpotManagementControllerTest extends IntegrationBaseClass {
 
         assertThat(spotMembershipRepository.findById(membership.getId()).orElseThrow().getMembershipStatus())
                 .isEqualTo(SpotMembershipStatus.ACTIVE);
+        assertThat(notificationRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -535,6 +542,7 @@ class SpotManagementControllerTest extends IntegrationBaseClass {
 
         assertThat(spotMembershipRepository.findById(membership.getId()).orElseThrow().getMembershipStatus())
                 .isEqualTo(SpotMembershipStatus.ACTIVE);
+        assertThat(notificationRepository.findAll()).isEmpty();
     }
 
     @Test
