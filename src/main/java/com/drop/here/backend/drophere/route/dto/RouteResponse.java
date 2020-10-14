@@ -40,7 +40,7 @@ public class RouteResponse {
     String profileLastName;
 
     @ApiModelProperty(value = "Route products")
-    List<RouteProductResponse> products;
+    List<RouteProductRouteResponse> products;
 
     @ApiModelProperty(value = "Route drops")
     List<DropRouteResponse> drops;

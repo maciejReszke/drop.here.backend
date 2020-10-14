@@ -9,11 +9,13 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
+import com.drop.here.backend.drophere.product.dto.ProductCopy;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
+import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +38,10 @@ public class ProductService {
     private final ProductMappingService productMappingService;
     private final ProductCustomizationService productCustomizationService;
     private final ImageService imageService;
+    private final RouteProductRepository routeProductRepository;
 
-    public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring) {
-        return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring);
+    public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring, AccountAuthentication authentication) {
+        return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, authentication);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -70,6 +73,7 @@ public class ProductService {
         final Product product = getProduct(productId, companyUid);
         productValidationService.validateProductModification(product);
         log.info("Deleting product {} for company {} with name {}", productId, companyUid, product.getName());
+        routeProductRepository.nullOriginalProductId(productId);
         productRepository.delete(product);
         return new ResourceOperationResponse(ResourceOperationStatus.DELETED, productId);
     }
@@ -102,12 +106,12 @@ public class ProductService {
                 .getImage();
     }
 
-    public Product createReadOnlyCopy(Long productId, Company company, ProductCreationType creationType) {
+    public ProductCopy createReadOnlyCopy(Long productId, Company company, ProductCreationType creationType) {
         final Product templateProduct = getProduct(productId, company.getUid());
         final Product newProduct = templateProduct.toBuilder().build();
         newProduct.setId(null);
         newProduct.setCreationType(creationType);
         newProduct.setCustomizationWrappers(productCustomizationService.createReadOnlyCopies(templateProduct, newProduct));
-        return newProduct;
+        return new ProductCopy(templateProduct, newProduct);
     }
 }

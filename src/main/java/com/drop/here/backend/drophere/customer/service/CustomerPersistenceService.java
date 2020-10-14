@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CustomerStoreService {
+public class CustomerPersistenceService {
     private final CustomerRepository customerRepository;
 
     public void save(Customer customer) {

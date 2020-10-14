@@ -1,6 +1,5 @@
 package com.drop.here.backend.drophere.route.dto;
 
-import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
@@ -9,10 +8,13 @@ import java.math.BigDecimal;
 
 @Value
 @Builder
-public class RouteProductResponse {
+public class RouteProductProductResponse {
 
     @ApiModelProperty(value = "Route product id", example = "5")
     Long id;
+
+    @ApiModelProperty(value = "Route original product id", example = "6")
+    Long originalProductId;
 
     @ApiModelProperty(value = "Is product limited", example = "true")
     boolean limitedAmount;
@@ -22,7 +24,4 @@ public class RouteProductResponse {
 
     @ApiModelProperty(value = "Base product price for every drop in this route/drop", example = "15.55")
     BigDecimal price;
-
-    @ApiModelProperty(value = "Product response")
-    ProductResponse productResponse;
 }

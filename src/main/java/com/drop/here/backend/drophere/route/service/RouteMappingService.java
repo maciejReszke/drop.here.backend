@@ -10,12 +10,12 @@ import com.drop.here.backend.drophere.drop.dto.DropRouteResponse;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.drop.service.DropService;
-import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.dto.ProductCopy;
 import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.route.dto.RouteDropRequest;
 import com.drop.here.backend.drophere.route.dto.RouteProductRequest;
-import com.drop.here.backend.drophere.route.dto.RouteProductResponse;
+import com.drop.here.backend.drophere.route.dto.RouteProductRouteResponse;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
 import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
 import com.drop.here.backend.drophere.route.entity.Route;
@@ -123,13 +123,14 @@ public class RouteMappingService {
     }
 
     private RouteProduct buildProduct(RouteProductRequest routeProductRequest, Route route, Company company, int orderNum) {
-        final Product product = productService.createReadOnlyCopy(routeProductRequest.getProductId(), company, ProductCreationType.ROUTE);
+        final ProductCopy product = productService.createReadOnlyCopy(routeProductRequest.getProductId(), company, ProductCreationType.ROUTE);
         return RouteProduct.builder()
                 .orderNum(orderNum)
                 .limitedAmount(routeProductRequest.isLimitedAmount())
                 .amount(getAmount(routeProductRequest))
                 .price(routeProductRequest.getPrice().setScale(2, RoundingMode.DOWN))
-                .product(product)
+                .product(product.getCopy())
+                .originalProduct(product.getOriginal())
                 .route(route)
                 .build();
     }
@@ -142,7 +143,7 @@ public class RouteMappingService {
 
     public RouteResponse toRouteResponse(Route route) {
         final List<DropRouteResponse> drops = dropService.toDropRouteResponses(route);
-        final List<RouteProductResponse> products = routeProductMappingService.toProductResponses(route);
+        final List<RouteProductRouteResponse> products = routeProductMappingService.toProductResponses(route);
         final Optional<AccountProfile> profile = getProfile(route);
         return RouteResponse.builder()
                 .id(route.getId())
