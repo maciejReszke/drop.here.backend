@@ -6,7 +6,7 @@ import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ByCompanyUpdatedShipmentProcessingServiceFactory implements ShipmentProcessingService {
+public class ByCompanyUpdatedShipmentProcessingService implements ShipmentProcessingService {
 
     // TODO: 13/10/2020 test, implement
     @Override

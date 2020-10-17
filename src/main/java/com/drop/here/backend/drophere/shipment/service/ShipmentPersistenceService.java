@@ -1,5 +1,7 @@
 package com.drop.here.backend.drophere.shipment.service;
 
+import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
+import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.repository.ShipmentRepository;
@@ -15,8 +17,11 @@ public class ShipmentPersistenceService {
         shipmentRepository.save(shipment);
     }
 
-    // TODO: 13/10/2020
     public Shipment findShipment(Long shipmentId, Customer customer) {
-        return null;
+        return shipmentRepository.findByIdAndCustomer(shipmentId, customer)
+                .orElseThrow(() -> new RestEntityNotFoundException(String.format(
+                        "Shipment with id %s for customer %s was not found", shipmentId, customer.getId()),
+                        RestExceptionStatusCode.SHIPMENT_BY_ID_DOES_NOT_EXIST
+                ));
     }
 }

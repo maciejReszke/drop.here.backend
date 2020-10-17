@@ -18,15 +18,14 @@ public class ShipmentProcessingServiceFactory {
     private final ByCustomerUpdatedShipmentProcessingService byCustomerUpdatedShipmentProcessingService;
     private final CustomerDecisionShipmentProcessingServiceFactory customerDecisionShipmentProcessingServiceFactory;
     private final CompanyDecisionShipmentProcessingServiceFactory companyDecisionShipmentProcessingServiceFactory;
-    private final ByCompanyUpdatedShipmentProcessingServiceFactory byCompanyUpdatedShipmentProcessingServiceFactory;
+    private final ByCompanyUpdatedShipmentProcessingService byCompanyUpdatedShipmentProcessingService;
 
-    // TODO: 13/10/2020 test, implement
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest request, ShipmentProcessOperation shipmentProcessOperation) {
         return API.Match(shipmentProcessOperation).of(
                 Case($(ShipmentProcessOperation.NEW), () -> newShipmentProcessingService.process(shipment, request)),
                 Case($(ShipmentProcessOperation.BY_CUSTOMER_UPDATED), () -> byCustomerUpdatedShipmentProcessingService.process(shipment, request)),
                 Case($(ShipmentProcessOperation.CUSTOMER_DECISION), () -> customerDecisionShipmentProcessingServiceFactory.process(shipment, request)),
-                Case($(ShipmentProcessOperation.BY_COMPANY_UPDATED), () -> byCompanyUpdatedShipmentProcessingServiceFactory.process(shipment, request)),
+                Case($(ShipmentProcessOperation.BY_COMPANY_UPDATED), () -> byCompanyUpdatedShipmentProcessingService.process(shipment, request)),
                 Case($(ShipmentProcessOperation.COMPANY_DECISION), () -> companyDecisionShipmentProcessingServiceFactory.process(shipment, request))
         );
     }

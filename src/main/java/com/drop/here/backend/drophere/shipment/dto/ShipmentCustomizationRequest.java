@@ -6,22 +6,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ShipmentCustomerSubmissionRequest {
+public class ShipmentCustomizationRequest {
 
-    @ApiModelProperty(value = "Products", required = true)
-    @NotEmpty
+    @ApiModelProperty(value = "Customization id", example = "55", required = true)
     @NotNull
-    @Valid
-    private List<@Valid ShipmentProductRequest> products;
-
-    private String comment;
+    private Long id;
 }

@@ -54,4 +54,6 @@ public class ProductCustomizationWrapper {
 
     @Version
     private Long version;
+
+    // TODO: 17/10/2020 required?
 }

@@ -37,11 +37,13 @@ public class ShipmentService {
     public ResourceOperationResponse createShipment(String dropUid, ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest, AccountAuthentication authentication) {
         final Customer customer = authentication.getCustomer();
         final Drop drop = dropService.findPrivilegedDrop(dropUid, customer);
+        // TODO: 17/10/2020 lepiej walidacja po mapowaniu?, sprawdzac unit czy fractionable i czy unikalne produkty
+        // TODO: 17/10/2020 nie musza byc unikalne bo moga miec rozne customizacje
         shipmentValidationService.validateCreateShipmentRequest(shipmentCustomerSubmissionRequest);
         final Shipment shipment = shipmentMappingService.toEntity(drop, shipmentCustomerSubmissionRequest, customer);
         final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerSubmission(shipmentCustomerSubmissionRequest), ShipmentProcessOperation.NEW);
         log.info("Created new shipment with status {} for customer {} drop {}", shipmentStatus, customer.getId(), drop.getUid());
-        shipment.setShipmentStatus(shipmentStatus);
+        shipment.setStatus(shipmentStatus);
         shipmentPersistenceService.save(shipment);
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, shipment.getId());
     }
@@ -67,8 +69,8 @@ public class ShipmentService {
     }
 
     private ResourceOperationResponse updateShipment(AccountAuthentication authentication, Shipment shipment, ShipmentStatus shipmentStatus) {
-        log.info("Updated shipment with status {} to {} for customer {} shipment {}", shipment.getShipmentStatus(), shipmentStatus, authentication.getCustomer().getId(), shipment.getId());
-        shipment.setShipmentStatus(shipmentStatus);
+        log.info("Updated shipment with status {} to {} for customer {} shipment {}", shipment.getStatus(), shipmentStatus, authentication.getCustomer().getId(), shipment.getId());
+        shipment.setStatus(shipmentStatus);
         shipmentPersistenceService.save(shipment);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, shipment.getId());
     }

@@ -18,7 +18,6 @@ public class CustomerDecisionShipmentProcessingServiceFactory implements Shipmen
     private final CancelCustomerDecisionShipmentProcessingService cancelCustomerDecisionShipmentProcessingService;
     private final AcceptCustomerDecisionShipmentProcessingService acceptCustomerDecisionShipmentProcessingService;
 
-    // TODO: 13/10/2020 test, implement
     @Override
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest request) {
         return API.Match(request.getShipmentCustomerDecisionRequest().getCustomerDecision()).of(
