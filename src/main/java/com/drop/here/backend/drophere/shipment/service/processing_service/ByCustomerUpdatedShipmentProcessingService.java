@@ -13,6 +13,10 @@ public class ByCustomerUpdatedShipmentProcessingService implements ShipmentProce
     // TODO: 13/10/2020 dwie opcje - palced lub compromised
     @Override
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest submission) {
+        /*
+            shipment.setStatus(routeService.getSubmittedShipmentStatus(shipment.getDrop()));
+        */
+
         return null;
     }
 }

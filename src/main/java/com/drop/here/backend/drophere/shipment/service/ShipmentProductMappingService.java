@@ -6,7 +6,6 @@ import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.enums.ProductCreationType;
-import com.drop.here.backend.drophere.product.service.ProductCustomizationService;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.service.RouteProductService;
@@ -32,13 +31,10 @@ import java.util.stream.Collectors;
 public class ShipmentProductMappingService {
     private final RouteProductService routeProductService;
     private final ProductService productService;
-    private final ProductCustomizationService productCustomizationService;
     private final ShipmentCalculatingService shipmentCalculatingService;
 
-    // TODO: 17/10/2020 test
     public Set<ShipmentProduct> createShipmentProducts(Shipment shipment, Company company, ShipmentCustomerSubmissionRequest request) {
         final List<RouteProduct> products = getRouteProducts(shipment, request);
-        final List<ProductCustomization> customizations = getCustomizations(products);
         final AtomicInteger counter = new AtomicInteger(0);
 
         return request.getProducts().stream()
@@ -46,24 +42,10 @@ public class ShipmentProductMappingService {
                         productRequest,
                         company,
                         findProduct(productRequest.getRouteProductId(), products),
-                        customizations,
                         shipment,
                         counter.incrementAndGet()
                 ))
                 .collect(Collectors.toSet());
-    }
-
-    private List<ProductCustomization> getCustomizations(List<RouteProduct> products) {
-        final List<Long> productsIds = products.stream()
-                .map(RouteProduct::getProduct)
-                .map(Product::getId)
-                .collect(Collectors.toList());
-
-        return productCustomizationService.findCustomizations(productsIds)
-                .stream()
-                .map(ProductCustomizationWrapper::getCustomizations)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
     }
 
     private List<RouteProduct> getRouteProducts(Shipment shipment, ShipmentCustomerSubmissionRequest request) {
@@ -75,17 +57,17 @@ public class ShipmentProductMappingService {
         return routeProductService.findProducts(shipment.getDrop(), routeProductsIds);
     }
 
-    private ShipmentProduct toShipmentProduct(ShipmentProductRequest productRequest, Company company, RouteProduct product, List<ProductCustomization> customizations, Shipment shipment, int orderNum) {
+    private ShipmentProduct toShipmentProduct(ShipmentProductRequest productRequest, Company company, RouteProduct product, Shipment shipment, int orderNum) {
         final ProductCopy productCopy = productService.createReadOnlyCopy(product.getProduct().getId(), company, ProductCreationType.SHIPMENT);
         final ShipmentProduct shipmentProduct = buildBaseShipmentProduct(productRequest, product, shipment, orderNum, productCopy);
-        setCustomizations(productRequest, product, customizations, shipmentProduct);
+        setCustomizations(productRequest, productCopy.getCopy(), shipmentProduct);
         updatePrice(shipmentProduct);
         return shipmentProduct;
     }
 
-    private void setCustomizations(ShipmentProductRequest productRequest, RouteProduct product, List<ProductCustomization> customizations, ShipmentProduct shipmentProduct) {
+    private void setCustomizations(ShipmentProductRequest productRequest, Product product, ShipmentProduct shipmentProduct) {
         shipmentProduct.setCustomizations(productRequest.getCustomizations().stream()
-                .map(customization -> toShipmentProductCustomization(shipmentProduct, findCustomization(customization, product.getProduct(), customizations)))
+                .map(customization -> toShipmentProductCustomization(shipmentProduct, findCustomization(customization, product)))
                 .collect(Collectors.toSet()));
     }
 
@@ -115,16 +97,13 @@ public class ShipmentProductMappingService {
                 .build();
     }
 
-    private ProductCustomization findCustomization(ShipmentCustomizationRequest customizationRequest, Product product, List<ProductCustomization> customizations) {
-        return customizations.stream()
-                .filter(customization -> matchesCustomization(customizationRequest, product, customization))
+    private ProductCustomization findCustomization(ShipmentCustomizationRequest customizationRequest, Product product) {
+        return product.getCustomizationWrappers().stream()
+                .map(ProductCustomizationWrapper::getCustomizations)
+                .flatMap(Collection::stream)
+                .filter(customization -> customization.getId().equals(customizationRequest.getId()))
                 .findFirst()
                 .orElseThrow();
-    }
-
-    private boolean matchesCustomization(ShipmentCustomizationRequest customizationRequest, Product product, ProductCustomization customization) {
-        return customization.getId().equals(customizationRequest.getId()) &&
-                customization.getWrapper().getProduct().getId().equals(product.getId());
     }
 
     private RouteProduct findProduct(Long routeProductId, List<RouteProduct> products) {

@@ -32,6 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// TODO: 17/10/2020 czy automatycznie akceptwoac
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

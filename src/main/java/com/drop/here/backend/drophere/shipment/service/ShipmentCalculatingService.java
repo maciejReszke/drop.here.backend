@@ -3,20 +3,35 @@ package com.drop.here.backend.drophere.shipment.service;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProductCalculation;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.entity.ShipmentProduct;
+import com.drop.here.backend.drophere.shipment.entity.ShipmentProductCustomization;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Service
 public class ShipmentCalculatingService {
 
-    // TODO: 17/10/2020
     public ShipmentProductCalculation calculateProductCost(ShipmentProduct shipmentProduct) {
-        return null;
+        final BigDecimal customizationsPrice = shipmentProduct.getCustomizations().stream()
+                .map(ShipmentProductCustomization::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new ShipmentProductCalculation(
+                scale(shipmentProduct.getUnitPrice()),
+                scale(customizationsPrice),
+                scale(customizationsPrice.add(shipmentProduct.getUnitPrice()))
+        );
     }
 
-    // TODO: 17/10/2020
+    private BigDecimal scale(BigDecimal amount) {
+        return amount.setScale(2, RoundingMode.DOWN);
+    }
+
     public BigDecimal calculateShipment(Shipment shipment) {
-        return null;
+        final BigDecimal amount = shipment.getProducts().stream()
+                .map(ShipmentProduct::getSummarizedPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return scale(amount);
     }
 }

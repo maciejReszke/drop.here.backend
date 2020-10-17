@@ -4,17 +4,18 @@ import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionReq
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import org.springframework.stereotype.Service;
 
-// TODO: 13/10/2020
 @Service
 public class ShipmentValidationService {
 
-    // TODO: 13/10/2020
-    public void validateCreateShipmentRequest(ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest) {
+    // TODO: 17/10/2020 test, implement
+    // TODO: 17/10/2020 sprawdzic unity - czy fractionable,
+    // TODO: 17/10/2020 sprawdzic customizacje, ceny, czy wymagane i inne, co z limitami?
+    public void validateShipment(Shipment shipment) {
 
     }
 
-    // TODO: 13/10/2020 test, implement
-    public void validateUpdateShipmentRequest(Shipment shipment, ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest) {
+    // TODO: 17/10/2020 test, impleent
+    public void validateShipmentCustomerUpdate(Shipment shipment, ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest) {
 
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface RouteProductRepository extends JpaRepository<RouteProduct, Long> {
@@ -18,6 +19,11 @@ public interface RouteProductRepository extends JpaRepository<RouteProduct, Long
     @Query("select rp from RouteProduct rp where " +
             "rp.route = (select d.route from Drop d where d =:drop)")
     List<RouteProduct> findByRouteDropContains(Drop drop);
+
+    @Query("select rp from RouteProduct rp where " +
+            "rp.id in (:routeProductsIds) and " +
+            "rp.route = (select d.route from Drop d where d =:drop)")
+    List<RouteProduct> findJoinProductByRouteDropContainsAndRouteProductIds(Drop drop, Set<Long> routeProductsIds);
 
     List<RouteProduct> findByOriginalProductIdIn(List<Long> productsIds);
 

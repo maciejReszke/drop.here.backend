@@ -11,6 +11,10 @@ public class NewShipmentProcessingService implements ShipmentProcessingService {
     // TODO: 13/10/2020
     @Override
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest submission) {
+/*
+        shipment.setStatus(routeService.getSubmittedShipmentStatus(shipment.getDrop()));
+*/
+
         return null;
     }
 }

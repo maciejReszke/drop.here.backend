@@ -120,7 +120,7 @@ public class RouteService {
     }
 
     // TODO: 17/10/2020 test, imlpmenet
-    public ShipmentStatus getPlacedShipmentStatus(Drop drop) {
+    public ShipmentStatus getSubmittedShipmentStatus(Drop drop) {
         return null;
     }
 }

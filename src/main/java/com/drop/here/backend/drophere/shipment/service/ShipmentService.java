@@ -21,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -33,14 +35,11 @@ public class ShipmentService {
     private final ShipmentPersistenceService shipmentPersistenceService;
     private final ShipmentSearchingService shipmentSearchingService;
 
-    // TODO: 12/10/2020  test
     public ResourceOperationResponse createShipment(String dropUid, ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest, AccountAuthentication authentication) {
         final Customer customer = authentication.getCustomer();
         final Drop drop = dropService.findPrivilegedDrop(dropUid, customer);
-        // TODO: 17/10/2020 lepiej walidacja po mapowaniu?, sprawdzac unit czy fractionable i czy unikalne produkty
-        // TODO: 17/10/2020 nie musza byc unikalne bo moga miec rozne customizacje
-        shipmentValidationService.validateCreateShipmentRequest(shipmentCustomerSubmissionRequest);
         final Shipment shipment = shipmentMappingService.toEntity(drop, shipmentCustomerSubmissionRequest, customer);
+        shipmentValidationService.validateShipment(shipment);
         final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerSubmission(shipmentCustomerSubmissionRequest), ShipmentProcessOperation.NEW);
         log.info("Created new shipment with status {} for customer {} drop {}", shipmentStatus, customer.getId(), drop.getUid());
         shipment.setStatus(shipmentStatus);
@@ -52,16 +51,15 @@ public class ShipmentService {
         return shipmentSearchingService.findCustomerShipments(authentication.getCustomer(), status, pageable);
     }
 
-    // TODO: 13/10/2020  test
     public ResourceOperationResponse updateShipment(Long shipmentId, ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest, AccountAuthentication authentication) {
         final Shipment shipment = shipmentPersistenceService.findShipment(shipmentId, authentication.getCustomer());
-        shipmentValidationService.validateUpdateShipmentRequest(shipment, shipmentCustomerSubmissionRequest);
+        shipmentValidationService.validateShipmentCustomerUpdate(shipment, shipmentCustomerSubmissionRequest);
         shipmentMappingService.update(shipment, shipmentCustomerSubmissionRequest);
+        shipmentValidationService.validateShipment(shipment);
         final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerSubmission(shipmentCustomerSubmissionRequest), ShipmentProcessOperation.BY_CUSTOMER_UPDATED);
         return updateShipment(authentication, shipment, shipmentStatus);
     }
 
-    // TODO: 13/10/2020 test
     public ResourceOperationResponse updateShipmentStatus(Long shipmentId, ShipmentCustomerDecisionRequest shipmentCustomerDecisionRequest, AccountAuthentication authentication) {
         final Shipment shipment = shipmentPersistenceService.findShipment(shipmentId, authentication.getCustomer());
         final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerDecision(shipmentCustomerDecisionRequest), ShipmentProcessOperation.CUSTOMER_DECISION);
@@ -71,6 +69,7 @@ public class ShipmentService {
     private ResourceOperationResponse updateShipment(AccountAuthentication authentication, Shipment shipment, ShipmentStatus shipmentStatus) {
         log.info("Updated shipment with status {} to {} for customer {} shipment {}", shipment.getStatus(), shipmentStatus, authentication.getCustomer().getId(), shipment.getId());
         shipment.setStatus(shipmentStatus);
+        shipment.setUpdatedAt(LocalDateTime.now());
         shipmentPersistenceService.save(shipment);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, shipment.getId());
     }
