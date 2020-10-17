@@ -55,7 +55,7 @@ public class ShipmentProduct {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "shipment_id")
     private Shipment shipment;
 
     @NotNull

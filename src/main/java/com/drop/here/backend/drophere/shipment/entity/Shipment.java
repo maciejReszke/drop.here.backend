@@ -39,8 +39,8 @@ import java.util.Set;
 @ToString(exclude = {"customer", "drop", "products", "company"})
 @EqualsAndHashCode(exclude = {"customer", "drop", "products", "company"})
 @Table(indexes = {
-        @Index(columnList = "company, status"),
-        @Index(columnList = "customer, status")
+        @Index(columnList = "company_id, status"),
+        @Index(columnList = "customer_id, status")
 })
 public class Shipment {
 
