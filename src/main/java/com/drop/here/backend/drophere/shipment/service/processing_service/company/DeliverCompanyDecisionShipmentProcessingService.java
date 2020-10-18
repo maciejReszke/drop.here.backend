@@ -4,7 +4,6 @@ import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import com.drop.here.backend.drophere.shipment.service.ShipmentNotificationService;
-import com.drop.here.backend.drophere.shipment.service.ShipmentProductManagementService;
 import com.drop.here.backend.drophere.shipment.service.ShipmentValidationService;
 import com.drop.here.backend.drophere.shipment.service.processing_service.ShipmentProcessingService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,6 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class DeliverCompanyDecisionShipmentProcessingService implements ShipmentProcessingService {
     private final ShipmentValidationService shipmentValidationService;
-    private final ShipmentProductManagementService shipmentProductManagementService;
     private final ShipmentNotificationService shipmentNotificationService;
 
     @Override
@@ -27,7 +25,6 @@ public class DeliverCompanyDecisionShipmentProcessingService implements Shipment
 
         shipment.setDeliveredAt(LocalDateTime.now());
 
-        shipmentProductManagementService.handle(shipment, newStatus);
         shipmentNotificationService.createNotifications(shipment, newStatus, true, false);
 
         return newStatus;

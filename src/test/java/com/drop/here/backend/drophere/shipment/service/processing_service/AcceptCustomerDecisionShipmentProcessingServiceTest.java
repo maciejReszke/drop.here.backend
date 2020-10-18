@@ -6,7 +6,6 @@ import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import com.drop.here.backend.drophere.shipment.service.ShipmentNotificationService;
-import com.drop.here.backend.drophere.shipment.service.ShipmentProductManagementService;
 import com.drop.here.backend.drophere.shipment.service.ShipmentValidationService;
 import com.drop.here.backend.drophere.shipment.service.processing_service.customer.AcceptCustomerDecisionShipmentProcessingService;
 import org.junit.jupiter.api.Test;
@@ -31,9 +30,6 @@ class AcceptCustomerDecisionShipmentProcessingServiceTest {
     @Mock
     private ShipmentNotificationService shipmentNotificationService;
 
-    @Mock
-    private ShipmentProductManagementService shipmentProductManagementService;
-
     @Test
     void givenShipmentWhenProcessThenProcess() {
         //given
@@ -44,7 +40,6 @@ class AcceptCustomerDecisionShipmentProcessingServiceTest {
         );
 
         doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.ACCEPTED, false, true);
-        doNothing().when(shipmentProductManagementService).handle(shipment, ShipmentStatus.ACCEPTED);
         doNothing().when(shipmentValidationService).validateAcceptCustomerDecision(shipment);
 
         //when

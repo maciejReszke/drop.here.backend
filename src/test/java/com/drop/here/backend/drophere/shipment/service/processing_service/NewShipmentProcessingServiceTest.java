@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +47,6 @@ class NewShipmentProcessingServiceTest {
 
         when(routeService.getSubmittedShipmentStatus(drop)).thenReturn(ShipmentStatus.PLACED);
         doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.PLACED, false, true);
-        doNothing().when(shipmentProductManagementService).handle(shipment, ShipmentStatus.PLACED);
 
         //when
         final ShipmentStatus status = processingService.process(shipment, shipmentProcessingRequest);
@@ -55,6 +55,7 @@ class NewShipmentProcessingServiceTest {
         assertThat(status).isEqualTo(ShipmentStatus.PLACED);
         assertThat(shipment.getPlacedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
         assertThat(shipment.getAcceptedAt()).isNull();
+        verifyNoMoreInteractions(shipmentProductManagementService);
     }
 
     @Test
@@ -67,7 +68,7 @@ class NewShipmentProcessingServiceTest {
 
         when(routeService.getSubmittedShipmentStatus(drop)).thenReturn(ShipmentStatus.ACCEPTED);
         doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.ACCEPTED, false, true);
-        doNothing().when(shipmentProductManagementService).handle(shipment, ShipmentStatus.ACCEPTED);
+        doNothing().when(shipmentProductManagementService).reduce(shipment);
 
         //when
         final ShipmentStatus status = processingService.process(shipment, shipmentProcessingRequest);

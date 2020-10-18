@@ -25,12 +25,12 @@ public class AcceptCompanyDecisionShipmentProcessingService implements ShipmentP
         shipment.setCompanyComment(submission.getShipmentCompanyDecisionRequest().getComment());
         final ShipmentStatus newStatus = ShipmentStatus.ACCEPTED;
 
-        if (shipment.getStatus() != ShipmentStatus.DELIVERED) {
+        if (shipment.getStatus() == ShipmentStatus.PLACED) {
             shipment.setAcceptedAt(LocalDateTime.now());
+            shipmentProductManagementService.reduce(shipment);
         }
         shipment.setDeliveredAt(null);
 
-        shipmentProductManagementService.handle(shipment, newStatus);
         shipmentNotificationService.createNotifications(shipment, newStatus, true, false);
 
         return newStatus;

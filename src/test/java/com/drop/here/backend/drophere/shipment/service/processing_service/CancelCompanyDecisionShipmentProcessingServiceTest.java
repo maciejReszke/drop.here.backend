@@ -44,7 +44,7 @@ class CancelCompanyDecisionShipmentProcessingServiceTest {
         );
 
         doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.CANCELLED, true, false);
-        doNothing().when(shipmentProductManagementService).handle(shipment, ShipmentStatus.CANCELLED);
+        doNothing().when(shipmentProductManagementService).increase(shipment);
         doNothing().when(shipmentValidationService).validateCancelCompanyDecision(shipment);
 
         //when

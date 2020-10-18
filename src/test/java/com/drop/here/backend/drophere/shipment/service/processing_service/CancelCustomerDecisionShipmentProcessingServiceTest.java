@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class CancelCustomerDecisionShipmentProcessingServiceTest {
@@ -44,7 +45,6 @@ class CancelCustomerDecisionShipmentProcessingServiceTest {
         );
 
         doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.CANCEL_REQUESTED, false, true);
-        doNothing().when(shipmentProductManagementService).handle(shipment, ShipmentStatus.CANCEL_REQUESTED);
         doNothing().when(shipmentValidationService).validateCancelCustomerDecision(shipment);
 
         //when
@@ -55,6 +55,7 @@ class CancelCustomerDecisionShipmentProcessingServiceTest {
         assertThat(shipment.getCancelRequestedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
         assertThat(shipment.getCancelledAt()).isNull();
         assertThat(shipment.getCustomerComment()).isEqualTo("customerComment123");
+        verifyNoMoreInteractions(shipmentProductManagementService);
     }
 
     @Test
@@ -67,7 +68,6 @@ class CancelCustomerDecisionShipmentProcessingServiceTest {
         );
 
         doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.CANCELLED, false, true);
-        doNothing().when(shipmentProductManagementService).handle(shipment, ShipmentStatus.CANCELLED);
         doNothing().when(shipmentValidationService).validateCancelCustomerDecision(shipment);
 
         //when
@@ -78,6 +78,7 @@ class CancelCustomerDecisionShipmentProcessingServiceTest {
         assertThat(shipment.getCancelledAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
         assertThat(shipment.getCancelRequestedAt()).isNull();
         assertThat(shipment.getCustomerComment()).isEqualTo("customerComment123");
+        verifyNoMoreInteractions(shipmentProductManagementService);
     }
 
     @Test
@@ -89,7 +90,7 @@ class CancelCustomerDecisionShipmentProcessingServiceTest {
                 ShipmentCustomerDecisionRequest.builder().comment("customerComment123").build());
 
         doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.CANCELLED, false, true);
-        doNothing().when(shipmentProductManagementService).handle(shipment, ShipmentStatus.CANCELLED);
+        doNothing().when(shipmentProductManagementService).increase(shipment);
         doNothing().when(shipmentValidationService).validateCancelCustomerDecision(shipment);
 
         //when

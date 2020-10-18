@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class RejectCompanyDecisionShipmentProcessingServiceTest {
@@ -34,17 +35,63 @@ class RejectCompanyDecisionShipmentProcessingServiceTest {
     private ShipmentProductManagementService shipmentProductManagementService;
 
     @Test
-    void givenShipmentWhenProcessThenProcess() {
+    void givenCompromisedShipmentWhenProcessThenProcess() {
         //given
         final Drop drop = Drop.builder().build();
-        final Shipment shipment = Shipment.builder().status(null)
+        final Shipment shipment = Shipment.builder().status(ShipmentStatus.COMPROMISED)
                 .acceptedAt(LocalDateTime.now()).drop(drop).build();
         final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.companyDecision(
                 ShipmentCompanyDecisionRequest.builder().comment("companyComment123").build()
         );
 
         doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.REJECTED, true, false);
-        doNothing().when(shipmentProductManagementService).handle(shipment, ShipmentStatus.REJECTED);
+        doNothing().when(shipmentProductManagementService).increase(shipment);
+        doNothing().when(shipmentValidationService).validateRejectCompanyDecision(shipment);
+
+        //when
+        final ShipmentStatus status = processingService.process(shipment, shipmentProcessingRequest);
+
+        //then
+        assertThat(status).isEqualTo(ShipmentStatus.REJECTED);
+        assertThat(shipment.getRejectedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
+        assertThat(shipment.getCompanyComment()).isEqualTo("companyComment123");
+    }
+
+    @Test
+    void givenPlacedShipmentWhenProcessThenProcess() {
+        //given
+        final Drop drop = Drop.builder().build();
+        final Shipment shipment = Shipment.builder().status(ShipmentStatus.PLACED)
+                .acceptedAt(LocalDateTime.now()).drop(drop).build();
+        final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.companyDecision(
+                ShipmentCompanyDecisionRequest.builder().comment("companyComment123").build()
+        );
+
+        doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.REJECTED, true, false);
+        doNothing().when(shipmentValidationService).validateRejectCompanyDecision(shipment);
+
+        //when
+        final ShipmentStatus status = processingService.process(shipment, shipmentProcessingRequest);
+
+        //then
+        assertThat(status).isEqualTo(ShipmentStatus.REJECTED);
+        assertThat(shipment.getRejectedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
+        assertThat(shipment.getCompanyComment()).isEqualTo("companyComment123");
+        verifyNoMoreInteractions(shipmentProductManagementService);
+    }
+
+    @Test
+    void givenAcceptedShipmentWhenProcessThenProcess() {
+        //given
+        final Drop drop = Drop.builder().build();
+        final Shipment shipment = Shipment.builder().status(ShipmentStatus.ACCEPTED)
+                .acceptedAt(LocalDateTime.now()).drop(drop).build();
+        final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.companyDecision(
+                ShipmentCompanyDecisionRequest.builder().comment("companyComment123").build()
+        );
+
+        doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.REJECTED, true, false);
+        doNothing().when(shipmentProductManagementService).increase(shipment);
         doNothing().when(shipmentValidationService).validateRejectCompanyDecision(shipment);
 
         //when

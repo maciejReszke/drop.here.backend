@@ -26,9 +26,9 @@ public class NewShipmentProcessingService implements ShipmentProcessingService {
 
         if (newStatus == ShipmentStatus.ACCEPTED) {
             shipment.setAcceptedAt(LocalDateTime.now());
+            shipmentProductManagementService.reduce(shipment);
         }
 
-        shipmentProductManagementService.handle(shipment, newStatus);
         shipmentNotificationService.createNotifications(shipment, newStatus, false, true);
         return newStatus;
     }

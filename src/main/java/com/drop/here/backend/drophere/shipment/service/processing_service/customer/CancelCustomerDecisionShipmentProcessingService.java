@@ -27,27 +27,32 @@ public class CancelCustomerDecisionShipmentProcessingService implements Shipment
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest submission) {
         shipmentValidationService.validateCancelCustomerDecision(shipment);
         shipment.setCustomerComment(submission.getShipmentCustomerDecisionRequest().getComment());
-        final ShipmentStatus newStatus = getShipmentStatus(shipment);
-
-        if (newStatus == ShipmentStatus.CANCEL_REQUESTED) {
-            shipment.setCancelRequestedAt(LocalDateTime.now());
-        }
-
-        if (newStatus == ShipmentStatus.CANCELLED) {
-            shipment.setCancelledAt(LocalDateTime.now());
-        }
-
-        shipmentProductManagementService.handle(shipment, newStatus);
+        final ShipmentStatus newStatus = handleByStatus(shipment);
         shipmentNotificationService.createNotifications(shipment, newStatus, false, true);
-
         return newStatus;
     }
 
-    private ShipmentStatus getShipmentStatus(Shipment shipment) {
+    private ShipmentStatus handleByStatus(Shipment shipment) {
         return API.Match(shipment.getStatus()).of(
-                Case($(ShipmentStatus.ACCEPTED), ShipmentStatus.CANCEL_REQUESTED),
-                Case($(ShipmentStatus.PLACED), ShipmentStatus.CANCELLED),
-                Case($(ShipmentStatus.COMPROMISED), ShipmentStatus.CANCELLED)
+                Case($(ShipmentStatus.ACCEPTED), () -> handleAcceptedShipment(shipment)),
+                Case($(ShipmentStatus.PLACED), () -> handlePlacedShipment(shipment)),
+                Case($(ShipmentStatus.COMPROMISED), () -> handleCompromisedShipment(shipment))
         );
+    }
+
+    private ShipmentStatus handleCompromisedShipment(Shipment shipment) {
+        shipment.setCancelledAt(LocalDateTime.now());
+        shipmentProductManagementService.increase(shipment);
+        return ShipmentStatus.CANCELLED;
+    }
+
+    private ShipmentStatus handlePlacedShipment(Shipment shipment) {
+        shipment.setCancelledAt(LocalDateTime.now());
+        return ShipmentStatus.CANCELLED;
+    }
+
+    private ShipmentStatus handleAcceptedShipment(Shipment shipment) {
+        shipment.setCancelRequestedAt(LocalDateTime.now());
+        return ShipmentStatus.CANCEL_REQUESTED;
     }
 }

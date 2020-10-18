@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class AcceptCompanyDecisionShipmentProcessingServiceTest {
@@ -44,7 +45,6 @@ class AcceptCompanyDecisionShipmentProcessingServiceTest {
         );
 
         doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.ACCEPTED, true, false);
-        doNothing().when(shipmentProductManagementService).handle(shipment, ShipmentStatus.ACCEPTED);
         doNothing().when(shipmentValidationService).validateAcceptCompanyDecision(shipment);
 
         //when
@@ -55,20 +55,21 @@ class AcceptCompanyDecisionShipmentProcessingServiceTest {
         assertThat(shipment.getAcceptedAt()).isNull();
         assertThat(shipment.getDeliveredAt()).isNull();
         assertThat(shipment.getCompanyComment()).isEqualTo("companyComment123");
+        verifyNoMoreInteractions(shipmentProductManagementService);
     }
 
     @Test
-    void givenNotDeliveredShipmentWhenProcessThenProcess() {
+    void givenPlacedShipmentWhenProcessThenProcess() {
         //given
         final Drop drop = Drop.builder().build();
-        final Shipment shipment = Shipment.builder().status(ShipmentStatus.COMPROMISED)
+        final Shipment shipment = Shipment.builder().status(ShipmentStatus.PLACED)
                 .deliveredAt(LocalDateTime.now()).drop(drop).build();
         final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.companyDecision(
                 ShipmentCompanyDecisionRequest.builder().comment("companyComment123").build()
         );
 
         doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.ACCEPTED, true, false);
-        doNothing().when(shipmentProductManagementService).handle(shipment, ShipmentStatus.ACCEPTED);
+        doNothing().when(shipmentProductManagementService).reduce(shipment);
         doNothing().when(shipmentValidationService).validateAcceptCompanyDecision(shipment);
 
         //when

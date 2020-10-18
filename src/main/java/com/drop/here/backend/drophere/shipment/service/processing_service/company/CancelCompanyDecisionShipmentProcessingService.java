@@ -26,7 +26,7 @@ public class CancelCompanyDecisionShipmentProcessingService implements ShipmentP
         final ShipmentStatus newStatus = ShipmentStatus.CANCELLED;
         shipment.setCancelledAt(LocalDateTime.now());
 
-        shipmentProductManagementService.handle(shipment, newStatus);
+        shipmentProductManagementService.increase(shipment);
         shipmentNotificationService.createNotifications(shipment, newStatus, true, false);
 
         return newStatus;
