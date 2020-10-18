@@ -64,4 +64,13 @@ public class DropValidationService {
     public void validateLiveUpdate(Drop drop) {
         validateUpdateCurrentStatus(drop, EnumSet.of(DropStatus.PREPARED, DropStatus.DELAYED), DropStatus.LIVE);
     }
+
+    public void validateDropForShipment(Drop drop) {
+        if (drop.getStatus() == DropStatus.CANCELLED || drop.getStatus() == DropStatus.FINISHED) {
+            throw new RestIllegalRequestValueException(String.format(
+                    "Shipment creation is prohibited because drop %s status is %s",
+                    drop.getUid(), drop.getStatus()),
+                    RestExceptionStatusCode.SHIPMENT_CREATION_DROP_INVALID_STATUS);
+        }
+    }
 }

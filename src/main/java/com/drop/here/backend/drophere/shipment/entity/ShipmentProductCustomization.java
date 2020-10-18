@@ -4,7 +4,9 @@ import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -22,6 +24,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Entity
 @Builder
+@EqualsAndHashCode(exclude = {"productCustomization", "shipmentProduct"})
+@ToString(exclude = {"productCustomization", "shipmentProduct"})
 public class ShipmentProductCustomization {
 
     @Id

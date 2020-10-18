@@ -2,22 +2,111 @@ package com.drop.here.backend.drophere.shipment.service;
 
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
+import com.drop.here.backend.drophere.drop.service.DropValidationService;
+import com.drop.here.backend.drophere.product.entity.ProductCustomization;
+import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
+import com.drop.here.backend.drophere.product.enums.ProductCustomizationWrapperType;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
+import com.drop.here.backend.drophere.shipment.entity.ShipmentProduct;
+import com.drop.here.backend.drophere.shipment.entity.ShipmentProductCustomization;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
+import io.vavr.control.Try;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ShipmentValidationService {
+    private final DropValidationService dropValidationService;
 
-    // TODO: 17/10/2020 test, implement
-    // TODO: 17/10/2020 sprawdzic unity - czy fractionable,
-    // TODO: 17/10/2020 sprawdzic customizacje, ceny, czy wymagane i inne, co z limitami?
-    // TODO: 18/10/2020 sprawdzic status dropa
     public void validateShipment(Shipment shipment) {
+        dropValidationService.validateDropForShipment(shipment.getDrop());
+        shipment.getProducts().forEach(this::validateShipmentProduct);
+    }
 
+    private void validateShipmentProduct(ShipmentProduct product) {
+        validateRequiredCustomizations(product);
+        validateUniqueCustomizations(product);
+        validateCustomizationWrapperType(product);
+        validateQuantity(product);
+    }
+
+    private void validateQuantity(ShipmentProduct product) {
+        final BigDecimal quantity = product.getQuantity();
+        final BigDecimal unitFraction = product.getProduct().getUnitFraction();
+        if (tryDivideToInteger(unitFraction, quantity).isFailure()) {
+            throw new RestIllegalRequestValueException(String.format(
+                    "To order product %s quantity %s must be dividable by %s",
+                    product.getProduct().getId(),
+                    quantity,
+                    unitFraction),
+                    RestExceptionStatusCode.INVALID_SHIPMENT_PRODUCT_QUANTITY_NOT_DIVIDABLE_BY_UNIT_FRACTION);
+        }
+    }
+
+    private Try<BigDecimal> tryDivideToInteger(BigDecimal unitFraction, BigDecimal quantity) {
+        return Try.ofSupplier(() -> quantity.divide(unitFraction, RoundingMode.UNNECESSARY));
+    }
+
+    private void validateCustomizationWrapperType(ShipmentProduct product) {
+        product.getCustomizations().stream()
+                .map(ShipmentProductCustomization::getProductCustomization)
+                .collect(Collectors.groupingBy(customization -> customization.getWrapper().getId()))
+                .forEach((customizationWrapperId, productCustomizations) -> validateCustomizationWrapperType(productCustomizations));
+    }
+
+    private void validateCustomizationWrapperType(List<ProductCustomization> productCustomizations) {
+        final ProductCustomizationWrapper wrapper = productCustomizations.get(0).getWrapper();
+        if (wrapper.getType() == ProductCustomizationWrapperType.SINGLE && productCustomizations.size() > 1) {
+            throw new RestIllegalRequestValueException(String.format(
+                    "To order product %s with customization wrapper %s only one customization can be picked because it is of type SINGLE", wrapper.getProduct().getId(), wrapper.getId()),
+                    RestExceptionStatusCode.INVALID_SHIPMENT_MULTIPLE_CUSTOMIZATIONS_FOR_SINGLE_CUSTOMIZATION_WRAPPER_TYPE);
+        }
+    }
+
+    private void validateUniqueCustomizations(ShipmentProduct product) {
+        final List<Long> customizationsIds = product.getCustomizations().stream()
+                .map(ShipmentProductCustomization::getProductCustomization)
+                .map(ProductCustomization::getId)
+                .collect(Collectors.toList());
+
+        final long uniqueCustomizations = new HashSet<>(customizationsIds).size();
+
+        if (customizationsIds.size() != uniqueCustomizations) {
+            throw new RestIllegalRequestValueException(String.format(
+                    "To order product %s customizations must be unique", product.getRouteProduct().getProduct().getId()),
+                    RestExceptionStatusCode.INVALID_SHIPMENT_NON_UNIQUE_CUSTOMIZATIONS);
+        }
+    }
+
+    private void validateRequiredCustomizations(ShipmentProduct product) {
+        final Set<Long> requiredWrappersIds = product.getRouteProduct()
+                .getProduct()
+                .getCustomizationWrappers()
+                .stream()
+                .filter(ProductCustomizationWrapper::isRequired)
+                .map(ProductCustomizationWrapper::getId)
+                .collect(Collectors.toSet());
+
+        final Set<Long> actualWrappersIds = product.getCustomizations().stream()
+                .map(ShipmentProductCustomization::getProductCustomization)
+                .map(ProductCustomization::getWrapper)
+                .map(ProductCustomizationWrapper::getId)
+                .collect(Collectors.toSet());
+
+        if (!actualWrappersIds.containsAll(requiredWrappersIds)) {
+            throw new RestIllegalRequestValueException(String.format(
+                    "To order product %s all required wrappers must be included", product.getRouteProduct().getProduct().getId()),
+                    RestExceptionStatusCode.INVALID_SHIPMENT_PRODUCT_WITHOUT_REQUIRED_CUSTOMIZATIONS);
+        }
     }
 
     public void validateShipmentCustomerUpdate(Shipment shipment) {
