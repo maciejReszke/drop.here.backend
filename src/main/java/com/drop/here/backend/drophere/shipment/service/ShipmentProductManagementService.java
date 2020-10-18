@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ShipmentProductManagementService {
 
     // TODO: 18/10/2020 - gdy sie nie uda to odpowiedni wyjatek z innym statusem, nazwa?
+    // TODO: 18/10/2020 chyba bez sensu ze on musi sie znac na statusach, lepiej zeby kazdy serwis sam ogarnial se
     public void handle(Shipment shipment, ShipmentStatus newStatus) {
 
     }

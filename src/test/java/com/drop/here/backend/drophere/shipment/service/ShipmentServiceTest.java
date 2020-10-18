@@ -111,7 +111,7 @@ class ShipmentServiceTest {
         doNothing().when(shipmentPersistenceService).save(shipment);
 
         //when
-        final ResourceOperationResponse result = shipmentService.updateShipment(shipmentId, submissionRequest, authentication);
+        final ResourceOperationResponse result = shipmentService.update(shipmentId, submissionRequest, authentication);
 
         //then
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);

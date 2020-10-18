@@ -51,22 +51,22 @@ public class ShipmentService {
         return shipmentSearchingService.findCustomerShipments(authentication.getCustomer(), status, pageable);
     }
 
-    public ResourceOperationResponse updateShipment(Long shipmentId, ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest, AccountAuthentication authentication) {
+    public ResourceOperationResponse update(Long shipmentId, ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest, AccountAuthentication authentication) {
         final Shipment shipment = shipmentPersistenceService.findShipment(shipmentId, authentication.getCustomer());
         shipmentValidationService.validateShipmentCustomerUpdate(shipment, shipmentCustomerSubmissionRequest);
         shipmentMappingService.update(shipment, shipmentCustomerSubmissionRequest);
         shipmentValidationService.validateShipment(shipment);
         final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerSubmission(shipmentCustomerSubmissionRequest), ShipmentProcessOperation.BY_CUSTOMER_UPDATED);
-        return updateShipment(authentication, shipment, shipmentStatus);
+        return update(authentication, shipment, shipmentStatus);
     }
 
     public ResourceOperationResponse updateShipmentStatus(Long shipmentId, ShipmentCustomerDecisionRequest shipmentCustomerDecisionRequest, AccountAuthentication authentication) {
         final Shipment shipment = shipmentPersistenceService.findShipment(shipmentId, authentication.getCustomer());
         final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerDecision(shipmentCustomerDecisionRequest), ShipmentProcessOperation.CUSTOMER_DECISION);
-        return updateShipment(authentication, shipment, shipmentStatus);
+        return update(authentication, shipment, shipmentStatus);
     }
 
-    private ResourceOperationResponse updateShipment(AccountAuthentication authentication, Shipment shipment, ShipmentStatus shipmentStatus) {
+    private ResourceOperationResponse update(AccountAuthentication authentication, Shipment shipment, ShipmentStatus shipmentStatus) {
         log.info("Updated shipment with status {} to {} for customer {} shipment {}", shipment.getStatus(), shipmentStatus, authentication.getCustomer().getId(), shipment.getId());
         shipment.setStatus(shipmentStatus);
         shipment.setUpdatedAt(LocalDateTime.now());

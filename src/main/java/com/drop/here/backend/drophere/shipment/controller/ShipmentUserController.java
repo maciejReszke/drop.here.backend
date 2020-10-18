@@ -82,7 +82,7 @@ public class ShipmentUserController {
     public ResourceOperationResponse updateShipment(@ApiIgnore AccountAuthentication authentication,
                                                  @ApiIgnore Long shipmentId,
                                                  @RequestBody @Valid ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest) {
-        return shipmentService.updateShipment(shipmentId, shipmentCustomerSubmissionRequest, authentication);
+        return shipmentService.update(shipmentId, shipmentCustomerSubmissionRequest, authentication);
     }
 
     // TODO: 13/10/2020 test
