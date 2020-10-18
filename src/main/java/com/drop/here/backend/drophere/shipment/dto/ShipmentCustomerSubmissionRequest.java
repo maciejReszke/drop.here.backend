@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -23,5 +24,7 @@ public class ShipmentCustomerSubmissionRequest {
     @Valid
     private List<@Valid ShipmentProductRequest> products;
 
+    @Length(max = 2048)
+    @ApiModelProperty(value = "Dzien dobry, prosze wypelnic pączka miłością")
     private String comment;
 }

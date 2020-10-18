@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 @Builder
 public class ProductCustomizationResponse {
 
-    // TODO: 17/10/2020
     @ApiModelProperty(value = "Customization choice id")
     Long id;
 

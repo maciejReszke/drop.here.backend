@@ -150,6 +150,7 @@ public class RouteMappingService {
                 .id(route.getId())
                 .name(route.getName())
                 .description(route.getDescription())
+                .acceptShipmentsAutomatically(route.isAcceptShipmentsAutomatically())
                 .status(route.getStatus())
                 .productsAmount(products.size())
                 .dropsAmount(drops.size())

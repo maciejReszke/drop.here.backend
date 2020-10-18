@@ -9,14 +9,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ByCustomerUpdatedShipmentProcessingService implements ShipmentProcessingService {
+    private final NewShipmentProcessingService newShipmentProcessingService;
 
-    // TODO: 13/10/2020 dwie opcje - palced lub compromised
     @Override
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest submission) {
-        /*
-            shipment.setStatus(routeService.getSubmittedShipmentStatus(shipment.getDrop()));
-        */
-
-        return null;
+        return newShipmentProcessingService.process(shipment, submission);
     }
 }

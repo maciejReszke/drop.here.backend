@@ -148,6 +148,7 @@ public class SpotMembershipService {
         return spotSearchingService.findSpots(authentication, xCoordinate, yCoordinate, radius, member, namePrefix, pageable);
     }
 
+    @Transactional(readOnly = true)
     public SpotDetailedCustomerResponse findSpot(String spotUid, AccountAuthentication authentication) {
         return spotSearchingService.findSpot(spotUid, authentication);
     }

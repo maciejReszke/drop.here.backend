@@ -11,7 +11,6 @@ import java.util.List;
 @Builder
 public class ProductCustomizationWrapperResponse {
 
-    // TODO: 17/10/2020
     @ApiModelProperty(value = "Customization id", example = "Roll")
     Long id;
 

@@ -105,6 +105,7 @@ public class ProductSearchingService {
 
     private ProductCustomizationWrapperResponse toCustomizationWrapper(ProductCustomizationWrapper wrapper) {
         return ProductCustomizationWrapperResponse.builder()
+                .id(wrapper.getId())
                 .type(wrapper.getType())
                 .heading(wrapper.getHeading())
                 .customizations(toCustomizations(wrapper.getCustomizations()))
@@ -120,6 +121,7 @@ public class ProductSearchingService {
 
     private ProductCustomizationResponse toCustomization(ProductCustomization customization) {
         return ProductCustomizationResponse.builder()
+                .id(customization.getId())
                 .price(customization.getPrice())
                 .value(customization.getValue())
                 .build();

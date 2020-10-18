@@ -22,7 +22,12 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "d.route = :route")
     List<Drop> findByRouteWithSpot(Route route);
 
-    List<Drop> findBySpotAndStartTimeAfterAndStartTimeBefore(Spot spot, LocalDateTime from, LocalDateTime to);
+    @Query("select d from Drop d " +
+            "join fetch d.route r where " +
+            "d.spot =:spot and " +
+            "d.startTime > :from and " +
+            "d.endTime < :to")
+    List<Drop> findJoinedRouteBySpotAndStartTimeAfterAndEndTimeBefore(Spot spot, LocalDateTime from, LocalDateTime to);
 
     @Query("select d from Drop d " +
             "join d.spot s " +

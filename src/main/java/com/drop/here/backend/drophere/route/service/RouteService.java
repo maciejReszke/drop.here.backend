@@ -16,6 +16,7 @@ import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import com.drop.here.backend.drophere.route.service.state_update.RouteUpdateStateServiceFactory;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -124,4 +125,5 @@ public class RouteService {
                 ? ShipmentStatus.ACCEPTED
                 : ShipmentStatus.PLACED;
     }
+
 }

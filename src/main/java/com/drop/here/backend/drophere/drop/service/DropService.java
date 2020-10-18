@@ -42,14 +42,14 @@ public class DropService {
     private final RouteProductMappingService routeProductMappingService;
     private final SpotPersistenceService spotPersistenceService;
     private final SpotSearchingService spotSearchingService;
-    private final AccountProfilePersistenceService accountProfilePersistenceService;
     private final DropValidationService dropValidationService;
     private final DropUpdateServiceFactory dropUpdateServiceFactory;
 
+    @Transactional(readOnly = true)
     public DropDetailedCustomerResponse findDropForCustomer(String dropUid, AccountAuthentication authentication) {
         final Customer customer = authentication.getCustomer();
         final Drop drop = findPrivilegedDrop(dropUid, customer);
-        final Spot spot = spotPersistenceService.findByIdWithCompany(drop.getSpot().getId());
+        final Spot spot = spotPersistenceService.findById(drop.getSpot().getId());
         return toDropCustomerDetailedResponse(drop, spot, customer);
     }
 
@@ -61,7 +61,8 @@ public class DropService {
     }
 
     private DropDetailedCustomerResponse toDropCustomerDetailedResponse(Drop drop, Spot spot, Customer customer) {
-        final Optional<AccountProfile> profile = accountProfilePersistenceService.findByDrop(drop);
+        final Route route = drop.getRoute();
+        final Optional<AccountProfile> profile = route.isWithSeller() ? Optional.of(route.getProfile()): Optional.empty();
         return DropDetailedCustomerResponse.builder()
                 .uid(drop.getUid())
                 .name(drop.getName())
@@ -77,6 +78,7 @@ public class DropService {
                 .streamingPosition(profile.map(AccountProfile::getProfileUid)
                         .map(uid -> isSellerLocationAvailableForCustomer(uid, customer))
                         .orElse(false))
+                .acceptShipmentsAutomatically(route.isAcceptShipmentsAutomatically())
                 .build();
     }
 

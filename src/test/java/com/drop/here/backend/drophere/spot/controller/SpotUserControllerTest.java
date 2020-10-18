@@ -918,15 +918,19 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final Drop drop1 = DropDataGenerator.drop(1, route, spot);
         drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        drop1.setEndTime(LocalDate.now().atStartOfDay().plusHours(1L).plusMinutes(15));
         dropRepository.save(drop1);
         final Drop drop2 = DropDataGenerator.drop(2, route, spot);
         drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        drop2.setEndTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4).plusMinutes(15));
         dropRepository.save(drop2);
         final Drop drop3 = DropDataGenerator.drop(3, route, spot);
         drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        drop3.setEndTime(LocalDate.now().atStartOfDay().minusHours(26).plusMinutes(15));
         dropRepository.save(drop3);
         final Drop drop4 = DropDataGenerator.drop(4, route, spot);
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        drop4.setEndTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4).plusMinutes(15));
         dropRepository.save(drop4);
 
         final String url = String.format("/spots/%s", spot.getUid());
@@ -954,15 +958,19 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final Drop drop1 = DropDataGenerator.drop(1, route, spot);
         drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        drop1.setEndTime(LocalDate.now().atStartOfDay().plusHours(1L).plusMinutes(15));
         dropRepository.save(drop1);
         final Drop drop2 = DropDataGenerator.drop(2, route, spot);
         drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        drop2.setEndTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4).plusMinutes(15));
         dropRepository.save(drop2);
         final Drop drop3 = DropDataGenerator.drop(3, route, spot);
         drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        drop3.setEndTime(LocalDate.now().atStartOfDay().minusHours(26).plusMinutes(15));
         dropRepository.save(drop3);
         final Drop drop4 = DropDataGenerator.drop(4, route, spot);
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        drop4.setEndTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4).plusMinutes(15));
         dropRepository.save(drop4);
 
         final String url = String.format("/spots/%s", spot.getUid());
@@ -990,15 +998,19 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final Drop drop1 = DropDataGenerator.drop(1, route, spot);
         drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        drop1.setEndTime(LocalDate.now().atStartOfDay().plusHours(1L).plusMinutes(15));
         dropRepository.save(drop1);
         final Drop drop2 = DropDataGenerator.drop(2, route, spot);
         drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        drop2.setEndTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4).plusMinutes(15));
         dropRepository.save(drop2);
         final Drop drop3 = DropDataGenerator.drop(3, route, spot);
         drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        drop3.setEndTime(LocalDate.now().atStartOfDay().minusHours(26).plusMinutes(15));
         dropRepository.save(drop3);
         final Drop drop4 = DropDataGenerator.drop(4, route, spot);
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        drop4.setEndTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4).plusMinutes(15));
         dropRepository.save(drop4);
 
         final String url = String.format("/spots/%s", spot.getUid());
@@ -1023,15 +1035,19 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final Drop drop1 = DropDataGenerator.drop(1, route, spot);
         drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        drop1.setEndTime(LocalDate.now().atStartOfDay().plusHours(1L).plusMinutes(15));
         dropRepository.save(drop1);
         final Drop drop2 = DropDataGenerator.drop(2, route, spot);
         drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        drop2.setEndTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4).plusMinutes(15));
         dropRepository.save(drop2);
         final Drop drop3 = DropDataGenerator.drop(3, route, spot);
         drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        drop3.setEndTime(LocalDate.now().atStartOfDay().minusHours(26).plusMinutes(15));
         dropRepository.save(drop3);
         final Drop drop4 = DropDataGenerator.drop(4, route, spot);
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        drop4.setEndTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4).plusMinutes(15));
         dropRepository.save(drop4);
 
         final String url = String.format("/spots/%s", spot.getUid());
@@ -1059,15 +1075,19 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final Drop drop1 = DropDataGenerator.drop(1, route, spot);
         drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        drop1.setEndTime(LocalDate.now().atStartOfDay().plusHours(1L).plusMinutes(15));
         dropRepository.save(drop1);
         final Drop drop2 = DropDataGenerator.drop(2, route, spot);
         drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        drop2.setEndTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4).plusMinutes(15));
         dropRepository.save(drop2);
         final Drop drop3 = DropDataGenerator.drop(3, route, spot);
         drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        drop3.setEndTime(LocalDate.now().atStartOfDay().minusHours(26).plusMinutes(15));
         dropRepository.save(drop3);
         final Drop drop4 = DropDataGenerator.drop(4, route, spot);
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        drop4.setEndTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4).plusMinutes(15));
         dropRepository.save(drop4);
 
         final String url = String.format("/spots/%s", spot.getUid());
@@ -1092,15 +1112,19 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final Drop drop1 = DropDataGenerator.drop(1, route, spot);
         drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        drop1.setEndTime(LocalDate.now().atStartOfDay().plusHours(1L).plusMinutes(15));
         dropRepository.save(drop1);
         final Drop drop2 = DropDataGenerator.drop(2, route, spot);
         drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        drop2.setEndTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4).plusMinutes(15));
         dropRepository.save(drop2);
         final Drop drop3 = DropDataGenerator.drop(3, route, spot);
         drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        drop3.setEndTime(LocalDate.now().atStartOfDay().minusHours(26).plusMinutes(15));
         dropRepository.save(drop3);
         final Drop drop4 = DropDataGenerator.drop(4, route, spot);
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        drop4.setEndTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4).plusMinutes(15));
         dropRepository.save(drop4);
 
         final String url = String.format("/spots/%s", spot.getUid());
@@ -1121,15 +1145,19 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final Drop drop1 = DropDataGenerator.drop(1, route, spot);
         drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        drop1.setEndTime(LocalDate.now().atStartOfDay().plusHours(1L).plusMinutes(15));
         dropRepository.save(drop1);
         final Drop drop2 = DropDataGenerator.drop(2, route, spot);
         drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        drop2.setEndTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4).plusMinutes(15));
         dropRepository.save(drop2);
         final Drop drop3 = DropDataGenerator.drop(3, route, spot);
         drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        drop3.setEndTime(LocalDate.now().atStartOfDay().minusHours(26).plusMinutes(15));
         dropRepository.save(drop3);
         final Drop drop4 = DropDataGenerator.drop(4, route, spot);
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        drop4.setEndTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4).plusMinutes(15));
         dropRepository.save(drop4);
 
         final String url = String.format("/spots/%s", spot.getUid() + "Keepo");
@@ -1152,15 +1180,19 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final Drop drop1 = DropDataGenerator.drop(1, route, spot);
         drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        drop1.setEndTime(LocalDate.now().atStartOfDay().plusHours(1L).plusMinutes(15));
         dropRepository.save(drop1);
         final Drop drop2 = DropDataGenerator.drop(2, route, spot);
         drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        drop2.setEndTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4).plusMinutes(15));
         dropRepository.save(drop2);
         final Drop drop3 = DropDataGenerator.drop(3, route, spot);
         drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        drop3.setEndTime(LocalDate.now().atStartOfDay().minusHours(26).plusMinutes(15));
         dropRepository.save(drop3);
         final Drop drop4 = DropDataGenerator.drop(4, route, spot);
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        drop4.setEndTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4).plusMinutes(15));
         dropRepository.save(drop4);
 
         final String url = String.format("/spots/%s", spot.getUid());
@@ -1182,15 +1214,19 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final Drop drop1 = DropDataGenerator.drop(1, route, spot);
         drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        drop1.setEndTime(LocalDate.now().atStartOfDay().plusHours(1L).plusMinutes(15));
         dropRepository.save(drop1);
         final Drop drop2 = DropDataGenerator.drop(2, route, spot);
         drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        drop2.setEndTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4).plusMinutes(15));
         dropRepository.save(drop2);
         final Drop drop3 = DropDataGenerator.drop(3, route, spot);
         drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        drop3.setEndTime(LocalDate.now().atStartOfDay().minusHours(26).plusMinutes(15));
         dropRepository.save(drop3);
         final Drop drop4 = DropDataGenerator.drop(4, route, spot);
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        drop4.setEndTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4).plusMinutes(15));
         dropRepository.save(drop4);
 
         final String url = String.format("/spots/%s", spot.getUid());
@@ -1246,15 +1282,19 @@ class SpotUserControllerTest extends IntegrationBaseClass {
         final Route route = routeRepository.save(RouteDataGenerator.route(1, company));
         final Drop drop1 = DropDataGenerator.drop(1, route, spot);
         drop1.setStartTime(LocalDate.now().atStartOfDay().plusHours(1L));
+        drop1.setEndTime(LocalDate.now().atStartOfDay().plusHours(1L).plusMinutes(15));
         dropRepository.save(drop1);
         final Drop drop2 = DropDataGenerator.drop(2, route, spot);
         drop2.setStartTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4));
+        drop2.setEndTime(LocalDate.now().atStartOfDay().plusDays(6).plusHours(4).plusMinutes(15));
         dropRepository.save(drop2);
         final Drop drop3 = DropDataGenerator.drop(3, route, spot);
         drop3.setStartTime(LocalDate.now().atStartOfDay().minusHours(26));
+        drop3.setEndTime(LocalDate.now().atStartOfDay().minusHours(26).plusMinutes(15));
         dropRepository.save(drop3);
         final Drop drop4 = DropDataGenerator.drop(4, route, spot);
         drop4.setStartTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4));
+        drop4.setEndTime(LocalDate.now().atStartOfDay().plusDays(7).plusHours(4).plusMinutes(15));
         dropRepository.save(drop4);
 
         final String url = String.format("/spots/%s", spot.getUid());

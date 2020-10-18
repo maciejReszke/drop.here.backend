@@ -29,7 +29,7 @@ public class DropSearchingService {
     private final RouteProductRepository routeProductRepository;
 
     public List<DropCustomerSpotResponse> findDrops(Spot spot, LocalDateTime from, LocalDateTime to) {
-        return dropRepository.findBySpotAndStartTimeAfterAndStartTimeBefore(spot, from, to)
+        return dropRepository.findJoinedRouteBySpotAndStartTimeAfterAndEndTimeBefore(spot, from, to)
                 .stream()
                 .map(this::toDropCustomerSpotResponse)
                 .collect(Collectors.toList());
@@ -44,6 +44,7 @@ public class DropSearchingService {
                 .name(drop.getName())
                 .status(drop.getStatus())
                 .uid(drop.getUid())
+                .acceptShipmentsAutomatically(drop.getRoute().isAcceptShipmentsAutomatically())
                 .build();
     }
 

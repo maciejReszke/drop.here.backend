@@ -22,15 +22,14 @@ public class NewShipmentProcessingService implements ShipmentProcessingService {
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest submission) {
         final ShipmentStatus newStatus = routeService.getSubmittedShipmentStatus(shipment.getDrop());
         shipment.setPlacedAt(LocalDateTime.now());
+
         if (newStatus == ShipmentStatus.ACCEPTED) {
-            handleAcceptedShipment(shipment);
+            shipment.setAcceptedAt(LocalDateTime.now());
         }
+
+        shipmentProductManagementService.handle(shipment, newStatus);
         shipmentNotificationService.createNotifications(shipment, newStatus, false, true);
         return newStatus;
     }
 
-    private void handleAcceptedShipment(Shipment shipment) {
-        shipment.setAcceptedAt(shipment.getStatus() == ShipmentStatus.ACCEPTED ? LocalDateTime.now() : null);
-        shipmentProductManagementService.subtract(shipment);
-    }
 }

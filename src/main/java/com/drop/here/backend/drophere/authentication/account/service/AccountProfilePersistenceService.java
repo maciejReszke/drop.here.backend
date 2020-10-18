@@ -7,7 +7,6 @@ import com.drop.here.backend.drophere.authentication.account.repository.AccountP
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.image.Image;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,10 +40,6 @@ public class AccountProfilePersistenceService {
 
     public List<AccountProfile> findByAccount(Account account) {
         return accountProfileRepository.findByAccount(account);
-    }
-
-    public Optional<AccountProfile> findByDrop(Drop drop) {
-        return accountProfileRepository.findByDrop(drop);
     }
 
     @Transactional(readOnly = true)

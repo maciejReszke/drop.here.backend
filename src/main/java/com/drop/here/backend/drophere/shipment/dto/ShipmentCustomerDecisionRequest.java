@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 
@@ -18,4 +19,8 @@ public class ShipmentCustomerDecisionRequest {
     @NotNull
     @ApiModelProperty(value = "Customer decision", example = "CANCEL", required = true)
     private ShipmentCustomerDecision customerDecision;
+
+    @Length(max = 2048)
+    @ApiModelProperty(value = "Customer comment", example = "Dziendobry, jednak jestem uczulony na cebuel")
+    private String comment;
 }
