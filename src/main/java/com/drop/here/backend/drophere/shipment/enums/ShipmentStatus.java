@@ -6,5 +6,6 @@ public enum ShipmentStatus {
     COMPROMISED,
     CANCEL_REQUESTED,
     CANCELLED,
-    DELIVERED
+    DELIVERED,
+    REJECTED
 }
