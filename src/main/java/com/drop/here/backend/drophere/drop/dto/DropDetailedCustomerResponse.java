@@ -48,4 +48,8 @@ public class DropDetailedCustomerResponse {
 
     @ApiModelProperty(value = "Should seller be streaming position", example = "true")
     boolean streamingPosition;
+
+    // TODO: 18/10/2020
+    @ApiModelProperty(value = "Are shipments automatically accepted", example = "true")
+    boolean acceptShipmentsAutomatically;
 }

@@ -82,6 +82,7 @@ public class RouteMappingService {
         buildDrops(routeRequest, route, company).forEach(drop -> route.getDrops().add(drop));
         route.setProfile(getProfile(company, routeRequest));
         route.setWithSeller(route.getProfile() != null);
+        route.setAcceptShipmentsAutomatically(routeRequest.isAcceptShipmentsAutomatically());
     }
 
     private AccountProfile getProfile(Company company, UnpreparedRouteRequest routeRequest) {

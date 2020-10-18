@@ -119,8 +119,9 @@ public class RouteService {
                 });
     }
 
-    // TODO: 17/10/2020 test, imlpmenet
     public ShipmentStatus getSubmittedShipmentStatus(Drop drop) {
-        return null;
+        return drop.getRoute().isAcceptShipmentsAutomatically()
+                ? ShipmentStatus.ACCEPTED
+                : ShipmentStatus.PLACED;
     }
 }

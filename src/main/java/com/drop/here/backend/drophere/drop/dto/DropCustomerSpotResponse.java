@@ -26,4 +26,8 @@ public class DropCustomerSpotResponse {
 
     @ApiModelProperty(value = "Drop status", example = "PREPARED")
     DropStatus status;
+
+    // TODO: 18/10/2020
+    @ApiModelProperty(value = "Are shipments automatically accepted", example = "true")
+    boolean acceptShipmentsAutomatically;
 }

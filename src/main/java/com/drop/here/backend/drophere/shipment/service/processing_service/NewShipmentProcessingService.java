@@ -1,20 +1,36 @@
 package com.drop.here.backend.drophere.shipment.service.processing_service;
 
+import com.drop.here.backend.drophere.route.service.RouteService;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
+import com.drop.here.backend.drophere.shipment.service.ShipmentNotificationService;
+import com.drop.here.backend.drophere.shipment.service.ShipmentProductManagementService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service
-public class NewShipmentProcessingService implements ShipmentProcessingService {
+import java.time.LocalDateTime;
 
-    // TODO: 13/10/2020
+@Service
+@RequiredArgsConstructor
+public class NewShipmentProcessingService implements ShipmentProcessingService {
+    private final RouteService routeService;
+    private final ShipmentNotificationService shipmentNotificationService;
+    private final ShipmentProductManagementService shipmentProductManagementService;
+
     @Override
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest submission) {
-/*
-        shipment.setStatus(routeService.getSubmittedShipmentStatus(shipment.getDrop()));
-*/
+        final ShipmentStatus newStatus = routeService.getSubmittedShipmentStatus(shipment.getDrop());
+        shipment.setPlacedAt(LocalDateTime.now());
+        if (newStatus == ShipmentStatus.ACCEPTED) {
+            handleAcceptedShipment(shipment);
+        }
+        shipmentNotificationService.createNotifications(shipment, newStatus, false, true);
+        return newStatus;
+    }
 
-        return null;
+    private void handleAcceptedShipment(Shipment shipment) {
+        shipment.setAcceptedAt(shipment.getStatus() == ShipmentStatus.ACCEPTED ? LocalDateTime.now() : null);
+        shipmentProductManagementService.subtract(shipment);
     }
 }

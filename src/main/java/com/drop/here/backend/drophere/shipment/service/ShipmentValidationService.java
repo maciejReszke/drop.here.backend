@@ -10,6 +10,7 @@ public class ShipmentValidationService {
     // TODO: 17/10/2020 test, implement
     // TODO: 17/10/2020 sprawdzic unity - czy fractionable,
     // TODO: 17/10/2020 sprawdzic customizacje, ceny, czy wymagane i inne, co z limitami?
+    // TODO: 18/10/2020 sprawdzic status dropa
     public void validateShipment(Shipment shipment) {
 
     }

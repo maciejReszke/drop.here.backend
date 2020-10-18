@@ -100,6 +100,7 @@ class RouteMappingServiceTest {
         assertThat(response.getProfile()).isEqualTo(accountProfile);
         assertThat(response.getRouteDate().format(DateTimeFormatter.ISO_LOCAL_DATE)).isEqualTo(routeRequest.getDate());
         assertThat(response.getProducts()).hasSize(2);
+        assertThat(response.isAcceptShipmentsAutomatically()).isTrue();
         final RouteProduct product1 = response.getProducts().stream().filter(t -> t.getOrderNum() == 1).findFirst().orElseThrow();
         final RouteProductRequest requestProduct1 = routeRequest.getProducts().get(0);
         assertThat(product1.getAmount()).isEqualTo(requestProduct1.getAmount());
@@ -163,6 +164,7 @@ class RouteMappingServiceTest {
         assertThat(route.getProfile()).isEqualTo(accountProfile);
         assertThat(route.getRouteDate().format(DateTimeFormatter.ISO_LOCAL_DATE)).isEqualTo(routeRequest.getDate());
         assertThat(route.getProducts()).hasSize(2);
+        assertThat(route.isAcceptShipmentsAutomatically()).isTrue();
         final RouteProduct product1 = route.getProducts().stream().filter(t -> t.getOrderNum() == 1).findFirst().orElseThrow();
         final RouteProductRequest requestProduct1 = routeRequest.getProducts().get(0);
         assertThat(product1.getAmount()).isEqualTo(requestProduct1.getAmount());

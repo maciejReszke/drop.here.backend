@@ -21,6 +21,10 @@ public class RouteResponse {
     @ApiModelProperty(value = "Route description", example = "Advanced description of route")
     String description;
 
+    // TODO: 18/10/2020
+    @ApiModelProperty(value = "Are shipments automatically accepted", example = "true")
+    boolean acceptShipmentsAutomatically;
+
     @ApiModelProperty(value = "Route status", example = "PREPARED")
     RouteStatus status;
 

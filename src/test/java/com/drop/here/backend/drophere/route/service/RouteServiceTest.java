@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
 import com.drop.here.backend.drophere.route.dto.RouteStateChangeRequest;
 import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
@@ -14,6 +15,7 @@ import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import com.drop.here.backend.drophere.route.service.state_update.RouteUpdateStateServiceFactory;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
@@ -295,5 +297,33 @@ class RouteServiceTest {
         //then
         assertThat(route.getStatus()).isEqualTo(RouteStatus.FINISHED);
         assertThat(route.getFinishedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
+    }
+
+    @Test
+    void givenDropWithRouteAcceptShipmentAutomaticallyWhenGetSubmittedShipmentStatusThenGetStatus(){
+        //given
+        final Drop drop = Drop.builder()
+                .route(Route.builder().acceptShipmentsAutomatically(true).build())
+                .build();
+
+        //when
+        final ShipmentStatus status = routeService.getSubmittedShipmentStatus(drop);
+
+        //then
+        assertThat(status).isEqualTo(ShipmentStatus.ACCEPTED);
+    }
+
+    @Test
+    void givenDropWithRouteNotAcceptShipmentAutomaticallyWhenGetSubmittedShipmentStatusThenGetStatus(){
+        //given
+        final Drop drop = Drop.builder()
+                .route(Route.builder().acceptShipmentsAutomatically(false).build())
+                .build();
+
+        //when
+        final ShipmentStatus status = routeService.getSubmittedShipmentStatus(drop);
+
+        //then
+        assertThat(status).isEqualTo(ShipmentStatus.PLACED);
     }
 }
