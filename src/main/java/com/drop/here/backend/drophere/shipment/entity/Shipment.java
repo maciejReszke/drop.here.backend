@@ -91,6 +91,9 @@ public class Shipment {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime cancelRequestedAt;
 
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime deliveredAt;
+
     @NotNull
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ShipmentProduct> products;

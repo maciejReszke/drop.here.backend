@@ -37,7 +37,8 @@ class AcceptCompanyDecisionShipmentProcessingServiceTest {
     void givenDeliveredShipmentWhenProcessThenProcess() {
         //given
         final Drop drop = Drop.builder().build();
-        final Shipment shipment = Shipment.builder().status(ShipmentStatus.DELIVERED).drop(drop).build();
+        final Shipment shipment = Shipment.builder().status(ShipmentStatus.DELIVERED)
+                .acceptedAt(LocalDateTime.now()).drop(drop).build();
         final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.companyDecision(
                 ShipmentCompanyDecisionRequest.builder().comment("companyComment123").build()
         );
@@ -52,6 +53,7 @@ class AcceptCompanyDecisionShipmentProcessingServiceTest {
         //then
         assertThat(status).isEqualTo(ShipmentStatus.ACCEPTED);
         assertThat(shipment.getAcceptedAt()).isNull();
+        assertThat(shipment.getDeliveredAt()).isNull();
         assertThat(shipment.getCompanyComment()).isEqualTo("companyComment123");
     }
 
@@ -59,7 +61,8 @@ class AcceptCompanyDecisionShipmentProcessingServiceTest {
     void givenNotDeliveredShipmentWhenProcessThenProcess() {
         //given
         final Drop drop = Drop.builder().build();
-        final Shipment shipment = Shipment.builder().status(ShipmentStatus.COMPROMISED).drop(drop).build();
+        final Shipment shipment = Shipment.builder().status(ShipmentStatus.COMPROMISED)
+                .acceptedAt(LocalDateTime.now()).drop(drop).build();
         final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.companyDecision(
                 ShipmentCompanyDecisionRequest.builder().comment("companyComment123").build()
         );
@@ -74,6 +77,7 @@ class AcceptCompanyDecisionShipmentProcessingServiceTest {
         //then
         assertThat(status).isEqualTo(ShipmentStatus.ACCEPTED);
         assertThat(shipment.getAcceptedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
+        assertThat(shipment.getDeliveredAt()).isNull();
         assertThat(shipment.getCompanyComment()).isEqualTo("companyComment123");
     }
 }
