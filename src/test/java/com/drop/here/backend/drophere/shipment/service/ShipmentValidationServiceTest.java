@@ -319,11 +319,14 @@ class ShipmentValidationServiceTest {
                 .id(8L)
                 .build();
         final ShipmentProductCustomization shipmentProductCustomization1 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization1).build();
+                .productCustomization(shipmentProductCustomizationCustomization1)
+                .price(BigDecimal.valueOf(5)).build();
         final ShipmentProductCustomization shipmentProductCustomization2 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization2).build();
+                .productCustomization(shipmentProductCustomizationCustomization2)
+                .price(BigDecimal.valueOf(6)).build();
         final ShipmentProductCustomization shipmentProductCustomization3 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization3).build();
+                .productCustomization(shipmentProductCustomizationCustomization3)
+                .price(BigDecimal.valueOf(7)).build();
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .routeProduct(routeProduct)
                 .customizations(Set.of(shipmentProductCustomization1, shipmentProductCustomization2, shipmentProductCustomization3))
@@ -387,11 +390,14 @@ class ShipmentValidationServiceTest {
                 .id(8L)
                 .build();
         final ShipmentProductCustomization shipmentProductCustomization1 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization1).build();
+                .productCustomization(shipmentProductCustomizationCustomization1)
+                .price(BigDecimal.valueOf(7)).build();
         final ShipmentProductCustomization shipmentProductCustomization2 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization2).build();
+                .productCustomization(shipmentProductCustomizationCustomization2)
+                .price(BigDecimal.valueOf(6)).build();
         final ShipmentProductCustomization shipmentProductCustomization3 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization3).build();
+                .productCustomization(shipmentProductCustomizationCustomization3)
+                .price(BigDecimal.valueOf(5)).build();
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .routeProduct(routeProduct)
                 .customizations(Set.of(shipmentProductCustomization1, shipmentProductCustomization2, shipmentProductCustomization3))
@@ -457,11 +463,14 @@ class ShipmentValidationServiceTest {
                 .price(BigDecimal.ONE)
                 .build();
         final ShipmentProductCustomization shipmentProductCustomization1 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization1).build();
+                .productCustomization(shipmentProductCustomizationCustomization1)
+                .price(BigDecimal.valueOf(5)).build();
         final ShipmentProductCustomization shipmentProductCustomization2 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization2).build();
+                .productCustomization(shipmentProductCustomizationCustomization2)
+                .price(BigDecimal.valueOf(6)).build();
         final ShipmentProductCustomization shipmentProductCustomization3 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization3).build();
+                .productCustomization(shipmentProductCustomizationCustomization3)
+                .price(BigDecimal.valueOf(7)).build();
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .routeProduct(routeProduct)
                 .customizations(Set.of(shipmentProductCustomization1, shipmentProductCustomization2, shipmentProductCustomization3))
@@ -530,11 +539,14 @@ class ShipmentValidationServiceTest {
                 .id(8L)
                 .build();
         final ShipmentProductCustomization shipmentProductCustomization1 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization1).build();
+                .productCustomization(shipmentProductCustomizationCustomization1)
+                .price(BigDecimal.valueOf(5)).build();
         final ShipmentProductCustomization shipmentProductCustomization2 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization2).build();
+                .productCustomization(shipmentProductCustomizationCustomization2)
+                .price(BigDecimal.valueOf(6)).build();
         final ShipmentProductCustomization shipmentProductCustomization3 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization3).build();
+                .productCustomization(shipmentProductCustomizationCustomization3)
+                .price(BigDecimal.valueOf(7)).build();
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .routeProduct(routeProduct)
                 .customizations(Set.of(shipmentProductCustomization1, shipmentProductCustomization2, shipmentProductCustomization3))
@@ -599,11 +611,14 @@ class ShipmentValidationServiceTest {
                 .id(8L)
                 .build();
         final ShipmentProductCustomization shipmentProductCustomization1 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization1).build();
+                .productCustomization(shipmentProductCustomizationCustomization1)
+                .price(BigDecimal.valueOf(5)).build();
         final ShipmentProductCustomization shipmentProductCustomization2 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization2).build();
+                .productCustomization(shipmentProductCustomizationCustomization2)
+                .price(BigDecimal.valueOf(6)).build();
         final ShipmentProductCustomization shipmentProductCustomization3 = ShipmentProductCustomization.builder()
-                .productCustomization(shipmentProductCustomizationCustomization3).build();
+                .productCustomization(shipmentProductCustomizationCustomization3)
+                .price(BigDecimal.valueOf(7)).build();
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .routeProduct(routeProduct)
                 .customizations(Set.of(shipmentProductCustomization1, shipmentProductCustomization2, shipmentProductCustomization3))
