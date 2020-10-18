@@ -2,11 +2,11 @@ package com.drop.here.backend.drophere.shipment.controller;
 
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerDecisionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerResponse;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
 import com.drop.here.backend.drophere.shipment.service.ShipmentService;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -37,8 +37,10 @@ import javax.validation.Valid;
 public class ShipmentUserController {
     private final ShipmentService shipmentService;
 
+    // TODO: 18/10/2020 problems/build problems intellij
     // TODO: 12/10/2020 test (pamietac zeby dac endpoint na konkretne zamowienie i zwracac ile rzeczeywiscie jest w bazie)
     // TODO: 13/10/2020 security
+    // TODO: 18/10/2020 get na jeden shipment
     @GetMapping("/shipments")
     @ApiOperation(value = "Find customer shipments", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
@@ -64,8 +66,8 @@ public class ShipmentUserController {
             @ApiResponse(code = 666, message = "Not enough products", response = ExceptionMessage.class),
     })
     public ResourceOperationResponse createShipment(@ApiIgnore AccountAuthentication authentication,
-                                                 @ApiIgnore @PathVariable String dropUid,
-                                                 @RequestBody @Valid ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest) {
+                                                    @ApiIgnore @PathVariable String dropUid,
+                                                    @RequestBody @Valid ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest) {
         return shipmentService.createShipment(dropUid, shipmentCustomerSubmissionRequest, authentication);
     }
 
@@ -80,13 +82,13 @@ public class ShipmentUserController {
             @ApiResponse(code = 666, message = "Not enough products", response = ExceptionMessage.class),
     })
     public ResourceOperationResponse updateShipment(@ApiIgnore AccountAuthentication authentication,
-                                                 @ApiIgnore Long shipmentId,
-                                                 @RequestBody @Valid ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest) {
+                                                    @ApiIgnore @PathVariable Long shipmentId,
+                                                    @RequestBody @Valid ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest) {
         return shipmentService.update(shipmentId, shipmentCustomerSubmissionRequest, authentication);
     }
 
     // TODO: 13/10/2020 test
-    // TODO: 12/10/2020 test, implement + endpointy dla firmy jeszcze trzeba zrobic, info do dropa czy automatycznie zaakceptowany bedzie shipment
+    // TODO: 12/10/2020 test, implement + endpointy dla firmy jeszcze trzeba zrobic
     @ApiOperation(value = "Updating shipment (status) - customer decisions", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PatchMapping("/companies/{companyUid}/drops/{dropUid}/shipments/{shipmentId}")
     @ResponseStatus(HttpStatus.OK)
@@ -97,8 +99,8 @@ public class ShipmentUserController {
             @ApiResponse(code = 666, message = "Not enough products", response = ExceptionMessage.class),
     })
     public ResourceOperationResponse updateShipmentStatus(@ApiIgnore AccountAuthentication authentication,
-                                                       @ApiIgnore Long shipmentId,
-                                                       @RequestBody @Valid ShipmentCustomerDecisionRequest shipmentCustomerDecisionRequest) {
+                                                          @ApiIgnore @PathVariable Long shipmentId,
+                                                          @RequestBody @Valid ShipmentCustomerDecisionRequest shipmentCustomerDecisionRequest) {
         return shipmentService.updateShipmentStatus(shipmentId, shipmentCustomerDecisionRequest, authentication);
     }
 
