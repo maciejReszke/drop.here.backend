@@ -17,14 +17,15 @@ public class CompanyDecisionShipmentProcessingServiceFactory implements Shipment
     private final AcceptCompanyDecisionShipmentProcessingService acceptCompanyDecisionShipmentProcessingService;
     private final RejectCompanyDecisionShipmentProcessingService rejectCompanyDecisionShipmentProcessingService;
     private final CancelCompanyDecisionShipmentProcessingService cancelCompanyDecisionShipmentProcessingService;
+    private final DeliverCompanyDecisionShipmentProcessingService deliverCompanyDecisionShipmentProcessingService;
 
-    // TODO: 18/10/2020 ??
     @Override
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest request) {
         return API.Match(request.getShipmentCompanyDecisionRequest().getCompanyDecision()).of(
                 Case($(ShipmentCompanyDecision.REJECT), () -> rejectCompanyDecisionShipmentProcessingService.process(shipment, request)),
                 Case($(ShipmentCompanyDecision.ACCEPT), () -> acceptCompanyDecisionShipmentProcessingService.process(shipment, request)),
-                Case($(ShipmentCompanyDecision.CANCEL), () -> cancelCompanyDecisionShipmentProcessingService.process(shipment, request))
+                Case($(ShipmentCompanyDecision.CANCEL), () -> cancelCompanyDecisionShipmentProcessingService.process(shipment, request)),
+                Case($(ShipmentCompanyDecision.DELIVER), () -> deliverCompanyDecisionShipmentProcessingService.process(shipment, request))
         );
     }
 }

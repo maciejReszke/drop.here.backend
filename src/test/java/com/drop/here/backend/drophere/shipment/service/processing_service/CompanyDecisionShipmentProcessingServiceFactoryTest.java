@@ -28,6 +28,9 @@ class CompanyDecisionShipmentProcessingServiceFactoryTest {
     @Mock
     private CancelCompanyDecisionShipmentProcessingService cancelCompanyDecisionShipmentProcessingService;
 
+    @Mock
+    private DeliverCompanyDecisionShipmentProcessingService deliverCompanyDecisionShipmentProcessingService;
+
     @Test
     void givenAcceptCompanyDecisionWhenProcessThenProcess() {
         //given
@@ -74,6 +77,24 @@ class CompanyDecisionShipmentProcessingServiceFactoryTest {
         final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.companyDecision(shipmentCompanyDecisionRequest);
 
         when(cancelCompanyDecisionShipmentProcessingService.process(shipment, shipmentProcessingRequest)).thenReturn(ShipmentStatus.PLACED);
+
+        //when
+        final ShipmentStatus status = companyDecisionShipmentProcessingServiceFactory.process(shipment, shipmentProcessingRequest);
+
+        //then
+        assertThat(status).isEqualTo(ShipmentStatus.PLACED);
+    }
+
+    @Test
+    void givenDeliverCompanyDecisionWhenProcessThenProcess() {
+        //given
+        final Shipment shipment = Shipment.builder().build();
+        final ShipmentCompanyDecisionRequest shipmentCompanyDecisionRequest = ShipmentCompanyDecisionRequest.builder()
+                .companyDecision(ShipmentCompanyDecision.DELIVER)
+                .build();
+        final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.companyDecision(shipmentCompanyDecisionRequest);
+
+        when(deliverCompanyDecisionShipmentProcessingService.process(shipment, shipmentProcessingRequest)).thenReturn(ShipmentStatus.PLACED);
 
         //when
         final ShipmentStatus status = companyDecisionShipmentProcessingServiceFactory.process(shipment, shipmentProcessingRequest);
