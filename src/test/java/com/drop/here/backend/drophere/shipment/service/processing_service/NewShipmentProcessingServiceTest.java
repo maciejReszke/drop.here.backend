@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import com.drop.here.backend.drophere.shipment.service.ShipmentNotificationService;
 import com.drop.here.backend.drophere.shipment.service.ShipmentProductManagementService;
+import com.drop.here.backend.drophere.shipment.service.processing_service.customer.NewShipmentProcessingService;
 import com.drop.here.backend.drophere.test_data.ShipmentDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

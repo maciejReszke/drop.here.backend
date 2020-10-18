@@ -80,6 +80,9 @@ public class Shipment {
     private LocalDateTime placedAt;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime compromiseAcceptedAt;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime acceptedAt;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)

@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import com.drop.here.backend.drophere.shipment.service.ShipmentNotificationService;
 import com.drop.here.backend.drophere.shipment.service.ShipmentProductManagementService;
 import com.drop.here.backend.drophere.shipment.service.ShipmentValidationService;
+import com.drop.here.backend.drophere.shipment.service.processing_service.customer.AcceptCustomerDecisionShipmentProcessingService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,7 +52,7 @@ class AcceptCustomerDecisionShipmentProcessingServiceTest {
 
         //then
         assertThat(status).isEqualTo(ShipmentStatus.ACCEPTED);
-        assertThat(shipment.getAcceptedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
+        assertThat(shipment.getCompromiseAcceptedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
         assertThat(shipment.getCustomerComment()).isEqualTo("customerComment123");
     }
 }

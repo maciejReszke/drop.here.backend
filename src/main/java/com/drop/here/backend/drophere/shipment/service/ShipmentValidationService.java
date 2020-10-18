@@ -35,4 +35,9 @@ public class ShipmentValidationService {
     public void validateCancelCompanyDecision(Shipment shipment) {
 
     }
+
+    // TODO: 18/10/2020 test,implement
+    public void validateAcceptCompanyDecision(Shipment shipment) {
+
+    }
 }
