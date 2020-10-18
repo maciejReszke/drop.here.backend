@@ -104,7 +104,7 @@ class ShipmentServiceTest {
 
         when(shipmentPersistenceService.findShipment(shipmentId, customer)).thenReturn(shipment);
         doNothing().when(shipmentValidationService).validateShipment(shipment);
-        doNothing().when(shipmentValidationService).validateShipmentCustomerUpdate(shipment, submissionRequest);
+        doNothing().when(shipmentValidationService).validateShipmentCustomerUpdate(shipment);
         doNothing().when(shipmentMappingService).update(shipment, submissionRequest);
         when(shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerSubmission(submissionRequest), ShipmentProcessOperation.BY_CUSTOMER_UPDATED))
                 .thenReturn(ShipmentStatus.PLACED);

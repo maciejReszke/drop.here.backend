@@ -53,7 +53,7 @@ public class ShipmentService {
 
     public ResourceOperationResponse update(Long shipmentId, ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest, AccountAuthentication authentication) {
         final Shipment shipment = shipmentPersistenceService.findShipment(shipmentId, authentication.getCustomer());
-        shipmentValidationService.validateShipmentCustomerUpdate(shipment, shipmentCustomerSubmissionRequest);
+        shipmentValidationService.validateShipmentCustomerUpdate(shipment);
         shipmentMappingService.update(shipment, shipmentCustomerSubmissionRequest);
         shipmentValidationService.validateShipment(shipment);
         final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerSubmission(shipmentCustomerSubmissionRequest), ShipmentProcessOperation.BY_CUSTOMER_UPDATED);

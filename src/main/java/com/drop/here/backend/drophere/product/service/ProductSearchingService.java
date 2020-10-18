@@ -108,6 +108,7 @@ public class ProductSearchingService {
                 .id(wrapper.getId())
                 .type(wrapper.getType())
                 .heading(wrapper.getHeading())
+                .required(wrapper.isRequired())
                 .customizations(toCustomizations(wrapper.getCustomizations()))
                 .build();
     }

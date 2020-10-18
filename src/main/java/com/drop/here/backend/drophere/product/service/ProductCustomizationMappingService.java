@@ -35,6 +35,7 @@ public class ProductCustomizationMappingService {
                 .heading(request.getHeading())
                 .product(product)
                 .type(ProductCustomizationWrapperType.valueOf(request.getType()))
+                .required(request.isRequired())
                 .build();
     }
 

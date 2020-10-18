@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Value
@@ -16,6 +17,9 @@ public class ProductCustomizationWrapperResponse {
 
     @ApiModelProperty(value = "Customization heading", example = "Roll")
     String heading;
+
+    @ApiModelProperty(value = "Is required to order", example = "true")
+    boolean required;
 
     @ApiModelProperty(value = "Customization type", example = "SINGLE")
     ProductCustomizationWrapperType type;

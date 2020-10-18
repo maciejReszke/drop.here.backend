@@ -34,7 +34,7 @@ public class DropValidationService {
     }
 
     public void validateDelayedUpdate(Drop drop, DropManagementRequest dropManagementRequest) {
-        validateUpdatePresentStatus(drop, EnumSet.of(DropStatus.PREPARED, DropStatus.DELAYED), DropStatus.DELAYED);
+        validateUpdateCurrentStatus(drop, EnumSet.of(DropStatus.PREPARED, DropStatus.DELAYED), DropStatus.DELAYED);
         if (dropManagementRequest.getDelayByMinutes() == null) {
             throw new RestIllegalRequestValueException(
                     "In order to delay drop delay by minutes cannot be null",
@@ -42,7 +42,7 @@ public class DropValidationService {
         }
     }
 
-    private void validateUpdatePresentStatus(Drop drop, EnumSet<DropStatus> desiredStatuses, DropStatus updateToStatus) {
+    private void validateUpdateCurrentStatus(Drop drop, EnumSet<DropStatus> desiredStatuses, DropStatus updateToStatus) {
         if (!desiredStatuses.contains(drop.getStatus())) {
             throw new RestIllegalRequestValueException(String.format(
                     "In order to change drop status to %s it must be in %s but was %s", updateToStatus, desiredStatuses
@@ -54,14 +54,14 @@ public class DropValidationService {
     }
 
     public void validateCancelledUpdate(Drop drop) {
-        validateUpdatePresentStatus(drop, EnumSet.of(DropStatus.PREPARED, DropStatus.DELAYED), DropStatus.CANCELLED);
+        validateUpdateCurrentStatus(drop, EnumSet.of(DropStatus.PREPARED, DropStatus.DELAYED), DropStatus.CANCELLED);
     }
 
     public void validateFinishedUpdate(Drop drop) {
-        validateUpdatePresentStatus(drop, EnumSet.of(DropStatus.LIVE), DropStatus.FINISHED);
+        validateUpdateCurrentStatus(drop, EnumSet.of(DropStatus.LIVE), DropStatus.FINISHED);
     }
 
     public void validateLiveUpdate(Drop drop) {
-        validateUpdatePresentStatus(drop, EnumSet.of(DropStatus.PREPARED, DropStatus.DELAYED), DropStatus.LIVE);
+        validateUpdateCurrentStatus(drop, EnumSet.of(DropStatus.PREPARED, DropStatus.DELAYED), DropStatus.LIVE);
     }
 }

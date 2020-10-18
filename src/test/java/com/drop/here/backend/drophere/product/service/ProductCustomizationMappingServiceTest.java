@@ -27,6 +27,7 @@ class ProductCustomizationMappingServiceTest {
         final Company company = Company.builder().build();
         final Product product = ProductDataGenerator.product(1, unit, company);
         final ProductCustomizationWrapperRequest request = ProductDataGenerator.productCustomizationWrapperRequest(1);
+        request.setRequired(true);
 
         //when
         final ProductCustomizationWrapper wrapper = productCustomizationMappingService.toCustomizationWrapper(product, request);
@@ -42,6 +43,7 @@ class ProductCustomizationMappingServiceTest {
         assertThat(wrapper.getHeading()).isEqualTo(request.getHeading());
         assertThat(wrapper.getType()).isEqualTo(ProductCustomizationWrapperType.SINGLE);
         assertThat(wrapper.getProduct()).isEqualTo(product);
+        assertThat(wrapper.isRequired()).isTrue();
     }
 
 }
