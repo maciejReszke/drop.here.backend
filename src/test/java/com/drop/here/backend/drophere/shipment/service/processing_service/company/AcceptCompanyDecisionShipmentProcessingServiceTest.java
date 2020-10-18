@@ -38,7 +38,7 @@ class AcceptCompanyDecisionShipmentProcessingServiceTest {
         //given
         final Drop drop = Drop.builder().build();
         final Shipment shipment = Shipment.builder().status(ShipmentStatus.DELIVERED)
-                .acceptedAt(LocalDateTime.now()).drop(drop).build();
+                .deliveredAt(LocalDateTime.now()).drop(drop).build();
         final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.companyDecision(
                 ShipmentCompanyDecisionRequest.builder().comment("companyComment123").build()
         );
@@ -62,7 +62,7 @@ class AcceptCompanyDecisionShipmentProcessingServiceTest {
         //given
         final Drop drop = Drop.builder().build();
         final Shipment shipment = Shipment.builder().status(ShipmentStatus.COMPROMISED)
-                .acceptedAt(LocalDateTime.now()).drop(drop).build();
+                .deliveredAt(LocalDateTime.now()).drop(drop).build();
         final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.companyDecision(
                 ShipmentCompanyDecisionRequest.builder().comment("companyComment123").build()
         );

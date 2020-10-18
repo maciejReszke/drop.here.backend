@@ -28,7 +28,7 @@ public class ProductCustomizationWrapperRequest {
     @ApiModelProperty(value = "Customization type", example = "SINGLE", required = true)
     private String type;
 
-    @NotBlank
+    @NotNull
     @ApiModelProperty(value = "Is required to order", example = "true", required = true)
     private boolean required;
 
