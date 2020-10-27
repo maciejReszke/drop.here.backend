@@ -199,7 +199,8 @@ public class ShipmentSearchingService {
                 .productDescription(product.getDescription())
                 .customizations(toShipmentProductCustomizationResponses(shipmentProductCustomizations, productCustomizations))
                 .unitPrice(shipmentProduct.getUnitPrice())
-                .customizationsPrice(shipmentProduct.getCustomizationsPrice())
+                .unitCustomizationsPrice(shipmentProduct.getUnitCustomizationsPrice())
+                .unitSummarizedPrice(shipmentProduct.getUnitSummarizedPrice())
                 .summarizedPrice(shipmentProduct.getSummarizedPrice())
                 .quantity(shipmentProduct.getQuantity())
                 .build();

@@ -9,9 +9,11 @@ import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,4 +42,9 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
             "                   d.route = r  and " +
             "                   d.status <> 'FINISHED' and d.status <> 'CANCELLED')")
     List<Route> finishToBeFinished();
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from Route r where " +
+            "r.id = :routeId")
+    Optional<Route> findByIdWithLock(Long routeId);
 }

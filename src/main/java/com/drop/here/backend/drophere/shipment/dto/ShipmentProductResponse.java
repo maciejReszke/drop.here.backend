@@ -30,9 +30,12 @@ public class ShipmentProductResponse {
     BigDecimal unitPrice;
 
     @ApiModelProperty(value = "Product customizations price (per unit)", example = "12.44")
-    BigDecimal customizationsPrice;
+    BigDecimal unitCustomizationsPrice;
 
-    @ApiModelProperty(value = "Product summarized price (for all unit)", example = "123.33")
+    @ApiModelProperty(value = "Product summarized price (for single unit)", example = "123.33")
+    BigDecimal unitSummarizedPrice;
+
+    @ApiModelProperty(value = "Product summarized price (for all unit)", example = "1230.33")
     BigDecimal summarizedPrice;
 
     @ApiModelProperty(value = "Product quantity", example = "2")

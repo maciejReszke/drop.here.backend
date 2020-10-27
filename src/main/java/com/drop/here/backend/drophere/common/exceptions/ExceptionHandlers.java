@@ -19,7 +19,7 @@ public class ExceptionHandlers {
     public ResponseEntity<ExceptionMessage> handleRestException(RestException exception) {
         exception.logMessage();
         return ResponseEntity
-                .status(exception.getHttpStatus())
+                .status(exception.getHttpCode())
                 .body(ExceptionMessage.builder()
                         .message(exception.getMessage())
                         .status(exception.getHttpStatus())

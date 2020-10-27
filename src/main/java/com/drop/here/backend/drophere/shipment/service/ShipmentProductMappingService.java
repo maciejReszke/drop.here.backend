@@ -19,6 +19,7 @@ import com.drop.here.backend.drophere.shipment.entity.ShipmentProductCustomizati
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -54,7 +55,7 @@ public class ShipmentProductMappingService {
                 .map(ShipmentProductRequest::getRouteProductId)
                 .collect(Collectors.toSet());
 
-        return routeProductService.findProducts(shipment.getDrop(), routeProductsIds);
+        return routeProductService.findProductsLocked(shipment.getDrop(), routeProductsIds);
     }
 
     private ShipmentProduct toShipmentProduct(ShipmentProductRequest productRequest, Company company, RouteProduct product, Shipment shipment, int orderNum) {
@@ -73,9 +74,10 @@ public class ShipmentProductMappingService {
 
     private void updatePrice(ShipmentProduct shipmentProduct) {
         final ShipmentProductCalculation calculation = shipmentCalculatingService.calculateProductCost(shipmentProduct);
-        shipmentProduct.setCustomizationsPrice(calculation.getCustomizationsPrice());
+        shipmentProduct.setUnitCustomizationsPrice(calculation.getUnitCustomizationsPrice());
         shipmentProduct.setUnitPrice(calculation.getUnitPrice());
         shipmentProduct.setSummarizedPrice(calculation.getSummarizedPrice());
+        shipmentProduct.setUnitSummarizedPrice(calculation.getUnitSummarizedPrice());
     }
 
     private ShipmentProduct buildBaseShipmentProduct(ShipmentProductRequest productRequest, RouteProduct product, Shipment shipment, int orderNum, ProductCopy productCopy) {
@@ -85,6 +87,7 @@ public class ShipmentProductMappingService {
                 .shipment(shipment)
                 .orderNum(orderNum)
                 .quantity(productRequest.getQuantity())
+                .units(productRequest.getQuantity().divide(product.getProduct().getUnitFraction(), RoundingMode.UNNECESSARY).intValue())
                 .createdAt(LocalDateTime.now())
                 .build();
     }

@@ -24,6 +24,7 @@ class ShipmentCalculatingServiceTest {
     void givenShipmentProductWithCustomizationsWhenCalculateProductCostThenCalculate() {
         //given
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
+                .units(3)
                 .customizations(Set.of(ShipmentProductCustomization.builder()
                                 .price(BigDecimal.valueOf(44.33))
                                 .build(),
@@ -38,8 +39,9 @@ class ShipmentCalculatingServiceTest {
 
         //then
         assertThat(result.getUnitPrice()).isEqualByComparingTo(BigDecimal.valueOf(55.33));
-        assertThat(result.getCustomizationsPrice()).isEqualByComparingTo(BigDecimal.valueOf(68.52));
-        assertThat(result.getSummarizedPrice()).isEqualByComparingTo(BigDecimal.valueOf(123.85));
+        assertThat(result.getUnitCustomizationsPrice()).isEqualByComparingTo(BigDecimal.valueOf(68.52));
+        assertThat(result.getUnitSummarizedPrice()).isEqualByComparingTo(BigDecimal.valueOf(123.85));
+        assertThat(result.getSummarizedPrice()).isEqualByComparingTo(BigDecimal.valueOf(371.55));
     }
 
     @Test
@@ -48,6 +50,7 @@ class ShipmentCalculatingServiceTest {
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .customizations(Set.of())
                 .unitPrice(BigDecimal.valueOf(55.33))
+                .units(2)
                 .build();
 
         //when
@@ -55,8 +58,9 @@ class ShipmentCalculatingServiceTest {
 
         //then
         assertThat(result.getUnitPrice()).isEqualByComparingTo(BigDecimal.valueOf(55.33));
-        assertThat(result.getCustomizationsPrice()).isEqualByComparingTo(BigDecimal.ZERO);
-        assertThat(result.getSummarizedPrice()).isEqualByComparingTo(BigDecimal.valueOf(55.33));
+        assertThat(result.getUnitCustomizationsPrice()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.getUnitSummarizedPrice()).isEqualByComparingTo(BigDecimal.valueOf(55.33));
+        assertThat(result.getSummarizedPrice()).isEqualByComparingTo(BigDecimal.valueOf(110.66));
     }
 
     @Test

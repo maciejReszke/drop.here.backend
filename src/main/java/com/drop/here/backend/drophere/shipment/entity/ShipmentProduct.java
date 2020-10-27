@@ -68,7 +68,11 @@ public class ShipmentProduct {
 
     @NotNull
     @Positive
-    private BigDecimal customizationsPrice;
+    private BigDecimal unitCustomizationsPrice;
+
+    @NotNull
+    @Positive
+    private BigDecimal unitSummarizedPrice;
 
     @NotNull
     @Positive
@@ -77,6 +81,10 @@ public class ShipmentProduct {
     @NotNull
     @Positive
     private BigDecimal quantity;
+
+    @NotNull
+    @Positive
+    private Integer units;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)

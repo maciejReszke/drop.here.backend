@@ -8,7 +8,9 @@ import java.math.BigDecimal;
 public class ShipmentProductCalculation {
     BigDecimal unitPrice;
 
-    BigDecimal customizationsPrice;
+    BigDecimal unitCustomizationsPrice;
+
+    BigDecimal unitSummarizedPrice;
 
     BigDecimal summarizedPrice;
 }
