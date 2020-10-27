@@ -12,6 +12,7 @@ import java.math.RoundingMode;
 @Service
 public class ShipmentCalculatingService {
 
+    // TODO: 22/10/2020 moze ktos wziac wiele sztuk wiec trzeba to uwzglednic!!!!!)
     public ShipmentProductCalculation calculateProductCost(ShipmentProduct shipmentProduct) {
         final BigDecimal customizationsPrice = shipmentProduct.getCustomizations().stream()
                 .map(ShipmentProductCustomization::getPrice)

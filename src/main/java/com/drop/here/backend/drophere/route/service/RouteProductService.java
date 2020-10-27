@@ -23,7 +23,7 @@ public class RouteProductService {
         return routeProductRepository.findJoinProductByRouteDropContainsAndRouteProductIds(drop, routeProductsIds);
     }
 
-    // TODO: 18/10/2020 (rzucac wyjatek gdy sie nie uda)
+    // TODO: 18/10/2020 (rzucac wyjatek gdy sie nie uda) (pamietac o tym czy jest limited)
     public void changeAmount(List<RouteProductAmountChange> routeProductChanges) {
 
 

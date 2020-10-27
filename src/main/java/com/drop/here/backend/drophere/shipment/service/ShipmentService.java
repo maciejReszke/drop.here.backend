@@ -7,7 +7,7 @@ import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerDecisionRequest;
-import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerResponse;
+import com.drop.here.backend.drophere.shipment.dto.ShipmentResponse;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
@@ -47,7 +47,7 @@ public class ShipmentService {
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, shipment.getId());
     }
 
-    public Page<ShipmentCustomerResponse> findCustomerShipments(AccountAuthentication authentication, String status, Pageable pageable) {
+    public Page<ShipmentResponse> findCustomerShipments(AccountAuthentication authentication, String status, Pageable pageable) {
         return shipmentSearchingService.findCustomerShipments(authentication.getCustomer(), status, pageable);
     }
 

@@ -109,4 +109,8 @@ public class DropSearchingService {
     private List<Drop> findCompanyProductDrops(Set<Long> routesIds) {
         return dropRepository.findUpcomingByRouteIdInWithSpotForCompany(routesIds);
     }
+
+    public List<Drop> findDrops(List<Long> dropIds) {
+        return dropRepository.findAllById(dropIds);
+    }
 }

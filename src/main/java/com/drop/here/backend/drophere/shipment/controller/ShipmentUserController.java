@@ -4,7 +4,7 @@ import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerDecisionRequest;
-import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerResponse;
+import com.drop.here.backend.drophere.shipment.dto.ShipmentResponse;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
 import com.drop.here.backend.drophere.shipment.service.ShipmentService;
 import io.swagger.annotations.ApiOperation;
@@ -49,9 +49,9 @@ public class ShipmentUserController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public Page<ShipmentCustomerResponse> findCustomerShipments(@ApiIgnore AccountAuthentication authentication,
-                                                                @ApiParam(value = "Shipment status") @RequestParam(required = false) String status,
-                                                                Pageable pageable) {
+    public Page<ShipmentResponse> findCustomerShipments(@ApiIgnore AccountAuthentication authentication,
+                                                        @ApiParam(value = "Shipment status") @RequestParam(required = false) String status,
+                                                        Pageable pageable) {
         return shipmentService.findCustomerShipments(authentication, status, pageable);
     }
 
