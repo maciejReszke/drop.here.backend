@@ -25,6 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtService jwtService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -73,6 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers("/companies/{companyUid}/drops/{dropUid}/shipments/**").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                         .mvcMatchers(HttpMethod.GET, "/shipments").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                         .mvcMatchers(HttpMethod.GET, "/shipments/{shipmentId}").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/shipments/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(new Http401UnauthorizedEntryPoint(), new AntPathRequestMatcher("/**")));

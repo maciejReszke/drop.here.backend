@@ -15,7 +15,6 @@ public class ProductValidationService {
     private final ProductUnitService productUnitService;
     private final ProductCustomizationValidationService productCustomizationValidationService;
 
-    // TODO: 27/10/2020 gdy jest fractionable to nie moze miec dodatkow!
     public void validateProductRequest(ProductManagementRequest productManagementRequest) {
         validateUnit(productManagementRequest);
         productCustomizationValidationService.validate(productManagementRequest.getProductCustomizationWrappers());
@@ -23,6 +22,22 @@ public class ProductValidationService {
 
     private void validateUnit(ProductManagementRequest productManagementRequest) {
         final ProductUnit productUnit = productUnitService.getByName(productManagementRequest.getUnit());
+        validateFractionableness(productManagementRequest, productUnit);
+        validateCustomizations(productManagementRequest, productUnit);
+    }
+
+    private void validateCustomizations(ProductManagementRequest productManagementRequest, ProductUnit productUnit) {
+        if (productUnit.isFractionable() && !productManagementRequest.getProductCustomizationWrappers().isEmpty()) {
+            throw new RestIllegalRequestValueException(
+                    String.format("Product with name %s has product unit %s fractionable and customizations size %s but must be empty",
+                            productManagementRequest.getName(), productUnit.getName(), productManagementRequest.getProductCustomizationWrappers().size()),
+                    RestExceptionStatusCode.PRODUCT_FRACTIONABLE_UNIT_WITH_CUSTOMIZATIONS
+            );
+        }
+
+    }
+
+    private void validateFractionableness(ProductManagementRequest productManagementRequest, ProductUnit productUnit) {
         if (productManagementRequest.getUnitFraction() != null && productManagementRequest.getUnitFraction().scale() > 0 && !productUnit.isFractionable()) {
             throw new RestIllegalRequestValueException(
                     String.format("Product with name %s has fraction not integer %s but product unit %s can must be integer",

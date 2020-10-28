@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.shipment.dto.ShipmentCompanyDecisionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerDecisionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
@@ -18,6 +19,7 @@ import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import com.drop.here.backend.drophere.shipment.service.processing_service.ShipmentProcessingServiceFactory;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
+import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CustomerDataGenerator;
 import com.drop.here.backend.drophere.test_data.DropDataGenerator;
 import com.drop.here.backend.drophere.test_data.ShipmentDataGenerator;
@@ -120,7 +122,36 @@ class ShipmentServiceTest {
     }
 
     @Test
-    void givenShipmentRequestWhenUpdateShipmentStatusThenUpdate() {
+    void givenShipmentRequestCompanyWhenUpdateShipmentStatusThenUpdate() {
+        //given
+        final ShipmentCompanyDecisionRequest shipmentCompanyDecisionRequest = ShipmentCompanyDecisionRequest.builder()
+                .build();
+        final Account account = AccountDataGenerator.customerAccount(1);
+        final Company company = Company.builder().build();
+        account.setCompany(company);
+        final Customer customer = Customer.builder().build();
+        final AccountAuthentication authentication = AuthenticationDataGenerator.accountAuthentication(account);
+        final Drop drop = DropDataGenerator.drop(1, null, null);
+        final long shipmentId = 5L;
+        final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, Set.of());
+        shipment.setUpdatedAt(null);
+
+        when(shipmentPersistenceService.findShipment(shipmentId, company)).thenReturn(shipment);
+        when(shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.companyDecision(shipmentCompanyDecisionRequest), ShipmentProcessOperation.COMPANY_DECISION))
+                .thenReturn(ShipmentStatus.PLACED);
+        doNothing().when(shipmentPersistenceService).save(shipment);
+
+        //when
+        final ResourceOperationResponse result = shipmentService.updateShipmentStatus(shipmentId, shipmentCompanyDecisionRequest, authentication);
+
+        //then
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        assertThat(shipment.getStatus()).isEqualTo(ShipmentStatus.PLACED);
+        assertThat(shipment.getUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
+    }
+
+    @Test
+    void givenShipmentRequestCustomerWhenUpdateShipmentStatusThenUpdate() {
         //given
         final ShipmentCustomerDecisionRequest shipmentCustomerDecisionRequest = ShipmentCustomerDecisionRequest.builder()
                 .customerDecision(ShipmentCustomerDecision.CANCEL)
@@ -149,6 +180,5 @@ class ShipmentServiceTest {
         assertThat(shipment.getStatus()).isEqualTo(ShipmentStatus.PLACED);
         assertThat(shipment.getUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
     }
-
 
 }

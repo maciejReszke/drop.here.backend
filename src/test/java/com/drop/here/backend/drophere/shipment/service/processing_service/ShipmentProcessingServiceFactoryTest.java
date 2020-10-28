@@ -4,7 +4,6 @@ import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentProcessOperation;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
-import com.drop.here.backend.drophere.shipment.service.processing_service.company.ByCompanyUpdatedShipmentProcessingService;
 import com.drop.here.backend.drophere.shipment.service.processing_service.company.CompanyDecisionShipmentProcessingServiceFactory;
 import com.drop.here.backend.drophere.shipment.service.processing_service.customer.ByCustomerUpdatedShipmentProcessingService;
 import com.drop.here.backend.drophere.shipment.service.processing_service.customer.CustomerDecisionShipmentProcessingServiceFactory;
@@ -35,9 +34,6 @@ class ShipmentProcessingServiceFactoryTest {
 
     @Mock
     private CompanyDecisionShipmentProcessingServiceFactory companyDecisionShipmentProcessingServiceFactory;
-
-    @Mock
-    private ByCompanyUpdatedShipmentProcessingService byCompanyUpdatedShipmentProcessingService;
 
     @Test
     void givenNewShipmentOperationWhenProcessThenProcess() {
@@ -77,21 +73,6 @@ class ShipmentProcessingServiceFactoryTest {
         final ShipmentProcessOperation shipmentProcessOperation = ShipmentProcessOperation.CUSTOMER_DECISION;
 
         when(customerDecisionShipmentProcessingServiceFactory.process(shipment, shipmentProcessingRequest)).thenReturn(ShipmentStatus.PLACED);
-        //when
-        final ShipmentStatus result = shipmentProcessingServiceFactory.process(shipment, shipmentProcessingRequest, shipmentProcessOperation);
-
-        //then
-        assertThat(result).isEqualTo(ShipmentStatus.PLACED);
-    }
-
-    @Test
-    void givenByCompanyUpdateShipmentOperationWhenProcessThenProcess() {
-        //given
-        final Shipment shipment = Shipment.builder().build();
-        final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.customerSubmission(null);
-        final ShipmentProcessOperation shipmentProcessOperation = ShipmentProcessOperation.BY_COMPANY_UPDATED;
-
-        when(byCompanyUpdatedShipmentProcessingService.process(shipment, shipmentProcessingRequest)).thenReturn(ShipmentStatus.PLACED);
         //when
         final ShipmentStatus result = shipmentProcessingServiceFactory.process(shipment, shipmentProcessingRequest, shipmentProcessOperation);
 

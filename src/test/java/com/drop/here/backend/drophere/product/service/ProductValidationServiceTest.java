@@ -1,6 +1,7 @@
 package com.drop.here.backend.drophere.product.service;
 
 import com.drop.here.backend.drophere.common.exceptions.RestIllegalRequestValueException;
+import com.drop.here.backend.drophere.product.dto.request.ProductCustomizationWrapperRequest;
 import com.drop.here.backend.drophere.product.dto.request.ProductManagementRequest;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
@@ -32,7 +33,27 @@ class ProductValidationServiceTest {
     private ProductCustomizationValidationService productCustomizationValidationService;
 
     @Test
-    void givenValidRequestOnePieceWhenValidateThenDoNothing() {
+    void givenValidRequestOnePieceNotFractionableWhenValidateThenDoNothing() {
+        //given
+        final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder()
+                .category("category")
+                .unit("unit")
+                .unitFraction(BigDecimal.ONE)
+                .productCustomizationWrappers(List.of(ProductCustomizationWrapperRequest.builder().build()))
+                .build();
+
+        when(productUnitService.getByName(productManagementRequest.getUnit())).thenReturn(ProductUnit.builder().fractionable(false).build());
+        doNothing().when(productCustomizationValidationService).validate(any());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> productValidationService.validateProductRequest(productManagementRequest));
+
+        //then
+        assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenValidRequestOnePieceFractionableWithoutCustomizationsWhenValidateThenDoNothing() {
         //given
         final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder()
                 .category("category")
@@ -41,7 +62,7 @@ class ProductValidationServiceTest {
                 .productCustomizationWrappers(List.of())
                 .build();
 
-        when(productUnitService.getByName(productManagementRequest.getUnit())).thenReturn(ProductUnit.builder().build());
+        when(productUnitService.getByName(productManagementRequest.getUnit())).thenReturn(ProductUnit.builder().fractionable(true).build());
         doNothing().when(productCustomizationValidationService).validate(any());
 
         //when
@@ -49,6 +70,25 @@ class ProductValidationServiceTest {
 
         //then
         assertThat(throwable).isNull();
+    }
+
+    @Test
+    void givenValidRequestOnePieceFractionableWithCustomizationsWhenValidateThenThrowException() {
+        //given
+        final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder()
+                .category("category")
+                .unit("unit")
+                .unitFraction(BigDecimal.ONE)
+                .productCustomizationWrappers(List.of(ProductCustomizationWrapperRequest.builder().build()))
+                .build();
+
+        when(productUnitService.getByName(productManagementRequest.getUnit())).thenReturn(ProductUnit.builder().fractionable(true).build());
+
+        //when
+        final Throwable throwable = catchThrowable(() -> productValidationService.validateProductRequest(productManagementRequest));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
     }
 
     @Test

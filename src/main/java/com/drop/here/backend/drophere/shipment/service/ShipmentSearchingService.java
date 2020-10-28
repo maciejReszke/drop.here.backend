@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.shipment.service;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.customer.service.CustomerSearchingService;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.service.DropSearchingService;
 import com.drop.here.backend.drophere.product.entity.Product;
@@ -41,6 +42,7 @@ public class ShipmentSearchingService {
     private final ShipmentProductRepository productRepository;
     private final DropSearchingService dropSearchingService;
     private final CompanyService companyService;
+    private final CustomerSearchingService customerSearchingService;
     private final ShipmentProductCustomizationRepository shipmentProductCustomizationRepository;
     private final ProductCustomizationService productCustomizationService;
     private final ShipmentPersistenceService shipmentPersistenceService;
@@ -59,17 +61,42 @@ public class ShipmentSearchingService {
         return mapToShipmentResponses(shipments);
     }
 
+    public Page<ShipmentResponse> findCompanyShipments(Company company, String status, Long routeId, String dropUid, Pageable pageable) {
+        final ShipmentStatus shipmentStatus = parseOrNull(status);
+        final Page<Shipment> shipments = shipmentRepository.findByCompanyAndStatusAndRouteIdAndDropUid(company, shipmentStatus, routeId, dropUid, pageable);
+        return mapToShipmentResponses(shipments);
+    }
+
+    public ShipmentResponse findCompanyShipment(Company company, Long shipmentId) {
+        final Shipment shipment = shipmentPersistenceService.findShipment(shipmentId, company);
+        return mapToShipmentResponses(new PageImpl<>(List.of(shipment)))
+                .stream()
+                .findFirst()
+                .orElseThrow();
+    }
+
     private Page<ShipmentResponse> mapToShipmentResponses(Page<Shipment> shipmentsPage) {
         final List<Shipment> shipments = shipmentsPage.toList();
         final List<Drop> drops = findDrops(shipments);
         final List<Company> companies = findCompanies(shipments);
+        final List<Customer> customers = findCustomers(shipments);
         final List<ShipmentProduct> shipmentProducts = findShipmentProducts(shipments);
         final List<ShipmentProductCustomization> shipmentProductCustomizations = findShipmentProductCustomizations(shipmentProducts);
         final List<ProductCustomization> customizations = findCustomizations(shipmentProductCustomizations);
-        return shipmentsPage.map(shipment -> toShipmentResponse(drops, companies, shipmentProducts, shipmentProductCustomizations, customizations, shipment));
+        return shipmentsPage.map(shipment -> toShipmentResponse(drops, companies, customers, shipmentProducts, shipmentProductCustomizations, customizations, shipment));
     }
 
-    private ShipmentResponse toShipmentResponse(List<Drop> drops, List<Company> companies, List<ShipmentProduct> shipmentProducts, List<ShipmentProductCustomization> shipmentProductCustomizations, List<ProductCustomization> customizations, Shipment shipment) {
+    private List<Customer> findCustomers(List<Shipment> shipments) {
+        final List<Long> customersIds = shipments
+                .stream()
+                .map(Shipment::getCustomer)
+                .map(Customer::getId)
+                .collect(Collectors.toList());
+
+        return customerSearchingService.findCustomers(customersIds);
+    }
+
+    private ShipmentResponse toShipmentResponse(List<Drop> drops, List<Company> companies, List<Customer> customers, List<ShipmentProduct> shipmentProducts, List<ShipmentProductCustomization> shipmentProductCustomizations, List<ProductCustomization> customizations, Shipment shipment) {
         final List<ShipmentProduct> productsForShipment = findProductsForShipment(shipment, shipmentProducts);
         final Set<Long> productsIds = productsForShipment.stream()
                 .map(ShipmentProduct::getId)
@@ -83,10 +110,18 @@ public class ShipmentSearchingService {
                 shipment,
                 findDropForShipment(shipment, drops),
                 findCompanyForShipment(shipment, companies),
+                findCustomerForShipment(shipment, customers),
                 productsForShipment,
                 productCustomizations,
                 customizationsForShipment
         );
+    }
+
+    private Customer findCustomerForShipment(Shipment shipment, List<Customer> customers) {
+        return customers.stream()
+                .filter(c -> c.getId().equals(shipment.getCustomer().getId()))
+                .findFirst()
+                .orElseThrow();
     }
 
     private List<ProductCustomization> findProductCustomizationsForShipment(Set<Long> customizationsIds, List<ProductCustomization> customizations) {
@@ -169,13 +204,16 @@ public class ShipmentSearchingService {
         return dropSearchingService.findDrops(dropsIds);
     }
 
-    private ShipmentResponse toShipmentCustomerResponse(Shipment shipment, Drop drop, Company company, List<ShipmentProduct> shipmentProducts, List<ShipmentProductCustomization> shipmentProductCustomizations, List<ProductCustomization> productCustomizations) {
+    private ShipmentResponse toShipmentCustomerResponse(Shipment shipment, Drop drop, Company company, Customer customer, List<ShipmentProduct> shipmentProducts, List<ShipmentProductCustomization> shipmentProductCustomizations, List<ProductCustomization> productCustomizations) {
         return ShipmentResponse.builder()
                 .id(shipment.getId())
                 .status(shipment.getStatus())
                 .dropUid(drop.getUid())
                 .companyName(company.getName())
                 .companyUid(company.getUid())
+                .customerFirstName(customer.getFirstName())
+                .customerLastName(customer.getLastName())
+                .customerId(customer.getId())
                 .createdAt(optionalDatetime(shipment.getCreatedAt()))
                 .placedAt(optionalDatetime(shipment.getPlacedAt()))
                 .acceptedAt(optionalDatetime(shipment.getAcceptedAt()))

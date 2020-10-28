@@ -34,7 +34,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
-public class ShipmentUserController {
+public class ShipmentCustomerController {
     private final ShipmentService shipmentService;
 
     @GetMapping("/shipments/{shipmentId}")
@@ -50,7 +50,6 @@ public class ShipmentUserController {
         return shipmentService.findCustomerShipment(authentication, shipmentId);
     }
 
-    // TODO: 28/10/2020 endpointy firma
     @GetMapping("/shipments")
     @ApiOperation(value = "Find customer shipments", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)

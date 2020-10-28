@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.shipment.dto.ShipmentCompanyDecisionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerDecisionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
@@ -61,20 +62,34 @@ public class ShipmentService {
         shipmentMappingService.update(shipment, shipmentCustomerSubmissionRequest);
         shipmentValidationService.validateShipment(shipment);
         final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerSubmission(shipmentCustomerSubmissionRequest), ShipmentProcessOperation.BY_CUSTOMER_UPDATED);
-        return update(authentication, shipment, shipmentStatus);
+        return update(shipment, shipmentStatus);
     }
 
     public ResourceOperationResponse updateShipmentStatus(Long shipmentId, ShipmentCustomerDecisionRequest shipmentCustomerDecisionRequest, AccountAuthentication authentication) {
         final Shipment shipment = shipmentPersistenceService.findShipment(shipmentId, authentication.getCustomer());
         final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerDecision(shipmentCustomerDecisionRequest), ShipmentProcessOperation.CUSTOMER_DECISION);
-        return update(authentication, shipment, shipmentStatus);
+        return update(shipment, shipmentStatus);
     }
 
-    private ResourceOperationResponse update(AccountAuthentication authentication, Shipment shipment, ShipmentStatus shipmentStatus) {
-        log.info("Updated shipment with status {} to {} for customer {} shipment {}", shipment.getStatus(), shipmentStatus, authentication.getCustomer().getId(), shipment.getId());
+    public ResourceOperationResponse updateShipmentStatus(Long shipmentId, ShipmentCompanyDecisionRequest shipmentCustomerDecisionRequest, AccountAuthentication authentication) {
+        final Shipment shipment = shipmentPersistenceService.findShipment(shipmentId, authentication.getCompany());
+        final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.companyDecision(shipmentCustomerDecisionRequest), ShipmentProcessOperation.COMPANY_DECISION);
+        return update(shipment, shipmentStatus);
+    }
+
+    private ResourceOperationResponse update(Shipment shipment, ShipmentStatus shipmentStatus) {
+        log.info("Updated shipment with status {} to {} for customer {} company {} shipment {}", shipment.getStatus(), shipmentStatus, shipment.getCustomer().getId(), shipment.getCompany().getId(), shipment.getId());
         shipment.setStatus(shipmentStatus);
         shipment.setUpdatedAt(LocalDateTime.now());
         shipmentPersistenceService.save(shipment);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, shipment.getId());
+    }
+
+    public ShipmentResponse findCompanyShipment(AccountAuthentication authentication, Long shipmentId) {
+        return shipmentSearchingService.findCompanyShipment(authentication.getCompany(), shipmentId);
+    }
+
+    public Page<ShipmentResponse> findCompanyShipments(AccountAuthentication authentication, String status, Long routeId, String dropUid, Pageable pageable) {
+        return shipmentSearchingService.findCompanyShipments(authentication.getCompany(), status, routeId, dropUid, pageable);
     }
 }

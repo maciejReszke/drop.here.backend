@@ -27,6 +27,15 @@ public class ShipmentResponse {
     @ApiModelProperty(value = "Company uid", example = "uid123")
     String companyUid;
 
+    @ApiModelProperty(value = "Customer first name", example = "Karol")
+    String customerFirstName;
+
+    @ApiModelProperty(value = "Customer last name", example = "Wojtyla")
+    String customerLastName;
+
+    @ApiModelProperty(value = "Customer id", example = "5")
+    Long customerId;
+
     @ApiModelProperty(value = "Shipment creation date time", example = "2020-04-06T11:03:32")
     String createdAt;
 
