@@ -110,7 +110,6 @@ class ShipmentProductMappingServiceTest {
         assertThat(firstProduct.getUnitSummarizedPrice()).isEqualTo(BigDecimal.valueOf(77));
         assertThat(firstProduct.getProduct()).isEqualTo(productCopy1);
         assertThat(firstProduct.getRouteProduct()).isEqualTo(routeProduct1);
-        assertThat(firstProduct.getUnits()).isEqualTo(shipmentCustomerSubmissionRequest.getProducts().get(0).getQuantity().intValue());
 
         final ShipmentProduct secondProduct = products.stream().filter(p -> p.getOrderNum().equals(2)).findFirst().orElseThrow();
         assertThat(secondProduct.getShipment()).isEqualTo(shipment);
@@ -129,8 +128,6 @@ class ShipmentProductMappingServiceTest {
         assertThat(secondProduct.getUnitPrice()).isEqualTo(BigDecimal.valueOf(88));
         assertThat(secondProduct.getProduct()).isEqualTo(productCopy2);
         assertThat(secondProduct.getRouteProduct()).isEqualTo(routeProduct2);
-        assertThat(secondProduct.getUnits()).isEqualTo(shipmentCustomerSubmissionRequest.getProducts().get(0).getQuantity().intValue());
-
     }
 
 }

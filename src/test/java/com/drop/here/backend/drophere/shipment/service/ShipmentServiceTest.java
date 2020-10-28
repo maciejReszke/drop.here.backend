@@ -72,7 +72,7 @@ class ShipmentServiceTest {
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, Set.of());
         shipment.setStatus(null);
 
-        when(dropService.findPrivilegedDrop(dropUid, customer)).thenReturn(drop);
+        when(dropService.findPrivilegedDrop(dropUid, customer, true)).thenReturn(drop);
         when(shipmentMappingService.toEntity(drop, submissionRequest, customer)).thenReturn(shipment);
         doNothing().when(shipmentValidationService).validateShipment(shipment);
         when(shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerSubmission(submissionRequest), ShipmentProcessOperation.NEW))
@@ -123,7 +123,7 @@ class ShipmentServiceTest {
     void givenShipmentRequestWhenUpdateShipmentStatusThenUpdate() {
         //given
         final ShipmentCustomerDecisionRequest shipmentCustomerDecisionRequest = ShipmentCustomerDecisionRequest.builder()
-                .customerDecision(ShipmentCustomerDecision.ACCEPT)
+                .customerDecision(ShipmentCustomerDecision.CANCEL)
                 .build();
         final Account account = AccountDataGenerator.customerAccount(1);
         final Customer customer = CustomerDataGenerator.customer(1, account);

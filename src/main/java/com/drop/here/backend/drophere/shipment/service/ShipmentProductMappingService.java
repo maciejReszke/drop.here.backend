@@ -19,7 +19,6 @@ import com.drop.here.backend.drophere.shipment.entity.ShipmentProductCustomizati
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -87,7 +86,6 @@ public class ShipmentProductMappingService {
                 .shipment(shipment)
                 .orderNum(orderNum)
                 .quantity(productRequest.getQuantity())
-                .units(productRequest.getQuantity().divide(product.getProduct().getUnitFraction(), RoundingMode.UNNECESSARY).intValue())
                 .createdAt(LocalDateTime.now())
                 .build();
     }

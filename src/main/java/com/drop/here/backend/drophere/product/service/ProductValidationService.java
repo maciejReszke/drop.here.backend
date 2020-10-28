@@ -15,6 +15,7 @@ public class ProductValidationService {
     private final ProductUnitService productUnitService;
     private final ProductCustomizationValidationService productCustomizationValidationService;
 
+    // TODO: 27/10/2020 gdy jest fractionable to nie moze miec dodatkow!
     public void validateProductRequest(ProductManagementRequest productManagementRequest) {
         validateUnit(productManagementRequest);
         productCustomizationValidationService.validate(productManagementRequest.getProductCustomizationWrappers());

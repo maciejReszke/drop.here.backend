@@ -7,9 +7,9 @@ import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerDecisionRequest;
-import com.drop.here.backend.drophere.shipment.dto.ShipmentResponse;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
+import com.drop.here.backend.drophere.shipment.dto.ShipmentResponse;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentProcessOperation;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
@@ -37,7 +37,7 @@ public class ShipmentService {
 
     public ResourceOperationResponse createShipment(String dropUid, ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest, AccountAuthentication authentication) {
         final Customer customer = authentication.getCustomer();
-        final Drop drop = dropService.findPrivilegedDrop(dropUid, customer);
+        final Drop drop = dropService.findPrivilegedDrop(dropUid, customer, true);
         final Shipment shipment = shipmentMappingService.toEntity(drop, shipmentCustomerSubmissionRequest, customer);
         shipmentValidationService.validateShipment(shipment);
         final ShipmentStatus shipmentStatus = shipmentProcessingServiceFactory.process(shipment, ShipmentProcessingRequest.customerSubmission(shipmentCustomerSubmissionRequest), ShipmentProcessOperation.NEW);
@@ -45,6 +45,10 @@ public class ShipmentService {
         shipment.setStatus(shipmentStatus);
         shipmentPersistenceService.save(shipment);
         return new ResourceOperationResponse(ResourceOperationStatus.CREATED, shipment.getId());
+    }
+
+    public ShipmentResponse findCustomerShipment(AccountAuthentication authentication, Long shipmentId) {
+        return shipmentSearchingService.findCustomerShipment(authentication.getCustomer(), shipmentId);
     }
 
     public Page<ShipmentResponse> findCustomerShipments(AccountAuthentication authentication, String status, Pageable pageable) {

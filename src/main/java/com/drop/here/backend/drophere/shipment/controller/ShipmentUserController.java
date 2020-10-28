@@ -4,8 +4,8 @@ import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerDecisionRequest;
-import com.drop.here.backend.drophere.shipment.dto.ShipmentResponse;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
+import com.drop.here.backend.drophere.shipment.dto.ShipmentResponse;
 import com.drop.here.backend.drophere.shipment.service.ShipmentService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -37,10 +37,20 @@ import javax.validation.Valid;
 public class ShipmentUserController {
     private final ShipmentService shipmentService;
 
-    // TODO: 18/10/2020 problems/build problems intellij
-    // TODO: 12/10/2020 test (pamietac zeby dac endpoint na konkretne zamowienie i zwracac ile rzeczeywiscie jest w bazie)
-    // TODO: 13/10/2020 security
-    // TODO: 18/10/2020 get na jeden shipment
+    @GetMapping("/shipments/{shipmentId}")
+    @ApiOperation(value = "Find customer shipment", authorizations = @Authorization(value = "AUTHORIZATION"))
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Found shipment"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    public ShipmentResponse findShipment(@ApiIgnore AccountAuthentication authentication,
+                                         @ApiIgnore @PathVariable Long shipmentId) {
+        return shipmentService.findCustomerShipment(authentication, shipmentId);
+    }
+
+    // TODO: 28/10/2020 endpointy firma
     @GetMapping("/shipments")
     @ApiOperation(value = "Find customer shipments", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
@@ -55,7 +65,6 @@ public class ShipmentUserController {
         return shipmentService.findCustomerShipments(authentication, status, pageable);
     }
 
-    // TODO: 12/10/2020 test
     @ApiOperation(value = "Creating shipments", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PostMapping("/companies/{companyUid}/drops/{dropUid}/shipments")
     @ResponseStatus(HttpStatus.CREATED)
@@ -63,7 +72,7 @@ public class ShipmentUserController {
             @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Shipment created", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class),
-            @ApiResponse(code = 666, message = "Not enough products", response = ExceptionMessage.class),
+            @ApiResponse(code = 601, message = "Not enough products to create order", response = ExceptionMessage.class),
     })
     public ResourceOperationResponse createShipment(@ApiIgnore AccountAuthentication authentication,
                                                     @ApiIgnore @PathVariable String dropUid,
@@ -71,7 +80,6 @@ public class ShipmentUserController {
         return shipmentService.createShipment(dropUid, shipmentCustomerSubmissionRequest, authentication);
     }
 
-    // TODO: 12/10/2020 test
     @ApiOperation(value = "Updating shipment (items in shipment)", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PutMapping("/companies/{companyUid}/drops/{dropUid}/shipments/{shipmentId}")
     @ResponseStatus(HttpStatus.OK)
@@ -79,7 +87,7 @@ public class ShipmentUserController {
             @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Shipment updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class),
-            @ApiResponse(code = 666, message = "Not enough products", response = ExceptionMessage.class),
+            @ApiResponse(code = 601, message = "Not enough products", response = ExceptionMessage.class),
     })
     public ResourceOperationResponse updateShipment(@ApiIgnore AccountAuthentication authentication,
                                                     @ApiIgnore @PathVariable Long shipmentId,
@@ -87,16 +95,13 @@ public class ShipmentUserController {
         return shipmentService.update(shipmentId, shipmentCustomerSubmissionRequest, authentication);
     }
 
-    // TODO: 13/10/2020 test
-    // TODO: 12/10/2020 test, implement + endpointy dla firmy jeszcze trzeba zrobic
     @ApiOperation(value = "Updating shipment (status) - customer decisions", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PatchMapping("/companies/{companyUid}/drops/{dropUid}/shipments/{shipmentId}")
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Shipment updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
-            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class),
-            @ApiResponse(code = 666, message = "Not enough products", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
     public ResourceOperationResponse updateShipmentStatus(@ApiIgnore AccountAuthentication authentication,
                                                           @ApiIgnore @PathVariable Long shipmentId,

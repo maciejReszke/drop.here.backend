@@ -70,7 +70,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers("/companies/{companyUid}/routes/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .mvcMatchers(LocationWebSocketController.ENDPOINT + "/**").permitAll()
                         .mvcMatchers(WebSocketConfig.WEB_SOCKET_DESTINATION_PREFIX + "/**").permitAll()
-
+                        .mvcMatchers("/companies/{companyUid}/drops/{dropUid}/shipments/**").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.GET, "/shipments").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
+                        .mvcMatchers(HttpMethod.GET, "/shipments/{shipmentId}").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(new Http401UnauthorizedEntryPoint(), new AntPathRequestMatcher("/**")));

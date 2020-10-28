@@ -161,6 +161,6 @@ class ShipmentNotificationServiceTest {
         assertThat(request.getRecipientCompanies()).contains(company);
         assertThat(request.getRecipientCustomers()).isNull();
         assertThat(request.getReferencedSubjectType()).isEqualTo(NotificationReferencedSubjectType.SHIPMENT);
-        assertThat(request.getReferencedSubjectId()).isEmpty();
+        assertThat(request.getReferencedSubjectId()).isEqualTo("null");
     }
 }

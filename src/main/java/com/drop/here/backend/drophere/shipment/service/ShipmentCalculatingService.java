@@ -17,13 +17,14 @@ public class ShipmentCalculatingService {
                 .map(ShipmentProductCustomization::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        final BigDecimal unitCustomizedPrice = customizationsPrice.add(shipmentProduct.getUnitPrice());
+        final BigDecimal productPrice = shipmentProduct.getRouteProduct().getPrice();
+        final BigDecimal unitCustomizedPrice = customizationsPrice.add(productPrice);
 
         return new ShipmentProductCalculation(
-                scale(shipmentProduct.getUnitPrice()),
+                scale(productPrice),
                 scale(customizationsPrice),
                 scale(unitCustomizedPrice),
-                scale(unitCustomizedPrice.multiply(BigDecimal.valueOf(shipmentProduct.getUnits())))
+                scale(unitCustomizedPrice.multiply(shipmentProduct.getQuantity()))
         );
     }
 

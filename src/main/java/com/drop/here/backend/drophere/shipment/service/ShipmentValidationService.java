@@ -120,16 +120,8 @@ public class ShipmentValidationService {
     public void validateCancelCustomerDecision(Shipment shipment) {
         validateUpdateCurrentStatus(
                 shipment,
-                EnumSet.of(ShipmentStatus.ACCEPTED, ShipmentStatus.PLACED, ShipmentStatus.COMPROMISED),
+                EnumSet.of(ShipmentStatus.ACCEPTED, ShipmentStatus.PLACED),
                 ShipmentStatus.CANCELLED
-        );
-    }
-
-    public void validateAcceptCustomerDecision(Shipment shipment) {
-        validateUpdateCurrentStatus(
-                shipment,
-                EnumSet.of(ShipmentStatus.COMPROMISED),
-                ShipmentStatus.ACCEPTED
         );
     }
 
@@ -160,7 +152,7 @@ public class ShipmentValidationService {
     public void validateRejectCompanyDecision(Shipment shipment) {
         validateUpdateCurrentStatus(
                 shipment,
-                EnumSet.of(ShipmentStatus.COMPROMISED, ShipmentStatus.PLACED, ShipmentStatus.ACCEPTED),
+                EnumSet.of(ShipmentStatus.PLACED, ShipmentStatus.ACCEPTED),
                 ShipmentStatus.REJECTED
         );
     }

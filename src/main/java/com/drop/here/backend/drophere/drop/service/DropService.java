@@ -48,13 +48,13 @@ public class DropService {
     @Transactional(readOnly = true)
     public DropDetailedCustomerResponse findDropForCustomer(String dropUid, AccountAuthentication authentication) {
         final Customer customer = authentication.getCustomer();
-        final Drop drop = findPrivilegedDrop(dropUid, customer);
+        final Drop drop = findPrivilegedDrop(dropUid, customer, false);
         final Spot spot = spotPersistenceService.findById(drop.getSpot().getId());
         return toDropCustomerDetailedResponse(drop, spot, customer);
     }
 
-    public Drop findPrivilegedDrop(String dropUid, Customer customer) {
-        return dropRepository.findPrivilegedDrop(dropUid, customer)
+    public Drop findPrivilegedDrop(String dropUid, Customer customer, boolean mustBeActiveMember) {
+        return dropRepository.findPrivilegedDrop(dropUid, customer, mustBeActiveMember)
                 .orElseThrow(() -> new RestEntityNotFoundException(String.format(
                         "Drop with uid %s was not found or is not privileged", dropUid),
                         RestExceptionStatusCode.PRIVILEGED_FOR_CUSTOMER_DROP_NOT_FOUND));

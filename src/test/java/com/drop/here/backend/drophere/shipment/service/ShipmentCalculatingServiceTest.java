@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.shipment.service;
 
+import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProductCalculation;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.entity.ShipmentProduct;
@@ -24,14 +25,16 @@ class ShipmentCalculatingServiceTest {
     void givenShipmentProductWithCustomizationsWhenCalculateProductCostThenCalculate() {
         //given
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
-                .units(3)
+                .quantity(BigDecimal.valueOf(3))
                 .customizations(Set.of(ShipmentProductCustomization.builder()
                                 .price(BigDecimal.valueOf(44.33))
                                 .build(),
                         ShipmentProductCustomization.builder()
                                 .price(BigDecimal.valueOf(24.19))
                                 .build()))
-                .unitPrice(BigDecimal.valueOf(55.33))
+                .routeProduct(RouteProduct.builder()
+                        .price(BigDecimal.valueOf(55.33))
+                        .build())
                 .build();
 
         //when
@@ -49,8 +52,10 @@ class ShipmentCalculatingServiceTest {
         //given
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .customizations(Set.of())
-                .unitPrice(BigDecimal.valueOf(55.33))
-                .units(2)
+                .quantity(BigDecimal.valueOf(2))
+                .routeProduct(RouteProduct.builder()
+                        .price(BigDecimal.valueOf(55.33))
+                        .build())
                 .build();
 
         //when

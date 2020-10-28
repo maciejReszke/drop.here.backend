@@ -3,6 +3,8 @@ package com.drop.here.backend.drophere.test_data;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomizationRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProductRequest;
@@ -52,6 +54,22 @@ public class ShipmentDataGenerator {
                 .companyComment("companyComment" + i)
                 .summarizedAmount(BigDecimal.valueOf(55.33))
                 .products(products)
+                .build();
+    }
+
+    public ShipmentProduct product(Shipment shipment, RouteProduct routeProduct, Product product) {
+        return ShipmentProduct.builder()
+                .routeProduct(routeProduct)
+                .product(product)
+                .customizations(Set.of())
+                .quantity(BigDecimal.valueOf(2))
+                .shipment(shipment)
+                .createdAt(LocalDateTime.now())
+                .unitPrice(BigDecimal.valueOf(23.33))
+                .orderNum(1)
+                .summarizedPrice(BigDecimal.valueOf(46.66))
+                .unitCustomizationsPrice(BigDecimal.ZERO)
+                .unitSummarizedPrice(BigDecimal.valueOf(23.33))
                 .build();
     }
 }

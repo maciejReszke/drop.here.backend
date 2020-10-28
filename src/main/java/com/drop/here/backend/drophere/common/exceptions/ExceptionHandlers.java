@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.support.WebExchangeBindException;
-import reactor.core.publisher.Mono;
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
@@ -47,20 +46,20 @@ public class ExceptionHandlers {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public Mono<ResponseEntity<ExceptionMessage>> handleException(ConstraintViolationException exception) {
+    public ResponseEntity<ExceptionMessage> handleException(ConstraintViolationException exception) {
         final String message = exception.getConstraintViolations()
                 .stream()
-                .map(fieldError -> String.format("Found error: %s", fieldError.getMessage()))
+                .map(fieldError -> String.format("Found error: %s  %s", fieldError.getPropertyPath(), fieldError.getMessage()))
                 .collect(Collectors.joining("\n"));
         log.info("Invalid request caused by invalid arguments {}", message);
         final HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
-        return Mono.just(ResponseEntity
+        return ResponseEntity
                 .status(status)
                 .body(ExceptionMessage.builder()
                         .message(message)
                         .status(status)
                         .timestamp(LocalDateTime.now())
                         .code(RestExceptionStatusCode.INVALID_ARGUMENTS_FOR_TRANSFER_TYPE_EXCEPTION.ordinal())
-                        .build()));
+                        .build());
     }
 }

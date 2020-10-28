@@ -17,12 +17,10 @@ import static io.vavr.API.Case;
 @RequiredArgsConstructor
 public class CustomerDecisionShipmentProcessingServiceFactory implements ShipmentProcessingService {
     private final CancelCustomerDecisionShipmentProcessingService cancelCustomerDecisionShipmentProcessingService;
-    private final AcceptCustomerDecisionShipmentProcessingService acceptCustomerDecisionShipmentProcessingService;
 
     @Override
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest request) {
         return API.Match(request.getShipmentCustomerDecisionRequest().getCustomerDecision()).of(
-                Case($(ShipmentCustomerDecision.ACCEPT), () -> acceptCustomerDecisionShipmentProcessingService.process(shipment, request)),
                 Case($(ShipmentCustomerDecision.CANCEL), () -> cancelCustomerDecisionShipmentProcessingService.process(shipment, request))
         );
     }

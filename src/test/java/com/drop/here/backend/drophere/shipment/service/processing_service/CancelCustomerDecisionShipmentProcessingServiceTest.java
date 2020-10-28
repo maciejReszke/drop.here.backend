@@ -80,26 +80,4 @@ class CancelCustomerDecisionShipmentProcessingServiceTest {
         assertThat(shipment.getCustomerComment()).isEqualTo("customerComment123");
         verifyNoMoreInteractions(shipmentProductManagementService);
     }
-
-    @Test
-    void givenShipmentCompromisedWhenProcessThenProcess() {
-        //given
-        final Drop drop = Drop.builder().build();
-        final Shipment shipment = Shipment.builder().status(ShipmentStatus.COMPROMISED).drop(drop).build();
-        final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.customerDecision(
-                ShipmentCustomerDecisionRequest.builder().comment("customerComment123").build());
-
-        doNothing().when(shipmentNotificationService).createNotifications(shipment, ShipmentStatus.CANCELLED, false, true);
-        doNothing().when(shipmentProductManagementService).increase(shipment);
-        doNothing().when(shipmentValidationService).validateCancelCustomerDecision(shipment);
-
-        //when
-        final ShipmentStatus status = processingService.process(shipment, shipmentProcessingRequest);
-
-        //then
-        assertThat(status).isEqualTo(ShipmentStatus.CANCELLED);
-        assertThat(shipment.getCancelledAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
-        assertThat(shipment.getCancelRequestedAt()).isNull();
-        assertThat(shipment.getCustomerComment()).isEqualTo("customerComment123");
-    }
 }

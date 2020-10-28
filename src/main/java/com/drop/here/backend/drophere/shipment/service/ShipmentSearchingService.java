@@ -21,6 +21,7 @@ import com.drop.here.backend.drophere.shipment.repository.ShipmentRepository;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,15 @@ public class ShipmentSearchingService {
     private final CompanyService companyService;
     private final ShipmentProductCustomizationRepository shipmentProductCustomizationRepository;
     private final ProductCustomizationService productCustomizationService;
+    private final ShipmentPersistenceService shipmentPersistenceService;
+
+    public ShipmentResponse findCustomerShipment(Customer customer, Long shipmentId) {
+        final Shipment shipment = shipmentPersistenceService.findShipment(shipmentId, customer);
+        return mapToShipmentResponses(new PageImpl<>(List.of(shipment)))
+                .stream()
+                .findFirst()
+                .orElseThrow();
+    }
 
     public Page<ShipmentResponse> findCustomerShipments(Customer customer, String status, Pageable pageable) {
         final ShipmentStatus shipmentStatus = parseOrNull(status);
@@ -168,7 +178,6 @@ public class ShipmentSearchingService {
                 .companyUid(company.getUid())
                 .createdAt(optionalDatetime(shipment.getCreatedAt()))
                 .placedAt(optionalDatetime(shipment.getPlacedAt()))
-                .compromiseAcceptedAt(optionalDatetime(shipment.getCompromiseAcceptedAt()))
                 .acceptedAt(optionalDatetime(shipment.getAcceptedAt()))
                 .cancelledAt(optionalDatetime(shipment.getCancelledAt()))
                 .cancelRequestedAt(optionalDatetime(shipment.getCancelRequestedAt()))

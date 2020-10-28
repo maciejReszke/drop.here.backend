@@ -115,7 +115,7 @@ class DropServiceTest {
         final SpotBaseCustomerResponse spotBaseCustomerResponse = SpotBaseCustomerResponse.builder().build();
         final List<RouteProductRouteResponse> routeProductRouteResponse = List.of();
 
-        when(dropRepository.findPrivilegedDrop(dropUid, customer)).thenReturn(Optional.of(drop));
+        when(dropRepository.findPrivilegedDrop(dropUid, customer, false)).thenReturn(Optional.of(drop));
         when(spotPersistenceService.findById(5L)).thenReturn(spot);
         when(spotSearchingService.findSpot(spot, customer)).thenReturn(spotBaseCustomerResponse);
         when(routeProductMappingService.toProductResponses(drop)).thenReturn(routeProductRouteResponse);
@@ -157,7 +157,7 @@ class DropServiceTest {
         final SpotBaseCustomerResponse spotBaseCustomerResponse = SpotBaseCustomerResponse.builder().build();
         final List<RouteProductRouteResponse> routeProductRouteResponse = List.of();
 
-        when(dropRepository.findPrivilegedDrop(dropUid, customer)).thenReturn(Optional.of(drop));
+        when(dropRepository.findPrivilegedDrop(dropUid, customer, false)).thenReturn(Optional.of(drop));
         when(spotPersistenceService.findById(5L)).thenReturn(spot);
         when(spotSearchingService.findSpot(spot, customer)).thenReturn(spotBaseCustomerResponse);
         when(routeProductMappingService.toProductResponses(drop)).thenReturn(routeProductRouteResponse);

@@ -5,7 +5,6 @@ import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentCustomerDecision;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
-import com.drop.here.backend.drophere.shipment.service.processing_service.customer.AcceptCustomerDecisionShipmentProcessingService;
 import com.drop.here.backend.drophere.shipment.service.processing_service.customer.CancelCustomerDecisionShipmentProcessingService;
 import com.drop.here.backend.drophere.shipment.service.processing_service.customer.CustomerDecisionShipmentProcessingServiceFactory;
 import org.junit.jupiter.api.Test;
@@ -25,27 +24,6 @@ class CustomerDecisionShipmentProcessingServiceFactoryTest {
 
     @Mock
     private CancelCustomerDecisionShipmentProcessingService cancelCustomerDecisionShipmentProcessingService;
-
-    @Mock
-    private AcceptCustomerDecisionShipmentProcessingService acceptCustomerDecisionShipmentProcessingService;
-
-    @Test
-    void givenAcceptCustomerDecisionWhenProcessThenProcess() {
-        //given
-        final Shipment shipment = Shipment.builder().build();
-        final ShipmentCustomerDecisionRequest shipmentCustomerDecisionRequest = ShipmentCustomerDecisionRequest.builder()
-                .customerDecision(ShipmentCustomerDecision.ACCEPT)
-                .build();
-        final ShipmentProcessingRequest shipmentProcessingRequest = ShipmentProcessingRequest.customerDecision(shipmentCustomerDecisionRequest);
-
-        when(acceptCustomerDecisionShipmentProcessingService.process(shipment, shipmentProcessingRequest)).thenReturn(ShipmentStatus.PLACED);
-
-        //when
-        final ShipmentStatus status = customerDecisionShipmentProcessingServiceFactory.process(shipment, shipmentProcessingRequest);
-
-        //then
-        assertThat(status).isEqualTo(ShipmentStatus.PLACED);
-    }
 
     @Test
     void givenCancelCustomerDecisionWhenProcessThenProcess() {

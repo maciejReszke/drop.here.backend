@@ -27,7 +27,7 @@ public class ProductResponse {
     @ApiModelProperty(value = "Minimal fraction", example = "0.1")
     BigDecimal unitFraction;
 
-    @ApiModelProperty(value = "Product price", example = "50.33")
+    @ApiModelProperty(value = "Product price per unit (1.0)", example = "50.33")
     BigDecimal price;
 
     @ApiModelProperty(value = "Product description", example = "Matka zona policjanta przynosi do hotelu blanta")

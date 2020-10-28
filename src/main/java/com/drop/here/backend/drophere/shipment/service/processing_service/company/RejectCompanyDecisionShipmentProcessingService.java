@@ -40,7 +40,6 @@ public class RejectCompanyDecisionShipmentProcessingService implements ShipmentP
 
     private void manageProductsQuantityChange(Shipment shipment) {
         API.Match(shipment.getStatus()).of(
-                Case($(ShipmentStatus.COMPROMISED), () -> API.run(() -> shipmentProductManagementService.increase(shipment))),
                 Case($(ShipmentStatus.ACCEPTED), () -> API.run(() -> shipmentProductManagementService.increase(shipment))),
                 Case($(ShipmentStatus.PLACED), () -> API.run(this::doNothing))
         );

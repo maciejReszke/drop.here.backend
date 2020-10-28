@@ -67,7 +67,7 @@ public class ShipmentNotificationService {
                 .broadcastingCustomer(customer)
                 .recipientCompanies(List.of(shipment.getCompany()))
                 .referencedSubjectType(NotificationReferencedSubjectType.SHIPMENT)
-                .referencedSubjectId(Optional.ofNullable(shipment.getId()).map(Object::toString).orElse(""))
+                .referencedSubjectId(Optional.ofNullable(shipment.getId()).map(Object::toString).orElse("null"))
                 .recipientAccountProfiles(route.isWithSeller() ? List.of(route.getProfile()) : null)
                 .build();
     }

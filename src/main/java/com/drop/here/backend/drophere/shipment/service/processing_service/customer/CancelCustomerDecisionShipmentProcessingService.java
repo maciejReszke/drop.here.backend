@@ -4,7 +4,6 @@ import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import com.drop.here.backend.drophere.shipment.service.ShipmentNotificationService;
-import com.drop.here.backend.drophere.shipment.service.ShipmentProductManagementService;
 import com.drop.here.backend.drophere.shipment.service.ShipmentValidationService;
 import com.drop.here.backend.drophere.shipment.service.processing_service.ShipmentProcessingService;
 import io.vavr.API;
@@ -20,7 +19,6 @@ import static io.vavr.API.Case;
 @RequiredArgsConstructor
 public class CancelCustomerDecisionShipmentProcessingService implements ShipmentProcessingService {
     private final ShipmentValidationService shipmentValidationService;
-    private final ShipmentProductManagementService shipmentProductManagementService;
     private final ShipmentNotificationService shipmentNotificationService;
 
     @Override
@@ -35,15 +33,8 @@ public class CancelCustomerDecisionShipmentProcessingService implements Shipment
     private ShipmentStatus handleByStatus(Shipment shipment) {
         return API.Match(shipment.getStatus()).of(
                 Case($(ShipmentStatus.ACCEPTED), () -> handleAcceptedShipment(shipment)),
-                Case($(ShipmentStatus.PLACED), () -> handlePlacedShipment(shipment)),
-                Case($(ShipmentStatus.COMPROMISED), () -> handleCompromisedShipment(shipment))
+                Case($(ShipmentStatus.PLACED), () -> handlePlacedShipment(shipment))
         );
-    }
-
-    private ShipmentStatus handleCompromisedShipment(Shipment shipment) {
-        shipment.setCancelledAt(LocalDateTime.now());
-        shipmentProductManagementService.increase(shipment);
-        return ShipmentStatus.CANCELLED;
     }
 
     private ShipmentStatus handlePlacedShipment(Shipment shipment) {
