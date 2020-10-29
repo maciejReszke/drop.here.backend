@@ -5,6 +5,12 @@ import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
+import com.drop.here.backend.drophere.notification.dto.NotificationCreationRequest;
+import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingType;
+import com.drop.here.backend.drophere.notification.enums.NotificationCategory;
+import com.drop.here.backend.drophere.notification.enums.NotificationReferencedSubjectType;
+import com.drop.here.backend.drophere.notification.enums.NotificationType;
+import com.drop.here.backend.drophere.notification.service.NotificationService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.SpotMembershipNotificationStatus;
 import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
@@ -37,6 +43,7 @@ public class SpotMembershipService {
     private final SpotManagementValidationService spotManagementValidationService;
     private final SpotMembershipSearchingService spotMembershipSearchingService;
     private final SpotSearchingService spotSearchingService;
+    private final NotificationService notificationService;
 
     public List<SpotMembership> findToBeNotified(Spot spot, SpotMembershipNotificationStatus notificationStatus) {
         return spotMembershipRepository.findToBeNotified(
@@ -90,14 +97,34 @@ public class SpotMembershipService {
         spotMembershipRepository.deleteBySpot(spot);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResourceOperationResponse updateMembership(Spot spot, Long membershipId, SpotCompanyMembershipManagementRequest companyMembershipManagementRequest) {
         spotManagementValidationService.validateUpdateMembership(companyMembershipManagementRequest);
         final SpotMembership spotMembership = getSpotMembership(spot, membershipId);
-        spotMembership.setMembershipStatus(SpotMembershipStatus.valueOf(companyMembershipManagementRequest.getMembershipStatus()));
+        final SpotMembershipStatus newMembershipStatus = SpotMembershipStatus.valueOf(companyMembershipManagementRequest.getMembershipStatus());
+        notifyPendingAccepted(spotMembership, newMembershipStatus, spot);
+        spotMembership.setMembershipStatus(newMembershipStatus);
         spotMembership.setLastUpdatedAt(LocalDateTime.now());
         spotMembershipRepository.save(spotMembership);
         log.info("Updating membership {} status to {}", spotMembership.getId(), companyMembershipManagementRequest.getMembershipStatus());
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, spotMembership.getId());
+    }
+
+    private void notifyPendingAccepted(SpotMembership spotMembership, SpotMembershipStatus newMembershipStatus, Spot spot) {
+        if (newMembershipStatus == SpotMembershipStatus.ACTIVE && spotMembership.getMembershipStatus() == SpotMembershipStatus.PENDING) {
+            notificationService.createNotifications(NotificationCreationRequest.builder()
+                    .broadcastingCompany(spot.getCompany())
+                    .broadcastingType(NotificationBroadcastingType.COMPANY)
+                    .message(String.format("Your join request to spot %s was accepted!", spot.getName()))
+                    .notificationCategory(NotificationCategory.SPOT_JOIN_REQUEST_ACCEPTED)
+                    .notificationType(NotificationType.PUSH_NOTIFICATION_ONLY)
+                    .recipientCustomers(List.of(spotMembership.getCustomer()))
+                    .referencedSubjectId(spot.getUid())
+                    .referencedSubjectType(NotificationReferencedSubjectType.SPOT)
+                    .title(String.format("%s joined!", spot.getName()))
+                    .build()
+            );
+        }
     }
 
     public boolean existsMembership(Company company, Long customerId) {
@@ -121,6 +148,7 @@ public class SpotMembershipService {
         return spotSearchingService.findSpots(authentication, xCoordinate, yCoordinate, radius, member, namePrefix, pageable);
     }
 
+    @Transactional(readOnly = true)
     public SpotDetailedCustomerResponse findSpot(String spotUid, AccountAuthentication authentication) {
         return spotSearchingService.findSpot(spotUid, authentication);
     }

@@ -44,4 +44,8 @@ public class UnpreparedRouteRequest {
 
     @ApiModelProperty(value = "Seller uid", example = "goobarich123")
     private String profileUid;
+
+    @NotNull
+    @ApiModelProperty(value = "Should shipments be automatically accepted", example = "true", required = true)
+    private boolean acceptShipmentsAutomatically;
 }

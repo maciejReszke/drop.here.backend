@@ -28,6 +28,7 @@ public class RouteDataGenerator {
                 .name("routeName" + i)
                 .products(List.of(productRequest(2 * i), productRequest(2 * i + 1)))
                 .profileUid("profileUid" + i)
+                .acceptShipmentsAutomatically(true)
                 .build();
     }
 

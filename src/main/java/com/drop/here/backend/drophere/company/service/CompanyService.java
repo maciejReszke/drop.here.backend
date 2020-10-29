@@ -15,11 +15,11 @@ import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
 import com.drop.here.backend.drophere.customer.service.CustomerPersistenceService;
-import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -134,5 +135,9 @@ public class CompanyService {
     public boolean isBlocked(String companyUid, Customer customer) {
         final Company company = getByUid(companyUid);
         return companyCustomerRelationshipService.isBlocked(company, customer);
+    }
+
+    public List<Company> findCompanies(List<Long> companiesIds) {
+        return companyRepository.findAllById(companiesIds);
     }
 }

@@ -5,6 +5,7 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.notification.service.NotificationService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.SpotMembershipNotificationStatus;
 import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
@@ -26,7 +27,9 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +44,9 @@ class SpotMembershipServiceTest {
 
     @Mock
     private SpotMappingService spotMappingService;
+
+    @Mock
+    private NotificationService notificationService;
 
     @Mock
     private SpotMembershipRepository spotMembershipRepository;
@@ -155,6 +161,28 @@ class SpotMembershipServiceTest {
         assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
 
         assertThat(spotMembership.getMembershipStatus()).isEqualTo(SpotMembershipStatus.BLOCKED);
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    void givenSpotAndExistingMembershipAndRequestFromPendingToActiveWhenUpdateMembershipThenUpdateAndNotify() {
+        //given
+        final Spot spot = Spot.builder().build();
+        final SpotMembership spotMembership = SpotMembership.builder().customer(Customer.builder().build()).membershipStatus(SpotMembershipStatus.PENDING).build();
+        final Long spotMembershipId = 5L;
+        final SpotCompanyMembershipManagementRequest request = SpotCompanyMembershipManagementRequest.builder()
+                .membershipStatus(SpotMembershipStatus.ACTIVE.name()).build();
+
+        when(spotMembershipRepository.findByIdAndSpot(spotMembershipId, spot)).thenReturn(Optional.of(spotMembership));
+        when(spotMembershipRepository.save(spotMembership)).thenReturn(spotMembership);
+        doNothing().when(notificationService).createNotifications(any());
+
+        //when
+        final ResourceOperationResponse result = spotMembershipService.updateMembership(spot, spotMembershipId, request);
+
+        //then
+        assertThat(result.getOperationStatus()).isEqualTo(ResourceOperationStatus.UPDATED);
+        assertThat(spotMembership.getMembershipStatus()).isEqualTo(SpotMembershipStatus.ACTIVE);
     }
 
     @Test

@@ -29,6 +29,22 @@ class UidGeneratorServiceTest {
     }
 
     @Test
+    void givenPolishDiacriticsWhenGenerateUidThenGenerate() {
+        //given
+        final String startingString = "żółćś";
+        final int startingStringPartLength = 5;
+        final int randomPartLength = 6;
+
+        //when
+        final String result = uidGeneratorService.generateUid(startingString, startingStringPartLength, randomPartLength);
+
+        //then
+        assertThat(result).hasSize(11)
+                .doesNotContain(" ")
+                .startsWith("zolcs");
+    }
+
+    @Test
     void givenStartingStringShorterThanStartingStringPartLengthWhenGenerateUidThenGenerate() {
         //given
         final String startingString = "mac k";

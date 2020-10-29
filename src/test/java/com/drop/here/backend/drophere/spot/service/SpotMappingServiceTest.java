@@ -68,7 +68,7 @@ class SpotMappingServiceTest {
     }
 
     @Test
-    void givenSpotAndSpotManagementRequestWhenUpdateThenUpdate() {
+    void givenChangedNameSpotAndSpotManagementRequestWhenUpdateThenUpdate() {
         //given
         final SpotManagementRequest spotManagementRequest = SpotDataGenerator.spotManagementRequest(1);
         spotManagementRequest.setName("nam");
@@ -85,6 +85,28 @@ class SpotMappingServiceTest {
         assertThat(spot.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(spot.getPassword()).isEqualTo(spotManagementRequest.getPassword());
         assertThat(spot.getUid()).isEqualTo("uid");
+        assertThat(spot.getXCoordinate()).isEqualTo(spotManagementRequest.getXCoordinate());
+        assertThat(spot.getYCoordinate()).isEqualTo(spotManagementRequest.getYCoordinate());
+        assertThat(spot.getCompany()).isNull();
+    }
+
+    @Test
+    void givenNotChangedNameSpotAndSpotManagementRequestWhenUpdateThenUpdate() {
+        //given
+        final SpotManagementRequest spotManagementRequest = SpotDataGenerator.spotManagementRequest(1);
+        spotManagementRequest.setName("nam");
+        final Spot spot = Spot.builder().name("nam").build();
+        //when
+        spotMappingService.update(spot, spotManagementRequest);
+
+        //then
+        assertThat(spot.getName()).isEqualTo(spotManagementRequest.getName());
+        assertThat(spot.getDescription()).isEqualTo(spotManagementRequest.getDescription());
+        assertThat(spot.getEstimatedRadiusMeters()).isEqualTo(spotManagementRequest.getEstimatedRadiusMeters());
+        assertThat(spot.getCreatedAt()).isNull();
+        assertThat(spot.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
+        assertThat(spot.getPassword()).isEqualTo(spotManagementRequest.getPassword());
+        assertThat(spot.getUid()).isNull();
         assertThat(spot.getXCoordinate()).isEqualTo(spotManagementRequest.getXCoordinate());
         assertThat(spot.getYCoordinate()).isEqualTo(spotManagementRequest.getYCoordinate());
         assertThat(spot.getCompany()).isNull();

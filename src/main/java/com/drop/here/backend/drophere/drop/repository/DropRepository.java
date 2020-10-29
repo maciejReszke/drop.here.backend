@@ -22,7 +22,12 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "d.route = :route")
     List<Drop> findByRouteWithSpot(Route route);
 
-    List<Drop> findBySpotAndStartTimeAfterAndStartTimeBefore(Spot spot, LocalDateTime from, LocalDateTime to);
+    @Query("select d from Drop d " +
+            "join fetch d.route r where " +
+            "d.spot =:spot and " +
+            "d.startTime > :from and " +
+            "d.endTime < :to")
+    List<Drop> findJoinedRouteBySpotAndStartTimeAfterAndEndTimeBefore(Spot spot, LocalDateTime from, LocalDateTime to);
 
     @Query("select d from Drop d " +
             "join d.spot s " +
@@ -32,7 +37,7 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "   c.visibilityStatus = 'VISIBLE'" +
             ") and " +
             "(" +
-            "   s.hidden = false or s in (select sm.spot from SpotMembership sm " +
+            "   (:mustBeActiveMember = false and s.hidden = false) or s in (select sm.spot from SpotMembership sm " +
             "                                   where sm.spot = s and sm.customer = :customer " +
             "                                   and sm.membershipStatus = 'ACTIVE')" +
             ") and " +
@@ -47,7 +52,7 @@ public interface DropRepository extends JpaRepository<Drop, Long> {
             "                      where dm.spot = s and dm.customer =:customer and " +
             "                       dm.membershipStatus = 'BLOCKED')" +
             ")")
-    Optional<Drop> findPrivilegedDrop(String dropUid, Customer customer);
+    Optional<Drop> findPrivilegedDrop(String dropUid, Customer customer, boolean mustBeActiveMember);
 
     @Query("select case when (count(d) > 0) then true else false end from Drop d " +
             "join d.spot s " +
