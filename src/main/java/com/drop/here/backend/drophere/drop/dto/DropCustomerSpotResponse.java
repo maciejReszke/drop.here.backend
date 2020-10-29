@@ -26,4 +26,7 @@ public class DropCustomerSpotResponse {
 
     @ApiModelProperty(value = "Drop status", example = "PREPARED")
     DropStatus status;
+
+    @ApiModelProperty(value = "Are shipments automatically accepted", example = "true")
+    boolean acceptShipmentsAutomatically;
 }

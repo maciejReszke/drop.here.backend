@@ -2,7 +2,6 @@ package com.drop.here.backend.drophere.spot.repository;
 
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -103,9 +102,4 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
             "                             ccr.relationshipStatus = 'BLOCKED')" +
             ")")
     List<Spot> findSpots(Customer customer);
-
-    @Query("select s from Spot s " +
-            "join fetch s.company where " +
-            "s.id = :id ")
-    Optional<Spot> findByIdWithCompany(Long id);
 }

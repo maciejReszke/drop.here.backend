@@ -3,6 +3,7 @@ package com.drop.here.backend.drophere.product.service;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
+import com.drop.here.backend.drophere.product.repository.ProductCustomizationRepository;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProductCustomizationService {
     private final ProductCustomizationWrapperRepository customizationWrapperRepository;
+    private final ProductCustomizationRepository productCustomizationRepository;
+
+    public List<ProductCustomization> findCustomizationsWithWrapper(List<Long> customizationsIds) {
+        return productCustomizationRepository.findCustomizationsWithWrapper(customizationsIds);
+    }
 
     public List<ProductCustomizationWrapper> findCustomizations(List<Long> productsIds) {
         return customizationWrapperRepository.findByProductsIdsWithCustomizations(productsIds);

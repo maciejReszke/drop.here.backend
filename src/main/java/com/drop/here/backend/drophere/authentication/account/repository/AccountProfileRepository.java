@@ -4,7 +4,6 @@ import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
 import com.drop.here.backend.drophere.authentication.account.enums.AccountProfileStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.drop.entity.Drop;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -34,10 +33,6 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
             "ap.status =:status and " +
             ":company = (select c from Company c where c.account = a)")
     Optional<AccountProfile> findByAccountCompanyAndProfileUidAndStatus(Company company, String profileUid, AccountProfileStatus status);
-
-
-    @Query("select d.route.profile from Drop d where d =:drop")
-    Optional<AccountProfile> findByDrop(Drop drop);
 
     boolean existsByAccountAndProfileUid(Account account, String profileUid);
 

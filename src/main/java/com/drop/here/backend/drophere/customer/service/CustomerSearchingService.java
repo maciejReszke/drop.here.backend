@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CustomerSearchingService {
@@ -15,5 +17,9 @@ public class CustomerSearchingService {
 
     public Page<Customer> findCustomers(String desiredCustomerStartingSubstring, Boolean blocked, Company company, Pageable pageable) {
         return customerRepository.findCustomers(desiredCustomerStartingSubstring, blocked, company, pageable);
+    }
+
+    public List<Customer> findCustomers(List<Long> ids) {
+        return customerRepository.findAllById(ids);
     }
 }

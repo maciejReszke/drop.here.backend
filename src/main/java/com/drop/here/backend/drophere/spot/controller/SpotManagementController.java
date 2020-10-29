@@ -42,6 +42,21 @@ import java.util.List;
 public class SpotManagementController {
     private final SpotManagementService spotManagementService;
 
+    @ApiOperation(value = "Companies spot", authorizations = @Authorization(value = "AUTHORIZATION"))
+    @GetMapping("/{spotId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Spot"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
+    public SpotCompanyResponse findSpots(@ApiIgnore AccountAuthentication authentication,
+                                               @ApiIgnore @PathVariable String companyUid,
+                                               @ApiIgnore @PathVariable Long spotId) {
+        return spotManagementService.findCompanySpot(authentication.getCompany(), spotId);
+    }
+
     @ApiOperation(value = "Listing companies spots", authorizations = @Authorization(value = "AUTHORIZATION"))
     @GetMapping
     @ResponseStatus(HttpStatus.OK)

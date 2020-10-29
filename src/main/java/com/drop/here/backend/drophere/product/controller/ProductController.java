@@ -47,6 +47,22 @@ public class ProductController {
 
     private static final String IMAGE_PART_NAME = "image";
 
+    @GetMapping("/{productId}")
+    @ApiOperation(value = "Find product", authorizations = @Authorization(value = "AUTHORIZATION"))
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Product", response = ProductResponse.class, responseContainer = "Page"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid) or " +
+            "@authenticationPrivilegesService.isCompanyVisibleForCustomer(authentication, #companyUid)")
+    public ProductResponse findProduct(@ApiIgnore @PathVariable String companyUid,
+                                       @ApiIgnore AccountAuthentication authentication,
+                                       @ApiIgnore @PathVariable Long productId) {
+        return productService.findProduct(companyUid, productId, authentication);
+    }
+
     @GetMapping
     @ApiOperation(value = "Fetching products", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)

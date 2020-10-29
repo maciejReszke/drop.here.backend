@@ -223,4 +223,40 @@ class DropValidationServiceTest {
         //then
         assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
     }
+
+    @Test
+    void givenCancelledDropWhenValidateDropForShipmentThenThrowException() {
+        //given
+        final Drop drop = Drop.builder().status(DropStatus.CANCELLED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropValidationService.validateDropForShipment(drop));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
+
+    @Test
+    void givenFinishedDropWhenValidateDropForShipmentThenThrowException() {
+        //given
+        final Drop drop = Drop.builder().status(DropStatus.FINISHED).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropValidationService.validateDropForShipment(drop));
+
+        //then
+        assertThat(throwable).isInstanceOf(RestIllegalRequestValueException.class);
+    }
+
+    @Test
+    void givenLiveDropWhenValidateDropForShipmentThenDoNothing() {
+        //given
+        final Drop drop = Drop.builder().status(DropStatus.LIVE).build();
+
+        //when
+        final Throwable throwable = catchThrowable(() -> dropValidationService.validateDropForShipment(drop));
+
+        //then
+        assertThat(throwable).isNull();
+    }
 }

@@ -113,7 +113,7 @@ class CompanyMappingServiceTest {
     }
 
     @Test
-    void givenCompanyRequestWhenUpdateCompanyThenMap() {
+    void givenChangedNameCompanyRequestWhenUpdateCompanyThenMap() {
         //given
         final CompanyManagementRequest companyManagementRequest = CompanyDataGenerator.managementRequest(1);
         companyManagementRequest.setName("Glodny maciek");
@@ -129,6 +129,29 @@ class CompanyMappingServiceTest {
 
         //then
         assertThat(company.getUid()).isEqualTo("uid");
+        assertThat(company.getCreatedAt()).isNull();
+        assertThat(company.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
+        assertThat(company.getVisibilityStatus()).isEqualTo(CompanyVisibilityStatus.VISIBLE);
+        assertThat(company.getName()).isEqualTo(companyManagementRequest.getName());
+        assertThat(company.getAccount()).isNull();
+        assertThat(company.getCountry()).isEqualTo(country);
+    }
+
+    @Test
+    void givenNotChangedNameCompanyRequestWhenUpdateCompanyThenMap() {
+        //given
+        final CompanyManagementRequest companyManagementRequest = CompanyDataGenerator.managementRequest(1);
+        companyManagementRequest.setName("Glodny maciek");
+        final Country country = CountryDataGenerator.poland();
+        final Company company = Company.builder().name("Glodny maciek").build();
+
+        when(countryService.findActive(companyManagementRequest.getCountry()))
+                .thenReturn(country);
+        //when
+        companyMappingService.updateCompany(companyManagementRequest, company);
+
+        //then
+        assertThat(company.getUid()).isNull();
         assertThat(company.getCreatedAt()).isNull();
         assertThat(company.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(company.getVisibilityStatus()).isEqualTo(CompanyVisibilityStatus.VISIBLE);

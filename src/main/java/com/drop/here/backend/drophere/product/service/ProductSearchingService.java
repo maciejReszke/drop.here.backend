@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,12 @@ public class ProductSearchingService {
     private final ProductRepository productRepository;
     private final ProductCustomizationService productCustomizationService;
     private final DropSearchingService dropSearchingService;
+
+    public ProductResponse mapProduct(Product product, AccountAuthentication authentication) {
+        return toResponse(new PageImpl<>(List.of(product)), authentication).stream()
+                .findFirst()
+                .orElseThrow();
+    }
 
     public Page<ProductResponse> findAll(Pageable pageable,
                                          String companyUid,
@@ -105,8 +112,10 @@ public class ProductSearchingService {
 
     private ProductCustomizationWrapperResponse toCustomizationWrapper(ProductCustomizationWrapper wrapper) {
         return ProductCustomizationWrapperResponse.builder()
+                .id(wrapper.getId())
                 .type(wrapper.getType())
                 .heading(wrapper.getHeading())
+                .required(wrapper.isRequired())
                 .customizations(toCustomizations(wrapper.getCustomizations()))
                 .build();
     }
@@ -120,6 +129,7 @@ public class ProductSearchingService {
 
     private ProductCustomizationResponse toCustomization(ProductCustomization customization) {
         return ProductCustomizationResponse.builder()
+                .id(customization.getId())
                 .price(customization.getPrice())
                 .value(customization.getValue())
                 .build();
@@ -132,4 +142,6 @@ public class ProductSearchingService {
                 .map(product -> toProductResponse(product, findCustomizationWrappersForProduct(product, customizations), List.of()))
                 .collect(Collectors.toList());
     }
+
+
 }

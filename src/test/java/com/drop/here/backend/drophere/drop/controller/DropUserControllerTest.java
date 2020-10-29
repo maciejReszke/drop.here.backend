@@ -169,6 +169,7 @@ class DropUserControllerTest extends IntegrationBaseClass {
         final AccountProfile profile = accountProfileRepository.save(AccountProfileDataGenerator.accountProfile(1, account));
         final Route route = routeRepository.findById(this.route.getId()).orElseThrow();
         route.setProfile(profile);
+        route.setWithSeller(true);
         routeRepository.save(route);
 
         final String url = String.format("/drops/%s", drop.getUid());

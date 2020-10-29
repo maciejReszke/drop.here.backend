@@ -76,7 +76,11 @@ public class Route {
     @JoinColumn(name = "profile_id")
     private AccountProfile profile;
 
+    @NotNull
     private boolean withSeller;
+
+    @NotNull
+    private boolean acceptShipmentsAutomatically;
 
     @Version
     private Long version;

@@ -48,4 +48,9 @@ public class RoutePersistenceService {
     public List<Route> finishToBeFinished() {
         return routeRepository.finishToBeFinished();
     }
+
+    public Route findLocked(Long routeId) {
+        return routeRepository.findByIdWithLock(routeId)
+                .orElseThrow();
+    }
 }
