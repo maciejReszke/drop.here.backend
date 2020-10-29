@@ -3,12 +3,13 @@ package com.drop.here.backend.drophere.spot.service;
 import com.drop.here.backend.drophere.authentication.account.entity.Account;
 import com.drop.here.backend.drophere.common.service.UidGeneratorService;
 import com.drop.here.backend.drophere.customer.entity.Customer;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
+import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.entity.SpotMembership;
 import com.drop.here.backend.drophere.spot.enums.SpotMembershipStatus;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import com.drop.here.backend.drophere.test_data.SpotDataGenerator;
@@ -48,7 +49,7 @@ class SpotMappingServiceTest {
         final AccountAuthentication accountAuthentication = AuthenticationDataGenerator.accountAuthentication(account);
         spotManagementRequest.setName("nam");
 
-        when(uidGeneratorService.generateUid("nam", 4,6)).thenReturn("uid");
+        when(uidGeneratorService.generateUid("nam", 4, 6)).thenReturn("uid");
 
         //when
         final Spot spot = spotMappingService.toEntity(spotManagementRequest, accountAuthentication);
@@ -67,12 +68,12 @@ class SpotMappingServiceTest {
     }
 
     @Test
-    void givenSpotAndSpotManagementRequestWhenUpdateThenUpdate() {
+    void givenChangedNameSpotAndSpotManagementRequestWhenUpdateThenUpdate() {
         //given
         final SpotManagementRequest spotManagementRequest = SpotDataGenerator.spotManagementRequest(1);
         spotManagementRequest.setName("nam");
         final Spot spot = Spot.builder().build();
-        when(uidGeneratorService.generateUid("nam", 4,6)).thenReturn("uid");
+        when(uidGeneratorService.generateUid("nam", 4, 6)).thenReturn("uid");
         //when
         spotMappingService.update(spot, spotManagementRequest);
 
@@ -90,6 +91,28 @@ class SpotMappingServiceTest {
     }
 
     @Test
+    void givenNotChangedNameSpotAndSpotManagementRequestWhenUpdateThenUpdate() {
+        //given
+        final SpotManagementRequest spotManagementRequest = SpotDataGenerator.spotManagementRequest(1);
+        spotManagementRequest.setName("nam");
+        final Spot spot = Spot.builder().name("nam").build();
+        //when
+        spotMappingService.update(spot, spotManagementRequest);
+
+        //then
+        assertThat(spot.getName()).isEqualTo(spotManagementRequest.getName());
+        assertThat(spot.getDescription()).isEqualTo(spotManagementRequest.getDescription());
+        assertThat(spot.getEstimatedRadiusMeters()).isEqualTo(spotManagementRequest.getEstimatedRadiusMeters());
+        assertThat(spot.getCreatedAt()).isNull();
+        assertThat(spot.getLastUpdatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
+        assertThat(spot.getPassword()).isEqualTo(spotManagementRequest.getPassword());
+        assertThat(spot.getUid()).isNull();
+        assertThat(spot.getXCoordinate()).isEqualTo(spotManagementRequest.getXCoordinate());
+        assertThat(spot.getYCoordinate()).isEqualTo(spotManagementRequest.getYCoordinate());
+        assertThat(spot.getCompany()).isNull();
+    }
+
+    @Test
     void givenSpotWithoutAcceptWhenCreateMembershipThenCreate() {
         //given
         final Spot spot = SpotDataGenerator.spot(1, null)
@@ -101,7 +124,13 @@ class SpotMappingServiceTest {
                 .builder()
                 .customer(customer)
                 .build();
-        final SpotJoinRequest spotJoinRequest = SpotJoinRequest.builder().receiveNotification(true).build();
+        final SpotJoinRequest spotJoinRequest = SpotJoinRequest.builder()
+                .receiveCancelledNotifications(false)
+                .receiveFinishedNotifications(true)
+                .receiveDelayedNotifications(false)
+                .receivePreparedNotifications(true)
+                .receiveLiveNotifications(false)
+                .build();
 
         //when
         final SpotMembership membership = spotMappingService.createMembership(spot, spotJoinRequest, accountAuthentication);
@@ -110,7 +139,11 @@ class SpotMappingServiceTest {
         assertThat(membership.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(membership.getCustomer()).isEqualTo(customer);
         assertThat(membership.getSpot()).isEqualTo(spot);
-        assertThat(membership.isReceiveNotification()).isTrue();
+        assertThat(membership.isReceiveCancelledNotifications()).isFalse();
+        assertThat(membership.isReceiveDelayedNotifications()).isFalse();
+        assertThat(membership.isReceiveFinishedNotifications()).isTrue();
+        assertThat(membership.isReceivePreparedNotifications()).isTrue();
+        assertThat(membership.isReceiveLiveNotifications()).isFalse();
         assertThat(membership.getMembershipStatus()).isEqualTo(SpotMembershipStatus.ACTIVE);
     }
 
@@ -126,7 +159,13 @@ class SpotMappingServiceTest {
                 .builder()
                 .customer(customer)
                 .build();
-        final SpotJoinRequest spotJoinRequest = SpotJoinRequest.builder().receiveNotification(false).build();
+        final SpotJoinRequest spotJoinRequest = SpotJoinRequest.builder()
+                .receiveCancelledNotifications(true)
+                .receiveFinishedNotifications(false)
+                .receiveDelayedNotifications(true)
+                .receivePreparedNotifications(false)
+                .receiveLiveNotifications(true)
+                .build();
 
         //when
         final SpotMembership membership = spotMappingService.createMembership(spot, spotJoinRequest, accountAuthentication);
@@ -135,7 +174,39 @@ class SpotMappingServiceTest {
         assertThat(membership.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
         assertThat(membership.getCustomer()).isEqualTo(customer);
         assertThat(membership.getSpot()).isEqualTo(spot);
-        assertThat(membership.isReceiveNotification()).isFalse();
+        assertThat(membership.isReceiveCancelledNotifications()).isTrue();
+        assertThat(membership.isReceiveDelayedNotifications()).isTrue();
+        assertThat(membership.isReceiveFinishedNotifications()).isFalse();
+        assertThat(membership.isReceivePreparedNotifications()).isFalse();
+        assertThat(membership.isReceiveLiveNotifications()).isTrue();
         assertThat(membership.getMembershipStatus()).isEqualTo(SpotMembershipStatus.PENDING);
+    }
+
+    @Test
+    void givenSpotMembershipWhenUpdateSpotMembershipThenUpdate() {
+        //given
+        final SpotMembershipManagementRequest spotMembershipManagementRequest = SpotMembershipManagementRequest.builder()
+                .receiveCancelledNotifications(true)
+                .receiveFinishedNotifications(false)
+                .receiveDelayedNotifications(true)
+                .receivePreparedNotifications(false)
+                .receiveLiveNotifications(true)
+                .build();
+        final SpotMembership membership = SpotMembership.builder().build();
+
+        //when
+        spotMappingService.updateSpotMembership(membership, spotMembershipManagementRequest);
+
+        //then
+        assertThat(membership.getCreatedAt()).isNull();
+        assertThat(membership.getCustomer()).isNull();
+        assertThat(membership.getSpot()).isNull();
+        assertThat(membership.isReceiveCancelledNotifications()).isTrue();
+        assertThat(membership.isReceiveDelayedNotifications()).isTrue();
+        assertThat(membership.isReceiveFinishedNotifications()).isFalse();
+        assertThat(membership.isReceivePreparedNotifications()).isFalse();
+        assertThat(membership.isReceiveLiveNotifications()).isTrue();
+        assertThat(membership.getMembershipStatus()).isNull();
+
     }
 }

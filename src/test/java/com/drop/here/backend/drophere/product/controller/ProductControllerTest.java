@@ -26,6 +26,7 @@ import com.drop.here.backend.drophere.test_data.CompanyDataGenerator;
 import com.drop.here.backend.drophere.test_data.CountryDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductDataGenerator;
 import com.drop.here.backend.drophere.test_data.ProductUnitDataGenerator;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -104,6 +105,27 @@ class ProductControllerTest extends IntegrationBaseClass {
         productUnitRepository.deleteAll();
         countryRepository.deleteAll();
         imageRepository.deleteAll();
+    }
+
+    @Test
+    void givenOwnCompanyOperationWhenFindProductThenFind() throws Exception {
+        //given
+        final Product product = ProductDataGenerator.product(1, productUnit, company);
+        product.setName("Hot dog");
+        product.setCategory("food");
+        productRepository.save(product);
+        company.setVisibilityStatus(CompanyVisibilityStatus.VISIBLE);
+        companyRepository.save(company);
+
+        final String url = String.format("/companies/%s/products/%s", company.getUid(), product.getId());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.equalTo(product.getId().intValue())));
     }
 
     @Test
@@ -704,7 +726,7 @@ class ProductControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidRequestNotExistingImageWhenUpdateImageThenUpdate() throws Exception {
+    void givenValidRequestCompanyOwnerNotExistingImageWhenUpdateImageThenUpdate() throws Exception {
         //given
         final Product product = ProductDataGenerator.product(1, productUnit, company);
         product.setCustomizationWrappers(List.of(ProductDataGenerator.productCustomizationWrapper(1, product)));

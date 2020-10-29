@@ -54,4 +54,7 @@ public class ProductCustomizationWrapper {
 
     @Version
     private Long version;
+
+    @NotNull
+    private boolean required;
 }

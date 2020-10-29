@@ -10,9 +10,6 @@ import lombok.Value;
 @Value
 public class DropRouteResponse {
 
-    @ApiModelProperty(value = "Drop id", example = "5")
-    Long id;
-
     @ApiModelProperty(value = "Drop uid", example = "dropuid123")
     String uid;
 
@@ -22,9 +19,6 @@ public class DropRouteResponse {
     @ApiModelProperty(value = "Drop description", example = "Description of drop")
     String description;
 
-    @ApiModelProperty(value = "Spot response")
-    SpotCompanyResponse spotCompanyResponse;
-
     @ApiModelProperty(value = "Drop start time", example = "2020-04-06T11:03:32")
     String startTime;
 
@@ -33,4 +27,7 @@ public class DropRouteResponse {
 
     @ApiModelProperty(value = "Drop status", example = "PREPARED")
     DropStatus status;
+
+    @ApiModelProperty(value = "Spot response")
+    SpotCompanyResponse spot;
 }

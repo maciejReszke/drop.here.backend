@@ -33,4 +33,8 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
             "ap.status =:status and " +
             ":company = (select c from Company c where c.account = a)")
     Optional<AccountProfile> findByAccountCompanyAndProfileUidAndStatus(Company company, String profileUid, AccountProfileStatus status);
+
+    boolean existsByAccountAndProfileUid(Account account, String profileUid);
+
+    Long countByAccount(Account account);
 }

@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.common.service.UidGeneratorService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.spot.dto.request.SpotJoinRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
+import com.drop.here.backend.drophere.spot.dto.request.SpotMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.entity.SpotMembership;
@@ -36,7 +37,8 @@ public class SpotMappingService {
     }
 
     public void update(Spot spot, SpotManagementRequest spotManagementRequest) {
-        spot.setUid(generateUid(spotManagementRequest.getName()));
+        boolean nameChanged = !spotManagementRequest.getName().equals(spot.getName());
+        spot.setUid(nameChanged ? generateUid(spotManagementRequest.getName()) : spot.getUid());
         spot.setYCoordinate(spotManagementRequest.getYCoordinate());
         spot.setXCoordinate(spotManagementRequest.getXCoordinate());
         spot.setEstimatedRadiusMeters(spotManagementRequest.getEstimatedRadiusMeters());
@@ -76,9 +78,21 @@ public class SpotMappingService {
                 .createdAt(LocalDateTime.now())
                 .lastUpdatedAt(LocalDateTime.now())
                 .customer(authentication.getCustomer())
-                .receiveNotification(spotJoinRequest.isReceiveNotification())
                 .spot(spot)
                 .membershipStatus(spot.isRequiresAccept() ? SpotMembershipStatus.PENDING : SpotMembershipStatus.ACTIVE)
+                .receiveCancelledNotifications(spotJoinRequest.isReceiveCancelledNotifications())
+                .receiveDelayedNotifications(spotJoinRequest.isReceiveDelayedNotifications())
+                .receiveFinishedNotifications(spotJoinRequest.isReceiveFinishedNotifications())
+                .receiveLiveNotifications(spotJoinRequest.isReceiveLiveNotifications())
+                .receivePreparedNotifications(spotJoinRequest.isReceivePreparedNotifications())
                 .build();
+    }
+
+    public void updateSpotMembership(SpotMembership spotMembership, SpotMembershipManagementRequest spotMembershipManagementRequest) {
+        spotMembership.setReceiveFinishedNotifications(spotMembershipManagementRequest.isReceiveFinishedNotifications());
+        spotMembership.setReceiveCancelledNotifications(spotMembershipManagementRequest.isReceiveCancelledNotifications());
+        spotMembership.setReceivePreparedNotifications(spotMembershipManagementRequest.isReceivePreparedNotifications());
+        spotMembership.setReceiveLiveNotifications(spotMembershipManagementRequest.isReceiveLiveNotifications());
+        spotMembership.setReceiveDelayedNotifications(spotMembershipManagementRequest.isReceiveDelayedNotifications());
     }
 }

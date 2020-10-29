@@ -21,6 +21,9 @@ public class RouteResponse {
     @ApiModelProperty(value = "Route description", example = "Advanced description of route")
     String description;
 
+    @ApiModelProperty(value = "Are shipments automatically accepted", example = "true")
+    boolean acceptShipmentsAutomatically;
+
     @ApiModelProperty(value = "Route status", example = "PREPARED")
     RouteStatus status;
 
@@ -40,7 +43,7 @@ public class RouteResponse {
     String profileLastName;
 
     @ApiModelProperty(value = "Route products")
-    List<RouteProductResponse> products;
+    List<RouteProductRouteResponse> products;
 
     @ApiModelProperty(value = "Route drops")
     List<DropRouteResponse> drops;

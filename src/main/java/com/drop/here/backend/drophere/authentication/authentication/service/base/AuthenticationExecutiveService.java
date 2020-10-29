@@ -6,6 +6,7 @@ import com.drop.here.backend.drophere.authentication.account.entity.AccountProfi
 import com.drop.here.backend.drophere.authentication.authentication.dto.response.LoginResponse;
 import com.drop.here.backend.drophere.authentication.token.JwtService;
 import com.drop.here.backend.drophere.authentication.token.TokenResponse;
+import com.drop.here.backend.drophere.route.service.RouteService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AuthenticationExecutiveService {
     private final JwtService jwtService;
+    private final RouteService routeService;
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
 
     public LoginResponse successLogin(Account account) {
@@ -62,6 +64,7 @@ public class AuthenticationExecutiveService {
                 .profileFirstName(profile.getFirstName())
                 .profileLastName(profile.getLastName())
                 .profileType(profile.getProfileType())
+                .streamingPosition(routeService.shouldBeStreamingPosition(profile))
                 .build();
     }
 

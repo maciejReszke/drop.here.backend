@@ -39,8 +39,8 @@ import java.util.List;
 @Builder(toBuilder = true)
 @Table(indexes = @Index(columnList = "mail"),
         uniqueConstraints = @UniqueConstraint(columnNames = "mail"))
-@ToString(exclude = {"privileges", "company"})
-@EqualsAndHashCode(exclude = {"privileges", "company"})
+@ToString(exclude = {"privileges", "company", "customer"})
+@EqualsAndHashCode(exclude = {"privileges", "company","customer"})
 public class Account {
 
     @Id

@@ -116,7 +116,7 @@ class CustomerManagementControllerTest extends IntegrationBaseClass {
         //given
         final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE))
                 .findFirst().orElseThrow();
-        privilege.setName(PrivilegeService.COMPANY_BASIC_MANAGEMENT_PRIVILEGE);
+        privilege.setName(PrivilegeService.LOGGED_ON_ANY_PROFILE_COMPANY);
         privilegeRepository.save(privilege);
 
         final String url = "/management/customers";

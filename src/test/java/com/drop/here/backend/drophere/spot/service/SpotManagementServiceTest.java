@@ -5,13 +5,13 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.spot.dto.SpotCompanyMembershipManagementRequest;
+import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyMembershipResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 import com.drop.here.backend.drophere.spot.repository.SpotRepository;
-import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
 import com.drop.here.backend.drophere.test_data.AccountDataGenerator;
 import com.drop.here.backend.drophere.test_data.AuthenticationDataGenerator;
 import com.drop.here.backend.drophere.test_data.SpotDataGenerator;
@@ -42,6 +42,9 @@ class SpotManagementServiceTest {
 
     @Mock
     private SpotRepository spotRepository;
+
+    @Mock
+    private SpotPersistenceService spotPersistenceService;
 
     @Mock
     private SpotManagementValidationService spotManagementValidationService;
@@ -235,5 +238,23 @@ class SpotManagementServiceTest {
 
         //then
         assertThat(throwable).isInstanceOf(RestEntityNotFoundException.class);
+    }
+
+    @Test
+    void givenExistingSpotWhenFindCompanySpotThenFind() {
+        //given
+        final Company company = Company.builder().build();
+        final Long id = 5L;
+
+        final Spot spot = Spot.builder().build();
+        final SpotCompanyResponse response = SpotCompanyResponse.builder().build();
+        when(spotPersistenceService.findSpot(id, company)).thenReturn(spot);
+        when(spotMappingService.toSpotCompanyResponse(spot)).thenReturn(response);
+
+        //when
+        final SpotCompanyResponse result = spotManagementService.findCompanySpot(company, id);
+
+        //then
+        assertThat(result).isEqualTo(response);
     }
 }

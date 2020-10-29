@@ -72,8 +72,9 @@ class PrivilegeServiceTest {
         privilegeService.addNewAccountProfilePrivileges(accountProfile);
 
         //then
-        assertThat(accountProfile.getPrivileges()).hasSize(1);
-        assertThat(accountProfile.getPrivileges().get(0).getName()).isEqualTo("COMPANY_FULL_MANAGEMENT");
+        assertThat(accountProfile.getPrivileges()).hasSize(2);
+        assertThat(accountProfile.getPrivileges().stream().filter(t -> t.getName().equalsIgnoreCase("COMPANY_FULL_MANAGEMENT"))).isNotEmpty();
+        assertThat(accountProfile.getPrivileges().stream().filter(t -> t.getName().equalsIgnoreCase("COMPANY_LOGGED_ON_ANY_PROFILE"))).isNotEmpty();
     }
 
     @Test
@@ -90,7 +91,7 @@ class PrivilegeServiceTest {
 
         //then
         assertThat(accountProfile.getPrivileges()).hasSize(1);
-        assertThat(accountProfile.getPrivileges().get(0).getName()).isEqualTo("COMPANY_BASIC_MANAGEMENT");
+        assertThat(accountProfile.getPrivileges().get(0).getName()).isEqualTo("COMPANY_LOGGED_ON_ANY_PROFILE");
     }
 
     @Test

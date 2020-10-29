@@ -14,12 +14,12 @@ import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.company.enums.CompanyVisibilityStatus;
 import com.drop.here.backend.drophere.company.repository.CompanyRepository;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.customer.service.CustomerStoreService;
-import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
+import com.drop.here.backend.drophere.customer.service.CustomerPersistenceService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
 import com.drop.here.backend.drophere.image.ImageType;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
+import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -42,7 +43,7 @@ public class CompanyService {
     private final ImageService imageService;
     private final SpotMembershipService spotMembershipService;
     private final CompanyCustomerRelationshipService companyCustomerRelationshipService;
-    private final CustomerStoreService customerStoreService;
+    private final CustomerPersistenceService customerPersistenceService;
     private final CompanyCustomerSearchingService companyCustomerSearchingService;
 
     public boolean isVisible(String companyUid) {
@@ -66,7 +67,7 @@ public class CompanyService {
     public CompanyManagementResponse findOwnCompany(AccountAuthentication authentication) {
         final Company company = companyRepository.findByAccount(authentication.getPrincipal())
                 .orElse(null);
-        return companyMappingService.toManagementResponse(company);
+        return companyMappingService.toManagementResponse(company, authentication.getPrincipal());
     }
 
     public ResourceOperationResponse updateCompany(CompanyManagementRequest companyManagementRequest, AccountAuthentication authentication) {
@@ -125,7 +126,7 @@ public class CompanyService {
     }
 
     public ResourceOperationResponse updateCustomerRelationship(Long customerId, CompanyCustomerRelationshipManagementRequest companyCustomerManagementRequest, AccountAuthentication accountAuthentication) {
-        final Customer customer = customerStoreService.findById(customerId);
+        final Customer customer = customerPersistenceService.findById(customerId);
         companyCustomerRelationshipService.handleCustomerBlocking(companyCustomerManagementRequest.isBlock(), customer, accountAuthentication.getCompany());
         log.info("Updated customer {} with company relation {}", customer, accountAuthentication.getCompany().getUid());
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customerId);
@@ -134,5 +135,9 @@ public class CompanyService {
     public boolean isBlocked(String companyUid, Customer customer) {
         final Company company = getByUid(companyUid);
         return companyCustomerRelationshipService.isBlocked(company, customer);
+    }
+
+    public List<Company> findCompanies(List<Long> companiesIds) {
+        return companyRepository.findAllById(companiesIds);
     }
 }

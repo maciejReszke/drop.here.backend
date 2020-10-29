@@ -57,7 +57,7 @@ class ProductMappingServiceTest {
         final Product result = productMappingService.toEntity(productManagementRequest, accountAuthentication);
 
         //then
-        assertThat(result.getCategory()).isEqualTo(productManagementRequest.getCategory());
+        assertThat(result.getCategory()).isEqualTo(productManagementRequest.getCategory().toUpperCase());
         assertThat(result.getName()).isEqualTo(productManagementRequest.getName());
         assertThat(result.getPrice()).isEqualTo(productManagementRequest.getPrice().setScale(2, RoundingMode.DOWN));
         assertThat(result.getCreatedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
@@ -87,7 +87,7 @@ class ProductMappingServiceTest {
         productMappingService.update(product, productManagementRequest);
 
         //then
-        assertThat(product.getCategory()).isEqualTo(productManagementRequest.getCategory());
+        assertThat(product.getCategory()).isEqualTo(productManagementRequest.getCategory().toUpperCase());
         assertThat(product.getName()).isEqualTo(productManagementRequest.getName());
         assertThat(product.getPrice()).isEqualTo(productManagementRequest.getPrice().setScale(2, RoundingMode.DOWN));
         assertThat(product.getCreatedAt()).isNull();

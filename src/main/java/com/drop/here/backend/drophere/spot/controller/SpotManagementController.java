@@ -3,17 +3,17 @@ package com.drop.here.backend.drophere.spot.controller;
 import com.drop.here.backend.drophere.common.exceptions.ExceptionMessage;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.spot.dto.SpotCompanyMembershipManagementRequest;
+import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyMembershipResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
 import com.drop.here.backend.drophere.spot.service.SpotManagementService;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,9 +42,23 @@ import java.util.List;
 public class SpotManagementController {
     private final SpotManagementService spotManagementService;
 
-    @ApiOperation("Listing companies spots")
+    @ApiOperation(value = "Companies spot", authorizations = @Authorization(value = "AUTHORIZATION"))
+    @GetMapping("/{spotId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Spot"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
+    public SpotCompanyResponse findSpots(@ApiIgnore AccountAuthentication authentication,
+                                               @ApiIgnore @PathVariable String companyUid,
+                                               @ApiIgnore @PathVariable Long spotId) {
+        return spotManagementService.findCompanySpot(authentication.getCompany(), spotId);
+    }
+
+    @ApiOperation(value = "Listing companies spots", authorizations = @Authorization(value = "AUTHORIZATION"))
     @GetMapping
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "List of spots"),
@@ -58,9 +72,8 @@ public class SpotManagementController {
         return spotManagementService.findCompanySpots(companyUid, name);
     }
 
-    @ApiOperation("Creating spot")
+    @ApiOperation(value = "Creating spot", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PostMapping
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.CREATED)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Spot created", response = ResourceOperationResponse.class),
@@ -74,9 +87,8 @@ public class SpotManagementController {
         return spotManagementService.createSpot(spotManagementRequest, companyUid, authentication);
     }
 
-    @ApiOperation("Updating spot")
+    @ApiOperation(value = "Updating spot", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PutMapping("/{spotId}")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Spot updated", response = ResourceOperationResponse.class),
@@ -91,9 +103,8 @@ public class SpotManagementController {
         return spotManagementService.updateSpot(spotManagementRequest, spotId, companyUid);
     }
 
-    @ApiOperation("Deleting spot")
+    @ApiOperation(value = "Deleting spot", authorizations = @Authorization(value = "AUTHORIZATION"))
     @DeleteMapping("/{spotId}")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Spot deleted", response = ResourceOperationResponse.class),
@@ -107,9 +118,8 @@ public class SpotManagementController {
         return spotManagementService.deleteSpot(spotId, companyUid);
     }
 
-    @ApiOperation("Listing members of given spot")
+    @ApiOperation(value = "Listing members of given spot", authorizations = @Authorization(value = "AUTHORIZATION"))
     @GetMapping("/{spotId}/memberships")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Spot memberships listed"),
@@ -126,9 +136,8 @@ public class SpotManagementController {
         return spotManagementService.findMemberships(spotId, companyUid, desiredCustomerStartingSubstring, membershipStatus, pageable);
     }
 
-    @ApiOperation("Update membership")
+    @ApiOperation(value = "Update membership", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PutMapping("/{spotId}/memberships/{membershipId}")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Membership updated"),

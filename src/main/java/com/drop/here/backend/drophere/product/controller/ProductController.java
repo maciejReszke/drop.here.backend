@@ -7,12 +7,12 @@ import com.drop.here.backend.drophere.product.dto.request.ProductManagementReque
 import com.drop.here.backend.drophere.product.dto.response.ProductResponse;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.swagger.ApiAuthorizationToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,15 +47,30 @@ public class ProductController {
 
     private static final String IMAGE_PART_NAME = "image";
 
+    @GetMapping("/{productId}")
+    @ApiOperation(value = "Find product", authorizations = @Authorization(value = "AUTHORIZATION"))
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Product", response = ProductResponse.class, responseContainer = "Page"),
+            @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
+            @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
+    })
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid) or " +
+            "@authenticationPrivilegesService.isCompanyVisibleForCustomer(authentication, #companyUid)")
+    public ProductResponse findProduct(@ApiIgnore @PathVariable String companyUid,
+                                       @ApiIgnore AccountAuthentication authentication,
+                                       @ApiIgnore @PathVariable Long productId) {
+        return productService.findProduct(companyUid, productId, authentication);
+    }
+
     @GetMapping
-    @ApiOperation("Fetching products")
+    @ApiOperation(value = "Fetching products", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "List of products, response is list of dto", response = ProductResponse.class, responseContainer = "Page"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    @ApiAuthorizationToken
     @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid) or " +
             "@authenticationPrivilegesService.isCompanyVisibleForCustomer(authentication, #companyUid)")
     public Page<ProductResponse> findAll(@ApiIgnore @PathVariable String companyUid,
@@ -63,13 +78,12 @@ public class ProductController {
                                          @ApiParam(value = "Desired category (1... n)") @RequestParam(value = "category", required = false) String[] desiredCategories,
                                          @ApiParam(value = "Product name (substring)") @RequestParam(value = "name", required = false) String desiredNameSubstring,
                                          @NotNull Pageable pageable) {
-        return productService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring);
+        return productService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, authentication);
     }
 
     @PostMapping
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation("Creating product")
+    @ApiOperation(value = "Creating product", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_CREATED, message = "Product created", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
@@ -83,9 +97,8 @@ public class ProductController {
     }
 
     @PutMapping("/{productId}")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Updating product")
+    @ApiOperation(value = "Updating product", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Product updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
@@ -100,9 +113,8 @@ public class ProductController {
     }
 
     @DeleteMapping("/{productId}")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Deleting product")
+    @ApiOperation(value = "Deleting product", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Product deleted", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
@@ -116,9 +128,8 @@ public class ProductController {
     }
 
     @PostMapping("/{productId}/images")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation("Update product image")
+    @ApiOperation(value = "Update product image", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Image updated", response = ResourceOperationResponse.class),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
@@ -134,7 +145,6 @@ public class ProductController {
 
     @GetMapping("/{productId}/images")
     @ApiOperation("Get product image")
-    @ApiAuthorizationToken
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = HttpServletResponse.SC_OK, message = "Product image"),

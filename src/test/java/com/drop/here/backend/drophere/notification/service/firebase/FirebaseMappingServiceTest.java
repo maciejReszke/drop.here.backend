@@ -5,6 +5,7 @@ import com.drop.here.backend.drophere.notification.configuration.GoogleCredentia
 import com.drop.here.backend.drophere.notification.entity.Notification;
 import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import com.drop.here.backend.drophere.notification.entity.NotificationToken;
+import com.drop.here.backend.drophere.notification.enums.NotificationReferencedSubjectType;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingUtilService;
 import com.google.firebase.messaging.Message;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,8 @@ class FirebaseMappingServiceTest {
     @Test
     void givenNotificationWhenToMessageThenMap() {
         //given
-        final Notification notification = Notification.builder().build();
+        final Notification notification = Notification.builder().referencedSubjectType(NotificationReferencedSubjectType.EMPTY)
+                .referencedSubjectId("sid").build();
         final NotificationToken token = NotificationToken.builder().token("123").build();
         final NotificationJob notificationJob = NotificationJob.builder().notification(notification).notificationToken(token).build();
 

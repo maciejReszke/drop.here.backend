@@ -5,6 +5,10 @@ import com.drop.here.backend.drophere.notification.configuration.GoogleCredentia
 import com.drop.here.backend.drophere.notification.entity.Notification;
 import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingUtilService;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,6 +43,16 @@ public class FirebaseMappingService {
                         .setBody(notification.getMessage())
                         .build())
                 .setToken(notificationJob.getNotificationToken().getToken())
+                .putData(notification.getReferencedSubjectType().name(), notification.getReferencedSubjectId())
+                .setAndroidConfig(AndroidConfig.builder()
+                        .setNotification(AndroidNotification.builder()
+                                .setClickAction(notification.getReferencedSubjectType().name())
+                                .build())
+                        .build())
+                .setApnsConfig(ApnsConfig.builder()
+                        .setAps(Aps.builder().setCategory(notification.getReferencedSubjectType().name())
+                                .build())
+                        .build())
                 .build();
     }
 }

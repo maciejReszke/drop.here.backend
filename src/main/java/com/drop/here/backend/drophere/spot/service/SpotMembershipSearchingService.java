@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -53,5 +54,9 @@ public class SpotMembershipSearchingService {
 
     public List<SpotMembership> findMemberships(List<Spot> spots, Customer customer) {
         return spotMembershipRepository.findByCustomerAndSpotIn(customer, spots);
+    }
+
+    public Optional<SpotMembership> findMembership(Spot spot, Customer customer) {
+        return spotMembershipRepository.findByCustomerAndSpot(customer, spot);
     }
 }

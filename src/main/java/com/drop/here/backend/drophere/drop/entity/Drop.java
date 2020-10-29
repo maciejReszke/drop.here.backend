@@ -33,7 +33,9 @@ import java.time.LocalDateTime;
 @Builder
 @Table(indexes = {
         @Index(columnList = "uid", unique = true),
-        @Index(columnList = "name")
+        @Index(columnList = "name"),
+        @Index(columnList = "startTime"),
+        @Index(columnList = "endTime")
 })
 @ToString(exclude = {"spot", "route"})
 @EqualsAndHashCode(exclude = {"spot", "route"})
@@ -67,6 +69,21 @@ public class Drop {
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime createdAt;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime preparedAt;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime liveAt;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime delayedAt;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime cancelledAt;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime finishedAt;
 
     @NotNull
     @Enumerated(EnumType.STRING)

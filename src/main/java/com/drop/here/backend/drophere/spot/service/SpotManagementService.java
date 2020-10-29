@@ -4,8 +4,9 @@ import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundExcept
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
+import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.spot.dto.SpotCompanyMembershipManagementRequest;
+import com.drop.here.backend.drophere.spot.dto.request.SpotCompanyMembershipManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.request.SpotManagementRequest;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyMembershipResponse;
 import com.drop.here.backend.drophere.spot.dto.response.SpotCompanyResponse;
@@ -30,6 +31,12 @@ public class SpotManagementService {
     private final SpotMappingService spotMappingService;
     private final SpotRepository spotRepository;
     private final SpotMembershipService spotMembershipService;
+    private final SpotPersistenceService spotPersistenceService;
+
+    public SpotCompanyResponse findCompanySpot(Company company, Long spotId) {
+        final Spot spot = spotPersistenceService.findSpot(spotId, company);
+        return spotMappingService.toSpotCompanyResponse(spot);
+    }
 
     public List<SpotCompanyResponse> findCompanySpots(String companyUid, String name) {
         return spotRepository.findAllByCompanyUidAndNameStartsWith(companyUid, StringUtils.defaultIfEmpty(name, ""))

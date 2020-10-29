@@ -16,7 +16,7 @@ import com.drop.here.backend.drophere.company.service.CompanyMappingService;
 import com.drop.here.backend.drophere.company.service.CompanyService;
 import com.drop.here.backend.drophere.company.service.CompanyValidationService;
 import com.drop.here.backend.drophere.customer.entity.Customer;
-import com.drop.here.backend.drophere.customer.service.CustomerStoreService;
+import com.drop.here.backend.drophere.customer.service.CustomerPersistenceService;
 import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
 import com.drop.here.backend.drophere.image.Image;
 import com.drop.here.backend.drophere.image.ImageService;
@@ -66,7 +66,7 @@ class CompanyServiceTest {
     private CompanyCustomerRelationshipService companyCustomerRelationshipService;
 
     @Mock
-    private CustomerStoreService customerStoreService;
+    private CustomerPersistenceService customerPersistenceService;
 
     @Test
     void givenVisibleCompanyWhenIsVisibleThenTrue() {
@@ -114,10 +114,10 @@ class CompanyServiceTest {
     @Test
     void givenAccountAuthenticationWhenFindOwnCompanyThenFind() {
         //given
-        final AccountAuthentication accountAuthentication = AccountAuthentication.builder().build();
+        final AccountAuthentication accountAuthentication = AccountAuthentication.builder().account(Account.builder().build()).build();
         final CompanyManagementResponse companyManagementResponse = CompanyManagementResponse.builder().build();
 
-        when(companyMappingService.toManagementResponse(accountAuthentication.getCompany()))
+        when(companyMappingService.toManagementResponse(accountAuthentication.getCompany(), accountAuthentication.getPrincipal()))
                 .thenReturn(companyManagementResponse);
 
         //when
@@ -331,7 +331,7 @@ class CompanyServiceTest {
                 .build();
         final Customer customer = Customer.builder().build();
 
-        when(customerStoreService.findById(customerId)).thenReturn(customer);
+        when(customerPersistenceService.findById(customerId)).thenReturn(customer);
         doNothing().when(companyCustomerRelationshipService).handleCustomerBlocking(true, customer, company);
 
         //when

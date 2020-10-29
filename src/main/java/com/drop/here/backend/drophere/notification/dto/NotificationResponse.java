@@ -1,9 +1,9 @@
 package com.drop.here.backend.drophere.notification.dto;
 
 import com.drop.here.backend.drophere.notification.enums.NotificationBroadcastingType;
+import com.drop.here.backend.drophere.notification.enums.NotificationCategory;
 import com.drop.here.backend.drophere.notification.enums.NotificationReadStatus;
 import com.drop.here.backend.drophere.notification.enums.NotificationReferencedSubjectType;
-import com.drop.here.backend.drophere.notification.enums.NotificationType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
@@ -21,8 +21,8 @@ public class NotificationResponse {
     @ApiModelProperty(value = "Notification message", example = "Natalka kocham ci ęśąćż e mi na mordzie")
     String message;
 
-    @ApiModelProperty(value = "Notification type", example = "TEST")
-    NotificationType type;
+    @ApiModelProperty(value = "Notification category", example = "TEST")
+    NotificationCategory category;
 
     @ApiModelProperty(value = "Notification read status", example = "READ")
     NotificationReadStatus readStatus;
