@@ -40,6 +40,10 @@ public class ProductService {
     private final ImageService imageService;
     private final RouteProductRepository routeProductRepository;
 
+    public ProductResponse findProduct(String companyUid, Long productId, AccountAuthentication authentication) {
+        final Product product = getProduct(productId, companyUid);
+        return productSearchingService.mapProduct(product, authentication);
+    }
     public Page<ProductResponse> findAll(Pageable pageable, String companyUid, String[] desiredCategories, String desiredNameSubstring, AccountAuthentication authentication) {
         return productSearchingService.findAll(pageable, companyUid, desiredCategories, desiredNameSubstring, authentication);
     }
