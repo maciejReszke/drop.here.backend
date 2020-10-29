@@ -355,6 +355,56 @@ class SpotManagementControllerTest extends IntegrationBaseClass {
     }
 
     @Test
+    void givenValidRequestOwnCompanyOperationWhenFindSpotThenFind() throws Exception {
+        //given
+        final Spot spot = spotRepository.save(SpotDataGenerator.spot(1, company).toBuilder()
+                .name("ryneczek").build());
+        final String url = String.format("/companies/%s/spots/%s", company.getUid(), spot.getId());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.equalTo(spot.getId().intValue())));
+    }
+
+    @Test
+    void givenValidRequestOwnCompanyOperationInvalidPrivilegeWhenFindSpotThen403() throws Exception {
+        //given
+        final Spot spot = spotRepository.save(SpotDataGenerator.spot(1, company).toBuilder()
+                .name("ryneczek").build());
+        final String url = String.format("/companies/%s/spots/%s", company.getUid(), spot.getId());
+        final Privilege privilege = privilegeRepository.findAll().stream().filter(t -> t.getName().equalsIgnoreCase(COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE))
+                .findFirst().orElseThrow();
+        privilege.setName("differentPrivilege");
+        privilegeRepository.save(privilege);
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+    }
+
+    @Test
+    void givenValidRequestNotOwnCompanyOperationWhenFindSpotThen403() throws Exception {
+        //given
+        final Spot spot = spotRepository.save(SpotDataGenerator.spot(1, company).toBuilder()
+                .name("ryneczek").build());
+        final String url = String.format("/companies/%s/spots/%s", company.getUid() + "i", spot.getId());
+
+        //when
+        final ResultActions result = mockMvc.perform(get(url)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(account).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+    }
+
+
+    @Test
     void givenValidRequestOwnCompanyOperationWhenFindSpotsThenFind() throws Exception {
         //given
         final Spot spot1 = spotRepository.save(SpotDataGenerator.spot(1, company).toBuilder()
