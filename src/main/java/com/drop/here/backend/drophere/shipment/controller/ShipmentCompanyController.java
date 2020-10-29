@@ -68,7 +68,6 @@ public class ShipmentCompanyController {
         return shipmentService.findCompanyShipments(authentication, status, routeId, dropUid, pageable);
     }
 
-    // TODO: 28/10/2020 test
     @ApiOperation(value = "Updating shipment (status) - company decisions", authorizations = @Authorization(value = "AUTHORIZATION"))
     @PatchMapping("/companies/{companyUid}/shipments/{shipmentId}")
     @ResponseStatus(HttpStatus.OK)
@@ -77,7 +76,9 @@ public class ShipmentCompanyController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
+    @PreAuthorize("@authenticationPrivilegesService.isOwnCompanyOperation(authentication, #companyUid)")
     public ResourceOperationResponse updateShipmentStatus(@ApiIgnore AccountAuthentication authentication,
+                                                          @ApiIgnore @PathVariable String companyUid,
                                                           @ApiIgnore @PathVariable Long shipmentId,
                                                           @RequestBody @Valid ShipmentCompanyDecisionRequest shipmentCompanyDecisionRequest) {
         return shipmentService.updateShipmentStatus(shipmentId, shipmentCompanyDecisionRequest, authentication);

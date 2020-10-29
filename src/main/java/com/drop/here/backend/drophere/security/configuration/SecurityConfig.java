@@ -74,7 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .mvcMatchers("/companies/{companyUid}/drops/{dropUid}/shipments/**").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                         .mvcMatchers(HttpMethod.GET, "/shipments").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
                         .mvcMatchers(HttpMethod.GET, "/shipments/{shipmentId}").hasAuthority(PrivilegeService.CUSTOMER_CREATED_PRIVILEGE)
-                        .mvcMatchers(HttpMethod.GET, "/companies/{companyUid}/shipments/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
+                        .mvcMatchers("/companies/{companyUid}/shipments/**").hasAuthority(PrivilegeService.COMPANY_RESOURCES_MANAGEMENT_PRIVILEGE)
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(new Http401UnauthorizedEntryPoint(), new AntPathRequestMatcher("/**")));

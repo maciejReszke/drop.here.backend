@@ -50,8 +50,9 @@ public class CompanyMappingService {
     public void updateCompany(CompanyManagementRequest companyManagementRequest, Company company) {
         final String name = companyManagementRequest.getName().trim();
         company.setLastUpdatedAt(LocalDateTime.now());
+        boolean nameChanged = !companyManagementRequest.getName().equals(company.getName());
         company.setName(name);
-        company.setUid(generateUid(name));
+        company.setUid(nameChanged ? generateUid(name) : company.getUid());
         company.setCountry(countryService.findActive(companyManagementRequest.getCountry()));
         company.setVisibilityStatus(CompanyVisibilityStatus.valueOf(companyManagementRequest.getVisibilityStatus()));
     }

@@ -31,8 +31,10 @@ import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
 import com.drop.here.backend.drophere.route.repository.RouteRepository;
+import com.drop.here.backend.drophere.shipment.dto.ShipmentCompanyDecisionRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.entity.ShipmentProduct;
+import com.drop.here.backend.drophere.shipment.enums.ShipmentCompanyDecision;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import com.drop.here.backend.drophere.shipment.repository.ShipmentProductRepository;
 import com.drop.here.backend.drophere.shipment.repository.ShipmentRepository;
@@ -56,13 +58,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.testcontainers.shaded.com.google.common.net.HttpHeaders;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -387,6 +393,342 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
 
         //then
         result.andExpect(status().isForbidden());
+    }
+
+    @Test
+    void givenPlacedShipmentAcceptDecisionWhenUpdateStatusThenUpdate() throws Exception {
+        //given
+        final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
+        shipment.getProducts().add(shipmentProduct1);
+        shipment.setStatus(ShipmentStatus.PLACED);
+        shipmentRepository.save(shipment);
+
+        final ShipmentCompanyDecisionRequest request = ShipmentCompanyDecisionRequest.builder()
+                .comment("comment123")
+                .companyDecision(ShipmentCompanyDecision.ACCEPT)
+                .build();
+
+        final String url = String.format("/companies/%s/shipments/%s", company.getUid(), shipment.getId());
+        final String json = objectMapper.writeValueAsString(request);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(companyAccount).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(notificationJobRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        final List<Shipment> shipments = shipmentRepository.findAll();
+        assertThat(shipments).hasSize(1);
+        final Shipment savedShipment = shipments.get(0);
+        assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.ACCEPTED);
+        assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
+                .isEqualByComparingTo(BigDecimal.valueOf(147));
+    }
+
+    @Test
+    void givenPlacedShipmentRejectDecisionWhenUpdateStatusThenUpdate() throws Exception {
+        //given
+        final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
+        shipment.getProducts().add(shipmentProduct1);
+        shipment.setStatus(ShipmentStatus.PLACED);
+        shipmentRepository.save(shipment);
+
+        final ShipmentCompanyDecisionRequest request = ShipmentCompanyDecisionRequest.builder()
+                .comment("comment123")
+                .companyDecision(ShipmentCompanyDecision.REJECT)
+                .build();
+
+        final String url = String.format("/companies/%s/shipments/%s", company.getUid(), shipment.getId());
+        final String json = objectMapper.writeValueAsString(request);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(companyAccount).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(notificationJobRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        final List<Shipment> shipments = shipmentRepository.findAll();
+        assertThat(shipments).hasSize(1);
+        final Shipment savedShipment = shipments.get(0);
+        assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.REJECTED);
+        assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
+                .isEqualByComparingTo(BigDecimal.valueOf(150));
+    }
+
+    @Test
+    void givenAcceptShipmentRejectDecisionWhenUpdateStatusThenUpdate() throws Exception {
+        //given
+        final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
+        shipment.getProducts().add(shipmentProduct1);
+        shipment.setStatus(ShipmentStatus.ACCEPTED);
+        shipmentRepository.save(shipment);
+
+        final ShipmentCompanyDecisionRequest request = ShipmentCompanyDecisionRequest.builder()
+                .comment("comment123")
+                .companyDecision(ShipmentCompanyDecision.REJECT)
+                .build();
+
+        final String url = String.format("/companies/%s/shipments/%s", company.getUid(), shipment.getId());
+        final String json = objectMapper.writeValueAsString(request);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(companyAccount).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(notificationJobRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        final List<Shipment> shipments = shipmentRepository.findAll();
+        assertThat(shipments).hasSize(1);
+        final Shipment savedShipment = shipments.get(0);
+        assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.REJECTED);
+        assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
+                .isEqualByComparingTo(BigDecimal.valueOf(153));
+    }
+
+    @Test
+    void givenAcceptShipmentDeliverDecisionWhenUpdateStatusThenUpdate() throws Exception {
+        //given
+        final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
+        shipment.getProducts().add(shipmentProduct1);
+        shipment.setStatus(ShipmentStatus.ACCEPTED);
+        shipmentRepository.save(shipment);
+
+        final ShipmentCompanyDecisionRequest request = ShipmentCompanyDecisionRequest.builder()
+                .comment("comment123")
+                .companyDecision(ShipmentCompanyDecision.DELIVER)
+                .build();
+
+        final String url = String.format("/companies/%s/shipments/%s", company.getUid(), shipment.getId());
+        final String json = objectMapper.writeValueAsString(request);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(companyAccount).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(notificationJobRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        final List<Shipment> shipments = shipmentRepository.findAll();
+        assertThat(shipments).hasSize(1);
+        final Shipment savedShipment = shipments.get(0);
+        assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
+        assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
+                .isEqualByComparingTo(BigDecimal.valueOf(150));
+    }
+
+    @Test
+    void givenCancelRequestShipmentDeliverDecisionWhenUpdateStatusThenUpdate() throws Exception {
+        //given
+        final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
+        shipment.getProducts().add(shipmentProduct1);
+        shipment.setStatus(ShipmentStatus.CANCEL_REQUESTED);
+        shipmentRepository.save(shipment);
+
+        final ShipmentCompanyDecisionRequest request = ShipmentCompanyDecisionRequest.builder()
+                .comment("comment123")
+                .companyDecision(ShipmentCompanyDecision.DELIVER)
+                .build();
+
+        final String url = String.format("/companies/%s/shipments/%s", company.getUid(), shipment.getId());
+        final String json = objectMapper.writeValueAsString(request);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(companyAccount).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(notificationJobRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        final List<Shipment> shipments = shipmentRepository.findAll();
+        assertThat(shipments).hasSize(1);
+        final Shipment savedShipment = shipments.get(0);
+        assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
+        assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
+                .isEqualByComparingTo(BigDecimal.valueOf(150));
+    }
+
+    @Test
+    void givenCancelRequestShipmentCancelDecisionWhenUpdateStatusThenUpdate() throws Exception {
+        //given
+        final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
+        shipment.getProducts().add(shipmentProduct1);
+        shipment.setStatus(ShipmentStatus.CANCEL_REQUESTED);
+        shipmentRepository.save(shipment);
+
+        final ShipmentCompanyDecisionRequest request = ShipmentCompanyDecisionRequest.builder()
+                .comment("comment123")
+                .companyDecision(ShipmentCompanyDecision.CANCEL)
+                .build();
+
+        final String url = String.format("/companies/%s/shipments/%s", company.getUid(), shipment.getId());
+        final String json = objectMapper.writeValueAsString(request);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(companyAccount).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(notificationJobRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        final List<Shipment> shipments = shipmentRepository.findAll();
+        assertThat(shipments).hasSize(1);
+        final Shipment savedShipment = shipments.get(0);
+        assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.CANCELLED);
+        assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
+                .isEqualByComparingTo(BigDecimal.valueOf(153));
+    }
+
+    @Test
+    void givenDeliverRequestShipmentAcceptDecisionWhenUpdateStatusThenUpdate() throws Exception {
+        //given
+        final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
+        shipment.getProducts().add(shipmentProduct1);
+        shipment.setStatus(ShipmentStatus.DELIVERED);
+        shipmentRepository.save(shipment);
+
+        final ShipmentCompanyDecisionRequest request = ShipmentCompanyDecisionRequest.builder()
+                .comment("comment123")
+                .companyDecision(ShipmentCompanyDecision.ACCEPT)
+                .build();
+
+        final String url = String.format("/companies/%s/shipments/%s", company.getUid(), shipment.getId());
+        final String json = objectMapper.writeValueAsString(request);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(companyAccount).getToken()));
+
+        //then
+        result.andExpect(status().isOk());
+
+        assertThat(notificationJobRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        final List<Shipment> shipments = shipmentRepository.findAll();
+        assertThat(shipments).hasSize(1);
+        final Shipment savedShipment = shipments.get(0);
+        assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.ACCEPTED);
+        assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
+                .isEqualByComparingTo(BigDecimal.valueOf(150));
+    }
+
+    @Test
+    void givenShipmentInvalidStateChangeWhenUpdateStatusThen422() throws Exception {
+        //given
+        final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
+        shipment.getProducts().add(shipmentProduct1);
+        shipment.setStatus(ShipmentStatus.DELIVERED);
+        shipmentRepository.save(shipment);
+
+        final ShipmentCompanyDecisionRequest request = ShipmentCompanyDecisionRequest.builder()
+                .comment("comment123")
+                .companyDecision(ShipmentCompanyDecision.CANCEL)
+                .build();
+
+        final String url = String.format("/companies/%s/shipments/%s", company.getUid(), shipment.getId());
+        final String json = objectMapper.writeValueAsString(request);
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(companyAccount).getToken()));
+
+        //then
+        result.andExpect(status().isUnprocessableEntity());
+
+        assertThat(notificationJobRepository.findAll()).isEmpty();
+        assertThat(notificationRepository.findAll()).isEmpty();
+        final List<Shipment> shipments = shipmentRepository.findAll();
+        assertThat(shipments).hasSize(1);
+        final Shipment savedShipment = shipments.get(0);
+        assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
+        assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
+                .isEqualByComparingTo(BigDecimal.valueOf(150));
+    }
+
+    @Test
+    void givenRequestInvalidPrivilegesWhenUpdateStatusThen403() throws Exception {
+        //given
+        final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
+        shipment.getProducts().add(shipmentProduct1);
+        shipment.setStatus(ShipmentStatus.DELIVERED);
+        shipmentRepository.save(shipment);
+
+        final ShipmentCompanyDecisionRequest request = ShipmentCompanyDecisionRequest.builder()
+                .comment("comment123")
+                .companyDecision(ShipmentCompanyDecision.ACCEPT)
+                .build();
+
+        final String url = String.format("/companies/%s/shipments/%s", company.getUid(), shipment.getId());
+        final String json = objectMapper.writeValueAsString(request);
+
+        privilegeRepository.deleteAll();
+        privilegeRepository.save(Privilege.builder().name(PrivilegeService.NEW_ACCOUNT_CREATE_CUSTOMER_PRIVILEGE).account(companyAccount).build());
+
+        //when
+        final ResultActions result = mockMvc.perform(patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(companyAccount).getToken()));
+
+        //then
+        result.andExpect(status().isForbidden());
+
+        assertThat(notificationJobRepository.findAll()).isEmpty();
+        assertThat(notificationRepository.findAll()).isEmpty();
+        final List<Shipment> shipments = shipmentRepository.findAll();
+        assertThat(shipments).hasSize(1);
+        final Shipment savedShipment = shipments.get(0);
+        assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
+        assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
+                .isEqualByComparingTo(BigDecimal.valueOf(150));
     }
 
 

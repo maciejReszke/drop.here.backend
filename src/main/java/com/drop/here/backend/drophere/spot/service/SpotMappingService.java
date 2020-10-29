@@ -37,7 +37,8 @@ public class SpotMappingService {
     }
 
     public void update(Spot spot, SpotManagementRequest spotManagementRequest) {
-        spot.setUid(generateUid(spotManagementRequest.getName()));
+        boolean nameChanged = !spotManagementRequest.getName().equals(spot.getName());
+        spot.setUid(nameChanged ? generateUid(spotManagementRequest.getName()) : spot.getUid());
         spot.setYCoordinate(spotManagementRequest.getYCoordinate());
         spot.setXCoordinate(spotManagementRequest.getXCoordinate());
         spot.setEstimatedRadiusMeters(spotManagementRequest.getEstimatedRadiusMeters());
