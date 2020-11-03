@@ -37,6 +37,7 @@ public class SpotMembershipSearchingService {
                 .lastName(customer.getLastName())
                 .customerId(customer.getId())
                 .membershipStatus(spotMembership.getMembershipStatus())
+                .spotMembershipId(spotMembership.getId())
                 .build();
     }
 
