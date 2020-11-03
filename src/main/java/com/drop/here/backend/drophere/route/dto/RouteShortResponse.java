@@ -1,5 +1,6 @@
 package com.drop.here.backend.drophere.route.dto;
 
+import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,9 @@ public class RouteShortResponse {
 
     @ApiModelProperty(value = "Route name", example = "Best seler")
     private String name;
+
+    @ApiModelProperty(value = "Route status", example = "PREPARED")
+    private RouteStatus status;
 
     @ApiModelProperty(value = "Amount of products in route", example = "15")
     private int productsAmount;

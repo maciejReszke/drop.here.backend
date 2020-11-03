@@ -22,7 +22,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     Optional<Route> findByIdAndCompany(Long routeId, Company company);
 
     @Query("select new com.drop.here.backend.drophere.route.dto.RouteShortResponse(" +
-            "r.id, r.name, size(r.products), size(r.drops), p.profileUid, p.firstName, p.lastName) " +
+            "r.id, r.name, r.status ,size(r.products), size(r.drops), p.profileUid, p.firstName, p.lastName) " +
             "from Route r " +
             "left join r.profile p where " +
             "r.company =:company and " +
