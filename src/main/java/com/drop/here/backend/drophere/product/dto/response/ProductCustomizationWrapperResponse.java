@@ -5,14 +5,13 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
 
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Value
 @Builder
 public class ProductCustomizationWrapperResponse {
 
-    @ApiModelProperty(value = "Customization id", example = "Roll")
+    @ApiModelProperty(value = "Customization id", example = "5")
     Long id;
 
     @ApiModelProperty(value = "Customization heading", example = "Roll")

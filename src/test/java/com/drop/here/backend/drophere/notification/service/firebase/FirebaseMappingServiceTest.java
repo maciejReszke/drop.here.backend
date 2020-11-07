@@ -1,13 +1,13 @@
 package com.drop.here.backend.drophere.notification.service.firebase;
 
-import com.drop.here.backend.drophere.notification.configuration.GoogleCredentialsConfiguration;
-import com.drop.here.backend.drophere.notification.configuration.GoogleCredentialsRequest;
 import com.drop.here.backend.drophere.notification.entity.Notification;
 import com.drop.here.backend.drophere.notification.entity.NotificationJob;
 import com.drop.here.backend.drophere.notification.entity.NotificationToken;
 import com.drop.here.backend.drophere.notification.enums.NotificationReferencedSubjectType;
 import com.drop.here.backend.drophere.notification.service.broadcasting.NotificationBroadcastingUtilService;
 import com.google.firebase.messaging.Message;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,18 +24,13 @@ class FirebaseMappingServiceTest {
     private FirebaseMappingService firebaseMappingService;
 
     @Mock
-    private GoogleCredentialsConfiguration googleCredentialsConfiguration;
-
-    @Mock
     private NotificationBroadcastingUtilService notificationBroadcastingUtilService;
 
-    @Test
-    void whenPrepareCredentialsRequest() {
-        //when
-        final GoogleCredentialsRequest prepare = firebaseMappingService.prepareCredentialsRequest();
-
-        //then
-        assertThat(prepare).isNotNull();
+    @BeforeEach
+    void prepare() throws IllegalAccessException {
+        FieldUtils.writeDeclaredField(firebaseMappingService, "referencedSubjectTypePropertyName", "a", true);
+        FieldUtils.writeDeclaredField(firebaseMappingService, "referencedSubjectIdPropertyName", "b", true);
+        FieldUtils.writeDeclaredField(firebaseMappingService, "firebaseClickAction", "c", true);
     }
 
     @Test

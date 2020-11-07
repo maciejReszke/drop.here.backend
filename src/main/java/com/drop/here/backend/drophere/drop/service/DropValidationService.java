@@ -9,7 +9,6 @@ import com.drop.here.backend.drophere.drop.dto.DropManagementRequest;
 import com.drop.here.backend.drophere.drop.entity.Drop;
 import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.route.repository.RouteRepository;
-import com.drop.here.backend.drophere.spot.service.SpotMembershipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DropValidationService {
     private final RouteRepository routeRepository;
-    private final SpotMembershipService spotMembershipService;
 
     public void validateUpdate(Drop drop, AccountProfile profile) {
         if (!isOwnerOrSeller(drop, profile)) {

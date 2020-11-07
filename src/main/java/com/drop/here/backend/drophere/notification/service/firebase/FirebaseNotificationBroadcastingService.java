@@ -35,7 +35,7 @@ public class FirebaseNotificationBroadcastingService implements NotificationBroa
 
             return true;
         } catch (Exception e) {
-            log.error("Exception occurred during sending batch {} of notifications {}", notifications.size(), e.getMessage());
+            log.error("Exception occurred during sending batch {} of notifications {}", notifications.size(), e.getMessage(), e);
             return false;
         }
     }
