@@ -1,7 +1,8 @@
 package com.drop.here.backend.drophere.notification.service.firebase;
 
-import com.drop.here.backend.drophere.notification.configuration.GoogleCredentialsRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.drop.here.backend.drophere.properties.Property;
+import com.drop.here.backend.drophere.properties.PropertyService;
+import com.drop.here.backend.drophere.properties.PropertyType;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,13 +27,10 @@ class FirebaseInitializationServiceTest {
     private FirebaseInitializationService firebaseInitializationService;
 
     @Mock
-    private FirebaseMappingService firebaseMappingService;
-
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
     private FirebaseExecutorService firebaseExecutorService;
+
+    @Mock
+    private PropertyService propertyService;
 
     @Test
     void givenInitializedAppWhenInitializeThenDoNothing() throws IOException, IllegalAccessException {
@@ -43,7 +41,7 @@ class FirebaseInitializationServiceTest {
         firebaseInitializationService.initialize();
 
         //then
-        verifyNoMoreInteractions(firebaseMappingService);
+        verifyNoMoreInteractions(propertyService);
     }
 
     @Test
@@ -64,16 +62,13 @@ class FirebaseInitializationServiceTest {
                 "  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n" +
                 "  \"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-4a4wv%40drop--here.iam.gserviceaccount.com\"\n" +
                 "}\n";
-        final GoogleCredentialsRequest credentials = GoogleCredentialsRequest.builder().build();
-        when(firebaseMappingService.prepareCredentialsRequest()).thenReturn(credentials);
-        when(objectMapper.writeValueAsString(credentials)).thenReturn(json);
+        when(propertyService.getProperty(PropertyType.GOOGLE_CREDENTIALS_CONFIGURATION)).thenReturn(Property.builder().value(json).build());
         doNothing().when(firebaseExecutorService).initializeApp(any());
 
         //when
         firebaseInitializationService.initialize();
 
         //then
-        verifyNoMoreInteractions(firebaseMappingService);
         assertThat(((AtomicBoolean) (FieldUtils.getField(FirebaseInitializationService.class, "INITIALIZED", true).get(1))))
                 .isTrue();
     }
@@ -96,9 +91,7 @@ class FirebaseInitializationServiceTest {
                 "  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n" +
                 "  \"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-4a4wv%40drop--here.iam.gserviceaccount.com\"\n" +
                 "}\n";
-        final GoogleCredentialsRequest credentials = GoogleCredentialsRequest.builder().build();
-        when(firebaseMappingService.prepareCredentialsRequest()).thenReturn(credentials);
-        when(objectMapper.writeValueAsString(credentials)).thenReturn(json);
+        when(propertyService.getProperty(PropertyType.GOOGLE_CREDENTIALS_CONFIGURATION)).thenReturn(Property.builder().value(json).build());
         doThrow(new RuntimeException()).when(firebaseExecutorService).initializeApp(any());
 
         //when

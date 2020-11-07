@@ -4,6 +4,7 @@ import com.drop.here.backend.drophere.route.service.RouteService;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
+import com.drop.here.backend.drophere.shipment.repository.ShipmentRepository;
 import com.drop.here.backend.drophere.shipment.service.ShipmentNotificationService;
 import com.drop.here.backend.drophere.shipment.service.ShipmentProductManagementService;
 import com.drop.here.backend.drophere.shipment.service.processing_service.ShipmentProcessingService;
@@ -18,6 +19,7 @@ public class NewShipmentProcessingService implements ShipmentProcessingService {
     private final RouteService routeService;
     private final ShipmentNotificationService shipmentNotificationService;
     private final ShipmentProductManagementService shipmentProductManagementService;
+    private final ShipmentRepository shipmentRepository;
 
     @Override
     public ShipmentStatus process(Shipment shipment, ShipmentProcessingRequest submission) {
@@ -28,6 +30,8 @@ public class NewShipmentProcessingService implements ShipmentProcessingService {
             shipment.setAcceptedAt(LocalDateTime.now());
             shipmentProductManagementService.reduce(shipment);
         }
+        shipment.setStatus(newStatus);
+        shipmentRepository.save(shipment);
 
         shipmentNotificationService.createNotifications(shipment, newStatus, false, true);
         return newStatus;

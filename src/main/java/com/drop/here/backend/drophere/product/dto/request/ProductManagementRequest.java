@@ -45,7 +45,7 @@ public class ProductManagementRequest {
     private BigDecimal price;
 
     @Length(max = 512)
-    @ApiModelProperty(value = "Product description", example = "Hot dog is a roll with a dog inside", required = true)
+    @ApiModelProperty(value = "Product description", example = "Hot dog is a roll with a dog inside")
     private String description;
 
     @NotNull

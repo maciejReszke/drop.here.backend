@@ -5,6 +5,7 @@ import com.drop.here.backend.drophere.route.service.RouteService;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProcessingRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
+import com.drop.here.backend.drophere.shipment.repository.ShipmentRepository;
 import com.drop.here.backend.drophere.shipment.service.ShipmentNotificationService;
 import com.drop.here.backend.drophere.shipment.service.ShipmentProductManagementService;
 import com.drop.here.backend.drophere.shipment.service.processing_service.customer.NewShipmentProcessingService;
@@ -36,6 +37,9 @@ class NewShipmentProcessingServiceTest {
 
     @Mock
     private ShipmentProductManagementService shipmentProductManagementService;
+
+    @Mock
+    private ShipmentRepository shipmentRepository;
 
     @Test
     void givenShipmentNewStatusIsPlacedWhenProcessThenProcess() {

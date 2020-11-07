@@ -1,7 +1,6 @@
 package com.drop.here.backend.drophere.drop.service;
 
 import com.drop.here.backend.drophere.authentication.account.entity.AccountProfile;
-import com.drop.here.backend.drophere.authentication.account.service.AccountProfilePersistenceService;
 import com.drop.here.backend.drophere.common.exceptions.RestEntityNotFoundException;
 import com.drop.here.backend.drophere.common.exceptions.RestExceptionStatusCode;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
@@ -62,7 +61,7 @@ public class DropService {
 
     private DropDetailedCustomerResponse toDropCustomerDetailedResponse(Drop drop, Spot spot, Customer customer) {
         final Route route = drop.getRoute();
-        final Optional<AccountProfile> profile = route.isWithSeller() ? Optional.of(route.getProfile()): Optional.empty();
+        final Optional<AccountProfile> profile = route.isWithSeller() ? Optional.of(route.getProfile()) : Optional.empty();
         return DropDetailedCustomerResponse.builder()
                 .uid(drop.getUid())
                 .name(drop.getName())

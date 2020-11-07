@@ -7,6 +7,7 @@ import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerDecisionReque
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentResponse;
 import com.drop.here.backend.drophere.shipment.service.ShipmentService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -34,6 +35,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
+@Api(tags = "Shipment customer management API")
 public class ShipmentCustomerController {
     private final ShipmentService shipmentService;
 

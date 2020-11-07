@@ -1,7 +1,7 @@
 package com.drop.here.backend.drophere.notification.service.firebase;
 
-import com.drop.here.backend.drophere.notification.configuration.GoogleCredentialsRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.drop.here.backend.drophere.properties.PropertyService;
+import com.drop.here.backend.drophere.properties.PropertyType;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseOptions;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +17,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 @Slf4j
 public class FirebaseInitializationService {
-    private final FirebaseMappingService firebaseMappingService;
     private final FirebaseExecutorService firebaseExecutorService;
-    private final ObjectMapper objectMapper;
+    private final PropertyService propertyService;
 
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 
@@ -38,8 +37,7 @@ public class FirebaseInitializationService {
     }
 
     private FirebaseOptions prepareFirebaseOptions() throws IOException {
-        final GoogleCredentialsRequest credentialsRequest = firebaseMappingService.prepareCredentialsRequest();
-        final String json = objectMapper.writeValueAsString(credentialsRequest);
+        final String json = propertyService.getProperty(PropertyType.GOOGLE_CREDENTIALS_CONFIGURATION).getValue();
         final ByteArrayInputStream serviceAccountStream = new ByteArrayInputStream(json.getBytes());
         return FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
