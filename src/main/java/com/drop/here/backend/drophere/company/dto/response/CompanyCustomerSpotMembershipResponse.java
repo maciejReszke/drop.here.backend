@@ -5,20 +5,21 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
 
-import javax.validation.constraints.NotBlank;
-
 @Value
 @Builder
 public class CompanyCustomerSpotMembershipResponse {
     @ApiModelProperty(value = "Spot membership status", example = "ACTIVE")
     SpotMembershipStatus membershipStatus;
 
-    @NotBlank
+    @ApiModelProperty(value = "Spot name", example = "Morenka")
     String spotName;
 
-    @NotBlank
+    @ApiModelProperty(value = "Spot id", example = "5")
     Long spotId;
 
-    @NotBlank
+    @ApiModelProperty(value = "Spot membership id", example = "6")
+    Long spotMembershipId;
+
+    @ApiModelProperty(value = "Spot uid", example = "spotUid1")
     String spotUid;
 }

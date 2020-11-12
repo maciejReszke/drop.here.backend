@@ -23,6 +23,9 @@ public class RouteProductRouteResponse {
     @ApiModelProperty(value = "Base product price for every drop in this route/drop", example = "15.55")
     BigDecimal price;
 
-    @ApiModelProperty(value = "Product response")
-    ProductResponse productResponse;
+    @ApiModelProperty(value = "For route created product response")
+    ProductResponse routeProductResponse;
+
+    @ApiModelProperty(value = "Original product response")
+    ProductResponse originalProductResponse;
 }

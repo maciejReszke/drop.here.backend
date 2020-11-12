@@ -38,7 +38,7 @@ class ProductValidationServiceTest {
         final ProductManagementRequest productManagementRequest = ProductManagementRequest.builder()
                 .category("category")
                 .unit("unit")
-                .unitFraction(BigDecimal.ONE)
+                .unitFraction(BigDecimal.valueOf(1.00))
                 .productCustomizationWrappers(List.of(ProductCustomizationWrapperRequest.builder().build()))
                 .build();
 
