@@ -38,6 +38,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @Query("select r from Route r where " +
             "r.status <> 'FINISHED' and " +
+            "r.status <> 'UNPREPARED' and " +
             "not exists (select d from Drop d where " +
             "                   d.route = r  and " +
             "                   d.status <> 'FINISHED' and d.status <> 'CANCELLED')")

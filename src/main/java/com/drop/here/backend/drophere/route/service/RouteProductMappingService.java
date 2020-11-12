@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,33 +34,43 @@ public class RouteProductMappingService {
     }
 
     private List<RouteProductRouteResponse> toResponses(List<RouteProduct> routeProducts) {
-        final List<Long> productsIds = routeProducts.stream()
+        final List<Long> routeProductsIds = routeProducts.stream()
                 .map(RouteProduct::getProduct)
                 .map(Product::getId)
                 .collect(Collectors.toList());
 
-        final List<ProductResponse> products = productSearchingService.findProducts(productsIds);
+        final List<Long> originalProductsIds = routeProducts.stream()
+                .map(RouteProduct::getOriginalProduct)
+                .filter(Objects::nonNull)
+                .map(Product::getId)
+                .collect(Collectors.toList());
+
+        final List<ProductResponse> forRouteProducts = productSearchingService.findProducts(routeProductsIds);
+        final List<ProductResponse> originalProducts = productSearchingService.findProducts(originalProductsIds);
 
         return routeProducts.stream()
                 .sorted(Comparator.comparing(RouteProduct::getOrderNum, Integer::compareTo))
-                .map(routeProduct -> toRouteProductResponse(routeProduct, findProductForRouteProduct(products, routeProduct)))
+                .map(routeProduct -> toRouteProductResponse(routeProduct,
+                        findProductForRouteProduct(forRouteProducts, productResponse -> productResponse.getId().equals(routeProduct.getProduct().getId())),
+                        findProductForRouteProduct(originalProducts, productResponse -> routeProduct.getOriginalProduct() != null && productResponse.getId().equals(routeProduct.getOriginalProduct().getId()))))
                 .collect(Collectors.toList());
     }
 
-    private ProductResponse findProductForRouteProduct(List<ProductResponse> products, RouteProduct routeProduct) {
+    private ProductResponse findProductForRouteProduct(List<ProductResponse> products, Predicate<ProductResponse> productMatcher) {
         return products.stream()
-                .filter(productResponse -> productResponse.getId().equals(routeProduct.getProduct().getId()))
+                .filter(productMatcher)
                 .findFirst()
-                .orElseThrow();
+                .orElse(null);
     }
 
-    private RouteProductRouteResponse toRouteProductResponse(RouteProduct routeProduct, ProductResponse productResponse) {
+    private RouteProductRouteResponse toRouteProductResponse(RouteProduct routeProduct, ProductResponse routeProductResponse, ProductResponse originalProductResponse) {
         return RouteProductRouteResponse.builder()
                 .amount(routeProduct.getAmount())
                 .id(routeProduct.getId())
                 .limitedAmount(routeProduct.isLimitedAmount())
                 .price(routeProduct.getPrice())
-                .productResponse(productResponse)
+                .routeProductResponse(routeProductResponse)
+                .originalProductResponse(originalProductResponse)
                 .build();
     }
 }
