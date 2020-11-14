@@ -9,10 +9,12 @@ import com.drop.here.backend.drophere.drop.service.DropSearchingService;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.service.ProductCustomizationService;
+import com.drop.here.backend.drophere.shipment.dto.ShipmentFlowResponse;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProductCustomizationResponse;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProductResponse;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentResponse;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
+import com.drop.here.backend.drophere.shipment.entity.ShipmentFlow;
 import com.drop.here.backend.drophere.shipment.entity.ShipmentProduct;
 import com.drop.here.backend.drophere.shipment.entity.ShipmentProductCustomization;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
@@ -77,13 +79,23 @@ public class ShipmentSearchingService {
 
     private Page<ShipmentResponse> mapToShipmentResponses(Page<Shipment> shipmentsPage) {
         final List<Shipment> shipments = shipmentsPage.toList();
+        final List<ShipmentFlow> flows = findFlows(shipments);
         final List<Drop> drops = findDrops(shipments);
         final List<Company> companies = findCompanies(shipments);
         final List<Customer> customers = findCustomers(shipments);
         final List<ShipmentProduct> shipmentProducts = findShipmentProducts(shipments);
         final List<ShipmentProductCustomization> shipmentProductCustomizations = findShipmentProductCustomizations(shipmentProducts);
         final List<ProductCustomization> customizations = findCustomizations(shipmentProductCustomizations);
-        return shipmentsPage.map(shipment -> toShipmentResponse(drops, companies, customers, shipmentProducts, shipmentProductCustomizations, customizations, shipment));
+        return shipmentsPage.map(shipment -> toShipmentResponse(drops, companies, customers, shipmentProducts, shipmentProductCustomizations, customizations, flows, shipment));
+    }
+
+    private List<ShipmentFlow> findFlows(List<Shipment> shipments) {
+        final List<Long> shipmentsIds = shipments
+                .stream()
+                .map(Shipment::getId)
+                .collect(Collectors.toList());
+
+        return shipmentPersistenceService.findShipmentsFlows(shipmentsIds);
     }
 
     private List<Customer> findCustomers(List<Shipment> shipments) {
@@ -96,7 +108,7 @@ public class ShipmentSearchingService {
         return customerSearchingService.findCustomers(customersIds);
     }
 
-    private ShipmentResponse toShipmentResponse(List<Drop> drops, List<Company> companies, List<Customer> customers, List<ShipmentProduct> shipmentProducts, List<ShipmentProductCustomization> shipmentProductCustomizations, List<ProductCustomization> customizations, Shipment shipment) {
+    private ShipmentResponse toShipmentResponse(List<Drop> drops, List<Company> companies, List<Customer> customers, List<ShipmentProduct> shipmentProducts, List<ShipmentProductCustomization> shipmentProductCustomizations, List<ProductCustomization> customizations, List<ShipmentFlow> flows, Shipment shipment) {
         final List<ShipmentProduct> productsForShipment = findProductsForShipment(shipment, shipmentProducts);
         final Set<Long> productsIds = productsForShipment.stream()
                 .map(ShipmentProduct::getId)
@@ -113,8 +125,15 @@ public class ShipmentSearchingService {
                 findCustomerForShipment(shipment, customers),
                 productsForShipment,
                 productCustomizations,
-                customizationsForShipment
+                customizationsForShipment,
+                findFlowsForShipment(shipment, flows)
         );
+    }
+
+    private List<ShipmentFlow> findFlowsForShipment(Shipment shipment, List<ShipmentFlow> flows) {
+        return flows.stream()
+                .filter(flow -> flow.getShipment().getId().equals(shipment.getId()))
+                .collect(Collectors.toList());
     }
 
     private Customer findCustomerForShipment(Shipment shipment, List<Customer> customers) {
@@ -204,7 +223,7 @@ public class ShipmentSearchingService {
         return dropSearchingService.findDrops(dropsIds);
     }
 
-    private ShipmentResponse toShipmentCustomerResponse(Shipment shipment, Drop drop, Company company, Customer customer, List<ShipmentProduct> shipmentProducts, List<ShipmentProductCustomization> shipmentProductCustomizations, List<ProductCustomization> productCustomizations) {
+    private ShipmentResponse toShipmentCustomerResponse(Shipment shipment, Drop drop, Company company, Customer customer, List<ShipmentProduct> shipmentProducts, List<ShipmentProductCustomization> shipmentProductCustomizations, List<ProductCustomization> productCustomizations, List<ShipmentFlow> flowsForShipment) {
         return ShipmentResponse.builder()
                 .id(shipment.getId())
                 .status(shipment.getStatus())
@@ -225,7 +244,15 @@ public class ShipmentSearchingService {
                 .summarizedAmount(shipment.getSummarizedAmount())
                 .customerComment(shipment.getCustomerComment())
                 .companyComment(shipment.getCompanyComment())
+                .flows(toFlowResponses(flowsForShipment))
                 .build();
+    }
+
+    private List<ShipmentFlowResponse> toFlowResponses(List<ShipmentFlow> flowsForShipment) {
+        return flowsForShipment.stream()
+                .sorted(Comparator.comparing(ShipmentFlow::getCreatedAt, LocalDateTime::compareTo))
+                .map(shipmentFlow -> new ShipmentFlowResponse(optionalDatetime(shipmentFlow.getCreatedAt()), shipmentFlow.getStatus()))
+                .collect(Collectors.toList());
     }
 
     private List<ShipmentProductResponse> toShipmentProductResponses(List<ShipmentProduct> shipmentProducts, List<ShipmentProductCustomization> productCustomizations, List<ProductCustomization> productCustomizationsForShipment) {

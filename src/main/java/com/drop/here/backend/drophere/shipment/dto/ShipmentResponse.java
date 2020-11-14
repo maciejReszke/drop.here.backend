@@ -72,4 +72,7 @@ public class ShipmentResponse {
     @ApiModelProperty(value = "Shipment company latest comment", example = "Mamy to gleboko i szeroko")
     String companyComment;
 
+    @ApiModelProperty(value = "Flows")
+    List<ShipmentFlowResponse> flows;
+
 }

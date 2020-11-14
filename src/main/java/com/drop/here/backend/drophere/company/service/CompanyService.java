@@ -128,7 +128,7 @@ public class CompanyService {
     public ResourceOperationResponse updateCustomerRelationship(Long customerId, CompanyCustomerRelationshipManagementRequest companyCustomerManagementRequest, AccountAuthentication accountAuthentication) {
         final Customer customer = customerPersistenceService.findById(customerId);
         companyCustomerRelationshipService.handleCustomerBlocking(companyCustomerManagementRequest.isBlock(), customer, accountAuthentication.getCompany());
-        log.info("Updated customer {} with company relation {}", customer, accountAuthentication.getCompany().getUid());
+        log.info("Updated customer {} with company relation {}", customer.getId(), accountAuthentication.getCompany().getUid());
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, customerId);
     }
 
