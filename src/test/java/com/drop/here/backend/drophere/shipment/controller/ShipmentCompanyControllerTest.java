@@ -36,6 +36,7 @@ import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.entity.ShipmentProduct;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentCompanyDecision;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
+import com.drop.here.backend.drophere.shipment.repository.ShipmentFlowRepository;
 import com.drop.here.backend.drophere.shipment.repository.ShipmentProductRepository;
 import com.drop.here.backend.drophere.shipment.repository.ShipmentRepository;
 import com.drop.here.backend.drophere.spot.entity.Spot;
@@ -128,6 +129,9 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     private SpotMembershipRepository spotMembershipRepository;
 
     @Autowired
+    private ShipmentFlowRepository shipmentFlowRepository;
+
+    @Autowired
     private ShipmentRepository shipmentRepository;
 
     @Autowired
@@ -189,6 +193,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
 
     @AfterEach
     void cleanUp() {
+        shipmentFlowRepository.deleteAll();
         spotMembershipRepository.deleteAll();
         shipmentRepository.deleteAll();
         notificationJobRepository.deleteAll();
@@ -430,6 +435,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
         assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.ACCEPTED);
         assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
                 .isEqualByComparingTo(BigDecimal.valueOf(147));
+        assertThat(shipmentFlowRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -467,6 +473,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
         assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.REJECTED);
         assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
                 .isEqualByComparingTo(BigDecimal.valueOf(150));
+        assertThat(shipmentFlowRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -504,6 +511,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
         assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.REJECTED);
         assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
                 .isEqualByComparingTo(BigDecimal.valueOf(153));
+        assertThat(shipmentFlowRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -541,6 +549,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
         assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
         assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
                 .isEqualByComparingTo(BigDecimal.valueOf(150));
+        assertThat(shipmentFlowRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -578,6 +587,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
         assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
         assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
                 .isEqualByComparingTo(BigDecimal.valueOf(150));
+        assertThat(shipmentFlowRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -615,6 +625,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
         assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.CANCELLED);
         assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
                 .isEqualByComparingTo(BigDecimal.valueOf(153));
+        assertThat(shipmentFlowRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -652,6 +663,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
         assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.ACCEPTED);
         assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
                 .isEqualByComparingTo(BigDecimal.valueOf(150));
+        assertThat(shipmentFlowRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -689,6 +701,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
         assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
         assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
                 .isEqualByComparingTo(BigDecimal.valueOf(150));
+        assertThat(shipmentFlowRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -729,6 +742,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
         assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
         assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
                 .isEqualByComparingTo(BigDecimal.valueOf(150));
+        assertThat(shipmentFlowRepository.findAll()).isEmpty();
     }
 
 
