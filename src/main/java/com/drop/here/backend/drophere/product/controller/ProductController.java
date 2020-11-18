@@ -63,6 +63,9 @@ public class ProductController {
         return productService.findProduct(companyUid, productId, authentication);
     }
 
+    // TODO: 15/11/2020 zwraca podwojnie customizacje po edycji customizacji (value )
+    //todo chyba dlatego ze zwraca duplikaty customizationwrapper
+    //todo dodac scheduler usuwajacy przedawnione routy
     @GetMapping
     @ApiOperation(value = "Fetching products", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)

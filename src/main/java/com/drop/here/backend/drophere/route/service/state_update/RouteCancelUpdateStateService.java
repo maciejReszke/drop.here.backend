@@ -15,6 +15,7 @@ public class RouteCancelUpdateStateService implements RouteUpdateStateService {
     private final DropService dropService;
     private final RouteValidationService routeValidationService;
 
+    // TODO: 15/11/2020 cos nie dzialalo
     @Override
     public RouteStatus update(Route route) {
         routeValidationService.validateCancelUpdate(route);

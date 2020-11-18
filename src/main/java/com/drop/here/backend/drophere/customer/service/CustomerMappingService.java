@@ -41,6 +41,7 @@ public class CustomerMappingService {
         return customer == null
                 ? CustomerManagementResponse.builder().registered(false).build()
                 : CustomerManagementResponse.builder()
+                .id(customer.getId())
                 .firstName(customer.getFirstName())
                 .lastName(customer.getLastName())
                 .registered(true)
