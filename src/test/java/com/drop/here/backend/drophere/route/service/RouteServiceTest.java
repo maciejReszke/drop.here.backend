@@ -334,10 +334,9 @@ class RouteServiceTest {
     @Test
     void givenObsoleteRouteWhenFinishObsoleteThenUpdateStatus() {
         //given
-        final Route route = Route.builder().build();
+        final Route route = Route.builder().drops(List.of()).build();
 
         when(routePersistenceService.finishObsolete()).thenReturn(List.of(route));
-        doNothing().when(dropService).cancelDrops(route);
         doNothing().when(routePersistenceService).save(route);
 
         //when
@@ -345,6 +344,6 @@ class RouteServiceTest {
 
         //then
         assertThat(route.getStatus()).isEqualTo(RouteStatus.FINISHED);
-        assertThat(route.getFinishedAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
+        assertThat(route.getCanceledAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
     }
 }
