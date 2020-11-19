@@ -8,5 +8,5 @@ import com.drop.here.backend.drophere.drop.enums.DropStatus;
 import com.drop.here.backend.drophere.spot.entity.Spot;
 
 public interface DropUpdateService {
-    DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest);
+    DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest, boolean force);
 }

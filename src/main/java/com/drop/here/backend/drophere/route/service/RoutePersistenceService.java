@@ -53,4 +53,8 @@ public class RoutePersistenceService {
         return routeRepository.findByIdWithLock(routeId)
                 .orElseThrow();
     }
+
+    public List<Route> finishObsolete() {
+        return routeRepository.finishObsolete();
+    }
 }

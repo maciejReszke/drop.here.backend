@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
 import com.drop.here.backend.drophere.route.dto.RouteStateChangeRequest;
 import com.drop.here.backend.drophere.route.dto.UnpreparedRouteRequest;
@@ -54,6 +55,9 @@ class RouteServiceTest {
 
     @Mock
     private RouteUpdateStateServiceFactory routeUpdateStateServiceFactory;
+
+    @Mock
+    private DropService dropService;
 
     @Test
     void givenRequestWhenCreateRouteThenCreate() {
@@ -300,7 +304,7 @@ class RouteServiceTest {
     }
 
     @Test
-    void givenDropWithRouteAcceptShipmentAutomaticallyWhenGetSubmittedShipmentStatusThenGetStatus(){
+    void givenDropWithRouteAcceptShipmentAutomaticallyWhenGetSubmittedShipmentStatusThenGetStatus() {
         //given
         final Drop drop = Drop.builder()
                 .route(Route.builder().acceptShipmentsAutomatically(true).build())
@@ -314,7 +318,7 @@ class RouteServiceTest {
     }
 
     @Test
-    void givenDropWithRouteNotAcceptShipmentAutomaticallyWhenGetSubmittedShipmentStatusThenGetStatus(){
+    void givenDropWithRouteNotAcceptShipmentAutomaticallyWhenGetSubmittedShipmentStatusThenGetStatus() {
         //given
         final Drop drop = Drop.builder()
                 .route(Route.builder().acceptShipmentsAutomatically(false).build())
@@ -325,5 +329,21 @@ class RouteServiceTest {
 
         //then
         assertThat(status).isEqualTo(ShipmentStatus.PLACED);
+    }
+
+    @Test
+    void givenObsoleteRouteWhenFinishObsoleteThenUpdateStatus() {
+        //given
+        final Route route = Route.builder().drops(List.of()).build();
+
+        when(routePersistenceService.finishObsolete()).thenReturn(List.of(route));
+        doNothing().when(routePersistenceService).save(route);
+
+        //when
+        routeService.finishObsolete();
+
+        //then
+        assertThat(route.getStatus()).isEqualTo(RouteStatus.FINISHED);
+        assertThat(route.getCanceledAt()).isBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
     }
 }

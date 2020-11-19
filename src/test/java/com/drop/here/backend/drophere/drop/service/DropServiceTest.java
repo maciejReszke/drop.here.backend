@@ -196,7 +196,7 @@ class DropServiceTest {
 
         when(dropRepository.findByUidAndRouteCompanyWithSpot(dropUid, company)).thenReturn(Optional.of(drop));
         doNothing().when(dropValidationService).validateUpdate(drop, accountProfile);
-        when(dropUpdateServiceFactory.update(drop, drop.getSpot(), company, accountProfile, dropManagementRequest)).thenReturn(DropStatus.DELAYED);
+        when(dropUpdateServiceFactory.update(drop, drop.getSpot(), company, accountProfile, dropManagementRequest, false)).thenReturn(DropStatus.DELAYED);
         when(dropRepository.save(drop)).thenReturn(drop);
         //when
         final ResourceOperationResponse result = dropService.updateDrop(dropManagementRequest, dropUid, accountAuthentication);
@@ -259,7 +259,7 @@ class DropServiceTest {
         route.setProfile(accountProfile);
 
         when(dropRepository.findByRouteWithSpot(route)).thenReturn(List.of(drop));
-        when(dropUpdateServiceFactory.update(eq(drop), eq(spot), eq(company), eq(accountProfile), any()))
+        when(dropUpdateServiceFactory.update(eq(drop), eq(spot), eq(company), eq(accountProfile), any(), eq(true)))
                 .thenReturn(DropStatus.CANCELLED);
         when(dropRepository.save(drop)).thenReturn(drop);
 

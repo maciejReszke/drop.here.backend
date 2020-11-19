@@ -40,11 +40,11 @@ public class CustomerManagementController {
     @ApiOperation(value = "Get own customer info", authorizations = @Authorization(value = "AUTHORIZATION"))
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Own customer info", response = ResourceOperationResponse.class),
+            @ApiResponse(code = HttpServletResponse.SC_OK, message = "Own customer info"),
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public CustomerManagementResponse findOwnCompany(@ApiIgnore AccountAuthentication authentication) {
+    public CustomerManagementResponse findOwnCustomer(@ApiIgnore AccountAuthentication authentication) {
         return customerService.findOwnCustomer(authentication);
     }
 
@@ -56,7 +56,7 @@ public class CustomerManagementController {
             @ApiResponse(code = 403, message = "Forbidden", response = ExceptionMessage.class),
             @ApiResponse(code = 422, message = "Error", response = ExceptionMessage.class)
     })
-    public ResourceOperationResponse updateCompany(@ApiIgnore AccountAuthentication authentication,
+    public ResourceOperationResponse updateCustomer(@ApiIgnore AccountAuthentication authentication,
                                                    @RequestBody @Valid CustomerManagementRequest customerManagementRequest) {
         return customerService.updateCustomer(customerManagementRequest, authentication);
     }

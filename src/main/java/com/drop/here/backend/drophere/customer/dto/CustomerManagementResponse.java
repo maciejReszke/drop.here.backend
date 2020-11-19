@@ -16,4 +16,7 @@ public class CustomerManagementResponse {
 
     @ApiModelProperty(value = "Customer last name", example = "Kamszota")
     String lastName;
+
+    @ApiModelProperty(value = "Customer id", example = "5L")
+    Long id;
 }

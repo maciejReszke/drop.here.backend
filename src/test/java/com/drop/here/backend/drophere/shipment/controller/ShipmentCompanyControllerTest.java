@@ -744,6 +744,4 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
                 .isEqualByComparingTo(BigDecimal.valueOf(150));
         assertThat(shipmentFlowRepository.findAll()).isEmpty();
     }
-
-
 }

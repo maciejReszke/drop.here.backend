@@ -8,6 +8,7 @@ import com.drop.here.backend.drophere.common.rest.ResourceOperationResponse;
 import com.drop.here.backend.drophere.common.rest.ResourceOperationStatus;
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.drop.entity.Drop;
+import com.drop.here.backend.drophere.drop.service.DropService;
 import com.drop.here.backend.drophere.route.dto.RouteResponse;
 import com.drop.here.backend.drophere.route.dto.RouteShortResponse;
 import com.drop.here.backend.drophere.route.dto.RouteStateChangeRequest;
@@ -16,7 +17,6 @@ import com.drop.here.backend.drophere.route.entity.Route;
 import com.drop.here.backend.drophere.route.enums.RouteStatus;
 import com.drop.here.backend.drophere.route.service.state_update.RouteUpdateStateServiceFactory;
 import com.drop.here.backend.drophere.security.configuration.AccountAuthentication;
-import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +37,7 @@ public class RouteService {
     private final RouteValidationService routeValidationService;
     private final RouteUpdateStateServiceFactory routeUpdateStateServiceFactory;
     private final AccountProfilePersistenceService accountProfilePersistenceService;
+    private final DropService dropService;
 
     public Page<RouteShortResponse> findRoutes(AccountAuthentication accountAuthentication, String routeStatus, Pageable pageable) {
         return routePersistenceService.findByCompany(accountAuthentication.getCompany(), routeStatus, pageable);
@@ -126,4 +127,15 @@ public class RouteService {
                 : ShipmentStatus.PLACED;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public void finishObsolete() {
+        routePersistenceService.finishObsolete()
+                .forEach(route -> {
+                    route.getDrops().forEach(drop -> dropService.cancelDrops(route));
+                    route.setCanceledAt(LocalDateTime.now());
+                    route.setStatus(RouteStatus.FINISHED);
+                    log.info("Finishing obsolete route with id {}", route.getId());
+                    routePersistenceService.save(route);
+                });
+    }
 }
