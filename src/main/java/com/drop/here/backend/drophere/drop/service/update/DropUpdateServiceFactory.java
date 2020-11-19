@@ -23,13 +23,13 @@ public class DropUpdateServiceFactory {
     private final DropFinishedUpdateService dropFinishedUpdateService;
     private final DropPreparedUpdateService dropPreparedUpdateService;
 
-    public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest) {
+    public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest, boolean force) {
         return API.Match(dropManagementRequest.getNewStatus()).of(
                 Case($(DropStatusChange.LIVE), () -> dropLiveUpdateService),
                 Case($(DropStatusChange.CANCELLED), () -> dropCancelledUpdateService),
                 Case($(DropStatusChange.DELAYED), () -> dropDelayedUpdateService),
                 Case($(DropStatusChange.FINISHED), () -> dropFinishedUpdateService))
-                .update(drop, spot, company, profile, dropManagementRequest);
+                .update(drop, spot, company, profile, dropManagementRequest, force);
     }
 
     public DropStatus prepare(Drop drop, Spot spot, Company company, AccountProfile profile) {

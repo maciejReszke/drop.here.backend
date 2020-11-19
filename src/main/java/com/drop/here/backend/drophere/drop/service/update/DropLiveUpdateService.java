@@ -31,8 +31,10 @@ public class DropLiveUpdateService implements DropUpdateService {
     private final NotificationService notificationService;
 
     @Override
-    public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest) {
-        dropValidationService.validateLiveUpdate(drop);
+    public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest, boolean force) {
+        if (!force) {
+            dropValidationService.validateLiveUpdate(drop);
+        }
         final List<SpotMembership> memberships = spotMembershipService.findToBeNotified(spot, SpotMembershipNotificationStatus.live());
         notificationService.createNotifications(prepareNotificationRequest(memberships, drop, company, profile));
         drop.setLiveAt(LocalDateTime.now());

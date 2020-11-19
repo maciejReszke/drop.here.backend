@@ -11,7 +11,10 @@ import java.math.BigDecimal;
 @Builder
 public class ShipmentProductCustomizationResponse {
 
-    @ApiModelProperty(value = "Customization wrapper id", example = "Roll")
+    @ApiModelProperty(value = "Customization id", example = "5")
+    Long id;
+
+    @ApiModelProperty(value = "Customization wrapper id", example = "5")
     Long wrapperId;
 
     @ApiModelProperty(value = "Customization wrapper heading", example = "Roll")

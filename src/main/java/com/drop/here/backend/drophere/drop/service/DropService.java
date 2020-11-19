@@ -110,7 +110,7 @@ public class DropService {
         final Company company = authentication.getCompany();
         final Drop drop = findDrop(dropUid, company);
         dropValidationService.validateUpdate(drop, authentication.getProfile());
-        final DropStatus newStatus = dropUpdateServiceFactory.update(drop, drop.getSpot(), company, authentication.getProfile(), dropManagementRequest);
+        final DropStatus newStatus = dropUpdateServiceFactory.update(drop, drop.getSpot(), company, authentication.getProfile(), dropManagementRequest, false);
         updateStatus(drop, newStatus);
         return new ResourceOperationResponse(ResourceOperationStatus.UPDATED, drop.getId());
     }
@@ -150,7 +150,7 @@ public class DropService {
                     final DropManagementRequest cancelRequest = DropManagementRequest.builder()
                             .newStatus(DropStatusChange.CANCELLED)
                             .build();
-                    final DropStatus newStatus = dropUpdateServiceFactory.update(drop, drop.getSpot(), company, route.getProfile(), cancelRequest);
+                    final DropStatus newStatus = dropUpdateServiceFactory.update(drop, drop.getSpot(), company, route.getProfile(), cancelRequest, true);
                     updateStatus(drop, newStatus);
                 });
     }

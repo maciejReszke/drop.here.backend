@@ -31,8 +31,10 @@ public class DropDelayedUpdateService implements DropUpdateService {
     private final NotificationService notificationService;
 
     @Override
-    public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest) {
-        dropValidationService.validateDelayedUpdate(drop, dropManagementRequest);
+    public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest, boolean force) {
+        if(!force){
+            dropValidationService.validateDelayedUpdate(drop, dropManagementRequest);
+        }
         drop.setStartTime(addDelay(dropManagementRequest, drop.getStartTime()));
         drop.setEndTime(addDelay(dropManagementRequest, drop.getEndTime()));
         final List<SpotMembership> memberships = spotMembershipService.findToBeNotified(spot, SpotMembershipNotificationStatus.delayed());

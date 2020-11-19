@@ -48,4 +48,10 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     @Query("select r from Route r where " +
             "r.id = :routeId")
     Optional<Route> findByIdWithLock(Long routeId);
+
+    @Query("select r from Route r where " +
+            "r.status <> 'FINISHED' and " +
+            "r.routeDate < current_date()")
+    List<Route> finishObsolete();
+
 }

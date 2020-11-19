@@ -31,8 +31,10 @@ public class DropFinishedUpdateService implements DropUpdateService {
     private final NotificationService notificationService;
 
     @Override
-    public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest) {
-        dropValidationService.validateFinishedUpdate(drop);
+    public DropStatus update(Drop drop, Spot spot, Company company, AccountProfile profile, DropManagementRequest dropManagementRequest, boolean force) {
+        if (!force) {
+            dropValidationService.validateFinishedUpdate(drop);
+        }
         final List<SpotMembership> memberships = spotMembershipService.findToBeNotified(spot, SpotMembershipNotificationStatus.finished());
         notificationService.createNotifications(prepareNotificationRequest(memberships, drop, company, profile));
         drop.setFinishedAt(LocalDateTime.now());

@@ -744,6 +744,4 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
                 .isEqualByComparingTo(BigDecimal.valueOf(150));
         assertThat(shipmentFlowRepository.findAll()).isEmpty();
     }
-// TODO: 14/11/2020 poprawic notyfikacje zeby byla wiadomosc do kogo ta notyfiakcja na telefonie bo omga sie ludzi przelogowywac i nie bedzie dzialalo
-
 }

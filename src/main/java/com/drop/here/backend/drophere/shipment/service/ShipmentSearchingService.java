@@ -292,6 +292,7 @@ public class ShipmentSearchingService {
                 .findFirst()
                 .orElseThrow();
         return ShipmentProductCustomizationResponse.builder()
+                .id(productCustomization.getId())
                 .wrapperId(productCustomization.getWrapper().getId())
                 .wrapperHeading(productCustomization.getWrapper().getHeading())
                 .wrapperType(productCustomization.getWrapper().getType())

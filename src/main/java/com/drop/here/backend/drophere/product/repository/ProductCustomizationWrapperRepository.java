@@ -10,12 +10,12 @@ import java.util.List;
 
 @Repository
 public interface ProductCustomizationWrapperRepository extends JpaRepository<ProductCustomizationWrapper, Long> {
-    @Query("select pcw from ProductCustomizationWrapper pcw " +
+    @Query("select distinct pcw from ProductCustomizationWrapper pcw " +
             "left join fetch pcw.customizations " +
             "where pcw.product = :product")
     List<ProductCustomizationWrapper> findByProductWithCustomizations(Product product);
 
-    @Query("select pcw from ProductCustomizationWrapper pcw " +
+    @Query("select distinct pcw from ProductCustomizationWrapper pcw " +
             "left join fetch pcw.customizations where " +
             "pcw.product.id in :productsIds")
     List<ProductCustomizationWrapper> findByProductsIdsWithCustomizations(List<Long> productsIds);
