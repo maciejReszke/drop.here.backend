@@ -2,11 +2,9 @@ package com.drop.here.backend.drophere.shipment.service;
 
 import com.drop.here.backend.drophere.company.entity.Company;
 import com.drop.here.backend.drophere.drop.entity.Drop;
-import com.drop.here.backend.drophere.product.dto.ProductCopy;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
-import com.drop.here.backend.drophere.product.enums.ProductCreationType;
 import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.service.RouteProductService;
@@ -40,9 +38,6 @@ class ShipmentProductMappingServiceTest {
     private RouteProductService routeProductService;
 
     @Mock
-    private ProductService productService;
-
-    @Mock
     private ShipmentCalculatingService shipmentCalculatingService;
 
     @Test
@@ -50,17 +45,10 @@ class ShipmentProductMappingServiceTest {
         //given
         final Drop drop = Drop.builder().build();
         final Shipment shipment = Shipment.builder().drop(drop).build();
-        final Company company = Company.builder().build();
         final ShipmentCustomerSubmissionRequest shipmentCustomerSubmissionRequest = ShipmentDataGenerator
                 .customerSubmissionRequest(1);
 
-        final RouteProduct routeProduct1 = RouteProduct.builder().id(7L)
-                .product(Product.builder().id(5L).unitFraction(BigDecimal.ONE).build())
-                .amount(BigDecimal.valueOf(44.42)).build();
 
-        final RouteProduct routeProduct2 = RouteProduct.builder().id(8L)
-                .product(Product.builder().id(6L).unitFraction(BigDecimal.ONE).build())
-                .amount(BigDecimal.valueOf(45.43)).build();
         final ProductCustomization customization1 = ProductCustomization.builder().id(5L)
                 .price(BigDecimal.valueOf(1232)).build();
         final ProductCustomization customization2 = ProductCustomization.builder().id(6L)
@@ -77,18 +65,22 @@ class ShipmentProductMappingServiceTest {
         final Product productCopy1 = Product.builder().id(66L).unitFraction(BigDecimal.ONE).customizationWrappers(List.of(wrapper1)).build();
         final Product productCopy2 = Product.builder().id(67L).unitFraction(BigDecimal.ONE).customizationWrappers(List.of(wrapper2)).build();
 
+        final RouteProduct routeProduct1 = RouteProduct.builder().id(7L)
+                .product(productCopy1)
+                .amount(BigDecimal.valueOf(44.42)).build();
+
+        final RouteProduct routeProduct2 = RouteProduct.builder().id(8L)
+                .product(productCopy2)
+                .amount(BigDecimal.valueOf(45.43)).build();
+
         when(routeProductService.findProductsLocked(drop, Set.of(7L, 8L))).thenReturn(List.of(routeProduct1, routeProduct2));
-        when(productService.createReadOnlyCopy(routeProduct1.getProduct().getId(), company, ProductCreationType.SHIPMENT))
-                .thenReturn(new ProductCopy(routeProduct1.getProduct(), productCopy1));
-        when(productService.createReadOnlyCopy(routeProduct2.getProduct().getId(), company, ProductCreationType.SHIPMENT))
-                .thenReturn(new ProductCopy(routeProduct2.getProduct(), productCopy2));
         when(shipmentCalculatingService.calculateProductCost(any())).thenReturn(
                 new ShipmentProductCalculation(BigDecimal.valueOf(55), BigDecimal.valueOf(66), BigDecimal.valueOf(77), BigDecimal.valueOf(78)),
                 new ShipmentProductCalculation(BigDecimal.valueOf(88), BigDecimal.valueOf(99), BigDecimal.valueOf(101), BigDecimal.valueOf(102))
         );
 
         //when
-        final Set<ShipmentProduct> products = shipmentProductMappingService.createShipmentProducts(shipment, company, shipmentCustomerSubmissionRequest);
+        final Set<ShipmentProduct> products = shipmentProductMappingService.createShipmentProducts(shipment, shipmentCustomerSubmissionRequest);
 
         //then
         assertThat(products).hasSize(2);
