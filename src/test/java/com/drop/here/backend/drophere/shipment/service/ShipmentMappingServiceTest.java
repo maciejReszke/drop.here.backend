@@ -61,7 +61,7 @@ class ShipmentMappingServiceTest {
 
         final Set<ShipmentProduct> products = Set.of(ShipmentProduct.builder().build());
         when(shipmentCalculatingService.calculateShipment(any())).thenReturn(BigDecimal.valueOf(44.32));
-        when(shipmentProductMappingService.createShipmentProducts(any(), eq(company), eq(shipmentCustomerSubmissionRequest)))
+        when(shipmentProductMappingService.createShipmentProducts(any(), eq(shipmentCustomerSubmissionRequest)))
                 .thenReturn(products);
         //when
         final Shipment shipment = shipmentMappingService.toEntity(drop, shipmentCustomerSubmissionRequest, customer);
@@ -95,7 +95,7 @@ class ShipmentMappingServiceTest {
                 .company(company).build();
         final Set<ShipmentProduct> products = Set.of(ShipmentProduct.builder().build());
         when(shipmentCalculatingService.calculateShipment(any())).thenReturn(BigDecimal.valueOf(44.32));
-        when(shipmentProductMappingService.createShipmentProducts(any(), eq(company), eq(shipmentCustomerSubmissionRequest)))
+        when(shipmentProductMappingService.createShipmentProducts(any(), eq(shipmentCustomerSubmissionRequest)))
                 .thenReturn(products);
         //when
         shipmentMappingService.update(shipment, shipmentCustomerSubmissionRequest);

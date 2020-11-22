@@ -1,12 +1,8 @@
 package com.drop.here.backend.drophere.shipment.service;
 
-import com.drop.here.backend.drophere.company.entity.Company;
-import com.drop.here.backend.drophere.product.dto.ProductCopy;
 import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
-import com.drop.here.backend.drophere.product.enums.ProductCreationType;
-import com.drop.here.backend.drophere.product.service.ProductService;
 import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.route.service.RouteProductService;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
@@ -30,17 +26,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ShipmentProductMappingService {
     private final RouteProductService routeProductService;
-    private final ProductService productService;
     private final ShipmentCalculatingService shipmentCalculatingService;
 
-    public Set<ShipmentProduct> createShipmentProducts(Shipment shipment, Company company, ShipmentCustomerSubmissionRequest request) {
+    public Set<ShipmentProduct> createShipmentProducts(Shipment shipment, ShipmentCustomerSubmissionRequest request) {
         final List<RouteProduct> products = getRouteProducts(shipment, request);
         final AtomicInteger counter = new AtomicInteger(0);
 
         return request.getProducts().stream()
                 .map(productRequest -> toShipmentProduct(
                         productRequest,
-                        company,
                         findProduct(productRequest.getRouteProductId(), products),
                         shipment,
                         counter.incrementAndGet()
@@ -57,10 +51,9 @@ public class ShipmentProductMappingService {
         return routeProductService.findProductsLocked(shipment.getDrop(), routeProductsIds);
     }
 
-    private ShipmentProduct toShipmentProduct(ShipmentProductRequest productRequest, Company company, RouteProduct product, Shipment shipment, int orderNum) {
-        final ProductCopy productCopy = productService.createReadOnlyCopy(product.getProduct().getId(), company, ProductCreationType.SHIPMENT);
-        final ShipmentProduct shipmentProduct = buildBaseShipmentProduct(productRequest, product, shipment, orderNum, productCopy);
-        setCustomizations(productRequest, productCopy.getCopy(), shipmentProduct);
+    private ShipmentProduct toShipmentProduct(ShipmentProductRequest productRequest, RouteProduct product, Shipment shipment, int orderNum) {
+        final ShipmentProduct shipmentProduct = buildBaseShipmentProduct(productRequest, product, shipment, orderNum);
+        setCustomizations(productRequest, product.getProduct(), shipmentProduct);
         updatePrice(shipmentProduct);
         return shipmentProduct;
     }
@@ -79,10 +72,10 @@ public class ShipmentProductMappingService {
         shipmentProduct.setUnitSummarizedPrice(calculation.getUnitSummarizedPrice());
     }
 
-    private ShipmentProduct buildBaseShipmentProduct(ShipmentProductRequest productRequest, RouteProduct product, Shipment shipment, int orderNum, ProductCopy productCopy) {
+    private ShipmentProduct buildBaseShipmentProduct(ShipmentProductRequest productRequest, RouteProduct routeProduct, Shipment shipment, int orderNum) {
         return ShipmentProduct.builder()
-                .product(productCopy.getCopy())
-                .routeProduct(product)
+                .product(routeProduct.getProduct())
+                .routeProduct(routeProduct)
                 .shipment(shipment)
                 .orderNum(orderNum)
                 .quantity(productRequest.getQuantity())

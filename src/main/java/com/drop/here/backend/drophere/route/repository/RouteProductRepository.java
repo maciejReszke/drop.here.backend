@@ -20,7 +20,8 @@ public interface RouteProductRepository extends JpaRepository<RouteProduct, Long
             "rp.route = (select d.route from Drop d where d =:drop)")
     List<RouteProduct> findByRouteDropContains(Drop drop);
 
-    @Query("select rp from RouteProduct rp where " +
+    @Query("select rp from RouteProduct rp " +
+            "join fetch rp.product where " +
             "rp.id in (:routeProductsIds) and " +
             "rp.route = (select d.route from Drop d where d =:drop)")
     List<RouteProduct> findJoinProductByRouteDropContainsAndRouteProductIds(Drop drop, Set<Long> routeProductsIds);

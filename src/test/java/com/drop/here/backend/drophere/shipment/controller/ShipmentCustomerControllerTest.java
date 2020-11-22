@@ -23,6 +23,8 @@ import com.drop.here.backend.drophere.notification.repository.NotificationJobRep
 import com.drop.here.backend.drophere.notification.repository.NotificationRepository;
 import com.drop.here.backend.drophere.notification.repository.NotificationTokenRepository;
 import com.drop.here.backend.drophere.product.entity.Product;
+import com.drop.here.backend.drophere.product.entity.ProductCustomization;
+import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.entity.ProductUnit;
 import com.drop.here.backend.drophere.product.repository.ProductCustomizationWrapperRepository;
 import com.drop.here.backend.drophere.product.repository.ProductRepository;
@@ -33,9 +35,9 @@ import com.drop.here.backend.drophere.route.repository.RouteProductRepository;
 import com.drop.here.backend.drophere.route.repository.RouteRepository;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerDecisionRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomerSubmissionRequest;
+import com.drop.here.backend.drophere.shipment.dto.ShipmentCustomizationRequest;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentProductRequest;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
-import com.drop.here.backend.drophere.shipment.entity.ShipmentFlow;
 import com.drop.here.backend.drophere.shipment.entity.ShipmentProduct;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentCustomerDecision;
 import com.drop.here.backend.drophere.shipment.enums.ShipmentStatus;
@@ -149,6 +151,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     private Route route;
     private Customer customer;
     private ProductUnit productUnit;
+    private ProductCustomization productCustomization;
 
 
     @BeforeEach
@@ -169,6 +172,9 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
                 .toBuilder()
                 .unitFraction(BigDecimal.ONE)
                 .build();
+        final ProductCustomizationWrapper customizationWrapper = ProductDataGenerator.productCustomizationWrapper(1, product);
+        product.setCustomizationWrappers(List.of(customizationWrapper));
+        productCustomization = (ProductCustomization) customizationWrapper.getCustomizations().toArray()[0];
         routeProduct = RouteDataGenerator.product(1, route, product);
         routeProduct.setLimitedAmount(true);
         routeProduct.setAmount(BigDecimal.valueOf(150));
@@ -219,7 +225,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     }
 
     @Test
-    void givenValidRequestAutomaticallyAcceptedWhenCreateShipmentThenCreate() throws Exception {
+    void givenValidRequestAutomaticallyAcceptedWithoutCustomizationsWhenCreateShipmentThenCreate() throws Exception {
         //given
         route.setAcceptShipmentsAutomatically(true);
         routeRepository.save(route);
@@ -251,6 +257,46 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
         final Shipment savedShipment = shipments.get(0);
         assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.ACCEPTED);
         assertThat(savedShipment.getSummarizedAmount()).isEqualByComparingTo(BigDecimal.valueOf(40.32));
+        assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
+                .isEqualByComparingTo(BigDecimal.valueOf(147));
+        assertThat(shipmentFlowRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void givenValidRequestAutomaticallyAcceptedWithCustomizationsWhenCreateShipmentThenCreate() throws Exception {
+        //given
+        route.setAcceptShipmentsAutomatically(true);
+        routeRepository.save(route);
+        final ShipmentCustomerSubmissionRequest request = ShipmentCustomerSubmissionRequest.builder()
+                .products(List.of(ShipmentProductRequest.builder()
+                        .routeProductId(routeProduct.getId())
+                        .quantity(BigDecimal.valueOf(3))
+                        .customizations(List.of(ShipmentCustomizationRequest.builder()
+                                .id(productCustomization.getId())
+                                .build()))
+                        .build()))
+                .comment("comment123")
+                .build();
+        final String url = String.format("/companies/%s/drops/%s/shipments", company.getUid(), drop.getUid());
+        final String json = objectMapper.writeValueAsString(request);
+
+
+        //when
+        final ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.createToken(customerAccount).getToken()));
+
+        //then
+        result.andExpect(status().isCreated());
+
+        assertThat(notificationJobRepository.findAll()).hasSize(1);
+        assertThat(notificationRepository.findAll()).hasSize(1);
+        final List<Shipment> shipments = shipmentRepository.findAll();
+        assertThat(shipments).hasSize(1);
+        final Shipment savedShipment = shipments.get(0);
+        assertThat(savedShipment.getStatus()).isEqualTo(ShipmentStatus.ACCEPTED);
+        assertThat(savedShipment.getSummarizedAmount()).isEqualByComparingTo(BigDecimal.valueOf(49.32));
         assertThat(routeProductRepository.findById(routeProduct.getId()).orElseThrow().getAmount())
                 .isEqualByComparingTo(BigDecimal.valueOf(147));
         assertThat(shipmentFlowRepository.findAll()).hasSize(1);
@@ -408,7 +454,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
         route.setAcceptShipmentsAutomatically(false);
         routeRepository.save(route);
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipment.getProducts().add(shipmentProduct);
         shipment.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment);
@@ -453,7 +499,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
         route.setAcceptShipmentsAutomatically(false);
         routeRepository.save(route);
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipment.getProducts().add(shipmentProduct);
         shipment.setStatus(ShipmentStatus.ACCEPTED);
         shipmentRepository.save(shipment);
@@ -498,7 +544,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
         route.setAcceptShipmentsAutomatically(false);
         routeRepository.save(route);
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipment.getProducts().add(shipmentProduct);
         shipment.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment);
@@ -547,7 +593,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
         final Account otherCustomerAccount = accountRepository.save(AccountDataGenerator.customerAccount(3));
         final Customer otherCustomer = customerRepository.save(CustomerDataGenerator.customer(2, otherCustomerAccount));
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, otherCustomer, new HashSet<>());
-        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipment.getProducts().add(shipmentProduct);
         shipment.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment);
@@ -590,7 +636,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     void givenPlacedShipmentCancelDecisionWhenUpdateStatusThenUpdate() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipment.getProducts().add(shipmentProduct);
         shipment.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment);
@@ -627,7 +673,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     void givenAcceptedShipmentCancelDecisionWhenUpdateStatusThenUpdate() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipment.getProducts().add(shipmentProduct);
         shipment.setStatus(ShipmentStatus.ACCEPTED);
         shipmentRepository.save(shipment);
@@ -664,7 +710,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     void givenInvalidShipmentStatusCancelDecisionWhenUpdateStatusThen422() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipment.getProducts().add(shipmentProduct);
         shipment.setStatus(ShipmentStatus.DELIVERED);
         shipmentRepository.save(shipment);
@@ -701,7 +747,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     void givenInvalidPrivilegesWhenUpdateStatusThen403() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipment.getProducts().add(shipmentProduct);
         shipment.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment);
@@ -743,7 +789,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
         final Account otherCustomerAccount = accountRepository.save(AccountDataGenerator.customerAccount(3));
         final Customer otherCustomer = customerRepository.save(CustomerDataGenerator.customer(2, otherCustomerAccount));
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, otherCustomer, new HashSet<>());
-        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipment.getProducts().add(shipmentProduct);
         shipment.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment);
@@ -781,13 +827,13 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     void givenExistingShipmentsWhenFindCustomerShipmentsThenFind() throws Exception {
         //given
         final Shipment shipment1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, routeProduct.getProduct());
         shipment1.getProducts().add(shipmentProduct1);
         shipment1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1);
 
         final Shipment shipment2 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2, routeProduct, ProductDataGenerator.product(2, productUnit, company));
+        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2, routeProduct, routeProduct.getProduct());
         shipment2.getProducts().add(shipmentProduct2);
         shipment2.setStatus(ShipmentStatus.ACCEPTED);
         shipmentRepository.save(shipment2);
@@ -811,13 +857,13 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     void givenExistingShipmentsByStatusWhenFindCustomerShipmentsThenFind() throws Exception {
         //given
         final Shipment shipment1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, routeProduct.getProduct());
         shipment1.getProducts().add(shipmentProduct1);
         shipment1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1);
 
         final Shipment shipment2 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2, routeProduct, ProductDataGenerator.product(2, productUnit, company));
+        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2, routeProduct, routeProduct.getProduct());
         shipment2.getProducts().add(shipmentProduct2);
         shipment2.setStatus(ShipmentStatus.ACCEPTED);
         shipmentRepository.save(shipment2);
@@ -843,13 +889,13 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     void givenInvalidPrivilegesWhenFindCustomerShipmentsThen403() throws Exception {
         //given
         final Shipment shipment1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, routeProduct.getProduct());
         shipment1.getProducts().add(shipmentProduct1);
         shipment1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1);
 
         final Shipment shipment2 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2, routeProduct, ProductDataGenerator.product(2, productUnit, company));
+        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2, routeProduct, routeProduct.getProduct());
         shipment2.getProducts().add(shipmentProduct2);
         shipment2.setStatus(ShipmentStatus.ACCEPTED);
         shipmentRepository.save(shipment2);
@@ -875,7 +921,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     void givenExistingShipmentWhenFindCustomerShipmentThenFind() throws Exception {
         //given
         final Shipment shipment1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, routeProduct.getProduct());
         shipment1.getProducts().add(shipmentProduct1);
         shipment1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1);
@@ -916,7 +962,7 @@ class ShipmentCustomerControllerTest extends IntegrationBaseClass {
     void givenInvalidPrivilegesWhenFindCustomerShipmentThen403() throws Exception {
         //given
         final Shipment shipment1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, routeProduct.getProduct());
         shipment1.getProducts().add(shipmentProduct1);
         shipment1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1);

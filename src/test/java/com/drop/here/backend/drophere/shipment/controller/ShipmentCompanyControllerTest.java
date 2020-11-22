@@ -217,7 +217,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenExistingShipmentWhenFindCompanyShipmentThenFind() throws Exception {
         //given
         final Shipment shipment1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, routeProduct.getProduct());
         shipment1.getProducts().add(shipmentProduct1);
         shipment1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1);
@@ -257,7 +257,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenInvalidPrivilegesWhenFindCompanyShipmentThen403() throws Exception {
         //given
         final Shipment shipment1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1, routeProduct, routeProduct.getProduct());
         shipment1.getProducts().add(shipmentProduct1);
         shipment1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1);
@@ -279,13 +279,13 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenExistingShipmentsWhenFindCompanyShipmentsThenFind() throws Exception {
         //given
         final Shipment shipment1route1drop1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1route1drop1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1route1drop1, routeProduct, routeProduct.getProduct());
         shipment1route1drop1.getProducts().add(shipmentProduct1);
         shipment1route1drop1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1route1drop1);
 
         final Shipment shipment2route1drop2 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2route1drop2, routeProduct, ProductDataGenerator.product(2, productUnit, company));
+        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2route1drop2, routeProduct, routeProduct.getProduct());
         shipment2route1drop2.getProducts().add(shipmentProduct2);
         shipment2route1drop2.setStatus(ShipmentStatus.ACCEPTED);
         shipmentRepository.save(shipment2route1drop2);
@@ -309,13 +309,13 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenExistingShipmentsByStatusWhenFindCustomerShipmentsThenFind() throws Exception {
         //given
         final Shipment shipment1route1drop1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1route1drop1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1route1drop1, routeProduct, routeProduct.getProduct());
         shipment1route1drop1.getProducts().add(shipmentProduct1);
         shipment1route1drop1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1route1drop1);
 
         final Shipment shipment2route1drop2 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2route1drop2, routeProduct, ProductDataGenerator.product(2, productUnit, company));
+        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2route1drop2, routeProduct, routeProduct.getProduct());
         shipment2route1drop2.getProducts().add(shipmentProduct2);
         shipment2route1drop2.setStatus(ShipmentStatus.ACCEPTED);
         shipmentRepository.save(shipment2route1drop2);
@@ -340,13 +340,13 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenExistingShipmentsByDropUidWhenFindCustomerShipmentsThenFind() throws Exception {
         //given
         final Shipment shipment1route1drop1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1route1drop1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1route1drop1, routeProduct, routeProduct.getProduct());
         shipment1route1drop1.getProducts().add(shipmentProduct1);
         shipment1route1drop1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1route1drop1);
 
         final Shipment shipment2route1drop2 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2route1drop2, routeProduct, ProductDataGenerator.product(2, productUnit, company));
+        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2route1drop2, routeProduct, routeProduct.getProduct());
         shipment2route1drop2.getProducts().add(shipmentProduct2);
         shipment2route1drop2.setStatus(ShipmentStatus.ACCEPTED);
         shipmentRepository.save(shipment2route1drop2);
@@ -372,13 +372,13 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenInvalidPrivilegesWhenFindCustomerShipmentsThen403() throws Exception {
         //given
         final Shipment shipment1route1drop1 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1route1drop1, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment1route1drop1, routeProduct, routeProduct.getProduct());
         shipment1route1drop1.getProducts().add(shipmentProduct1);
         shipment1route1drop1.setStatus(ShipmentStatus.PLACED);
         shipmentRepository.save(shipment1route1drop1);
 
         final Shipment shipment2route1drop2 = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2route1drop2, routeProduct, ProductDataGenerator.product(2, productUnit, company));
+        final ShipmentProduct shipmentProduct2 = ShipmentDataGenerator.product(shipment2route1drop2, routeProduct, routeProduct.getProduct());
         shipment2route1drop2.getProducts().add(shipmentProduct2);
         shipment2route1drop2.setStatus(ShipmentStatus.ACCEPTED);
         shipmentRepository.save(shipment2route1drop2);
@@ -404,7 +404,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenPlacedShipmentAcceptDecisionWhenUpdateStatusThenUpdate() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
         shipment.getProducts().add(shipmentProduct1);
         shipment.setStatus(ShipmentStatus.PLACED);
@@ -442,7 +442,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenPlacedShipmentRejectDecisionWhenUpdateStatusThenUpdate() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
         shipment.getProducts().add(shipmentProduct1);
         shipment.setStatus(ShipmentStatus.PLACED);
@@ -480,7 +480,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenAcceptShipmentRejectDecisionWhenUpdateStatusThenUpdate() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
         shipment.getProducts().add(shipmentProduct1);
         shipment.setStatus(ShipmentStatus.ACCEPTED);
@@ -518,7 +518,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenAcceptShipmentDeliverDecisionWhenUpdateStatusThenUpdate() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
         shipment.getProducts().add(shipmentProduct1);
         shipment.setStatus(ShipmentStatus.ACCEPTED);
@@ -556,7 +556,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenCancelRequestShipmentDeliverDecisionWhenUpdateStatusThenUpdate() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
         shipment.getProducts().add(shipmentProduct1);
         shipment.setStatus(ShipmentStatus.CANCEL_REQUESTED);
@@ -594,7 +594,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenCancelRequestShipmentCancelDecisionWhenUpdateStatusThenUpdate() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
         shipment.getProducts().add(shipmentProduct1);
         shipment.setStatus(ShipmentStatus.CANCEL_REQUESTED);
@@ -632,7 +632,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenDeliverRequestShipmentAcceptDecisionWhenUpdateStatusThenUpdate() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
         shipment.getProducts().add(shipmentProduct1);
         shipment.setStatus(ShipmentStatus.DELIVERED);
@@ -670,7 +670,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenShipmentInvalidStateChangeWhenUpdateStatusThen422() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
         shipment.getProducts().add(shipmentProduct1);
         shipment.setStatus(ShipmentStatus.DELIVERED);
@@ -708,7 +708,7 @@ class ShipmentCompanyControllerTest extends IntegrationBaseClass {
     void givenRequestInvalidPrivilegesWhenUpdateStatusThen403() throws Exception {
         //given
         final Shipment shipment = ShipmentDataGenerator.shipment(1, drop, company, customer, new HashSet<>());
-        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, ProductDataGenerator.product(1, productUnit, company));
+        final ShipmentProduct shipmentProduct1 = ShipmentDataGenerator.product(shipment, routeProduct, routeProduct.getProduct());
         shipmentProduct1.setQuantity(BigDecimal.valueOf(3));
         shipment.getProducts().add(shipmentProduct1);
         shipment.setStatus(ShipmentStatus.DELIVERED);

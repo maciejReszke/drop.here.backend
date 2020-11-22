@@ -35,7 +35,7 @@ public class ShipmentMappingService {
         shipment.getProducts().clear();
         shipment.setUpdatedAt(LocalDateTime.now());
         shipment.setCustomerComment(request.getComment());
-        shipment.getProducts().addAll(shipmentProductMappingService.createShipmentProducts(shipment, shipment.getCompany(), request));
+        shipment.getProducts().addAll(shipmentProductMappingService.createShipmentProducts(shipment, request));
         shipment.setSummarizedAmount(shipmentCalculatingService.calculateShipment(shipment));
     }
 }
