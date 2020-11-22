@@ -10,6 +10,7 @@ import com.drop.here.backend.drophere.product.entity.Product;
 import com.drop.here.backend.drophere.product.entity.ProductCustomization;
 import com.drop.here.backend.drophere.product.entity.ProductCustomizationWrapper;
 import com.drop.here.backend.drophere.product.service.ProductCustomizationService;
+import com.drop.here.backend.drophere.route.entity.RouteProduct;
 import com.drop.here.backend.drophere.shipment.dto.ShipmentResponse;
 import com.drop.here.backend.drophere.shipment.entity.Shipment;
 import com.drop.here.backend.drophere.shipment.entity.ShipmentProduct;
@@ -80,6 +81,7 @@ class ShipmentSearchingServiceTest {
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .id(4L)
                 .product(product)
+                .routeProduct(RouteProduct.builder().build())
                 .customizations(Set.of(shipmentProductCustomization))
                 .build();
         final Shipment shipment = Shipment.builder()
@@ -124,6 +126,7 @@ class ShipmentSearchingServiceTest {
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .id(4L)
                 .product(product)
+                .routeProduct(RouteProduct.builder().build())
                 .customizations(Set.of(shipmentProductCustomization))
                 .build();
         final Shipment shipment = Shipment.builder()
@@ -166,6 +169,7 @@ class ShipmentSearchingServiceTest {
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .id(4L)
                 .product(product)
+                .routeProduct(RouteProduct.builder().build())
                 .customizations(Set.of(shipmentProductCustomization))
                 .build();
         final Shipment shipment = Shipment.builder()
@@ -211,6 +215,7 @@ class ShipmentSearchingServiceTest {
         final Product product = Product.builder().id(6L).build();
         final ShipmentProduct shipmentProduct = ShipmentProduct.builder()
                 .id(4L)
+                .routeProduct(RouteProduct.builder().build())
                 .product(product)
                 .customizations(Set.of(shipmentProductCustomization))
                 .build();
