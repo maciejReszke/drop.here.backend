@@ -15,6 +15,9 @@ public class ShipmentProductResponse {
     Long id;
 
     @ApiModelProperty(value = "Referred product id", example = "55.32")
+    Long routeProductId;
+
+    @ApiModelProperty(value = "Referred product id", example = "55.32")
     Long productId;
 
     @ApiModelProperty(value = "Referred product name", example = "Burger")

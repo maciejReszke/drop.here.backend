@@ -268,6 +268,7 @@ public class ShipmentSearchingService {
         final Product product = shipmentProduct.getProduct();
         return ShipmentProductResponse.builder()
                 .id(shipmentProduct.getId())
+                .routeProductId(shipmentProduct.getRouteProduct().getId())
                 .productId(product.getId())
                 .productName(product.getName())
                 .productDescription(product.getDescription())
