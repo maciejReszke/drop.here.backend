@@ -23,6 +23,7 @@ import com.drop.here.backend.drophere.shipment.repository.ShipmentProductReposit
 import com.drop.here.backend.drophere.shipment.repository.ShipmentRepository;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -65,7 +66,12 @@ public class ShipmentSearchingService {
 
     public Page<ShipmentResponse> findCompanyShipments(Company company, String status, Long routeId, String dropUid, Pageable pageable) {
         final ShipmentStatus shipmentStatus = parseOrNull(status);
-        final Page<Shipment> shipments = shipmentRepository.findByCompanyAndStatusAndRouteIdAndDropUid(company, shipmentStatus, routeId, dropUid, pageable);
+        final Page<Shipment> shipments = shipmentRepository.findByCompanyAndStatusAndRouteIdAndDropUid(
+                company,
+                shipmentStatus,
+                routeId,
+                StringUtils.defaultIfBlank(dropUid, null),
+                pageable);
         return mapToShipmentResponses(shipments);
     }
 
